@@ -78,7 +78,7 @@ func refactorHeaderCommentMap(obj interface{}) map[string]string {
 func ExportColumnList(ctx context.Context, task string) ([]interface{}, map[string]string) {
 	one := GetExportTaskImpl(task)
 	utility.Assert(one != nil, "Task not found")
-	return RefactorHeaders(one.Header(), nil), refactorHeaderCommentMap(one.Header())
+	return RefactorHeaders(one.Header(), nil, false), refactorHeaderCommentMap(one.Header())
 }
 
 func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskInternalRequest) error {
@@ -183,7 +183,7 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 
-		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), exportColumns), excelize.RowOpts{StyleID: headerStyleID})
+		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), exportColumns, true), excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)

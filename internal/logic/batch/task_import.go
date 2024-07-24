@@ -136,7 +136,7 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 		//Set Header
-		resultHeader := RefactorHeaders(taskImpl.TemplateHeader(), nil)
+		resultHeader := RefactorHeaders(taskImpl.TemplateHeader(), nil, true)
 		resultHeader = append(resultHeader, "ImportResult")
 		err = writer.SetRow("A1", resultHeader, excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {

@@ -59,7 +59,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		r.Response.Writeln("Bad request")
 		return
 	}
-	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader(), nil), excelize.RowOpts{StyleID: headerStyleID})
+	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader(), nil, true), excelize.RowOpts{StyleID: headerStyleID})
 	if err != nil {
 		g.Log().Errorf(r.Context(), err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest)

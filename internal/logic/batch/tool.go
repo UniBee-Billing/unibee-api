@@ -8,6 +8,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/utility"
@@ -15,7 +16,7 @@ import (
 
 const GeneralExportImportSheetName = "Sheet1"
 
-func RefactorHeaders(obj interface{}, exportColumns []string) []interface{} {
+func RefactorHeaders(obj interface{}, exportColumns []string, readability bool) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
 		return out
@@ -35,7 +36,9 @@ func RefactorHeaders(obj interface{}, exportColumns []string) []interface{} {
 	for i := 0; i < v.NumField(); i++ {
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
-			key = addSpaceBeforeUpperCaseExceptFirst(key)
+			if readability {
+				key = addSpaceBeforeUpperCaseExceptFirst(key)
+			}
 			out = append(out, key)
 			allKeys[key] = "1"
 		}
@@ -177,7 +180,7 @@ func failureTask(ctx context.Context, taskId int64, err error) {
 }
 
 func addSpaceBeforeUpperCaseExceptFirst(str string) string {
-	if len(str) == 0 {
+	if len(str) == 0 || strings.Contains(str, "/") {
 		return str
 	}
 	re := regexp.MustCompile(`([A-Z])`)
