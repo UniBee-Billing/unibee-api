@@ -151,5 +151,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		TrialEnd:                       invoice.TrialEnd,
 		CreateTime:                     invoice.CreateTime,
 		BizType:                        invoice.BizType,
+		PaymentId:                      invoice.PaymentId,
+		RefundId:                       invoice.RefundId,
 	}
 }
