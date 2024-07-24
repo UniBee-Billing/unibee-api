@@ -15,13 +15,16 @@ type PdfGenerateRes struct {
 }
 
 type PdfUpdateReq struct {
-	g.Meta           `path:"/pdf_update" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
-	InvoiceId        string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
-	IssueCompanyName *string `json:"issueCompanyName" dc:"IssueCompanyName"`
-	IssueAddress     *string `json:"issueAddress" dc:"IssueAddress"`
-	IssueVatNumber   *string `json:"issueVatNumber" dc:"IssueVatNumber"`
-	IssueRegNumber   *string `json:"issueRegNumber" dc:"IssueRegNumber"`
-	SendUserEmail    bool    `json:"sendUserEmail" d:"false" dc:"Whether sen invoice email to user or not，default false"`
+	g.Meta                `path:"/pdf_update" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
+	InvoiceId             string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+	IssueCompanyName      *string `json:"issueCompanyName" dc:"IssueCompanyName"`
+	IssueAddress          *string `json:"issueAddress" dc:"IssueAddress"`
+	IssueVatNumber        *string `json:"issueVatNumber" dc:"IssueVatNumber"`
+	IssueRegNumber        *string `json:"issueRegNumber" dc:"IssueRegNumber"`
+	LocalizedCurrency     *string `json:"localizedCurrency" dc:"LocalizedCurrency, To display localized currency amount"`
+	LocalizedExchangeRate *string `json:"localizedExchangeRate" dc:"LocalizedExchangeRate, exchange rate must set while LocalizedCurrency enabled"`
+	ShowDetailItem        *bool   `json:"showDetailItem" d:"false" dc:"ShowDetailItem"`
+	SendUserEmail         bool    `json:"sendUserEmail" d:"false" dc:"Whether sen invoice email to user or not，default false"`
 }
 type PdfUpdateRes struct {
 }

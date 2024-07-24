@@ -42,6 +42,15 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	if req.IssueVatNumber != nil {
 		metadata["IssueVatNumber"] = *req.IssueVatNumber
 	}
+	if req.LocalizedExchangeRate != nil {
+		metadata["LocalizedExchangeRate"] = *req.LocalizedExchangeRate
+	}
+	if req.LocalizedCurrency != nil {
+		metadata["LocalizedCurrency"] = *req.LocalizedCurrency
+	}
+	if req.ShowDetailItem != nil {
+		metadata["ShowDetailItem"] = *req.ShowDetailItem
+	}
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().MetaData:  utility.MarshalToJsonString(metadata),
 		dao.Invoice.Columns().GmtModify: gtime.Now(),
