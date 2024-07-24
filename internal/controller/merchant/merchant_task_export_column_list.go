@@ -12,12 +12,14 @@ import (
 func (c *ControllerTask) ExportColumnList(ctx context.Context, req *task.ExportColumnListReq) (res *task.ExportColumnListRes, err error) {
 	columns, commentMap := batch.ExportColumnList(ctx, req.Task)
 	lowerColumns := make([]interface{}, 0)
+	var lowerColumnHeaders = make(map[string]string)
 	for _, value := range columns {
-		if utility.IsStartUpper(fmt.Sprintf("%s", value)) {
-			lowerColumns = append(lowerColumns, utility.ToFirstCharLowerCase(fmt.Sprintf("%s", value)))
-		} else {
-			lowerColumns = append(lowerColumns, fmt.Sprintf("%s", value))
+		var column = fmt.Sprintf("%s", value)
+		if utility.IsStartUpper(fmt.Sprintf("%s", column)) {
+			column = utility.ToFirstCharLowerCase(column)
 		}
+		lowerColumns = append(lowerColumns, column)
+		lowerColumnHeaders[column] = batch.AddSpaceBeforeUpperCaseExceptFirst(fmt.Sprintf("%s", value))
 	}
 	var lowerColumnCommentMap = make(map[string]string)
 	for key, value := range commentMap {

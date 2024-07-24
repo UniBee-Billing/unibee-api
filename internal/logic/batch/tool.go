@@ -37,7 +37,7 @@ func RefactorHeaders(obj interface{}, exportColumns []string, readability bool) 
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
 			if readability {
-				key = addSpaceBeforeUpperCaseExceptFirst(key)
+				key = AddSpaceBeforeUpperCaseExceptFirst(key)
 			}
 			out = append(out, key)
 			allKeys[key] = "1"
@@ -179,7 +179,7 @@ func failureTask(ctx context.Context, taskId int64, err error) {
 	}).Where(dao.MerchantBatchTask.Columns().Id, taskId).OmitNil().Update()
 }
 
-func addSpaceBeforeUpperCaseExceptFirst(str string) string {
+func AddSpaceBeforeUpperCaseExceptFirst(str string) string {
 	if len(str) == 0 || strings.Contains(str, "/") {
 		return str
 	}
