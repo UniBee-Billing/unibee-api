@@ -140,7 +140,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if one.Status == consts.InvoiceStatusFailed || one.Status == consts.InvoiceStatusCancelled {
 		if payment.Status == consts.PaymentSuccess {
 			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().Status:           consts.InvoiceStatusReversed,
+				dao.Invoice.Columns().Status:           consts.InvoiceStatusPaid,
 				dao.Invoice.Columns().GmtModify:        gtime.Now(),
 				dao.Invoice.Columns().GatewayPaymentId: payment.GatewayPaymentId,
 				dao.Invoice.Columns().PaymentLink:      payment.Link,
@@ -149,13 +149,13 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				g.Log().Errorf(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s error:%s", one.InvoiceId, payment.PaymentId, err.Error())
 				return one, gerror.New("invoice reverse failed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 			} else {
-				one.Status = consts.InvoiceStatusReversed
+				one.Status = consts.InvoiceStatusPaid
 				one.GatewayPaymentId = payment.GatewayPaymentId
 				one.Link = payment.Link
 				g.Log().Infof(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
 				_, _ = redismq.Send(&redismq.Message{
-					Topic: redismq2.TopicInvoiceReversed.Topic,
-					Tag:   redismq2.TopicInvoiceReversed.Tag,
+					Topic: redismq2.TopicInvoicePaid.Topic,
+					Tag:   redismq2.TopicInvoicePaid.Tag,
 					Body:  one.InvoiceId,
 				})
 				return one, nil
