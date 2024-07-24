@@ -288,6 +288,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		ctx := context.Background()
 		defer func() {
 			if exception := recover(); exception != nil {
+				// todo mark print exception stack
 				fmt.Printf("RedisMQ_Receive Stream Message Error  messageKey:%s messageId:%v panic error:%s\n", GetMessageKey(message.Topic, message.Tag), message.MessageId, exception)
 				if pushTaskToResumeLater(consumer, message) {
 					messageAck(message)
