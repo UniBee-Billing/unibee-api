@@ -56,7 +56,7 @@ func TestGenerate(t *testing.T) {
 		TaxPercentage:                  2000,
 		RefundId:                       "dddd",
 		CreateFrom:                     "Refund Requested: xxxxxxxxx",
-		MetaData:                       utility.MarshalToJsonString(map[string]string{"IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
+		MetaData:                       utility.MarshalToJsonString(map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrencys": "EUR", "LocalizedExchangeRate": 1.0, "IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
 	}, &entity.Merchant{
 		CompanyName: "Multilogin OÜ",
 		BusinessNum: "EE101775690",

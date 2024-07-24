@@ -263,7 +263,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	)
 
 	// Unit price
-	if ItemColQuantityOffset-ItemColUnitPriceOffset > 0 {
+	if ItemColQuantityOffset-ItemColUnitPriceOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColUnitPriceOffset)
 		doc.pdf.CellFormat(
 			ItemColQuantityOffset-ItemColUnitPriceOffset,
@@ -279,7 +279,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	}
 
 	// Quantity
-	if ItemColTotalHTOffset-ItemColQuantityOffset > 0 {
+	if ItemColTotalHTOffset-ItemColQuantityOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColQuantityOffset)
 		doc.pdf.CellFormat(
 			ItemColTotalHTOffset-ItemColQuantityOffset,
@@ -295,7 +295,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	}
 
 	// Total NoTax
-	if ItemColDiscountOffset-ItemColTotalHTOffset > 0 {
+	if ItemColDiscountOffset-ItemColTotalHTOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColTotalHTOffset)
 		doc.pdf.CellFormat(
 			ItemColDiscountOffset-ItemColTotalHTOffset,
@@ -311,7 +311,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	}
 
 	// Discount
-	if ItemColTaxOffset-ItemColDiscountOffset > 0 {
+	if ItemColTaxOffset-ItemColDiscountOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColDiscountOffset)
 		doc.pdf.CellFormat(
 			ItemColTaxOffset-ItemColDiscountOffset,
@@ -327,7 +327,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	}
 
 	// Tax
-	if ItemColTotalTTCOffset-ItemColDiscountOffset > 0 {
+	if ItemColTotalTTCOffset-ItemColDiscountOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColTaxOffset)
 		doc.pdf.CellFormat(
 			ItemColTotalTTCOffset-ItemColDiscountOffset,
@@ -494,6 +494,29 @@ func (doc *Document) appendTotal() {
 		0,
 		"",
 	)
+
+	if len(doc.ExchangeRate) > 0 {
+		doc.pdf.SetY(doc.pdf.GetY() + 10)
+		doc.pdf.SetX(120)
+		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+		doc.pdf.CellFormat(38, 10, doc.encodeString("Exchange Rate"), "0", 0, "R", false, 0, "")
+
+		doc.pdf.SetX(moneyX)
+		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+		doc.pdf.CellFormat(
+			40,
+			10,
+			doc.encodeString(doc.ExchangeRate),
+			"0",
+			0,
+			"L",
+			false,
+			0,
+			"",
+		)
+	}
 
 	// Draw total with tax title
 	doc.pdf.SetY(doc.pdf.GetY() + 10)

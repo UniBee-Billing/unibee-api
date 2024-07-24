@@ -26,15 +26,15 @@ const (
 // Cols offsets
 const (
 	// ItemColNameOffset ...
-	ItemColNameOffset float64 = 20
+	ItemColNameOffset float64 = 15
 
 	// ItemColUnitPriceOffset ...
 	//ItemColUnitPriceOffset float64 = 80
-	ItemColUnitPriceOffset float64 = ItemColTotalTTCOffset
+	ItemColUnitPriceOffset float64 = 103
 
 	// ItemColQuantityOffset ...
 	//ItemColQuantityOffset float64 = 103
-	ItemColQuantityOffset float64 = ItemColTotalTTCOffset
+	ItemColQuantityOffset float64 = 140
 
 	// ItemColTotalHTOffset ...
 	//ItemColTotalHTOffset float64 = 113

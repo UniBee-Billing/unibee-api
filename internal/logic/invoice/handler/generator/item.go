@@ -9,6 +9,7 @@ import (
 type Item struct {
 	Name string `json:"name,omitempty" validate:"required"`
 	//Description string    `json:"description,omitempty"`
+	UnitCostStr  string    `json:"unit_cost_str,omitempty"`
 	UnitCost     string    `json:"unit_cost,omitempty"`
 	Quantity     string    `json:"quantity,omitempty"`
 	AmountString string    `json:"amountString,omitempty"`
@@ -157,13 +158,13 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	colHeight := doc.pdf.GetY() - baseY
 
 	// Unit price
-	if ItemColQuantityOffset-ItemColUnitPriceOffset > 0 {
+	if ItemColQuantityOffset-ItemColUnitPriceOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColUnitPriceOffset)
 		doc.pdf.CellFormat(
 			ItemColQuantityOffset-ItemColUnitPriceOffset,
 			colHeight,
-			doc.encodeString(doc.ac.FormatMoneyDecimal(i._unitCost)),
+			doc.encodeString(i.UnitCostStr),
 			"0",
 			0,
 			"",
@@ -174,7 +175,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	}
 
 	// Quantity
-	if ItemColTaxOffset-ItemColQuantityOffset > 0 {
+	if ItemColTaxOffset-ItemColQuantityOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColQuantityOffset)
 		doc.pdf.CellFormat(
@@ -191,7 +192,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	}
 
 	// Total No Tax
-	if ItemColTaxOffset-ItemColTotalHTOffset > 0 {
+	if ItemColTaxOffset-ItemColTotalHTOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColTotalHTOffset)
 		doc.pdf.CellFormat(
@@ -208,7 +209,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	}
 
 	// Discount
-	if ItemColTotalTTCOffset-ItemColDiscountOffset > 0 {
+	if ItemColTotalTTCOffset-ItemColDiscountOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColDiscountOffset)
 		if i.Discount == nil {
@@ -292,7 +293,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	}
 
 	// Tax
-	if ItemColDiscountOffset-ItemColTaxOffset > 0 {
+	if ItemColDiscountOffset-ItemColTaxOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColTaxOffset)
 		if i.Tax == nil {
