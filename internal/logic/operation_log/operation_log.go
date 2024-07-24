@@ -34,8 +34,7 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 		return
 	}
 	if optError != nil {
-		g.Log().Infof(superCtx, "AppendOptLog hasError skip")
-		return
+		g.Log().Errorf(superCtx, "AppendOptLog hasError, %s", optError.Error())
 	}
 	var memberId uint64 = 0
 	var optAccount = ""
