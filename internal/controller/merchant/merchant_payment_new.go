@@ -143,6 +143,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			SendStatus:              sendStatus,
 			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines:                   invoiceItems,
+			CountryCode:             req.CountryCode,
 			Metadata:                req.Metadata,
 		}
 	} else {
@@ -155,6 +156,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Currency:                req.Currency,
 			TaxAmount:               0,
 			DiscountAmount:          0,
+			CountryCode:             req.CountryCode,
 			SendStatus:              sendStatus,
 			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines: []*bean.InvoiceItemSimplify{{

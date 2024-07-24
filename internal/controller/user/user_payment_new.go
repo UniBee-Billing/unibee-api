@@ -7,6 +7,7 @@ import (
 	"unibee/api/user/payment"
 	merchant "unibee/internal/controller/merchant"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -43,6 +44,16 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}},
 		Metadata: req.Metadata,
 	})
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     plan.MerchantId,
+		Target:         fmt.Sprintf("Addon(%v)", plan.Id),
+		Content:        "NewPayment",
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         plan.Id,
+		DiscountCode:   "",
+	}, paymentErr)
 
 	if paymentErr != nil {
 		return nil, paymentErr

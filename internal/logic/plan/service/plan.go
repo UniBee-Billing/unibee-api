@@ -233,6 +233,30 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		PlanId:         one.Id,
 		DiscountCode:   "",
 	}, err)
+	if req.AddonIds != nil && len(req.AddonIds) > 0 {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("AddonIds(%s)", utility.IntListToString(req.AddonIds)),
+			Content:        "OverrideRecurringAddons",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	}
+	if req.OnetimeAddonIds != nil && len(req.OnetimeAddonIds) > 0 {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("OneTimeAddonIds(%s)", utility.IntListToString(req.OnetimeAddonIds)),
+			Content:        "OverrideOneTimeAddons",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	}
 	return one, nil
 }
 
@@ -427,6 +451,30 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		PlanId:         one.Id,
 		DiscountCode:   "",
 	}, err)
+	if req.AddonIds != nil && len(req.AddonIds) > 0 {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("AddonIds(%s)", utility.IntListToString(req.AddonIds)),
+			Content:        "OverrideRecurringAddons",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	}
+	if req.OnetimeAddonIds != nil && len(req.OnetimeAddonIds) > 0 {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("OneTimeAddonIds(%s)", utility.IntListToString(req.OnetimeAddonIds)),
+			Content:        "OverrideOneTimeAddons",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	}
 	return one, nil
 }
 

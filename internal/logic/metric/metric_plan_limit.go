@@ -178,6 +178,7 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, p
 		for _, old := range oldList {
 			oldMap[old.MetricId] = old
 		}
+		var newMap = make(map[uint64]uint64)
 		for _, ml := range params {
 			utility.Assert(ml.MetricId > 0, "invalid metricId")
 			utility.Assert(ml.MetricLimit > 0, "invalid MetricLimit")
@@ -190,11 +191,13 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, p
 				delete(oldMap, ml.MetricId)
 				if old.MetricLimit != ml.MetricLimit {
 					//need update
-					_, _ = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
+					_, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
 						dao.MerchantMetricPlanLimit.Columns().MetricLimit: ml.MetricLimit,
 						dao.MerchantMetricPlanLimit.Columns().GmtModify:   gtime.Now(),
 					}).Where(dao.MerchantMetricPlanLimit.Columns().Id, old.Id).Update()
-
+					if err == nil {
+						newMap[old.Id] = ml.MetricLimit
+					}
 				}
 			} else {
 				//create
@@ -205,7 +208,12 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, p
 					MetricLimit: ml.MetricLimit,
 					CreateTime:  gtime.Now().Timestamp(),
 				}
-				_, _ = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
+				result, _ := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
+				if result != nil {
+					id, _ := result.LastInsertId()
+					one.Id = uint64(uint(id))
+					newMap[one.Id] = ml.MetricLimit
+				}
 			}
 		}
 		// delete other all
@@ -215,6 +223,17 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, p
 				dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.MerchantMetricPlanLimit.Columns().Id, other.Id).Update()
 		}
+
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     plan.MerchantId,
+			Target:         fmt.Sprintf("MetricLimitJson(%s)", utility.MarshalToJsonString(newMap)),
+			Content:        "OverrideMetricLimit",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         plan.Id,
+			DiscountCode:   "",
+		}, nil)
 		// reload Cache
 		MerchantMetricPlanLimitCachedList(ctx, plan.MerchantId, plan.Id, true)
 	}
