@@ -29,5 +29,5 @@ func (c *ControllerTask) ExportColumnList(ctx context.Context, req *task.ExportC
 			lowerColumnCommentMap[key] = value
 		}
 	}
-	return &task.ExportColumnListRes{Columns: lowerColumns, ColumnComments: lowerColumnCommentMap}, nil
+	return &task.ExportColumnListRes{Columns: lowerColumns, ColumnComments: lowerColumnCommentMap, ColumnHeaders: lowerColumnHeaders}, nil
 }
