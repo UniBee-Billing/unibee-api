@@ -553,6 +553,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			FinishTime:         currentTimeStart.Timestamp(),
 			Metadata:           req.Metadata,
 			VatNumber:          validVatNumber,
+			CountryCode:        vatCountryCode,
+			TaxPercentage:      subscriptionTaxPercentage,
 		}
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
@@ -592,6 +594,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			PlanId:             req.PlanId,
 			Quantity:           req.Quantity,
 			AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+			CountryCode:        vatCountryCode,
+			VatNumber:          validVatNumber,
 			TaxPercentage:      subscriptionTaxPercentage,
 			PeriodStart:        currentTimeStart.Timestamp(),
 			PeriodEnd:          currentTimeEnd,
@@ -599,7 +603,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			ProductData:        req.ProductData,
 			BillingCycleAnchor: currentTimeStart.Timestamp(),
 			Metadata:           req.Metadata,
-			VatNumber:          validVatNumber,
 		})
 
 		return &CreatePreviewInternalRes{
