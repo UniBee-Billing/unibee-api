@@ -12,7 +12,7 @@ import (
 	"unibee/internal/consts"
 	//_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
 	_ "unibee/internal/driver/pgsql"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test/prepare"
 	"unibee/utility"

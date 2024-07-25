@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unibee/api/bean"
 	config2 "unibee/internal/cmd/config"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/operation_log"
@@ -18,7 +18,7 @@ import (
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
 	"unibee/internal/logic/vat_gateway/vatstack"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

@@ -9,7 +9,7 @@ import (
 	"time"
 	"unibee/api/bean/detail"
 	"unibee/internal/cmd/config"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

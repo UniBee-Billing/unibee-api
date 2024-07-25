@@ -12,7 +12,7 @@ import (
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/service"
 	user2 "unibee/internal/logic/user"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 

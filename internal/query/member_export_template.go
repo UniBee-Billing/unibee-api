@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetMerchantTaskExportTemplateById(ctx context.Context, id int64) (one *entity.MerchantBatchExportTemplate) {

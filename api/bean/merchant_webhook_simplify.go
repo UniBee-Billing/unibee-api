@@ -1,6 +1,6 @@
 package bean
 
-import entity "unibee/internal/model/entity/oversea_pay"
+import entity "unibee/internal/model/entity/default"
 
 type MerchantWebhookEndpointSimplify struct {
 	Id            uint64   `json:"id"            description:"id"`                       // id

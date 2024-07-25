@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/controller/link"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

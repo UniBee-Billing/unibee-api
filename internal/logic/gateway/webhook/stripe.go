@@ -27,7 +27,7 @@ import (
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/user/sub_update"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

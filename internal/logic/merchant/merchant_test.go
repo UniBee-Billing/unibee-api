@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	member2 "unibee/internal/logic/member"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	_ "unibee/test"
 )

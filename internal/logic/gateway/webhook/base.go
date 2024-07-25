@@ -9,7 +9,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

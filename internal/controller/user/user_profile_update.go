@@ -18,7 +18,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 
 	"unibee/api/user/profile"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 )
 
 func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error) {

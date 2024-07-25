@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"unibee/internal/logic/gateway/gateway_bean"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type AutoTestCryptoWebhook struct {

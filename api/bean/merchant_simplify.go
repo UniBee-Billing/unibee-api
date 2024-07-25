@@ -1,6 +1,6 @@
 package bean
 
-import entity "unibee/internal/model/entity/oversea_pay"
+import entity "unibee/internal/model/entity/default"
 
 type MerchantSimplify struct {
 	Id          uint64 `json:"id"          description:"merchant_id"`                // merchant_id

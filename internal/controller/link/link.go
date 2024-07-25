@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/cmd/config"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetInvoiceLink(invoiceId string, st string) string {

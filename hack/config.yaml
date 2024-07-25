@@ -13,15 +13,13 @@ gfcli:
     extra:    ""
   docker:
     build: "-a amd64 -s linux -p temp -ew"
-    tagPrefixes:
-      - registry.cn-shenzhen.aliyuncs.com/heiku
   gen:
     dao:
       - link:   "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/unib?loc=Local&parseTime=true"
         group: "default"
-        daoPath:  "dao/oversea_pay"
-        doPath:  "model/do/oversea_pay"
-        entityPath:  "model/entity/oversea_pay"
+        daoPath:  "dao/default"
+        doPath:  "model/do/default"
+        entityPath:  "model/entity/default"
         noModelComment: false
         descriptionTag: true
         tables: ""

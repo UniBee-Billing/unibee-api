@@ -6,10 +6,10 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

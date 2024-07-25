@@ -5,7 +5,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strconv"
 	"strings"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type MerchantDiscountCodeSimplify struct {

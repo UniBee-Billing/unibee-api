@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, gatewayId uint64) (one *entity.GatewayVatRate) {

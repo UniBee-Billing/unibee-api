@@ -14,7 +14,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/vat_gateway"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
 	"unibee/utility/unibee"

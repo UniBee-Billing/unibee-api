@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 
 	"unibee/api/merchant/profile"

@@ -3,9 +3,9 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean/detail"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 

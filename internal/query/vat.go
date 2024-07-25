@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetVatNumberValidateHistory(ctx context.Context, merchantId uint64, vatNumber string) (res *entity.MerchantVatNumberVerifyHistory) {

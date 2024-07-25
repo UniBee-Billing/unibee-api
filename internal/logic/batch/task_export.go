@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/batch/export/discount"
 	"unibee/internal/logic/batch/export/invoice"
@@ -23,7 +23,7 @@ import (
 	"unibee/internal/logic/batch/export/transaction"
 	"unibee/internal/logic/batch/export/user"
 	"unibee/internal/logic/oss"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

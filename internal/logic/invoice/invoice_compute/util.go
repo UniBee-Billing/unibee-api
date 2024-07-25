@@ -10,7 +10,7 @@ import (
 	"unibee/internal/logic/discount"
 	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

@@ -7,7 +7,7 @@ package _interface
 import (
 	"context"
 	"unibee/internal/model"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type ISession interface {

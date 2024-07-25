@@ -3,7 +3,7 @@ package bean
 import (
 	"unibee/internal/consts"
 	gateway2 "unibee/internal/logic/gateway"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unicode"
 )
 

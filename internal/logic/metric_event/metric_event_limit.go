@@ -9,11 +9,11 @@ import (
 	"unibee/api/bean"
 	metric2 "unibee/api/merchant/metric"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/metric"
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/user_sub_plan"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

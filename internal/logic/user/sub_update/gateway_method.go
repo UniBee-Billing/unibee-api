@@ -10,7 +10,7 @@ import (
 	config2 "unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"

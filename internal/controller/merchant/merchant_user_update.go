@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/user"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/user/sub_update"

@@ -8,9 +8,9 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	addon2 "unibee/internal/logic/subscription/addon"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

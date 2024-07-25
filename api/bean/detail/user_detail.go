@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

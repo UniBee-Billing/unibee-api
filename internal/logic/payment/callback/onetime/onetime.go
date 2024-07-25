@@ -10,7 +10,7 @@ import (
 	"unibee/internal/consumer/webhook/subscription_onetimeaddon"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/subscription/handler"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type Onetime struct {

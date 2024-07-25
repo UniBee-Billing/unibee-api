@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 	"unibee/internal/consts"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	_ "unibee/test"
 	"unibee/utility"

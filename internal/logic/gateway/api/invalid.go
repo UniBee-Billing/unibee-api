@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"unibee/internal/logic/gateway/gateway_bean"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type Invalid struct{}

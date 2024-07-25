@@ -8,11 +8,11 @@ import (
 	"strings"
 	"unibee/api/merchant/payment"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/service"
 	user2 "unibee/internal/logic/user"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 

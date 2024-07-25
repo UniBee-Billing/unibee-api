@@ -1,7 +1,7 @@
 package bean
 
 import (
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type PaymentItemSimplify struct {

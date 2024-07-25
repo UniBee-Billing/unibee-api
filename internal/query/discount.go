@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetDiscountById(ctx context.Context, id uint64) (one *entity.MerchantDiscountCode) {

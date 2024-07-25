@@ -2,7 +2,7 @@ package bean
 
 import (
 	"strconv"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type UserAccountSimplify struct {

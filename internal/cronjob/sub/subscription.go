@@ -7,10 +7,10 @@ import (
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
 	"unibee/internal/logic/subscription/service"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

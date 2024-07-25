@@ -3,8 +3,8 @@ package query
 import (
 	"context"
 	"unibee/api/bean"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.MerchantEmailTemplateSimplify {

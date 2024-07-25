@@ -18,7 +18,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
 	"unibee/internal/logic/oss"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

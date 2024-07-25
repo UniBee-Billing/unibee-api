@@ -8,7 +8,7 @@ import (
 	"strconv"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/payment/service"
 	"unibee/internal/query"
 	"unibee/redismq"

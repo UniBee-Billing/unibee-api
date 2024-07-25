@@ -13,7 +13,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

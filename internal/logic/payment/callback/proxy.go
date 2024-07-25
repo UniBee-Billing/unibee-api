@@ -13,7 +13,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/callback/onetime"
 	"unibee/internal/logic/subscription/callback"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

@@ -2,7 +2,7 @@ package util
 
 import (
 	"context"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

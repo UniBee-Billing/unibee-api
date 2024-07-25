@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"strings"
 	"unibee/internal/cmd/config"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )

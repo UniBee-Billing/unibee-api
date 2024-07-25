@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

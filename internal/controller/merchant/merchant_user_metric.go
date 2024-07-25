@@ -4,7 +4,7 @@ import (
 	"context"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/metric_event"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/logic/merchant_config"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 const (

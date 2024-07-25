@@ -10,7 +10,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/invoice_compute"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
 )

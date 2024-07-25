@@ -6,7 +6,7 @@ import (
 	"testing"
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
 	"unibee/utility/unibee"

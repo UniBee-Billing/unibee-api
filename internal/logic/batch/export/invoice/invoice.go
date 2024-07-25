@@ -11,7 +11,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/vat_gateway"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/unibee"

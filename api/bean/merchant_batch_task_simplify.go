@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unibee/internal/controller/link"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type MerchantBatchTaskSimplify struct {

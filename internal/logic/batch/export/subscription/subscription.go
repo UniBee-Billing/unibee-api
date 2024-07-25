@@ -9,7 +9,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/subscription/service"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/unibee"

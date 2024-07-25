@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 )
 
 func MerchantRoleList(ctx context.Context, merchantId uint64) ([]*bean.MerchantRoleSimplify, int) {

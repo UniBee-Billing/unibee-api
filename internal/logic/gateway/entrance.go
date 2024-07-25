@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"unibee/internal/cmd/config"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 func GetPaymentWebhookEntranceUrl(gatewayId uint64) string {

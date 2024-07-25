@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

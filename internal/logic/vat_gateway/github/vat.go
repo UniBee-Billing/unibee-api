@@ -18,7 +18,7 @@ import (
 	"errors"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

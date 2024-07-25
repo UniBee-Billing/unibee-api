@@ -12,10 +12,10 @@ import (
 	"strings"
 	"unibee/api/bean"
 	log2 "unibee/internal/consumer/webhook/log"
-	dao "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/operation_log"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 

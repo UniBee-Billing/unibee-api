@@ -10,7 +10,7 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/consumer/webhook/message"
 	"unibee/internal/logic/subscription/service"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 

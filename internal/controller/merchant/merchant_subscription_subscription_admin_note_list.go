@@ -3,8 +3,8 @@ package merchant
 import (
 	"context"
 	"unibee/api/merchant/subscription"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
 

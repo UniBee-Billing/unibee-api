@@ -3,7 +3,7 @@ package bean
 import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	entity "unibee/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/default"
 )
 
 type PlanSimplify struct {

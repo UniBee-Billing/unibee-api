@@ -16,9 +16,9 @@ import (
 	"time"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
-	_ "unibee/internal/dao/oversea_pay"
-	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
+	_ "unibee/internal/dao/default"
+	dao "unibee/internal/dao/default"
+	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 	"unibee/utility/liberr"
 )
