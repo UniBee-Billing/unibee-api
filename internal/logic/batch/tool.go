@@ -47,6 +47,9 @@ func RefactorHeaders(obj interface{}, exportColumns []string, readability bool) 
 	if exportColumns != nil && len(exportColumns) > 0 {
 		out = nil
 		for _, key := range exportColumns {
+			if readability {
+				key = AddSpaceBeforeUpperCaseExceptFirst(key)
+			}
 			if _, ok := allKeys[key]; ok {
 				out = append(out, key)
 			}
