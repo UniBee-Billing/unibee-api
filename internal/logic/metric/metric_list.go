@@ -8,9 +8,9 @@ import (
 	"unibee/utility"
 )
 
-func MerchantMetricList(ctx context.Context, merchantId uint64) ([]*bean.MerchantMetricSimplify, int) {
+func MerchantMetricList(ctx context.Context, merchantId uint64) ([]*bean.MerchantMetric, int) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*bean.MerchantMetricSimplify, 0)
+	var list = make([]*bean.MerchantMetric, 0)
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetric
 		err := dao.MerchantMetric.Ctx(ctx).

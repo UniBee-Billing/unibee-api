@@ -117,8 +117,8 @@ func StandAloneInit(ctx context.Context) {
 	}
 }
 
-func fetchColumnAppendListFromCloudApi() []*bean.TableUpgradeSimplify {
-	var list = make([]*bean.TableUpgradeSimplify, 0)
+func fetchColumnAppendListFromCloudApi() []*bean.TableUpgrade {
+	var list = make([]*bean.TableUpgrade, 0)
 	var env = 1
 	if config.GetConfigInstance().IsProd() {
 		env = 2
@@ -175,7 +175,7 @@ func GetUpgradeList(ctx context.Context) (list []*entity.TableUpgradeHistory) {
 	return data
 }
 
-func SaveUpgradeHistory(ctx context.Context, one *bean.TableUpgradeSimplify) {
+func SaveUpgradeHistory(ctx context.Context, one *bean.TableUpgrade) {
 	g.Log().Info(ctx, "StandAloneInit DBUpgrade success and save upgradeId:%v", one.Id)
 	_, err := dao.TableUpgradeHistory.Ctx(ctx).Data(&entity.TableUpgradeHistory{
 		Id:            one.Id,

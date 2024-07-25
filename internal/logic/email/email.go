@@ -194,7 +194,7 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 }
 
 func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
-	var template *bean.MerchantEmailTemplateSimplify
+	var template *bean.MerchantEmailTemplate
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
 	} else {

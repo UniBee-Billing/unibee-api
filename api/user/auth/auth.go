@@ -12,8 +12,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Token string                    `json:"token" dc:"token string"`
+	User  *bean.UserAccount `json:"user" dc:"user"`
+	Token string            `json:"token" dc:"token string"`
 }
 
 type SessionLoginReq struct {
@@ -22,9 +22,9 @@ type SessionLoginReq struct {
 }
 
 type SessionLoginRes struct {
-	User      *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Token     string                    `json:"token" dc:"token string"`
-	ReturnUrl string                    `json:"returnUrl" dc:"ReturnUrl"`
+	User      *bean.UserAccount `json:"user" dc:"user"`
+	Token     string            `json:"token" dc:"token string"`
+	ReturnUrl string            `json:"returnUrl" dc:"ReturnUrl"`
 }
 
 type LoginOtpReq struct {
@@ -42,8 +42,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Token string                    `json:"token" dc:"token"`
+	User  *bean.UserAccount `json:"user" dc:"user"`
+	Token string            `json:"token" dc:"token"`
 }
 
 type PasswordForgetOtpReq struct {
@@ -91,5 +91,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	User *bean.UserAccountSimplify `json:"user" dc:"User"`
+	User *bean.UserAccount `json:"user" dc:"User"`
 }

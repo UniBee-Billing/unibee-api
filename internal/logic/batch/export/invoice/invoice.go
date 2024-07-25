@@ -104,16 +104,16 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				invoiceGateway = one.Gateway.GatewayName
 			}
 			if one.UserAccount == nil {
-				one.UserAccount = &bean.UserAccountSimplify{}
+				one.UserAccount = &bean.UserAccount{}
 			}
 			if one.UserSnapshot == nil {
 				one.UserSnapshot = one.UserAccount
 			}
 			if one.Subscription == nil {
-				one.Subscription = &bean.SubscriptionSimplify{}
+				one.Subscription = &bean.Subscription{}
 			}
 			if one.Payment == nil {
-				one.Payment = &bean.PaymentSimplify{}
+				one.Payment = &bean.Payment{}
 			}
 			invoiceType := "Tax invoice"
 			OriginInvoiceId := ""

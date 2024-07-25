@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type PaymentSimplify struct {
+type Payment struct {
 	PaymentId         string                 `json:"paymentId"              description:"payment id"`                                                             // payment id
 	MerchantId        uint64                 `json:"merchantId"             description:"merchant id"`                                                            // merchant id
 	UserId            uint64                 `json:"userId"                 description:"user_id"`                                                                // user_id
@@ -36,7 +36,7 @@ type PaymentSimplify struct {
 	GasPayer          string                 `json:"gasPayer"               description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 }
 
-func SimplifyPayment(one *entity.Payment) *PaymentSimplify {
+func SimplifyPayment(one *entity.Payment) *Payment {
 	if one == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func SimplifyPayment(one *entity.Payment) *PaymentSimplify {
 	if len(lastErr) == 0 {
 		lastErr = one.AuthorizeReason
 	}
-	return &PaymentSimplify{
+	return &Payment{
 		PaymentId:         one.PaymentId,
 		MerchantId:        one.MerchantId,
 		UserId:            one.UserId,
@@ -82,9 +82,9 @@ func SimplifyPayment(one *entity.Payment) *PaymentSimplify {
 	}
 }
 
-func SimplifyPaymentList(ones []*entity.Payment) (list []*PaymentSimplify) {
+func SimplifyPaymentList(ones []*entity.Payment) (list []*Payment) {
 	if len(ones) == 0 {
-		return make([]*PaymentSimplify, 0)
+		return make([]*Payment, 0)
 	}
 	for _, one := range ones {
 		list = append(list, SimplifyPayment(one))

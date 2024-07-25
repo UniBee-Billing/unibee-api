@@ -18,7 +18,7 @@ type EndpointListReq struct {
 }
 
 type EndpointListRes struct {
-	EndpointList []*bean.MerchantWebhookEndpointSimplify `json:"endpointList" dc:"EndpointList"`
+	EndpointList []*bean.MerchantWebhookEndpoint `json:"endpointList" dc:"EndpointList"`
 }
 
 type EndpointLogListReq struct {
@@ -29,8 +29,8 @@ type EndpointLogListReq struct {
 }
 
 type EndpointLogListRes struct {
-	EndpointLogList []*bean.MerchantWebhookLogSimplify `json:"endpointLogList" dc:"EndpointLogList"`
-	Total           int                                `json:"total" dc:"Total"`
+	EndpointLogList []*bean.MerchantWebhookLog `json:"endpointLogList" dc:"EndpointLogList"`
+	Total           int                        `json:"total" dc:"Total"`
 }
 
 type ResendWebhookReq struct {

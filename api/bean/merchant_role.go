@@ -6,7 +6,7 @@ import (
 	"unibee/utility"
 )
 
-type MerchantRoleSimplify struct {
+type MerchantRole struct {
 	Id          uint64                    `json:"id"             description:"id"`          // id
 	MerchantId  uint64                    `json:"merchantId"     description:"merchant id"` // merchant id
 	Role        string                    `json:"role"           description:"role"`        // role
@@ -14,7 +14,7 @@ type MerchantRoleSimplify struct {
 	CreateTime  int64                     `json:"createTime"     description:"create utc time"` // create utc time
 }
 
-func SimplifyMerchantRole(one *entity.MerchantRole) *MerchantRoleSimplify {
+func SimplifyMerchantRole(one *entity.MerchantRole) *MerchantRole {
 	if one == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func SimplifyMerchantRole(one *entity.MerchantRole) *MerchantRoleSimplify {
 	if err != nil {
 		fmt.Printf("ConvertInvoiceLines err:%s", err)
 	}
-	return &MerchantRoleSimplify{
+	return &MerchantRole{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		CreateTime:  one.CreateTime,

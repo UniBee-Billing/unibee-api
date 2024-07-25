@@ -129,7 +129,7 @@ type FinishReq struct {
 	DaysUtilDue int `json:"daysUtilDue" dc:"Due Day Of Invoice Payment" v:"required"`
 }
 type FinishRes struct {
-	Invoice *bean.InvoiceSimplify `json:"invoice" `
+	Invoice *bean.Invoice `json:"invoice" `
 }
 
 type CancelReq struct {
@@ -148,7 +148,7 @@ type RefundReq struct {
 }
 
 type RefundRes struct {
-	Refund *bean.RefundSimplify `json:"refund" dc:"Refund Object"`
+	Refund *bean.Refund `json:"refund" dc:"Refund Object"`
 }
 
 type MarkRefundReq struct {
@@ -160,7 +160,7 @@ type MarkRefundReq struct {
 }
 
 type MarkRefundRes struct {
-	Refund *bean.RefundSimplify `json:"refund" dc:"Refund Object"`
+	Refund *bean.Refund `json:"refund" dc:"Refund Object"`
 }
 
 type MarkWireTransferSuccessReq struct {

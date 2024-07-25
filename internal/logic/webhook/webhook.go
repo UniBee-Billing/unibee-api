@@ -19,9 +19,9 @@ import (
 
 const SplitSep = ","
 
-func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean.MerchantWebhookEndpointSimplify {
+func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean.MerchantWebhookEndpoint {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*bean.MerchantWebhookEndpointSimplify, 0)
+	var list = make([]*bean.MerchantWebhookEndpoint, 0)
 	if merchantId > 0 {
 		var entities []*entity.MerchantWebhook
 		err := dao.MerchantWebhook.Ctx(ctx).
@@ -34,7 +34,7 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean
 				if len(one.WebhookEvents) != 0 {
 					events = strings.Split(one.WebhookEvents, SplitSep)
 				}
-				list = append(list, &bean.MerchantWebhookEndpointSimplify{
+				list = append(list, &bean.MerchantWebhookEndpoint{
 					Id:            one.Id,
 					MerchantId:    one.MerchantId,
 					WebhookUrl:    one.WebhookUrl,
@@ -55,8 +55,8 @@ type EndpointLogListInternalReq struct {
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) ([]*bean.MerchantWebhookLogSimplify, int) {
-	var mainList = make([]*bean.MerchantWebhookLogSimplify, 0)
+func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) ([]*bean.MerchantWebhookLog, int) {
+	var mainList = make([]*bean.MerchantWebhookLog, 0)
 	if req.Count <= 0 {
 		req.Count = 20
 	}

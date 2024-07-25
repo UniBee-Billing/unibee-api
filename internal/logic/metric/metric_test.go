@@ -11,7 +11,7 @@ import (
 
 func TestMerchantMetric(t *testing.T) {
 	ctx := context.Background()
-	var one *bean.MerchantMetricSimplify
+	var one *bean.MerchantMetric
 	var limit *bean.MerchantMetricPlanLimit
 	var err error
 	t.Run("Test for merchant metric New|Get|Detail|Edit|Delete|List", func(t *testing.T) {

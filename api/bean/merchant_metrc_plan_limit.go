@@ -6,14 +6,14 @@ type BulkMetricLimitPlanBindingParam struct {
 }
 
 type MerchantMetricPlanLimit struct {
-	Id          uint64                  `json:"id"            description:"id"`                           // id
-	MerchantId  uint64                  `json:"merchantId"          description:"merchantId"`             // merchantId
-	MetricId    uint64                  `json:"metricId"    description:"metricId"`                       // metricId
-	Metric      *MerchantMetricSimplify `json:"merchantMetricVo"    description:"MerchantMetricSimplify"` // metricId
-	PlanId      uint64                  `json:"planId"      description:"plan_id"`                        // plan_id
-	MetricLimit uint64                  `json:"metricLimit" description:"plan metric limit"`              // plan metric limit
-	UpdateTime  int64                   `json:"gmtModify"     description:"update time"`                  // update time
-	CreateTime  int64                   `json:"createTime"    description:"create utc time"`              // create utc time
+	Id          uint64          `json:"id"            description:"id"`                   // id
+	MerchantId  uint64          `json:"merchantId"          description:"merchantId"`     // merchantId
+	MetricId    uint64          `json:"metricId"    description:"metricId"`               // metricId
+	Metric      *MerchantMetric `json:"merchantMetricVo"    description:"MerchantMetric"` // metricId
+	PlanId      uint64          `json:"planId"      description:"plan_id"`                // plan_id
+	MetricLimit uint64          `json:"metricLimit" description:"plan metric limit"`      // plan metric limit
+	UpdateTime  int64           `json:"gmtModify"     description:"update time"`          // update time
+	CreateTime  int64           `json:"createTime"    description:"create utc time"`      // create utc time
 }
 
 type PlanMetricLimitDetail struct {
@@ -26,5 +26,5 @@ type PlanMetricLimitDetail struct {
 	AggregationType     int    `json:"aggregationType"     description:"0-count，1-count unique, 2-latest, 3-max, 4-sum"`                              // 0-count，1-count unique, 2-latest, 3-max, 4-sum
 	AggregationProperty string `json:"aggregationProperty" description:"aggregation property"`
 	TotalLimit          uint64
-	PlanLimits          []*MerchantMetricPlanLimit // ?
+	PlanLimits          []*MerchantMetricPlanLimit
 }

@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type MerchantMetricSimplify struct {
+type MerchantMetric struct {
 	Id                  uint64 `json:"id"            description:"id"`                                                                                // id
 	MerchantId          uint64 `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
 	Code                string `json:"code"                description:"code"`                                                                        // code
@@ -15,7 +15,7 @@ type MerchantMetricSimplify struct {
 	CreateTime          int64  `json:"createTime"    description:"create utc time"` // create utc time
 }
 
-func SimplifyMerchantMetric(one *entity.MerchantMetric) *MerchantMetricSimplify {
+func SimplifyMerchantMetric(one *entity.MerchantMetric) *MerchantMetric {
 	if one == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func SimplifyMerchantMetric(one *entity.MerchantMetric) *MerchantMetricSimplify 
 	if one.GmtModify != nil {
 		updateTime = one.GmtModify.Timestamp()
 	}
-	return &MerchantMetricSimplify{
+	return &MerchantMetric{
 		Id:                  one.Id,
 		MerchantId:          one.MerchantId,
 		Code:                one.Code,

@@ -32,7 +32,7 @@ func (c *ControllerTask) ExportTemplateList(ctx context.Context, req *task.Expor
 		q = q.Where(dao.MerchantBatchExportTemplate.Columns().Task, req.Task)
 	}
 	err = q.ScanAndCount(&entities, &total, true)
-	var list []*bean.MerchantBatchExportTemplateSimplify
+	var list []*bean.MerchantBatchExportTemplate
 	if err == nil && len(entities) > 0 {
 		for _, one := range entities {
 			list = append(list, bean.SimplifyMerchantBatchExportTemplate(one))

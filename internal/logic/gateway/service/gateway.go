@@ -130,8 +130,8 @@ func IsGatewaySupportCountryCode(ctx context.Context, gateway *entity.MerchantGa
 	return support
 }
 
-func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*bean.GatewaySimplify {
-	var availableGateways []*bean.GatewaySimplify
+func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*bean.Gateway {
+	var availableGateways []*bean.Gateway
 	gateways := query.GetMerchantGatewayList(ctx, merchantId)
 	for _, one := range gateways {
 		if IsGatewaySupportCountryCode(ctx, one, countryCode) {

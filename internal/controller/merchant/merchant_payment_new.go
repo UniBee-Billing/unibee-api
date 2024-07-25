@@ -104,7 +104,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	if req.SendInvoice {
 		sendStatus = consts.InvoiceSendStatusUnSend
 	}
-	var invoice *bean.InvoiceSimplify
+	var invoice *bean.Invoice
 	if req.Items != nil && len(req.Items) > 0 {
 		var invoiceItems []*bean.InvoiceItemSimplify
 		var totalAmountExcludingTax int64 = 0
@@ -131,7 +131,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			totalAmount = totalAmount + line.Amount
 		}
 		utility.Assert(totalAmount == req.TotalAmount, "sum(items.amount) should match totalAmount")
-		invoice = &bean.InvoiceSimplify{
+		invoice = &bean.Invoice{
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			Currency:                req.Currency,
@@ -147,7 +147,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Metadata:                req.Metadata,
 		}
 	} else {
-		invoice = &bean.InvoiceSimplify{
+		invoice = &bean.Invoice{
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			TotalAmountExcludingTax: req.TotalAmount,

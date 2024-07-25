@@ -20,8 +20,8 @@ type PaymentItemListInternalReq struct {
 }
 
 type PaymentItemListInternalRes struct {
-	PaymentItems []*bean.PaymentItemSimplify `json:"paymentItem" dc:"paymentItems"`
-	Total        int                         `json:"total" dc:"Total"`
+	PaymentItems []*bean.PaymentItem `json:"paymentItem" dc:"paymentItems"`
+	Total        int                 `json:"total" dc:"Total"`
 }
 
 func OneTimePaymentItemList(ctx context.Context, req *PaymentItemListInternalReq) (res *PaymentItemListInternalRes, err error) {
@@ -56,7 +56,7 @@ func OneTimePaymentItemList(ctx context.Context, req *PaymentItemListInternalReq
 		return nil, err
 	}
 
-	var resultList = make([]*bean.PaymentItemSimplify, 0)
+	var resultList = make([]*bean.PaymentItem, 0)
 	for _, one := range mainList {
 		resultList = append(resultList, bean.SimplifyPaymentItemTimeline(one))
 	}

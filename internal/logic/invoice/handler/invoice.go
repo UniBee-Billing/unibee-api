@@ -27,7 +27,7 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.InvoiceSimplify, payment *entity.Payment) (*entity.Invoice, error) {
+func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoice, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
 	utility.Assert(len(payment.PaymentId) > 0, "paymentId is nil")
@@ -214,7 +214,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	return one, nil
 }
 
-func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.InvoiceSimplify, refund *entity.Refund) (*entity.Invoice, error) {
+func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.Invoice, refund *entity.Refund) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(refund != nil, "refund data is nil")
 	utility.Assert(len(refund.RefundId) > 0, "refundId is nil")

@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type MerchantWebhookEndpointSimplify struct {
+type MerchantWebhookEndpoint struct {
 	Id            uint64   `json:"id"            description:"id"`                       // id
 	MerchantId    uint64   `json:"merchantId"    description:"webhook url"`              // webhook url
 	WebhookUrl    string   `json:"webhookUrl"    description:"webhook url"`              // webhook url
@@ -11,7 +11,7 @@ type MerchantWebhookEndpointSimplify struct {
 	CreateTime    int64    `json:"createTime"    description:"create utc time"`          // create utc time
 }
 
-type MerchantWebhookLogSimplify struct {
+type MerchantWebhookLog struct {
 	Id             uint64 `json:"id"             description:"id"`              // id
 	MerchantId     uint64 `json:"merchantId"     description:"webhook url"`     // webhook url
 	EndpointId     int64  `json:"endpointId"     description:""`                //
@@ -25,11 +25,11 @@ type MerchantWebhookLogSimplify struct {
 	CreateTime     int64  `json:"createTime"     description:"create utc time"` // create utc time
 }
 
-func SimplifyMerchantWebhookLog(one *entity.MerchantWebhookLog) *MerchantWebhookLogSimplify {
+func SimplifyMerchantWebhookLog(one *entity.MerchantWebhookLog) *MerchantWebhookLog {
 	if one == nil {
 		return nil
 	}
-	return &MerchantWebhookLogSimplify{
+	return &MerchantWebhookLog{
 		Id:             one.Id,
 		MerchantId:     one.MerchantId,
 		EndpointId:     one.EndpointId,

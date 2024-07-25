@@ -27,7 +27,7 @@ type MerchantDiscountCodeDetail struct {
 	EndTime            int64                  `json:"endTime"            description:"end of discount available utc time, 0-invalid"`                              // end of discount available utc time
 	CreateTime         int64                  `json:"createTime"         description:"create utc time"`                                                            // create utc time
 	PlanIds            []int64                `json:"planIds"  description:"Ids of plan which discount code can effect, default effect all plans if not set" `
-	Plans              []*bean.PlanSimplify   `json:"plans"         description:"plans which discount code can effect, default effect all plans if not set"` // create utc time
+	Plans              []*bean.Plan           `json:"plans"         description:"plans which discount code can effect, default effect all plans if not set"` // create utc time
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 }
 
@@ -78,17 +78,17 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 }
 
 type MerchantUserDiscountCodeDetail struct {
-	Id             int64                     `json:"id"             description:"ID"`         // ID
-	MerchantId     uint64                    `json:"merchantId"     description:"merchantId"` // merchantId
-	User           *bean.UserAccountSimplify `json:"user"     description:"User"`
-	Code           string                    `json:"code"           description:"code"` // code
-	Plan           *bean.PlanSimplify        `json:"plan"     description:"Plan"`
-	SubscriptionId string                    `json:"subscriptionId" description:"subscription_id"` // subscription_id
-	PaymentId      string                    `json:"paymentId"      description:"payment_id"`      // payment_id
-	InvoiceId      string                    `json:"invoiceId"      description:"invoice_id"`      // invoice_id
-	CreateTime     int64                     `json:"createTime"     description:"create utc time"` // create utc time
-	ApplyAmount    int64                     `json:"applyAmount"    description:"apply_amount"`    // apply_amount
-	Currency       string                    `json:"currency"       description:"currency"`        // currency
+	Id             int64             `json:"id"             description:"ID"`         // ID
+	MerchantId     uint64            `json:"merchantId"     description:"merchantId"` // merchantId
+	User           *bean.UserAccount `json:"user"     description:"User"`
+	Code           string            `json:"code"           description:"code"` // code
+	Plan           *bean.Plan        `json:"plan"     description:"Plan"`
+	SubscriptionId string            `json:"subscriptionId" description:"subscription_id"` // subscription_id
+	PaymentId      string            `json:"paymentId"      description:"payment_id"`      // payment_id
+	InvoiceId      string            `json:"invoiceId"      description:"invoice_id"`      // invoice_id
+	CreateTime     int64             `json:"createTime"     description:"create utc time"` // create utc time
+	ApplyAmount    int64             `json:"applyAmount"    description:"apply_amount"`    // apply_amount
+	Currency       string            `json:"currency"       description:"currency"`        // currency
 }
 
 func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.MerchantUserDiscountCode) *MerchantUserDiscountCodeDetail {
@@ -102,7 +102,7 @@ func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.Merc
 			planId = int64(sub.PlanId)
 		}
 	}
-	var plan *bean.PlanSimplify
+	var plan *bean.Plan
 	if planId > 0 {
 		plan = bean.SimplifyPlan(query.GetPlanById(ctx, uint64(planId)))
 	}

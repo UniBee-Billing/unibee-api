@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type MerchantSimplify struct {
+type Merchant struct {
 	Id          uint64 `json:"id"          description:"merchant_id"`                // merchant_id
 	UserId      int64  `json:"userId"      description:"create_user_id"`             // create_user_id
 	Type        int    `json:"type"        description:"type"`                       // type
@@ -21,11 +21,11 @@ type MerchantSimplify struct {
 	CompanyName string `json:"companyName" description:"company_name"`               // company_name
 }
 
-func SimplifyMerchant(one *entity.Merchant) *MerchantSimplify {
+func SimplifyMerchant(one *entity.Merchant) *Merchant {
 	if one == nil {
 		return nil
 	}
-	return &MerchantSimplify{
+	return &Merchant{
 		Id:          one.Id,
 		UserId:      one.UserId,
 		Type:        one.Type,

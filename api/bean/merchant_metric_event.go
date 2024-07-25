@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type MerchantMetricEventSimplify struct {
+type MerchantMetricEvent struct {
 	Id                        uint64 `json:"id"                          description:"Id"`                                                                     // Id
 	MerchantId                uint64 `json:"merchantId"                  description:"merchantId"`                                                             // merchantId
 	MetricId                  uint64 `json:"metricId"                    description:"metric_id"`                                                              // metric_id
@@ -19,11 +19,11 @@ type MerchantMetricEventSimplify struct {
 	Used                      uint64 `json:"used"                        description:""`                                                                       //
 }
 
-func SimplifyMerchantMetricEvent(one *entity.MerchantMetricEvent) *MerchantMetricEventSimplify {
+func SimplifyMerchantMetricEvent(one *entity.MerchantMetricEvent) *MerchantMetricEvent {
 	if one == nil {
 		return nil
 	}
-	return &MerchantMetricEventSimplify{
+	return &MerchantMetricEvent{
 		Id:                        one.Id,
 		MerchantId:                one.MerchantId,
 		MetricId:                  one.MetricId,

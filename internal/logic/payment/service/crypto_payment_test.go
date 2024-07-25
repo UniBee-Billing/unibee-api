@@ -39,7 +39,7 @@ func TestCryptoPayment(t *testing.T) {
 			Email:          test.TestUser.Email,
 			DaysUtilDue:    consts.DEFAULT_DAY_UTIL_DUE,
 			PayImmediate:   false,
-			Invoice: &bean.InvoiceSimplify{
+			Invoice: &bean.Invoice{
 				TotalAmount:             100,
 				Currency:                "USD",
 				TotalAmountExcludingTax: 0,
@@ -93,7 +93,7 @@ func TestCryptoPayment(t *testing.T) {
 			Email:          test.TestUser.Email,
 			DaysUtilDue:    consts.DEFAULT_DAY_UTIL_DUE,
 			PayImmediate:   true,
-			Invoice: &bean.InvoiceSimplify{
+			Invoice: &bean.Invoice{
 				TotalAmount:             100,
 				Currency:                "USD",
 				TotalAmountExcludingTax: 0,

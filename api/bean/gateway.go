@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-type GatewaySimplify struct {
+type Gateway struct {
 	Id                 uint64          `json:"gatewayId"`
 	GatewayName        string          `json:"gatewayName"`
 	DisplayName        string          `json:"displayName"`
@@ -30,7 +30,7 @@ type GatewayBank struct {
 	Address       string `json:"address"   dc:"The address of wire transfer " v:"required" `
 }
 
-func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
+func SimplifyGateway(one *entity.MerchantGateway) *Gateway {
 	if one == nil {
 		return nil
 	}
@@ -43,7 +43,7 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		webhookEndpointUrl = gateway2.GetPaymentWebhookEntranceUrl(one.Id)
 	}
 
-	return &GatewaySimplify{
+	return &Gateway{
 		Id:                 one.Id,
 		GatewayLogo:        one.Logo,
 		GatewayName:        one.GatewayName,
@@ -72,9 +72,9 @@ func toUpperFirst(s string, target string) string {
 	return string(runes)
 }
 
-func SimplifyGatewayList(ones []*entity.MerchantGateway) (list []*GatewaySimplify) {
+func SimplifyGatewayList(ones []*entity.MerchantGateway) (list []*Gateway) {
 	if len(ones) == 0 {
-		return make([]*GatewaySimplify, 0)
+		return make([]*Gateway, 0)
 	}
 	for _, one := range ones {
 		list = append(list, SimplifyGateway(one))

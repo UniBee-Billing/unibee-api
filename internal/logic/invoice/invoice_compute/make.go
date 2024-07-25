@@ -27,14 +27,14 @@ type InvoiceSimplifyInternalReq struct {
 }
 
 type InvoiceItemSimplifyInternalReq struct {
-	UnitAmountExcludingTax int64              `json:"unitAmountExcludingTax"`
-	Quantity               int64              `json:"quantity"`
-	Name                   string             `json:"name"`
-	Description            string             `json:"description"`
-	Plan                   *bean.PlanSimplify `json:"plan"`
+	UnitAmountExcludingTax int64      `json:"unitAmountExcludingTax"`
+	Quantity               int64      `json:"quantity"`
+	Name                   string     `json:"name"`
+	Description            string     `json:"description"`
+	Plan                   *bean.Plan `json:"plan"`
 }
 
-func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *bean.InvoiceSimplify {
+func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *bean.Invoice {
 	utility.Assert(req.Lines != nil, "MakeInvoiceSimplify error, line is null")
 	utility.Assert(req.MerchantId > 0, "MakeInvoiceSimplify error, merchantId is null")
 	var invoiceItems = make([]*bean.InvoiceItemSimplify, 0)
@@ -63,7 +63,7 @@ func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
 
-	return &bean.InvoiceSimplify{
+	return &bean.Invoice{
 		InvoiceName:                    req.InvoiceName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,

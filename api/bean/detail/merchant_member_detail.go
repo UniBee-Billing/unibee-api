@@ -10,16 +10,16 @@ import (
 )
 
 type MerchantMemberDetail struct {
-	Id          uint64                       `json:"id"         description:"userId"`          // userId
-	MerchantId  uint64                       `json:"merchantId" description:"merchant id"`     // merchant id
-	Email       string                       `json:"email"      description:"email"`           // email
-	FirstName   string                       `json:"firstName"  description:"first name"`      // first name
-	LastName    string                       `json:"lastName"   description:"last name"`       // last name
-	CreateTime  int64                        `json:"createTime" description:"create utc time"` // create utc time
-	Mobile      string                       `json:"mobile"     description:"mobile"`          // mobile
-	IsOwner     bool                         `json:"isOwner" description:"Check Member is Owner" `
-	Status      int                          `json:"status"             description:"0-Active, 2-Suspend"`
-	MemberRoles []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
+	Id          uint64               `json:"id"         description:"userId"`          // userId
+	MerchantId  uint64               `json:"merchantId" description:"merchant id"`     // merchant id
+	Email       string               `json:"email"      description:"email"`           // email
+	FirstName   string               `json:"firstName"  description:"first name"`      // first name
+	LastName    string               `json:"lastName"   description:"last name"`       // last name
+	CreateTime  int64                `json:"createTime" description:"create utc time"` // create utc time
+	Mobile      string               `json:"mobile"     description:"mobile"`          // mobile
+	IsOwner     bool                 `json:"isOwner" description:"Check Member is Owner" `
+	Status      int                  `json:"status"             description:"0-Active, 2-Suspend"`
+	MemberRoles []*bean.MerchantRole `json:"MemberRoles" description:"The member's role list'" `
 }
 
 func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *MerchantMemberDetail {
@@ -41,8 +41,8 @@ func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *Mer
 	}
 }
 
-func ConvertMemberRole(ctx context.Context, member *entity.MerchantMember) (isOwner bool, memberRoles []*bean.MerchantRoleSimplify) {
-	memberRoles = make([]*bean.MerchantRoleSimplify, 0)
+func ConvertMemberRole(ctx context.Context, member *entity.MerchantMember) (isOwner bool, memberRoles []*bean.MerchantRole) {
+	memberRoles = make([]*bean.MerchantRole, 0)
 	if member != nil {
 		if strings.Contains(member.Role, "Owner") {
 			isOwner = true

@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type EmailDefaultTemplateSimplify struct {
+type EmailDefaultTemplate struct {
 	Id                  int64  `json:"id"                 description:""`
 	TemplateName        string `json:"templateName"       description:""`
 	TemplateDescription string `json:"templateDescription" description:""`
@@ -11,11 +11,11 @@ type EmailDefaultTemplateSimplify struct {
 	TemplateAttachName  string `json:"templateAttachName" description:""`
 }
 
-func SimplifyEmailDefaultTemplate(emailTemplate *entity.EmailDefaultTemplate) *EmailDefaultTemplateSimplify {
+func SimplifyEmailDefaultTemplate(emailTemplate *entity.EmailDefaultTemplate) *EmailDefaultTemplate {
 	if emailTemplate == nil {
 		return nil
 	}
-	return &EmailDefaultTemplateSimplify{
+	return &EmailDefaultTemplate{
 		Id:                  emailTemplate.Id,
 		TemplateName:        emailTemplate.TemplateName,
 		TemplateDescription: emailTemplate.TemplateDescription,

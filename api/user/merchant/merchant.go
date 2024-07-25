@@ -10,5 +10,5 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *bean.MerchantSimplify `json:"merchant" dc:"Merchant"`
+	Merchant *bean.Merchant `json:"merchant" dc:"Merchant"`
 }

@@ -6,16 +6,16 @@ import (
 )
 
 type SubscriptionDetail struct {
-	DayLeft                             int                                `json:"dayLeft" dc:"DayLeft util the period end, only available for webhook"`
-	User                                *bean.UserAccountSimplify          `json:"user" dc:"user"`
-	Subscription                        *bean.SubscriptionSimplify         `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                 `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify              `json:"gateway" dc:"Gateway"`
-	AddonParams                         []*bean.PlanAddonParam             `json:"addonParams" dc:"AddonParams"`
-	Addons                              []*bean.PlanAddonDetail            `json:"addons" dc:"Addon"`
-	LatestInvoice                       *bean.InvoiceSimplify              `json:"latestInvoice" dc:"LatestInvoice"`
-	Discount                            *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount"`
-	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail   `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	DayLeft                             int                              `json:"dayLeft" dc:"DayLeft util the period end, only available for webhook"`
+	User                                *bean.UserAccount                `json:"user" dc:"user"`
+	Subscription                        *bean.Subscription               `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.Plan                       `json:"plan" dc:"Plan"`
+	Gateway                             *bean.Gateway                    `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*bean.PlanAddonParam           `json:"addonParams" dc:"AddonParams"`
+	Addons                              []*bean.PlanAddonDetail          `json:"addons" dc:"Addon"`
+	LatestInvoice                       *bean.Invoice                    `json:"latestInvoice" dc:"LatestInvoice"`
+	Discount                            *bean.MerchantDiscountCode       `json:"discount" dc:"Discount"`
+	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type SubscriptionTimeLineDetail struct {
@@ -31,7 +31,7 @@ type SubscriptionTimeLineDetail struct {
 	UniqueId        string                  `json:"uniqueId"        description:"unique id"`               // unique id
 	Currency        string                  `json:"currency"        description:"currency"`                // currency
 	PlanId          uint64                  `json:"planId"          description:"PlanId"`                  // PlanId
-	Plan            *bean.PlanSimplify      `json:"plan" description:"Plan"`
+	Plan            *bean.Plan              `json:"plan" description:"Plan"`
 	Quantity        int64                   `json:"quantity"        description:"quantity"` // quantity
 	Addons          []*bean.PlanAddonDetail `json:"addons" description:"Addon"`
 	GatewayId       uint64                  `json:"gatewayId"       description:"gateway_id"`                                  // gateway_id
@@ -65,22 +65,22 @@ type SubscriptionPendingUpdateDetail struct {
 	EffectImmediate int                     `json:"effectImmediate"      description:"EffectImmediate"`
 	EffectTime      int64                   `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
 	Note            string                  `json:"note"            description:"Update Note"`
-	Plan            *bean.PlanSimplify      `json:"plan" dc:"Plan"`
+	Plan            *bean.Plan              `json:"plan" dc:"Plan"`
 	Addons          []*bean.PlanAddonDetail `json:"addons" dc:"Addons"`
-	UpdatePlan      *bean.PlanSimplify      `json:"updatePlan" dc:"UpdatePlan"`
+	UpdatePlan      *bean.Plan              `json:"updatePlan" dc:"UpdatePlan"`
 	UpdateAddons    []*bean.PlanAddonDetail `json:"updateAddons" dc:"UpdateAddons"`
 	Metadata        map[string]interface{}  `json:"metadata" description:""`
 }
 
 type SubscriptionOnetimeAddonDetail struct {
-	Id             uint64                    `json:"id"             description:"id"`              // id
-	SubscriptionId string                    `json:"subscriptionId" description:"subscription_id"` // subscription_id
-	AddonId        uint64                    `json:"addonId"        description:"onetime addonId"` // onetime addonId
-	Addon          *bean.PlanSimplify        `json:"addon"          description:"Addon"`
-	Quantity       int64                     `json:"quantity"       description:"quantity"`                                      // quantity
-	Status         int                       `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
-	CreateTime     int64                     `json:"createTime"     description:"create utc time"`                               // create utc time
-	Payment        *bean.PaymentSimplify     `json:"payment"        description:"Payment"`
-	Metadata       map[string]interface{}    `json:"metadata"       description:"Metadata"`
-	User           *bean.UserAccountSimplify `json:"user"           description:"User"`
+	Id             uint64                 `json:"id"             description:"id"`              // id
+	SubscriptionId string                 `json:"subscriptionId" description:"subscription_id"` // subscription_id
+	AddonId        uint64                 `json:"addonId"        description:"onetime addonId"` // onetime addonId
+	Addon          *bean.Plan             `json:"addon"          description:"Addon"`
+	Quantity       int64                  `json:"quantity"       description:"quantity"`                                      // quantity
+	Status         int                    `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
+	CreateTime     int64                  `json:"createTime"     description:"create utc time"`                               // create utc time
+	Payment        *bean.Payment          `json:"payment"        description:"Payment"`
+	Metadata       map[string]interface{} `json:"metadata"       description:"Metadata"`
+	User           *bean.UserAccount      `json:"user"           description:"User"`
 }

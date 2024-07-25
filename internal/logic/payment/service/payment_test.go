@@ -41,7 +41,7 @@ func TestPayment(t *testing.T) {
 			Email:          test.TestUser.Email,
 			DaysUtilDue:    consts.DEFAULT_DAY_UTIL_DUE,
 			PayImmediate:   false,
-			Invoice: &bean.InvoiceSimplify{
+			Invoice: &bean.Invoice{
 				OriginAmount:            100,
 				TotalAmount:             100,
 				Currency:                "USD",
@@ -125,7 +125,7 @@ func TestPayment(t *testing.T) {
 			Email:          test.TestUser.Email,
 			DaysUtilDue:    consts.DEFAULT_DAY_UTIL_DUE,
 			PayImmediate:   true,
-			Invoice: &bean.InvoiceSimplify{
+			Invoice: &bean.Invoice{
 				TotalAmount:             100,
 				Currency:                "USD",
 				TotalAmountExcludingTax: 0,

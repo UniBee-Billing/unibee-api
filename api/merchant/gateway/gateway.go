@@ -9,7 +9,7 @@ type ListReq struct {
 	g.Meta `path:"/list" tags:"Gateway" method:"get" summary:"PaymentGatewayList"`
 }
 type ListRes struct {
-	Gateways []*bean.GatewaySimplify `json:"gateways" dc:"Payment Gateway Object List"`
+	Gateways []*bean.Gateway `json:"gateways" dc:"Payment Gateway Object List"`
 }
 
 type SetupReq struct {
@@ -19,7 +19,7 @@ type SetupReq struct {
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 }
 type SetupRes struct {
-	Gateway *bean.GatewaySimplify `json:"gateway" dc:"Payment Gateway Object"`
+	Gateway *bean.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type EditReq struct {
@@ -29,7 +29,7 @@ type EditReq struct {
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 }
 type EditRes struct {
-	Gateway *bean.GatewaySimplify `json:"gateway" dc:"Payment Gateway Object"`
+	Gateway *bean.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type EditCountryConfigReq struct {

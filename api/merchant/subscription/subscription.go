@@ -34,13 +34,13 @@ type DetailReq struct {
 }
 
 type DetailRes struct {
-	User                                *bean.UserAccountSimplify               `json:"user" dc:"User"`
-	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	User                                *bean.UserAccount                       `json:"user" dc:"User"`
+	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
+	Gateway                             *bean.Gateway                           `json:"gateway" dc:"Gateway"`
 	AddonParams                         []*bean.PlanAddonParam                  `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
-	LatestInvoice                       *bean.InvoiceSimplify                   `json:"latestInvoice" dc:"LatestInvoice"`
+	LatestInvoice                       *bean.Invoice                           `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
@@ -147,9 +147,9 @@ type RenewReq struct {
 }
 
 type RenewRes struct {
-	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
-	Paid         bool                       `json:"paid"`
-	Link         string                     `json:"link"`
+	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	Paid         bool               `json:"paid"`
+	Link         string             `json:"link"`
 }
 
 type CreatePreviewReq struct {
@@ -169,27 +169,27 @@ type CreatePreviewReq struct {
 }
 
 type CreatePreviewRes struct {
-	Plan                     *bean.PlanSimplify                 `json:"plan"`
-	TrialEnd                 int64                              `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
-	Quantity                 int64                              `json:"quantity"`
-	Gateway                  *bean.GatewaySimplify              `json:"gateway"`
-	AddonParams              []*bean.PlanAddonParam             `json:"addonParams"`
-	Addons                   []*bean.PlanAddonDetail            `json:"addons"`
-	OriginAmount             int64                              `json:"originAmount"                `
-	TotalAmount              int64                              `json:"totalAmount"                `
-	DiscountAmount           int64                              `json:"discountAmount"`
-	Currency                 string                             `json:"currency"              `
-	Invoice                  *bean.InvoiceSimplify              `json:"invoice"`
-	UserId                   uint64                             `json:"userId" `
-	Email                    string                             `json:"email" `
-	VatCountryCode           string                             `json:"vatCountryCode"              `
-	VatCountryName           string                             `json:"vatCountryName"              `
-	TaxPercentage            int64                              `json:"taxPercentage"              `
-	VatNumber                string                             `json:"vatNumber"              `
-	VatNumberValidate        *bean.ValidResult                  `json:"vatNumberValidate"   `
-	Discount                 *bean.MerchantDiscountCodeSimplify `json:"discount" `
-	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
-	DiscountMessage          string                             `json:"discountMessage" `
+	Plan                     *bean.Plan                 `json:"plan"`
+	TrialEnd                 int64                      `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	Quantity                 int64                      `json:"quantity"`
+	Gateway                  *bean.Gateway              `json:"gateway"`
+	AddonParams              []*bean.PlanAddonParam     `json:"addonParams"`
+	Addons                   []*bean.PlanAddonDetail    `json:"addons"`
+	OriginAmount             int64                      `json:"originAmount"                `
+	TotalAmount              int64                      `json:"totalAmount"                `
+	DiscountAmount           int64                      `json:"discountAmount"`
+	Currency                 string                     `json:"currency"              `
+	Invoice                  *bean.Invoice              `json:"invoice"`
+	UserId                   uint64                     `json:"userId" `
+	Email                    string                     `json:"email" `
+	VatCountryCode           string                     `json:"vatCountryCode"              `
+	VatCountryName           string                     `json:"vatCountryName"              `
+	TaxPercentage            int64                      `json:"taxPercentage"              `
+	VatNumber                string                     `json:"vatNumber"              `
+	VatNumberValidate        *bean.ValidResult          `json:"vatNumberValidate"   `
+	Discount                 *bean.MerchantDiscountCode `json:"discount" `
+	VatNumberValidateMessage string                     `json:"vatNumberValidateMessage" `
+	DiscountMessage          string                     `json:"discountMessage" `
 }
 
 type CreateReq struct {
@@ -218,9 +218,9 @@ type CreateReq struct {
 }
 
 type CreateRes struct {
-	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
-	Paid         bool                       `json:"paid"`
-	Link         string                     `json:"link"`
+	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	Paid         bool               `json:"paid"`
+	Link         string             `json:"link"`
 }
 
 type UpdatePreviewReq struct {
@@ -235,14 +235,14 @@ type UpdatePreviewReq struct {
 }
 
 type UpdatePreviewRes struct {
-	OriginAmount      int64                              `json:"originAmount"                `
-	TotalAmount       int64                              `json:"totalAmount"                `
-	DiscountAmount    int64                              `json:"discountAmount"`
-	Currency          string                             `json:"currency"              `
-	Invoice           *bean.InvoiceSimplify              `json:"invoice"`
-	NextPeriodInvoice *bean.InvoiceSimplify              `json:"nextPeriodInvoice"`
-	ProrationDate     int64                              `json:"prorationDate"`
-	Discount          *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	OriginAmount      int64                      `json:"originAmount"                `
+	TotalAmount       int64                      `json:"totalAmount"                `
+	DiscountAmount    int64                      `json:"discountAmount"`
+	Currency          string                     `json:"currency"              `
+	Invoice           *bean.Invoice              `json:"invoice"`
+	NextPeriodInvoice *bean.Invoice              `json:"nextPeriodInvoice"`
+	ProrationDate     int64                      `json:"prorationDate"`
+	Discount          *bean.MerchantDiscountCode `json:"discount" `
 }
 
 type UpdateReq struct {
@@ -280,10 +280,10 @@ type UserSubscriptionDetailReq struct {
 }
 
 type UserSubscriptionDetailRes struct {
-	User                                *bean.UserAccountSimplify               `json:"user" dc:"user"`
-	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	User                                *bean.UserAccount                       `json:"user" dc:"user"`
+	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
+	Gateway                             *bean.Gateway                           `json:"gateway" dc:"Gateway"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }
@@ -373,10 +373,10 @@ type OnetimeAddonNewReq struct {
 }
 
 type OnetimeAddonNewRes struct {
-	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddonSimplify `json:"subscriptionOnetimeAddon" dc:"SubscriptionOnetimeAddon, object of onetime-addon purchased"`
-	Paid                     bool                                   `json:"paid" dc:"true|false,automatic payment is default behavior for one-time addon purchased, payment will create attach to the purchase, when payment is success, return false, otherwise false"`
-	Link                     string                                 `json:"link" dc:"if automatic payment is false, Gateway Link will provided that manual payment needed"`
-	Invoice                  *bean.InvoiceSimplify                  `json:"invoice" dc:"invoice of one-time payment"`
+	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddon `json:"subscriptionOnetimeAddon" dc:"SubscriptionOnetimeAddon, object of onetime-addon purchased"`
+	Paid                     bool                           `json:"paid" dc:"true|false,automatic payment is default behavior for one-time addon purchased, payment will create attach to the purchase, when payment is success, return false, otherwise false"`
+	Link                     string                         `json:"link" dc:"if automatic payment is false, Gateway Link will provided that manual payment needed"`
+	Invoice                  *bean.Invoice                  `json:"invoice" dc:"invoice of one-time payment"`
 }
 
 type OnetimeAddonListReq struct {

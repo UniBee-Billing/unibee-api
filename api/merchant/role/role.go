@@ -10,8 +10,8 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	MerchantRoles []*bean.MerchantRoleSimplify `json:"merchantRoles" dc:"Merchant Roles"`
-	Total         int                          `json:"total" dc:"Total"`
+	MerchantRoles []*bean.MerchantRole `json:"merchantRoles" dc:"Merchant Roles"`
+	Total         int                  `json:"total" dc:"Total"`
 }
 
 type NewReq struct {

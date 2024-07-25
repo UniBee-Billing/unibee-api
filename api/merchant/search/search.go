@@ -20,5 +20,5 @@ type PrecisionMatchObject struct {
 type SearchRes struct {
 	PrecisionMatchObject *PrecisionMatchObject       `json:"precisionMatchObject" description:"PrecisionMatchObject" `
 	UserAccounts         []*detail.UserAccountDetail `json:"matchUserAccounts" description:"MatchUserAccounts" `
-	Invoices             []*bean.InvoiceSimplify     `json:"matchInvoice" description:"MatchInvoice" `
+	Invoices             []*bean.Invoice             `json:"matchInvoice" description:"MatchInvoice" `
 }

@@ -307,33 +307,33 @@ type CreatePreviewInternalReq struct {
 }
 
 type CreatePreviewInternalRes struct {
-	Plan                     *entity.Plan                       `json:"plan"`
-	Quantity                 int64                              `json:"quantity"`
-	Gateway                  *entity.MerchantGateway            `json:"gateway"`
-	Merchant                 *entity.Merchant                   `json:"merchantInfo"`
-	AddonParams              []*bean.PlanAddonParam             `json:"addonParams"`
-	Addons                   []*bean.PlanAddonDetail            `json:"addons"`
-	OriginAmount             int64                              `json:"originAmount"                `
-	TotalAmount              int64                              `json:"totalAmount" `
-	DiscountAmount           int64                              `json:"discountAmount"`
-	Currency                 string                             `json:"currency" `
-	VatCountryCode           string                             `json:"vatCountryCode" `
-	VatCountryName           string                             `json:"vatCountryName" `
-	VatNumber                string                             `json:"vatNumber" `
-	VatNumberValidate        *bean.ValidResult                  `json:"vatNumberValidate" `
-	TaxPercentage            int64                              `json:"taxPercentage" `
-	TrialEnd                 int64                              `json:"trialEnd" `
-	VatVerifyData            string                             `json:"vatVerifyData" `
-	Invoice                  *bean.InvoiceSimplify              `json:"invoice"`
-	UserId                   uint64                             `json:"userId" `
-	Email                    string                             `json:"email" `
-	VatCountryRate           *bean.VatCountryRate               `json:"vatCountryRate" `
-	Gateways                 []*bean.GatewaySimplify            `json:"gateways" `
-	RecurringDiscountCode    string                             `json:"recurringDiscountCode" `
-	Discount                 *bean.MerchantDiscountCodeSimplify `json:"discount" `
-	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
-	DiscountMessage          string                             `json:"discountMessage" `
-	CancelAtPeriodEnd        int                                `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"` // whether cancel at period end，0-false | 1-true
+	Plan                     *entity.Plan               `json:"plan"`
+	Quantity                 int64                      `json:"quantity"`
+	Gateway                  *entity.MerchantGateway    `json:"gateway"`
+	Merchant                 *entity.Merchant           `json:"merchantInfo"`
+	AddonParams              []*bean.PlanAddonParam     `json:"addonParams"`
+	Addons                   []*bean.PlanAddonDetail    `json:"addons"`
+	OriginAmount             int64                      `json:"originAmount"                `
+	TotalAmount              int64                      `json:"totalAmount" `
+	DiscountAmount           int64                      `json:"discountAmount"`
+	Currency                 string                     `json:"currency" `
+	VatCountryCode           string                     `json:"vatCountryCode" `
+	VatCountryName           string                     `json:"vatCountryName" `
+	VatNumber                string                     `json:"vatNumber" `
+	VatNumberValidate        *bean.ValidResult          `json:"vatNumberValidate" `
+	TaxPercentage            int64                      `json:"taxPercentage" `
+	TrialEnd                 int64                      `json:"trialEnd" `
+	VatVerifyData            string                     `json:"vatVerifyData" `
+	Invoice                  *bean.Invoice              `json:"invoice"`
+	UserId                   uint64                     `json:"userId" `
+	Email                    string                     `json:"email" `
+	VatCountryRate           *bean.VatCountryRate       `json:"vatCountryRate" `
+	Gateways                 []*bean.Gateway            `json:"gateways" `
+	RecurringDiscountCode    string                     `json:"recurringDiscountCode" `
+	Discount                 *bean.MerchantDiscountCode `json:"discount" `
+	VatNumberValidateMessage string                     `json:"vatNumberValidateMessage" `
+	DiscountMessage          string                     `json:"discountMessage" `
+	CancelAtPeriodEnd        int                        `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"` // whether cancel at period end，0-false | 1-true
 	GatewayPaymentMethodId   string
 }
 
@@ -361,9 +361,9 @@ type CreateInternalReq struct {
 }
 
 type CreateInternalRes struct {
-	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
-	Paid         bool                       `json:"paid"`
-	Link         string                     `json:"link"`
+	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	Paid         bool               `json:"paid"`
+	Link         string             `json:"link"`
 }
 
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
@@ -516,7 +516,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			name = req.ProductData.Name
 			description = req.ProductData.Description
 		}
-		invoice := &bean.InvoiceSimplify{
+		invoice := &bean.Invoice{
 			InvoiceName:                    "SubscriptionCreate",
 			ProductName:                    name,
 			OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
@@ -865,29 +865,29 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 }
 
 type UpdatePreviewInternalRes struct {
-	Subscription          *entity.Subscription               `json:"subscription"`
-	Plan                  *entity.Plan                       `json:"plan"`
-	Quantity              int64                              `json:"quantity"`
-	Gateway               *entity.MerchantGateway            `json:"gateway"`
-	MerchantInfo          *entity.Merchant                   `json:"merchantInfo"`
-	AddonParams           []*bean.PlanAddonParam             `json:"addonParams"`
-	Addons                []*bean.PlanAddonDetail            `json:"addons"`
-	OriginAmount          int64                              `json:"originAmount"                `
-	TotalAmount           int64                              `json:"totalAmount"`
-	DiscountAmount        int64                              `json:"discountAmount"`
-	Currency              string                             `json:"currency"`
-	UserId                uint64                             `json:"userId"`
-	OldPlan               *entity.Plan                       `json:"oldPlan"`
-	Invoice               *bean.InvoiceSimplify              `json:"invoice"`
-	NextPeriodInvoice     *bean.InvoiceSimplify              `json:"nextPeriodInvoice"`
-	ProrationDate         int64                              `json:"prorationDate"`
-	EffectImmediate       bool                               `json:"EffectImmediate"`
-	Gateways              []*bean.GatewaySimplify            `json:"gateways"`
-	Changed               bool                               `json:"changed"`
-	IsUpgrade             bool                               `json:"isUpgrade"`
-	TaxPercentage         int64                              `json:"taxPercentage" `
-	RecurringDiscountCode string                             `json:"recurringDiscountCode" `
-	Discount              *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	Subscription          *entity.Subscription       `json:"subscription"`
+	Plan                  *entity.Plan               `json:"plan"`
+	Quantity              int64                      `json:"quantity"`
+	Gateway               *entity.MerchantGateway    `json:"gateway"`
+	MerchantInfo          *entity.Merchant           `json:"merchantInfo"`
+	AddonParams           []*bean.PlanAddonParam     `json:"addonParams"`
+	Addons                []*bean.PlanAddonDetail    `json:"addons"`
+	OriginAmount          int64                      `json:"originAmount"                `
+	TotalAmount           int64                      `json:"totalAmount"`
+	DiscountAmount        int64                      `json:"discountAmount"`
+	Currency              string                     `json:"currency"`
+	UserId                uint64                     `json:"userId"`
+	OldPlan               *entity.Plan               `json:"oldPlan"`
+	Invoice               *bean.Invoice              `json:"invoice"`
+	NextPeriodInvoice     *bean.Invoice              `json:"nextPeriodInvoice"`
+	ProrationDate         int64                      `json:"prorationDate"`
+	EffectImmediate       bool                       `json:"EffectImmediate"`
+	Gateways              []*bean.Gateway            `json:"gateways"`
+	Changed               bool                       `json:"changed"`
+	IsUpgrade             bool                       `json:"isUpgrade"`
+	TaxPercentage         int64                      `json:"taxPercentage" `
+	RecurringDiscountCode string                     `json:"recurringDiscountCode" `
+	Discount              *bean.MerchantDiscountCode `json:"discount" `
 	PaymentMethodId       string
 }
 
@@ -1051,8 +1051,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		}
 	}
 
-	var currentInvoice *bean.InvoiceSimplify
-	var nextPeriodInvoice *bean.InvoiceSimplify
+	var currentInvoice *bean.Invoice
+	var nextPeriodInvoice *bean.Invoice
 	var RecurringDiscountCode string
 	if prorationDate == 0 {
 		prorationDate = time.Now().Unix()
@@ -1114,7 +1114,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
-			currentInvoice = &bean.InvoiceSimplify{
+			currentInvoice = &bean.Invoice{
 				InvoiceName:                    "SubscriptionUpgrade",
 				ProductName:                    plan.PlanName,
 				OriginAmount:                   0,
@@ -1222,7 +1222,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		prorationDate = currentInvoice.ProrationDate
 	} else {
 		prorationDate = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-		currentInvoice = &bean.InvoiceSimplify{
+		currentInvoice = &bean.Invoice{
 			InvoiceName:                    "SubscriptionUpgrade",
 			ProductName:                    plan.PlanName,
 			OriginAmount:                   0,

@@ -26,7 +26,7 @@ const (
 	MetricAggregationTypeSum         = 5
 )
 
-func GetMerchantMetricSimplify(ctx context.Context, id uint64) *bean.MerchantMetricSimplify {
+func GetMerchantMetricSimplify(ctx context.Context, id uint64) *bean.MerchantMetric {
 	one := query.GetMerchantMetric(ctx, id)
 	if one != nil {
 		return bean.SimplifyMerchantMetric(one)
@@ -34,7 +34,7 @@ func GetMerchantMetricSimplify(ctx context.Context, id uint64) *bean.MerchantMet
 	return nil
 }
 
-func MerchantMetricDetail(ctx context.Context, merchantId uint64, merchantMetricId uint64) *bean.MerchantMetricSimplify {
+func MerchantMetricDetail(ctx context.Context, merchantId uint64, merchantMetricId uint64) *bean.MerchantMetric {
 	utility.Assert(merchantMetricId > 0, "invalid merchantMetricId")
 	if merchantMetricId > 0 {
 		var one *entity.MerchantMetric
@@ -58,7 +58,7 @@ type NewMerchantMetricInternalReq struct {
 	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
-func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*bean.MerchantMetricSimplify, error) {
+func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*bean.MerchantMetric, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.Code) > 0, "code is nil")
 	utility.Assert(req.AggregationType > 0 && req.AggregationType < 6, "aggregationType should be one of 1-count，2-count unique, 3-latest, 4-max, 5-sum")
@@ -99,7 +99,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, name string, description string) (*bean.MerchantMetricSimplify, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, name string, description string) (*bean.MerchantMetric, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)

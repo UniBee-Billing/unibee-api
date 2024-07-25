@@ -74,10 +74,10 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 				lastName = one.User.LastName
 				email = one.User.Email
 			} else {
-				one.User = &bean.UserAccountSimplify{}
+				one.User = &bean.UserAccount{}
 			}
 			if one.Plan == nil {
-				one.Plan = &bean.PlanSimplify{}
+				one.Plan = &bean.Plan{}
 			}
 			mainList = append(mainList, &ExportUserDiscountEntity{
 				Id:             fmt.Sprintf("%v", one.Id),

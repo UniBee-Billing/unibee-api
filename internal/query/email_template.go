@@ -7,7 +7,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.MerchantEmailTemplateSimplify {
+func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.MerchantEmailTemplate {
 	if len(templateName) == 0 {
 		return nil
 	}
@@ -19,7 +19,7 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 		one = nil
 	}
 	if one != nil {
-		return &bean.MerchantEmailTemplateSimplify{
+		return &bean.MerchantEmailTemplate{
 			Id:                  one.Id,
 			MerchantId:          0,
 			TemplateName:        one.TemplateName,
@@ -36,7 +36,7 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 	}
 }
 
-func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *bean.MerchantEmailTemplateSimplify {
+func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *bean.MerchantEmailTemplate {
 	if len(templateName) == 0 || merchantId <= 0 {
 		return nil
 	}
@@ -55,7 +55,7 @@ func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint
 	return bean.SimplifyMerchantEmailTemplate(one)
 }
 
-func GetEmailDefaultTemplateList(ctx context.Context) (mainlist []*bean.EmailDefaultTemplateSimplify, err error) {
+func GetEmailDefaultTemplateList(ctx context.Context) (mainlist []*bean.EmailDefaultTemplate, err error) {
 	list := make([]*entity.EmailDefaultTemplate, 0)
 	err = dao.EmailDefaultTemplate.Ctx(ctx).
 		Where(dao.EmailDefaultTemplate.Columns().IsDeleted, 0).
@@ -63,7 +63,7 @@ func GetEmailDefaultTemplateList(ctx context.Context) (mainlist []*bean.EmailDef
 	if err != nil {
 		return nil, err
 	}
-	var templates = make([]*bean.EmailDefaultTemplateSimplify, 0)
+	var templates = make([]*bean.EmailDefaultTemplate, 0)
 	for _, one := range list {
 		templates = append(templates, bean.SimplifyEmailDefaultTemplate(one))
 	}

@@ -10,8 +10,8 @@ import (
 	"unibee/utility"
 )
 
-func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*bean.MerchantEmailTemplateSimplify, int) {
-	var list = make([]*bean.MerchantEmailTemplateSimplify, 0)
+func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*bean.MerchantEmailTemplate, int) {
+	var list = make([]*bean.MerchantEmailTemplate, 0)
 	if merchantId > 0 {
 		var defaultTemplateList []*entity.EmailDefaultTemplate
 		err := dao.EmailDefaultTemplate.Ctx(ctx).
@@ -23,7 +23,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*be
 					Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
 					Where(entity.MerchantEmailTemplate{TemplateName: emailTemplate.TemplateName}).
 					Scan(&merchantEmailTemplate)
-				vo := &bean.MerchantEmailTemplateSimplify{
+				vo := &bean.MerchantEmailTemplate{
 					Id:                  emailTemplate.Id,
 					MerchantId:          0,
 					TemplateName:        emailTemplate.TemplateName,

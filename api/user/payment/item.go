@@ -14,6 +14,6 @@ type ItemListReq struct {
 }
 
 type ItemListRes struct {
-	PaymentItems []*bean.PaymentItemSimplify `json:"paymentItems" description:"User Payment Item Object List" `
-	Total        int                         `json:"total" dc:"Total"`
+	PaymentItems []*bean.PaymentItem `json:"paymentItems" description:"User Payment Item Object List" `
+	Total        int                 `json:"total" dc:"Total"`
 }

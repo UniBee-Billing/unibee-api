@@ -18,7 +18,7 @@ type NewReq struct {
 }
 
 type NewRes struct {
-	User *bean.UserAccountSimplify `json:"user" dc:"User Object"`
+	User *bean.UserAccount `json:"user" dc:"User Object"`
 }
 
 type ListReq struct {

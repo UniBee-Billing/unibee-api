@@ -21,11 +21,11 @@ import (
 )
 
 type SubscriptionCreateOnetimeAddonInternalRes struct {
-	MerchantId               uint64                                 `json:"merchantId" dc:"MerchantId"`
-	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddonSimplify `json:"subscriptionOnetimeAddon"  dc:"SubscriptionOnetimeAddon" `
-	Paid                     bool                                   `json:"paid"`
-	Link                     string                                 `json:"link"`
-	Invoice                  *bean.InvoiceSimplify                  `json:"invoice"  dc:"Invoice" `
+	MerchantId               uint64                         `json:"merchantId" dc:"MerchantId"`
+	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddon `json:"subscriptionOnetimeAddon"  dc:"SubscriptionOnetimeAddon" `
+	Paid                     bool                           `json:"paid"`
+	Link                     string                         `json:"link"`
+	Invoice                  *bean.Invoice                  `json:"invoice"  dc:"Invoice" `
 }
 
 type SubscriptionCreateOnetimeAddonInternalReq struct {
@@ -120,7 +120,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(taxPercentage))
-	invoice := &bean.InvoiceSimplify{
+	invoice := &bean.Invoice{
 		InvoiceName:             "OneTimeAddonPurchase-Subscription",
 		OriginAmount:            totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:             totalAmountExcludingTax + taxAmount,
@@ -200,7 +200,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 	}
 
 	return &SubscriptionCreateOnetimeAddonInternalRes{
-		SubscriptionOnetimeAddon: bean.SimplifySubscriptionOnetimeAddonSimplify(one),
+		SubscriptionOnetimeAddon: bean.SimplifySubscriptionOnetimeAddon(one),
 		Link:                     createRes.Link,
 		Paid:                     createRes.Status == consts.PaymentSuccess,
 		Invoice:                  bean.SimplifyInvoice(createRes.Invoice),

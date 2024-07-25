@@ -8,8 +8,8 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-func MerchantRoleList(ctx context.Context, merchantId uint64) ([]*bean.MerchantRoleSimplify, int) {
-	var mainList = make([]*bean.MerchantRoleSimplify, 0)
+func MerchantRoleList(ctx context.Context, merchantId uint64) ([]*bean.MerchantRole, int) {
+	var mainList = make([]*bean.MerchantRole, 0)
 	var list []*entity.MerchantRole
 	err := dao.MerchantRole.Ctx(ctx).
 		Where(dao.MerchantRole.Columns().MerchantId, merchantId).

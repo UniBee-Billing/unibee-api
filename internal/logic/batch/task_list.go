@@ -8,7 +8,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-func MerchantBatchTaskList(ctx context.Context, merchantId uint64, memberId uint64, page int, count int) ([]*bean.MerchantBatchTaskSimplify, int) {
+func MerchantBatchTaskList(ctx context.Context, merchantId uint64, memberId uint64, page int, count int) ([]*bean.MerchantBatchTask, int) {
 	if count <= 0 {
 		count = 20
 	}
@@ -16,7 +16,7 @@ func MerchantBatchTaskList(ctx context.Context, merchantId uint64, memberId uint
 		page = 0
 	}
 	var total = 0
-	var resultList = make([]*bean.MerchantBatchTaskSimplify, 0)
+	var resultList = make([]*bean.MerchantBatchTask, 0)
 	var mainList = make([]*entity.MerchantBatchTask, 0)
 	err := dao.MerchantBatchTask.Ctx(ctx).
 		Where(dao.MerchantBatchTask.Columns().MerchantId, merchantId).

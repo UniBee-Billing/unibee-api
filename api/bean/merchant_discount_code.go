@@ -8,7 +8,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type MerchantDiscountCodeSimplify struct {
+type MerchantDiscountCode struct {
 	Id                 uint64                 `json:"id"                 description:"Id"`                                                                         // Id
 	MerchantId         uint64                 `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string                 `json:"name"               description:"name"`                                                                       // name
@@ -27,7 +27,7 @@ type MerchantDiscountCodeSimplify struct {
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 }
 
-func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCodeSimplify {
+func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCode {
 	if one == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 			}
 		}
 	}
-	return &MerchantDiscountCodeSimplify{
+	return &MerchantDiscountCode{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
 		Name:               one.Name,

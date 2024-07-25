@@ -35,7 +35,7 @@ type CalculateInvoiceReq struct {
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
-func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
+func VerifyInvoiceSimplify(one *bean.Invoice) {
 	var totalAmount = one.TotalAmount
 	var totalOriginAmount = one.OriginAmount
 	var totalTax = one.TaxAmount
@@ -84,7 +84,7 @@ func VerifyInvoice(one *entity.Invoice) {
 	}
 }
 
-func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.InvoiceSimplify {
+func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.Invoice {
 	originalInvoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(originalInvoice != nil, "Payment Invoice Not found")
 	var items []*bean.InvoiceItemSimplify
@@ -127,7 +127,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		refundType = "Full Refund"
 	}
 	totalTax := -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
-	return &bean.InvoiceSimplify{
+	return &bean.Invoice{
 		InvoiceName:                    "Credit Note",
 		ProductName:                    originalInvoice.ProductName,
 		BizType:                        originalInvoice.BizType,
@@ -210,7 +210,7 @@ func ProrationDiscountToItem(totalDiscountAmount int64, totalTaxAmount int64, it
 	}
 }
 
-func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *bean.InvoiceSimplify {
+func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *bean.Invoice {
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, fmt.Sprintf("plan not found:%d", req.PlanId))
 	addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
@@ -271,7 +271,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
 
-	return &bean.InvoiceSimplify{
+	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    plan.PlanName,
@@ -323,7 +323,7 @@ type CalculateProrationInvoiceReq struct {
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
-func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
+func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.Invoice {
 	if req.OldProrationPlans == nil {
 		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
 	}
@@ -439,7 +439,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
-	return &bean.InvoiceSimplify{
+	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    req.ProductName,
@@ -468,7 +468,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 	}
 }
 
-func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
+func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.Invoice {
 	if req.OldProrationPlans == nil {
 		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
 	}
@@ -551,7 +551,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
-	return &bean.InvoiceSimplify{
+	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    req.ProductName,

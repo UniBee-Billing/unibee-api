@@ -15,7 +15,7 @@ type NewEventReq struct {
 }
 
 type NewEventRes struct {
-	MerchantMetricEvent *bean.MerchantMetricEventSimplify `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
+	MerchantMetricEvent *bean.MerchantMetricEvent `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
 }
 
 type DeleteEventReq struct {

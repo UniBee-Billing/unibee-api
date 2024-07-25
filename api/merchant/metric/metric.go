@@ -10,8 +10,8 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	MerchantMetrics []*bean.MerchantMetricSimplify `json:"merchantMetrics" dc:"MerchantMetrics"`
-	Total           int                            `json:"total" dc:"Total"`
+	MerchantMetrics []*bean.MerchantMetric `json:"merchantMetrics" dc:"MerchantMetrics"`
+	Total           int                    `json:"total" dc:"Total"`
 }
 
 type NewReq struct {
@@ -24,7 +24,7 @@ type NewReq struct {
 }
 
 type NewRes struct {
-	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetric `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type EditReq struct {
@@ -35,7 +35,7 @@ type EditReq struct {
 }
 
 type EditRes struct {
-	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetric `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type DeleteReq struct {
@@ -44,7 +44,7 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct {
-	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetric `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type DetailReq struct {
@@ -53,5 +53,5 @@ type DetailReq struct {
 }
 
 type DetailRes struct {
-	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetric `json:"merchantMetric" dc:"MerchantMetric"`
 }

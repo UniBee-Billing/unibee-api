@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type MerchantEmailTemplateSimplify struct {
+type MerchantEmailTemplate struct {
 	Id                  int64  `json:"id"                 description:""`                //
 	MerchantId          uint64 `json:"merchantId"         description:""`                //
 	TemplateName        string `json:"templateName"       description:""`                //
@@ -15,12 +15,12 @@ type MerchantEmailTemplateSimplify struct {
 	Status              string `json:"status"             description:""`                //
 }
 
-func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) *MerchantEmailTemplateSimplify {
+func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) *MerchantEmailTemplate {
 	var status = "Active"
 	if emailTemplate.Status != 0 {
 		status = "InActive"
 	}
-	return &MerchantEmailTemplateSimplify{
+	return &MerchantEmailTemplate{
 		Id:                  emailTemplate.Id,
 		MerchantId:          emailTemplate.MerchantId,
 		TemplateName:        emailTemplate.TemplateName,

@@ -2,7 +2,7 @@ package bean
 
 import entity "unibee/internal/model/entity/default"
 
-type PaymentTimelineSimplify struct {
+type PaymentTimeline struct {
 	Id             uint64 `json:"id"             description:""`                                //
 	MerchantId     uint64 `json:"merchantId"     description:"merchant id"`                     // merchant id
 	UserId         uint64 `json:"userId"         description:"userId"`                          // userId
@@ -20,11 +20,11 @@ type PaymentTimelineSimplify struct {
 
 }
 
-func SimplifyPaymentTimeline(one *entity.PaymentTimeline) *PaymentTimelineSimplify {
+func SimplifyPaymentTimeline(one *entity.PaymentTimeline) *PaymentTimeline {
 	if one == nil {
 		return nil
 	}
-	return &PaymentTimelineSimplify{
+	return &PaymentTimeline{
 		Id:             one.Id,
 		MerchantId:     one.MerchantId,
 		UserId:         one.UserId,

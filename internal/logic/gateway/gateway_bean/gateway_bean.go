@@ -15,7 +15,7 @@ type GatewayNewPaymentReq struct {
 	ExternalUserId       string                  `json:"externalUserId"`
 	Email                string                  `json:"email"`
 	Metadata             map[string]interface{}  `json:"metadata"`
-	Invoice              *bean.InvoiceSimplify   `json:"invoice"`
+	Invoice              *bean.Invoice           `json:"invoice"`
 	DaysUtilDue          int                     `json:"daysUtilDue"`
 	GatewayPaymentMethod string                  `json:"gatewayPaymentMethod"`
 	PayImmediate         bool                    `json:"payImmediate"`

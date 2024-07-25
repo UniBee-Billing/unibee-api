@@ -4,7 +4,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type MerchantBatchExportTemplateSimplify struct {
+type MerchantBatchExportTemplate struct {
 	TemplateId    uint64                 `json:"templateId"            description:"templateId"`
 	Name          string                 `json:"name"          description:"name"`        // name
 	MerchantId    uint64                 `json:"merchantId"    description:"merchant_id"` // merchant_id
@@ -16,7 +16,7 @@ type MerchantBatchExportTemplateSimplify struct {
 	CreateTime    int64                  `json:"createTime"    description:"create utc time"` // create utc time
 }
 
-func SimplifyMerchantBatchExportTemplate(one *entity.MerchantBatchExportTemplate) *MerchantBatchExportTemplateSimplify {
+func SimplifyMerchantBatchExportTemplate(one *entity.MerchantBatchExportTemplate) *MerchantBatchExportTemplate {
 	if one == nil {
 		return nil
 	}
@@ -25,7 +25,7 @@ func SimplifyMerchantBatchExportTemplate(one *entity.MerchantBatchExportTemplate
 
 	var exportColumns []string
 	_ = UnmarshalFromJsonString(one.ExportColumns, &exportColumns)
-	return &MerchantBatchExportTemplateSimplify{
+	return &MerchantBatchExportTemplate{
 		TemplateId:    one.Id,
 		Name:          one.Name,
 		MerchantId:    one.MerchantId,

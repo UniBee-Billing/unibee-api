@@ -8,7 +8,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type MerchantBatchTaskSimplify struct {
+type MerchantBatchTask struct {
 	Id             int64  `json:"id"            description:"id"`                                                // id
 	MerchantId     uint64 `json:"merchantId"    description:"merchant_id"`                                       // merchant_id
 	MemberId       uint64 `json:"memberId"      description:"member_id"`                                         // member_id
@@ -28,7 +28,7 @@ type MerchantBatchTaskSimplify struct {
 	Format         string `json:"format"    description:"format of file"`                                        // format of file
 }
 
-func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTaskSimplify {
+func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask {
 	if one == nil {
 		return nil
 	}
@@ -44,7 +44,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 			one.Format = "xlsx"
 		}
 	}
-	return &MerchantBatchTaskSimplify{
+	return &MerchantBatchTask{
 		Id:             one.Id,
 		MerchantId:     one.MerchantId,
 		MemberId:       one.MemberId,

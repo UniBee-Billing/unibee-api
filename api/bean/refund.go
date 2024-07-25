@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type RefundSimplify struct {
+type Refund struct {
 	MerchantId       uint64                 `json:"merchantId"           description:"merchant id"`                                        // merchant id
 	UserId           uint64                 `json:"userId"               description:"user_id"`                                            // user_id
 	GatewayId        uint64                 `json:"gatewayId"            description:"gateway_id"`                                         // gateway_id
@@ -28,7 +28,7 @@ type RefundSimplify struct {
 	InvoiceId        string                 `json:"invoiceId"            description:"invoice id"`                     // invoice id
 }
 
-func SimplifyRefund(one *entity.Refund) *RefundSimplify {
+func SimplifyRefund(one *entity.Refund) *Refund {
 	if one == nil {
 		return nil
 	}
@@ -39,7 +39,7 @@ func SimplifyRefund(one *entity.Refund) *RefundSimplify {
 			fmt.Printf("SimplifyRefund Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &RefundSimplify{
+	return &Refund{
 		MerchantId:       one.MerchantId,
 		UserId:           one.UserId,
 		GatewayId:        one.GatewayId,
@@ -62,9 +62,9 @@ func SimplifyRefund(one *entity.Refund) *RefundSimplify {
 	}
 }
 
-func SimplifyRefundList(ones []*entity.Refund) (list []*RefundSimplify) {
+func SimplifyRefundList(ones []*entity.Refund) (list []*Refund) {
 	if len(ones) == 0 {
-		return make([]*RefundSimplify, 0)
+		return make([]*Refund, 0)
 	}
 	for _, one := range ones {
 		list = append(list, SimplifyRefund(one))

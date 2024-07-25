@@ -18,7 +18,7 @@ type SubscriptionConfig struct {
 	GatewayVATRule                     string `json:"gatewayVATRule" dc:""`
 }
 
-type SubscriptionSimplify struct {
+type Subscription struct {
 	Id                     uint64                 `json:"id"                          description:""`                                                                                                                                                               //
 	SubscriptionId         string                 `json:"subscriptionId"              description:"subscription id"`                                                                                                                                                // subscription id
 	ExternalSubscriptionId string                 `json:"externalSubscriptionId"      description:"external_subscription_id"`                                                                                                                                       // external_subscription_id
@@ -58,7 +58,7 @@ type SubscriptionSimplify struct {
 	DefaultPaymentMethodId string                 `json:"defaultPaymentMethodId"    description:""`
 }
 
-func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
+func SimplifySubscription(one *entity.Subscription) *Subscription {
 	if one == nil {
 		return nil
 	}
@@ -69,7 +69,7 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &SubscriptionSimplify{
+	return &Subscription{
 		Id:                     one.Id,
 		SubscriptionId:         one.SubscriptionId,
 		ExternalSubscriptionId: one.ExternalSubscriptionId,
@@ -110,7 +110,7 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 	}
 }
 
-type SubscriptionOnetimeAddonSimplify struct {
+type SubscriptionOnetimeAddon struct {
 	Id             uint64                 `json:"id"             description:"id"`                                            // id
 	SubscriptionId string                 `json:"subscriptionId" description:"subscription_id"`                               // subscription_id
 	AddonId        uint64                 `json:"addonId"        description:"onetime addonId"`                               // onetime addonId
@@ -123,7 +123,7 @@ type SubscriptionOnetimeAddonSimplify struct {
 	Metadata       map[string]interface{} `json:"metadata" description:""`
 }
 
-func SimplifySubscriptionOnetimeAddonSimplify(one *entity.SubscriptionOnetimeAddon) *SubscriptionOnetimeAddonSimplify {
+func SimplifySubscriptionOnetimeAddon(one *entity.SubscriptionOnetimeAddon) *SubscriptionOnetimeAddon {
 	if one == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func SimplifySubscriptionOnetimeAddonSimplify(one *entity.SubscriptionOnetimeAdd
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &SubscriptionOnetimeAddonSimplify{
+	return &SubscriptionOnetimeAddon{
 		Id:             one.Id,
 		SubscriptionId: one.SubscriptionId,
 		AddonId:        one.AddonId,

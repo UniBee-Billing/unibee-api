@@ -4,7 +4,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type PaymentItemSimplify struct {
+type PaymentItem struct {
 	Id             uint64 `json:"id"             description:""`                                           //
 	BizType        int    `json:"bizType"        description:"biz_type 1-onetime payment, 3-subscription"` // biz_type 1-onetime payment, 3-subscription
 	MerchantId     uint64 `json:"merchantId"     description:"merchant id"`                                // merchant id
@@ -23,11 +23,11 @@ type PaymentItemSimplify struct {
 	Name           string `json:"name"           description:"name"`                                       // name
 }
 
-func SimplifyPaymentItemTimeline(one *entity.PaymentItem) *PaymentItemSimplify {
+func SimplifyPaymentItemTimeline(one *entity.PaymentItem) *PaymentItem {
 	if one == nil {
 		return nil
 	}
-	return &PaymentItemSimplify{
+	return &PaymentItem{
 		Id:             one.Id,
 		BizType:        one.BizType,
 		MerchantId:     one.MerchantId,

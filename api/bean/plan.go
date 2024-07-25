@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type PlanSimplify struct {
+type Plan struct {
 	Id                     uint64                 `json:"id"                        description:""`
 	MerchantId             uint64                 `json:"merchantId"                description:"merchant id"`                                               // merchant id
 	PlanName               string                 `json:"planName"                  description:"PlanName"`                                                  // PlanName
@@ -36,7 +36,7 @@ type PlanSimplify struct {
 	ExternalPlanId         string                 `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 }
 
-func SimplifyPlan(one *entity.Plan) *PlanSimplify {
+func SimplifyPlan(one *entity.Plan) *Plan {
 	if one == nil {
 		return nil
 	}
@@ -47,7 +47,7 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 			fmt.Printf("SimplifyPlan Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &PlanSimplify{
+	return &Plan{
 		Id:                     one.Id,
 		MerchantId:             one.MerchantId,
 		PlanName:               one.PlanName,
@@ -78,9 +78,9 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 	}
 }
 
-func SimplifyPlanList(ones []*entity.Plan) (list []*PlanSimplify) {
+func SimplifyPlanList(ones []*entity.Plan) (list []*Plan) {
 	if len(ones) == 0 {
-		return make([]*PlanSimplify, 0)
+		return make([]*Plan, 0)
 	}
 	for _, one := range ones {
 		list = append(list, SimplifyPlan(one))

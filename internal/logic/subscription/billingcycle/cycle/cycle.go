@@ -160,7 +160,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 
 			if needInvoiceGenerate {
-				var invoice *bean.InvoiceSimplify
+				var invoice *bean.Invoice
 				var discountCode = ""
 				canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
 					MerchantId:     sub.MerchantId,

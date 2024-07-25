@@ -13,8 +13,8 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Downloads []*bean.MerchantBatchTaskSimplify `json:"downloads" dc:"Merchant Member Task List"`
-	Total     int                               `json:"total" dc:"Total"`
+	Downloads []*bean.MerchantBatchTask `json:"downloads" dc:"Merchant Member Task List"`
+	Total     int                       `json:"total" dc:"Total"`
 }
 
 type ExportColumnListReq struct {
@@ -57,7 +57,7 @@ type NewTemplateReq struct {
 }
 
 type NewTemplateRes struct {
-	Template *bean.MerchantBatchExportTemplateSimplify `json:"template" dc:"Merchant Member Export Template"`
+	Template *bean.MerchantBatchExportTemplate `json:"template" dc:"Merchant Member Export Template"`
 }
 
 type EditTemplateReq struct {
@@ -71,7 +71,7 @@ type EditTemplateReq struct {
 }
 
 type EditTemplateRes struct {
-	Template *bean.MerchantBatchExportTemplateSimplify `json:"template" dc:"Merchant Member Export Template"`
+	Template *bean.MerchantBatchExportTemplate `json:"template" dc:"Merchant Member Export Template"`
 }
 
 type DeleteTemplateReq struct {
@@ -90,6 +90,6 @@ type ExportTemplateListReq struct {
 }
 
 type ExportTemplateListRes struct {
-	Templates []*bean.MerchantBatchExportTemplateSimplify `json:"templates" dc:"Merchant Member Export Template List"`
-	Total     int                                         `json:"total" dc:"Total"`
+	Templates []*bean.MerchantBatchExportTemplate `json:"templates" dc:"Merchant Member Export Template List"`
+	Total     int                                 `json:"total" dc:"Total"`
 }

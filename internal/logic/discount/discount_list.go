@@ -26,8 +26,8 @@ type ListInternalReq struct {
 	SkipTotal       bool
 }
 
-func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bean.MerchantDiscountCodeSimplify, int) {
-	var mainList = make([]*bean.MerchantDiscountCodeSimplify, 0)
+func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bean.MerchantDiscountCode, int) {
+	var mainList = make([]*bean.MerchantDiscountCode, 0)
 	var list []*entity.MerchantDiscountCode
 	if req.Count <= 0 {
 		req.Count = 20

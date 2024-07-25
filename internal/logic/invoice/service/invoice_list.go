@@ -148,10 +148,10 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	return &InvoiceListInternalRes{Invoices: resultList, Total: total}, nil
 }
 
-func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.InvoiceSimplify, err error) {
+func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.Invoice, err error) {
 	//Will Search
-	var mainList = make([]*bean.InvoiceSimplify, 0)
-	var mainMap = make(map[uint64]*bean.InvoiceSimplify)
+	var mainList = make([]*bean.Invoice, 0)
+	var mainMap = make(map[uint64]*bean.Invoice)
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
 	m := dao.Invoice.Ctx(ctx)

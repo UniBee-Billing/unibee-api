@@ -22,8 +22,8 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Discounts []*bean.MerchantDiscountCodeSimplify `json:"discounts" dc:"Discount Object List"`
-	Total     int                                  `json:"total" dc:"Total"`
+	Discounts []*bean.MerchantDiscountCode `json:"discounts" dc:"Discount Object List"`
+	Total     int                          `json:"total" dc:"Total"`
 }
 
 type DetailReq struct {
@@ -53,7 +53,7 @@ type NewReq struct {
 }
 
 type NewRes struct {
-	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
+	Discount *bean.MerchantDiscountCode `json:"discount" dc:"Discount Object"`
 }
 
 type EditReq struct {
@@ -74,7 +74,7 @@ type EditReq struct {
 }
 
 type EditRes struct {
-	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
+	Discount *bean.MerchantDiscountCode `json:"discount" dc:"Discount Object"`
 }
 
 type DeleteReq struct {

@@ -9,5 +9,5 @@ type ListReq struct {
 	g.Meta `path:"/list" tags:"User-Gateway" method:"get" summary:"Query Gateway List"`
 }
 type ListRes struct {
-	Gateways []*bean.GatewaySimplify `json:"gateways"`
+	Gateways []*bean.Gateway `json:"gateways"`
 }

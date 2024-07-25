@@ -11,6 +11,6 @@ type PlanAddonParam struct {
 }
 
 type PlanAddonDetail struct {
-	Quantity  int64         `json:"quantity" dc:"Quantity" `
-	AddonPlan *PlanSimplify `json:"addonPlan" dc:"addonPlan" `
+	Quantity  int64 `json:"quantity" dc:"Quantity" `
+	AddonPlan *Plan `json:"addonPlan" dc:"addonPlan" `
 }

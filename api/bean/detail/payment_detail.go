@@ -5,8 +5,8 @@ import (
 )
 
 type PaymentDetail struct {
-	User    *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Payment *bean.PaymentSimplify     `json:"payment" dc:"Payment"`
-	Gateway *bean.GatewaySimplify     `json:"gateway" dc:"Gateway"`
-	Invoice *InvoiceDetail            `json:"invoice" dc:"Invoice"`
+	User    *bean.UserAccount `json:"user" dc:"user"`
+	Payment *bean.Payment     `json:"payment" dc:"Payment"`
+	Gateway *bean.Gateway     `json:"gateway" dc:"Gateway"`
+	Invoice *InvoiceDetail    `json:"invoice" dc:"Invoice"`
 }

@@ -5,7 +5,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
-type UserAccountSimplify struct {
+type UserAccount struct {
 	Id                 uint64 `json:"id"                 description:"userId"`                                    // userId
 	MerchantId         uint64 `json:"merchantId"         description:"merchant_id"`                               // merchant_id
 	UserName           string `json:"userName"           description:"user name"`                                 // user name
@@ -54,13 +54,13 @@ type UserAccountSimplify struct {
 	ZipCode            string `json:"zipCode" dc:"zip_code"`
 }
 
-func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
+func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 	if one == nil {
 		return nil
 	}
 	gatewayId, _ := strconv.ParseUint(one.GatewayId, 10, 64)
 
-	return &UserAccountSimplify{
+	return &UserAccount{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
 		UserName:           one.UserName,

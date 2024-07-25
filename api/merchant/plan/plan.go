@@ -31,7 +31,7 @@ type NewReq struct {
 	CancelAtTrialEnd   int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 type NewRes struct {
-	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.Plan `json:"plan" dc:"Plan"`
 }
 
 type EditReq struct {
@@ -59,7 +59,7 @@ type EditReq struct {
 	CancelAtTrialEnd   *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 type EditRes struct {
-	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.Plan `json:"plan" dc:"Plan"`
 }
 
 type AddonsBindingReq struct {
@@ -70,7 +70,7 @@ type AddonsBindingReq struct {
 	OnetimeAddonIds []int64 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type"   v:"required" `
 }
 type AddonsBindingRes struct {
-	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.Plan `json:"plan" dc:"Plan"`
 }
 
 type ListReq struct {
@@ -94,7 +94,7 @@ type CopyReq struct {
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type CopyRes struct {
-	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.Plan `json:"plan" dc:"Plan"`
 }
 
 type ActivateReq struct {

@@ -1,6 +1,6 @@
 package bean
 
-type TableUpgradeSimplify struct {
+type TableUpgrade struct {
 	Id           uint64 `json:"id"           description:"id"`                       // id
 	DatabaseType string `json:"databaseType" description:"type of database"`         // type of database
 	Env          int    `json:"env"          description:"0-offline,1-stage,2-prod"` // 0-offline,1-stage,2-prod
