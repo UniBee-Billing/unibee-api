@@ -103,7 +103,7 @@ func CreateTestWireTransferGateway(ctx context.Context, merchantId uint64) *enti
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	one = query.GetGatewayByGatewayName(ctx, merchantId, "autotest_wire_transfer")
+	one = query.GetGatewayByGatewayName(ctx, merchantId, "wire_transfer")
 	utility.Assert(one != nil, "autotest gateway error")
 	return one
 }
