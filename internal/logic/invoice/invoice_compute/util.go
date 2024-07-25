@@ -99,13 +99,13 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	var leftRefundAmount = refund.RefundAmount
 	//proration to the items
 	for _, item := range items {
-		item.Tax = 0
 		item.DiscountAmount = 0
 		itemRefundAmount := utility.MinInt64(int64(float64(leftRefundAmount)*float64(item.AmountExcludingTax)/float64(totalAmountExcludingTax)), item.AmountExcludingTax)
 		item.Amount = -itemRefundAmount
-		item.AmountExcludingTax = -itemRefundAmount
-		item.OriginAmount = -itemRefundAmount
-		item.UnitAmountExcludingTax = int64(float64(-itemRefundAmount) / float64(item.Quantity))
+		item.OriginAmount = item.Amount
+		item.Tax = int64(float64(item.Amount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
+		item.AmountExcludingTax = item.Amount - item.Tax
+		item.UnitAmountExcludingTax = int64(float64(item.AmountExcludingTax) / float64(item.Quantity))
 		leftRefundAmount = leftRefundAmount - itemRefundAmount
 	}
 	//compensate to the items
@@ -114,8 +114,8 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 			if leftRefundAmount > 0 {
 				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.Amount)
 				item.Amount = item.Amount - tempLeftDiscountAmount
-				item.AmountExcludingTax = item.AmountExcludingTax - tempLeftDiscountAmount
 				item.OriginAmount = item.OriginAmount - tempLeftDiscountAmount
+				item.AmountExcludingTax = item.AmountExcludingTax - tempLeftDiscountAmount
 				leftRefundAmount = leftRefundAmount - tempLeftDiscountAmount
 			} else {
 				break
@@ -126,18 +126,18 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if payment.TotalAmount == refund.RefundAmount {
 		refundType = "Full Refund"
 	}
-
+	totalTax := -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    "Credit Note",
 		ProductName:                    originalInvoice.ProductName,
 		BizType:                        originalInvoice.BizType,
 		Currency:                       originalInvoice.Currency,
+		TaxAmount:                      totalTax,
 		OriginAmount:                   -refund.RefundAmount,
 		TotalAmount:                    -refund.RefundAmount,
-		TotalAmountExcludingTax:        -refund.RefundAmount,
+		TotalAmountExcludingTax:        -refund.RefundAmount - totalTax,
 		SubscriptionAmount:             -refund.RefundAmount,
-		SubscriptionAmountExcludingTax: -refund.RefundAmount,
-		TaxAmount:                      -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)),
+		SubscriptionAmountExcludingTax: -refund.RefundAmount - totalTax,
 		CountryCode:                    originalInvoice.CountryCode,
 		VatNumber:                      originalInvoice.VatNumber,
 		TaxPercentage:                  originalInvoice.TaxPercentage,
