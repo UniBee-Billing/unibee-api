@@ -134,3 +134,9 @@ func NewTrack() merchant.IMerchantTrack {
 	return &ControllerTrack{}
 }
 
+type ControllerProduct struct{}
+
+func NewProduct() merchant.IMerchantProduct {
+	return &ControllerProduct{}
+}
+

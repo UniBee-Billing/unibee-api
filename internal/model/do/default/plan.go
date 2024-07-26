@@ -44,4 +44,5 @@ type Plan struct {
 	TrialDemand               interface{} //
 	CancelAtTrialEnd          interface{} // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ExternalPlanId            interface{} // external_user_id
+	ProductId                 interface{} // product id
 }

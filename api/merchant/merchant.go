@@ -18,6 +18,7 @@ import (
 	"unibee/api/merchant/oss"
 	"unibee/api/merchant/payment"
 	"unibee/api/merchant/plan"
+	"unibee/api/merchant/product"
 	"unibee/api/merchant/profile"
 	"unibee/api/merchant/role"
 	"unibee/api/merchant/search"
@@ -153,6 +154,17 @@ type IMerchantPlan interface {
 	Detail(ctx context.Context, req *plan.DetailReq) (res *plan.DetailRes, err error)
 	Expire(ctx context.Context, req *plan.ExpireReq) (res *plan.ExpireRes, err error)
 	Delete(ctx context.Context, req *plan.DeleteReq) (res *plan.DeleteRes, err error)
+}
+
+type IMerchantProduct interface {
+	New(ctx context.Context, req *product.NewReq) (res *product.NewRes, err error)
+	Edit(ctx context.Context, req *product.EditReq) (res *product.EditRes, err error)
+	List(ctx context.Context, req *product.ListReq) (res *product.ListRes, err error)
+	Copy(ctx context.Context, req *product.CopyReq) (res *product.CopyRes, err error)
+	Activate(ctx context.Context, req *product.ActivateReq) (res *product.ActivateRes, err error)
+	Inactive(ctx context.Context, req *product.InactiveReq) (res *product.InactiveRes, err error)
+	Detail(ctx context.Context, req *product.DetailReq) (res *product.DetailRes, err error)
+	Delete(ctx context.Context, req *product.DeleteReq) (res *product.DeleteRes, err error)
 }
 
 type IMerchantProfile interface {
