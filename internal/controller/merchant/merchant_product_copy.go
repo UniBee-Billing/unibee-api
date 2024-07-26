@@ -2,13 +2,16 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/api/bean"
+	product2 "unibee/internal/logic/product"
 
 	"unibee/api/merchant/product"
 )
 
 func (c *ControllerProduct) Copy(ctx context.Context, req *product.CopyReq) (res *product.CopyRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	one, err := product2.ProductCopy(ctx, req.ProductId)
+	if err != nil {
+		return nil, err
+	}
+	return &product.CopyRes{Product: bean.SimplifyProduct(one)}, nil
 }

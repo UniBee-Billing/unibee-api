@@ -7,7 +7,7 @@ import (
 	_plan "unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -17,10 +17,10 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
-	service.PlanOrAddonIntervalVerify(ctx, req.PlanId)
+	plan2.PlanOrAddonIntervalVerify(ctx, req.PlanId)
 
 	//Activate Plan
-	err = service.PlanActivate(ctx, req.PlanId)
+	err = plan2.PlanActivate(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}
@@ -46,10 +46,10 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
-				service.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)
+				plan2.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)
 
 				//Activate Plan
-				err = service.PlanActivate(ctx, addonPlan.Id)
+				err = plan2.PlanActivate(ctx, addonPlan.Id)
 				if err != nil {
 					return nil, err
 				}

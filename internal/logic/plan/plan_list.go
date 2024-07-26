@@ -1,4 +1,4 @@
-package service
+package plan
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"unibee/utility"
 )
 
-type SubscriptionPlanListInternalReq struct {
+type ListInternalReq struct {
 	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	Type          []int  `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
 	Status        []int  `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
@@ -60,6 +60,7 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 	}
 	return &plan.DetailRes{
 		Plan: &detail.PlanDetail{
+			Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(one.ProductId))),
 			Plan:             bean.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
 			Addons:           bean.SimplifyPlanList(query.GetAddonsByIds(ctx, addonIds)),
@@ -70,7 +71,7 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 	}, nil
 }
 
-func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*detail.PlanDetail, total int) {
+func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDetail, total int) {
 	var mainList []*entity.Plan
 	if req.Count <= 0 {
 		req.Count = 20
@@ -111,6 +112,7 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 	for _, p := range mainList {
 		if p.Type != consts.PlanTypeMain {
 			list = append(list, &detail.PlanDetail{
+				Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId))),
 				Plan:             bean.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Addons:           nil,
@@ -147,6 +149,7 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 			}
 		}
 		list = append(list, &detail.PlanDetail{
+			Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId))),
 			Plan:             bean.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Addons:           nil,

@@ -3,11 +3,11 @@ package merchant
 import (
 	"context"
 	"unibee/api/merchant/plan"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 )
 
 func (c *ControllerPlan) UnPublish(ctx context.Context, req *plan.UnPublishReq) (res *plan.UnPublishRes, err error) {
-	err = service.PlanUnPublish(ctx, req.PlanId)
+	err = plan2.PlanUnPublish(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}

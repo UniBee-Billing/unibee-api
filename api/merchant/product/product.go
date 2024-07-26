@@ -7,8 +7,6 @@ import (
 
 type NewReq struct {
 	g.Meta      `path:"/new" tags:"Product" method:"post" summary:"CreateProduct"`
-	Id          uint64                  `json:"id"          description:""`
-	MerchantId  uint64                  `json:"merchantId"  description:"merchant id"`                                // merchant id
 	ProductName string                  `json:"productName" description:"ProductName"`                                // ProductName
 	Description string                  `json:"description" description:"description"`                                // description
 	ImageUrl    string                  `json:"imageUrl"    description:"image_url"`                                  // image_url
@@ -23,12 +21,11 @@ type NewRes struct {
 type EditReq struct {
 	g.Meta      `path:"/edit" tags:"Product" method:"post" summary:"EditProduct" dc:"Edit exist product, product is editable for both active and inactive status "`
 	ProductId   uint64                  `json:"productId" dc:"Id of product" v:"required"`
-	MerchantId  uint64                  `json:"merchantId"  description:"merchant id"`                                // merchant id
-	ProductName string                  `json:"productName" description:"ProductName"`                                // ProductName
-	Description string                  `json:"description" description:"description"`                                // description
-	ImageUrl    string                  `json:"imageUrl"    description:"image_url"`                                  // image_url
-	HomeUrl     string                  `json:"homeUrl"     description:"home_url"`                                   // home_url
-	Status      int                     `json:"status"      description:"status，1-active，2-inactive, default active"` // status，1-active，2-inactive, default active
+	ProductName *string                 `json:"productName" description:"ProductName"`                                // ProductName
+	Description *string                 `json:"description" description:"description"`                                // description
+	ImageUrl    *string                 `json:"imageUrl"    description:"image_url"`                                  // image_url
+	HomeUrl     *string                 `json:"homeUrl"     description:"home_url"`                                   // home_url
+	Status      *int                    `json:"status"      description:"status，1-active，2-inactive, default active"` // status，1-active，2-inactive, default active
 	Metadata    *map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {

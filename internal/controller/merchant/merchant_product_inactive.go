@@ -2,13 +2,15 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	product2 "unibee/internal/logic/product"
 
 	"unibee/api/merchant/product"
 )
 
 func (c *ControllerProduct) Inactive(ctx context.Context, req *product.InactiveReq) (res *product.InactiveRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	err = product2.ProductInactivate(ctx, req.ProductId)
+	if err != nil {
+		return nil, err
+	}
+	return &product.InactiveRes{}, nil
 }

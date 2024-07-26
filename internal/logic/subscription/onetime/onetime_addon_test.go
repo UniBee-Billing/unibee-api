@@ -9,7 +9,7 @@ import (
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	"unibee/internal/logic/invoice/invoice_compute"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/test"
@@ -19,7 +19,7 @@ func TestSubscription(t *testing.T) {
 	ctx := context.Background()
 	var testSubscriptionId string
 	t.Run("Test case for subscription create | onetime addon purchase", func(t *testing.T) {
-		_, err := service.PlanAddonsBinding(ctx, &plan.AddonsBindingReq{
+		_, err := plan2.PlanAddonsBinding(ctx, &plan.AddonsBindingReq{
 			PlanId:          test.TestPlan.Id,
 			Action:          1,
 			AddonIds:        []int64{int64(test.TestRecurringAddon.Id)},

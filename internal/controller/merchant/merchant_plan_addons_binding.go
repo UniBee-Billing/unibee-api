@@ -4,11 +4,11 @@ import (
 	"context"
 	"unibee/api/bean"
 	"unibee/api/merchant/plan"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 )
 
 func (c *ControllerPlan) AddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (res *plan.AddonsBindingRes, err error) {
-	one, err := service.PlanAddonsBinding(ctx, req)
+	one, err := plan2.PlanAddonsBinding(ctx, req)
 	if err != nil {
 		return nil, err
 	}

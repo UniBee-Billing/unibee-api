@@ -6,7 +6,7 @@ import (
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -16,7 +16,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 	}
 
-	publishPlans, total := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
+	publishPlans, total := plan2.PlanList(ctx, &plan2.ListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
 		Type:          req.Type,
 		Status:        []int{consts.PlanStatusActive},
@@ -29,7 +29,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 	if sub != nil {
 		subPlan := query.GetPlanById(ctx, sub.PlanId)
 		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {
-			userPlan, _ := service.PlanDetail(ctx, _interface.GetMerchantId(ctx), subPlan.Id)
+			userPlan, _ := plan2.PlanDetail(ctx, _interface.GetMerchantId(ctx), subPlan.Id)
 			if userPlan != nil {
 				publishPlans = append(publishPlans, userPlan.Plan)
 			}

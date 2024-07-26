@@ -1,4 +1,4 @@
-package service
+package plan
 
 import (
 	"context"
@@ -36,7 +36,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, one)
-		ones, _ := PlanList(ctx, &SubscriptionPlanListInternalReq{
+		ones, _ := PlanList(ctx, &ListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			Type:       []int{consts.PlanTypeMain},
 			Status:     []int{consts.PlanStatusActive},
@@ -72,7 +72,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.NotNil(t, detail.Plan.Addons)
 		require.Equal(t, 1, len(detail.Plan.AddonIds))
 		require.Equal(t, 1, len(detail.Plan.Addons))
-		ones, _ = PlanList(ctx, &SubscriptionPlanListInternalReq{
+		ones, _ = PlanList(ctx, &ListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			Type:       []int{consts.PlanTypeMain},
 			Status:     []int{consts.PlanStatusActive},
@@ -86,7 +86,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.Nil(t, err)
 		err = PlanActivate(ctx, one.Id)
 		require.Nil(t, err)
-		ones, _ = PlanList(ctx, &SubscriptionPlanListInternalReq{
+		ones, _ = PlanList(ctx, &ListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			Type:       []int{consts.PlanTypeMain},
 			Status:     []int{consts.PlanStatusActive},
@@ -118,7 +118,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.NotNil(t, detail.Plan.Addons)
 		require.Equal(t, 1, len(detail.Plan.AddonIds))
 		require.Equal(t, 1, len(detail.Plan.Addons))
-		ones, _ = PlanList(ctx, &SubscriptionPlanListInternalReq{
+		ones, _ = PlanList(ctx, &ListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			Type:       []int{consts.PlanTypeMain},
 			Status:     []int{consts.PlanStatusActive},
@@ -137,7 +137,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 	t.Run("Test for Plan Publish|UnPublish|PlanDetail", func(t *testing.T) {
 		one = test.TestPlan
 		//activate & publish
-		publishPlans, _ := PlanList(ctx, &SubscriptionPlanListInternalReq{
+		publishPlans, _ := PlanList(ctx, &ListInternalReq{
 			MerchantId:    test.TestMerchant.Id,
 			Type:          []int{consts.PlanTypeMain},
 			Status:        []int{consts.PlanStatusActive},
@@ -150,7 +150,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.Equal(t, 1, len(publishPlans))
 		err := PlanUnPublish(ctx, one.Id)
 		require.Nil(t, err)
-		publishPlans, _ = PlanList(ctx, &SubscriptionPlanListInternalReq{
+		publishPlans, _ = PlanList(ctx, &ListInternalReq{
 			MerchantId:    test.TestMerchant.Id,
 			Type:          []int{consts.PlanTypeMain},
 			Status:        []int{consts.PlanStatusActive},
@@ -161,7 +161,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.Equal(t, 0, len(publishPlans))
 		err = PlanPublish(ctx, one.Id)
 		require.Nil(t, err)
-		publishPlans, _ = PlanList(ctx, &SubscriptionPlanListInternalReq{
+		publishPlans, _ = PlanList(ctx, &ListInternalReq{
 			MerchantId:    test.TestMerchant.Id,
 			Status:        []int{consts.PlanStatusActive},
 			PublishStatus: consts.PlanPublishStatusPublished,

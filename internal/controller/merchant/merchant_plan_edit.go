@@ -5,12 +5,12 @@ import (
 	"unibee/api/bean"
 	"unibee/api/merchant/plan"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/plan/service"
+	plan2 "unibee/internal/logic/plan"
 )
 
 func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan.EditRes, err error) {
 
-	one, err := service.PlanEdit(ctx, &service.EditInternalReq{
+	one, err := plan2.PlanEdit(ctx, &plan2.EditInternalReq{
 		MerchantId:         _interface.GetMerchantId(ctx),
 		PlanId:             req.PlanId,
 		ExternalPlanId:     req.ExternalPlanId,

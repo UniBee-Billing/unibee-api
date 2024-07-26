@@ -4,11 +4,11 @@ import (
 	"context"
 	v1 "unibee/api/merchant/plan"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/plan/service"
+	"unibee/internal/logic/plan"
 )
 
 func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.ListRes, err error) {
-	plans, total := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
+	plans, total := plan.PlanList(ctx, &plan.ListInternalReq{
 		MerchantId:    _interface.Context().Get(ctx).MerchantId,
 		Type:          req.Type,
 		Status:        req.Status,
