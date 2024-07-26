@@ -56,6 +56,14 @@ func GetPlansByProductId(ctx context.Context, productId int64) (list []*entity.P
 	}
 }
 
+func GetPlanIdsByProductId(ctx context.Context, productId int64) (ids []uint64) {
+	list := GetPlansByProductId(ctx, productId)
+	for _, one := range list {
+		ids = append(ids, one.Id)
+	}
+	return ids
+}
+
 func GetAddonsByIds(ctx context.Context, addonIdsList []int64) (list []*entity.Plan) {
 	err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIdsList).Scan(&list)
 	if err != nil {
