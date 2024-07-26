@@ -40,11 +40,20 @@ func GetPlansByIds(ctx context.Context, ids []int64) (list []*entity.Plan) {
 }
 
 func GetPlansByProductId(ctx context.Context, productId int64) (list []*entity.Plan) {
-	err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().ProductId, productId).OmitEmpty().Scan(&list)
-	if err != nil {
-		return nil
+	if productId <= 0 {
+		q := dao.Plan.Ctx(ctx)
+		err := q.WhereOr(q.Builder().WhereOrNull(dao.Plan.Columns().ProductId).WhereOr(dao.Plan.Columns().ProductId, 0)).OmitNil().Scan(&list)
+		if err != nil {
+			return nil
+		}
+		return list
+	} else {
+		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().ProductId, productId).OmitEmpty().Scan(&list)
+		if err != nil {
+			return nil
+		}
+		return list
 	}
-	return list
 }
 
 func GetAddonsByIds(ctx context.Context, addonIdsList []int64) (list []*entity.Plan) {
