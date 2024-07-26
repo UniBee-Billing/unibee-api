@@ -73,7 +73,6 @@ type RegisterReq struct {
 	Phone       string  `json:"phone" dc:"Phone" `
 	Address     string  `json:"address" dc:"Address"`
 	CountryCode string  `json:"countryCode" dc:"CountryCode"`
-	CountryName string  `json:"countryName" dc:"CountryName"`
 	UserName    string  `json:"userName" dc:"UserName"`
 	Type        int64   `json:"type" dc:"User type, 1-Individual|2-organization"`
 	CompanyName string  `json:"companyName" dc:"company name"`

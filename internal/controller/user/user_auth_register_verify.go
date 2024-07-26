@@ -22,7 +22,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	userStr, err := g.Redis().Get(ctx, CacheKeyUserRegisterPrefix+req.Email)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(userStr != nil, "Invalid Code")
-	var newReq *auth2.NewReq
+	var newReq *auth2.NewUserInternalReq
 	err = json.Unmarshal([]byte(userStr.String()), &newReq)
 	newReq.MerchantId = _interface.GetMerchantId(ctx)
 

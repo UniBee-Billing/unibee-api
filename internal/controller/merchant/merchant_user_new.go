@@ -17,7 +17,7 @@ func (c *ControllerUser) New(ctx context.Context, req *user.NewReq) (res *user.N
 		existOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 		utility.Assert(existOne == nil, "same email exist")
 	}
-	one, err := user2.QueryOrCreateUser(ctx, &user2.NewReq{
+	one, err := user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		FirstName:      req.FirstName,

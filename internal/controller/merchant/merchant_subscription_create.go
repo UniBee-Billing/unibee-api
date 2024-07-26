@@ -6,16 +6,34 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
-	"unibee/internal/logic/user"
+	user2 "unibee/internal/logic/user"
 	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.CreateReq) (res *subscription.CreateRes, err error) {
-	if req.UserId == 0 {
-		utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
-		user, err := user.QueryOrCreateUser(ctx, &user.NewReq{
+	if req.UserId == 0 && req.User != nil {
+		user, err := user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
+			ExternalUserId: req.User.ExternalUserId,
+			Email:          req.User.Email,
+			FirstName:      req.User.FirstName,
+			LastName:       req.User.LastName,
+			Phone:          req.User.Phone,
+			Address:        req.User.Address,
+			UserName:       req.User.UserName,
+			CountryCode:    req.User.CountryCode,
+			Type:           req.User.Type,
+			CompanyName:    req.User.CompanyName,
+			VATNumber:      req.User.VatNumber,
+			City:           req.User.City,
+			ZipCode:        req.User.ZipCode,
+			MerchantId:     _interface.GetMerchantId(ctx),
+		})
+		utility.AssertError(err, "Server Error")
+		req.UserId = user.Id
+	} else if req.UserId == 0 && len(req.Email) > 0 {
+		user, err := user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
 			ExternalUserId: req.ExternalUserId,
 			Email:          req.Email,
 			MerchantId:     _interface.GetMerchantId(ctx),

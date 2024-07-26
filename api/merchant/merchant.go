@@ -55,6 +55,7 @@ type IMerchantDiscount interface {
 	Activate(ctx context.Context, req *discount.ActivateReq) (res *discount.ActivateRes, err error)
 	Deactivate(ctx context.Context, req *discount.DeactivateReq) (res *discount.DeactivateRes, err error)
 	UserDiscountList(ctx context.Context, req *discount.UserDiscountListReq) (res *discount.UserDiscountListRes, err error)
+	PlanApplyPreview(ctx context.Context, req *discount.PlanApplyPreviewReq) (res *discount.PlanApplyPreviewRes, err error)
 }
 
 type IMerchantEmail interface {

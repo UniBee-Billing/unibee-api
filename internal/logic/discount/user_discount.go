@@ -32,9 +32,9 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if req.MerchantId == 0 {
 		return false, false, "Invalid merchantId"
 	}
-	if req.UserId == 0 {
-		return false, false, "Invalid userId"
-	}
+	//if req.UserId == 0 {
+	//	return false, false, "Invalid userId"
+	//}
 	if len(req.DiscountCode) == 0 {
 		return false, false, "Invalid code"
 	}
@@ -74,7 +74,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Code not allow to use on this plan"
 		}
 	}
-	if discountCode.UserLimit > 0 {
+	if discountCode.UserLimit > 0 && req.UserId > 0 {
 		//check user limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
@@ -91,7 +91,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Code reach out the limit"
 		}
 	}
-	if discountCode.SubscriptionLimit > 0 && len(req.SubscriptionId) > 0 {
+	if discountCode.SubscriptionLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
@@ -109,7 +109,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Code reach out the limit"
 		}
 	}
-	if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && len(req.SubscriptionId) > 0 {
+	if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).

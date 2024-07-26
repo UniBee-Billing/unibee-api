@@ -33,7 +33,7 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		if req.UserId == 0 {
 			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil")
 			utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
-			user, err = user2.QueryOrCreateUser(ctx, &user2.NewReq{
+			user, err = user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
 				ExternalUserId: req.ExternalUserId,
 				Email:          req.Email,
 				MerchantId:     merchantInfo.Id,

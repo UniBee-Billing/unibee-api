@@ -5,6 +5,22 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+type NewUser struct {
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
+	Email          string `json:"email" dc:"Email" v:"required"`
+	FirstName      string `json:"firstName" dc:"First Name"`
+	LastName       string `json:"lastName" dc:"Last Name"`
+	Phone          string `json:"phone" dc:"Phone" `
+	Address        string `json:"address" dc:"Address"`
+	UserName       string `json:"userName" dc:"UserName"`
+	CountryCode    string `json:"countryCode" dc:"CountryCode"`
+	Type           int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	CompanyName    string `json:"companyName" dc:"company name"`
+	VatNumber      string `json:"vatNumber" dc:"vat number"`
+	City           string `json:"city" dc:"city"`
+	ZipCode        string `json:"zipCode" dc:"zip_code"`
+}
+
 type UserAccount struct {
 	Id                 uint64 `json:"id"                 description:"userId"`                                    // userId
 	MerchantId         uint64 `json:"merchantId"         description:"merchant_id"`                               // merchant_id

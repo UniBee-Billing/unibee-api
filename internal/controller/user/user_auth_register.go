@@ -7,7 +7,7 @@ import (
 	"unibee/api/user/auth"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
-	auth2 "unibee/internal/logic/user"
+	"unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
 
@@ -46,7 +46,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	userStr, err := json.Marshal(
-		&auth2.NewReq{
+		&user.NewUserInternalReq{
 			Email:       req.Email,
 			FirstName:   req.FirstName,
 			LastName:    req.LastName,
@@ -55,7 +55,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 			Address:     req.Address,
 			UserName:    req.UserName,
 			CountryCode: req.CountryCode,
-			CountryName: req.CountryName,
 			Type:        req.Type,
 			CompanyName: req.CompanyName,
 			VATNumber:   vatNumber,

@@ -195,9 +195,10 @@ type CreatePreviewRes struct {
 type CreateReq struct {
 	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
 	PlanId             uint64                      `json:"planId" dc:"PlanId" v:"required"`
-	ExternalUserId     string                      `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
-	Email              string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId             uint64                      `json:"userId" dc:"UserId"`
+	Email              string                      `json:"email" dc:"Email, one of ExternalUserId&Email, UserId or User needed"`
+	ExternalUserId     string                      `json:"externalUserId" dc:"ExternalUserId, unique, one of ExternalUserId&Email, UserId or User needed"`
+	User               *bean.NewUser               `json:"user" dc:"User Object"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          *uint64                     `json:"gatewayId" dc:"GatewayId" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `

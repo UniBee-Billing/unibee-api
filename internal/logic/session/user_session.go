@@ -34,7 +34,7 @@ func UserSessionTransfer(ctx context.Context, session string) (*entity.UserAccou
 }
 
 func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq) (res *session.NewRes, err error) {
-	one, err := user.QueryOrCreateUser(ctx, &user.NewReq{
+	one, err := user.QueryOrCreateUser(ctx, &user.NewUserInternalReq{
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		FirstName:      req.FirstName,

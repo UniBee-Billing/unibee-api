@@ -793,8 +793,9 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		if err != nil {
 			// todo mark use method
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
-				dao.Subscription.Columns().Status:    consts.SubStatusCancelled,
-				dao.Subscription.Columns().GmtModify: gtime.Now(),
+				dao.Subscription.Columns().Status:       consts.SubStatusCancelled,
+				dao.Subscription.Columns().CancelReason: "Create First Payment Error",
+				dao.Subscription.Columns().GmtModify:    gtime.Now(),
 			}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 			if updateErr != nil {
 				return nil, updateErr

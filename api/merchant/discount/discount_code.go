@@ -116,3 +116,17 @@ type UserDiscountListRes struct {
 	UserDiscounts []*detail.MerchantUserDiscountCodeDetail `json:"userDiscounts" dc:"User Discount Object List"`
 	Total         int                                      `json:"total" dc:"Total"`
 }
+
+type PlanApplyPreviewReq struct {
+	g.Meta         `path:"/plan_apply_preview" tags:"Discount" method:"post" summary:"PlanApplyPreview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
+	Code           string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	PlanId         int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
+	ExternalPlanId string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
+}
+
+type PlanApplyPreviewRes struct {
+	Valid          bool                       `json:"valid" dc:"The apply preview result, true or false" `
+	DiscountAmount int64                      `json:"discountAmount" dc:"The discount amount can apply to plan" `
+	DiscountCode   *bean.MerchantDiscountCode `json:"discountCode" dc:"The discount code object" `
+	FailureReason  string                     `json:"failureReason" dc:"The apply preview failure reason" `
+}

@@ -105,26 +105,6 @@ func ReleaseUser(ctx context.Context, userId int64) {
 	utility.AssertError(err, "server error")
 }
 
-type NewReq struct {
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
-	Email          string `json:"email" dc:"Email" v:"required"`
-	FirstName      string `json:"firstName" dc:"First Name"`
-	LastName       string `json:"lastName" dc:"Last Name"`
-	Password       string `json:"password" dc:"Password"`
-	Phone          string `json:"phone" dc:"Phone" `
-	Address        string `json:"address" dc:"Address"`
-	UserName       string `json:"userName" dc:"UserName"`
-	CountryCode    string `json:"countryCode" dc:"CountryCode"`
-	CountryName    string `json:"countryName" dc:"CountryName"`
-	MerchantId     uint64 `json:"merchantId" dc:"MerchantId"`
-	Type           int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
-	CompanyName    string `json:"companyName" dc:"company name"`
-	VATNumber      string `json:"vATNumber" dc:"vat number"`
-	City           string `json:"city" dc:"city"`
-	ZipCode        string `json:"zipCode" dc:"zip_code"`
-	Custom         string `json:"custom" dc:"Custom"`
-}
-
 func PasswordLogin(ctx context.Context, merchantId uint64, email string, password string) (one *entity.UserAccount, token string) {
 	one = query.GetUserAccountByEmail(ctx, merchantId, email)
 	utility.Assert(one != nil, "Email Not Found")
@@ -138,7 +118,7 @@ func PasswordLogin(ctx context.Context, merchantId uint64, email string, passwor
 	return one, token
 }
 
-func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err error) {
+func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserAccount, err error) {
 	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	utility.Assert(req != nil, "Server Error")
 	if len(req.ExternalUserId) > 0 {
@@ -207,7 +187,7 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 	return one, nil
 }
 
-func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err error) {
+func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserAccount, err error) {
 	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	utility.Assert(req != nil, "Server Error")
 	if len(req.ExternalUserId) > 0 {

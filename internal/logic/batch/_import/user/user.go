@@ -100,7 +100,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 	if one != nil {
 		return target, gerror.New("Error, same ExternalUserId user exist")
 	}
-	one, err = user.CreateUser(ctx, &user.NewReq{
+	one, err = user.CreateUser(ctx, &user.NewUserInternalReq{
 		ExternalUserId: target.ExternalUserId,
 		Email:          target.Email,
 		FirstName:      target.FirstName,
