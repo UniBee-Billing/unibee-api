@@ -33,6 +33,7 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 		TrialDurationTime:  req.TrialDurationTime,
 		TrialDemand:        req.TrialDemand,
 		CancelAtTrialEnd:   req.CancelAtTrialEnd,
+		ProductId:          req.ProductId,
 	})
 	if err != nil {
 		return nil, err

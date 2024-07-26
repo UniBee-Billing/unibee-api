@@ -94,6 +94,7 @@ type PlanInternalReq struct {
 	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
 	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd   int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ProductId          int64                                   `json:"productId"   dc:"Id of product which plan to linked" `
 }
 
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
@@ -103,6 +104,11 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
+	// product check and update
+	if req.ProductId > 0 {
+		product := query.GetProductById(ctx, uint64(req.ProductId))
+		utility.Assert(product != nil && product.Status == 1, "product not found or product not activate")
+	}
 
 	if len(req.ExternalPlanId) > 0 {
 		utility.Assert(query.GetPlanByExternalPlanId(ctx, req.MerchantId, req.ExternalPlanId) == nil, "Same ExternalPlanId Exist")
@@ -209,6 +215,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		TrialDemand:               req.TrialDemand,
 		CancelAtTrialEnd:          req.CancelAtTrialEnd,
 		PublishStatus:             consts.PlanPublishStatusUnPublished,
+		ProductId:                 req.ProductId,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -283,6 +290,7 @@ type EditInternalReq struct {
 	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
 	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd   *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ProductId          *int64                                  `json:"productId"   dc:"Id of product which plan to linked" `
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
@@ -291,6 +299,12 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
+
+	// product check and update
+	if req.ProductId != nil && *req.ProductId > 0 {
+		product := query.GetProductById(ctx, uint64(*req.ProductId))
+		utility.Assert(product != nil && product.Status == 1, "product not found or product not activate")
+	}
 
 	if req.ExternalPlanId != nil && len(*req.ExternalPlanId) > 0 && strings.Compare(one.ExternalPlanId, *req.ExternalPlanId) != 0 {
 		utility.Assert(query.GetPlanByExternalPlanId(ctx, req.MerchantId, *req.ExternalPlanId) == nil, "Same ExternalPlanId Exist")
@@ -423,6 +437,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		dao.Plan.Columns().TrialDurationTime:         req.TrialDurationTime,
 		dao.Plan.Columns().TrialAmount:               req.TrialAmount,
 		dao.Plan.Columns().CancelAtTrialEnd:          req.CancelAtTrialEnd,
+		dao.Plan.Columns().ProductId:                 req.ProductId,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)
@@ -506,6 +521,7 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 		TrialAmount:               one.TrialAmount,
 		TrialDemand:               one.TrialDemand,
 		CancelAtTrialEnd:          one.CancelAtTrialEnd,
+		ProductId:                 one.ProductId,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
