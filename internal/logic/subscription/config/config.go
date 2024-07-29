@@ -22,9 +22,9 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 	config = &bean.SubscriptionConfig{
 		DowngradeEffectImmediately:         false,
 		UpgradeProration:                   true,
-		IncompleteExpireTime:               24 * 60 * 60, // 24h expire after
+		IncompleteExpireTime:               24 * 60 * 60, // default 24h expire after
 		InvoiceEmail:                       true,
-		TryAutomaticPaymentBeforePeriodEnd: 30 * 60, // 30 min before period
+		TryAutomaticPaymentBeforePeriodEnd: 2 * 60 * 60, // default 2 hours before period
 		GatewayVATRule:                     "",
 	}
 	downgradeEffectImmediatelyConfig := merchant_config.GetMerchantConfig(ctx, merchantId, DowngradeEffectImmediately)

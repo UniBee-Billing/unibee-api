@@ -39,7 +39,7 @@ func TaskForExpireInvoices(ctx context.Context) {
 				if err != nil {
 					g.Log().Errorf(ctx, "TaskForExpireInvoices Update FinishTime error:", err.Error())
 				}
-			} else if one.FinishTime+(one.DayUtilDue*86400)+600 < gtime.Now().Timestamp() { // task delay 10 min to expire
+			} else if one.FinishTime+(one.DayUtilDue*86400)+1200 < gtime.Now().Timestamp() { // task delay 20 minutes to expire
 				//Invoice Expire
 				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId, "TaskForExpireInvoices")
 				if err != nil {

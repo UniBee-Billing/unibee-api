@@ -100,6 +100,12 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		} else if timeNow < sub.DunningTime {
 			needInvoiceGenerate = false
 		}
+		// lock the invoice and payment creation half an hour before period end
+		if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-27*60 {
+			needInvoiceGenerate = false
+			needTryInvoiceAutomaticPayment = false
+		}
+
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
 		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing {

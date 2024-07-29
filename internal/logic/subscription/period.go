@@ -49,7 +49,7 @@ func GetDunningTimeFromEnd(ctx context.Context, end int64, planId uint64) int64 
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
 		return end - 15*24*60*60 // 15 day
 	}
-	return end - 30*60 // half hour
+	return end - 30*60 // half an hour
 }
 
 func GetDunningTimeCap(ctx context.Context, planId uint64) int64 {
@@ -65,5 +65,5 @@ func GetDunningTimeCap(ctx context.Context, planId uint64) int64 {
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
 		return 15 * 24 * 60 * 60 // 15 day
 	}
-	return 30 * 60 // half hour
+	return 30 * 60 // half an hour
 }
