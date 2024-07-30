@@ -13,6 +13,7 @@ import (
 	"unibee/api/user/merchant"
 	"unibee/api/user/payment"
 	"unibee/api/user/plan"
+	"unibee/api/user/product"
 	"unibee/api/user/profile"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
@@ -55,6 +56,10 @@ type IUserPayment interface {
 
 type IUserPlan interface {
 	List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error)
+}
+
+type IUserProduct interface {
+	List(ctx context.Context, req *product.ListReq) (res *product.ListRes, err error)
 }
 
 type IUserProfile interface {

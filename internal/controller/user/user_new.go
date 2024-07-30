@@ -62,3 +62,9 @@ func NewMerchantinfo() user.IUserMerchant {
 	return &ControllerMerchant{}
 }
 
+type ControllerProduct struct{}
+
+func NewProduct() user.IUserProduct {
+	return &ControllerProduct{}
+}
+
