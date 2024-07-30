@@ -17,15 +17,16 @@ import (
 )
 
 type ListInternalReq struct {
-	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	Type          []int  `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
-	Status        []int  `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
-	PublishStatus int    `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
-	Currency      string `json:"currency" dc:"Currency"  `
-	SortField     string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `json:"page" dc:"Page, Start With 0" `
-	Count         int    `json:"count" dc:"Count Of Page" `
+	MerchantId    uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
+	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
+	Type          []int   `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
+	Status        []int   `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
+	PublishStatus int     `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
+	Currency      string  `json:"currency" dc:"Currency"  `
+	SortField     string  `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int     `json:"page" dc:"Page, Start With 0" `
+	Count         int     `json:"count" dc:"Count Of Page" `
 }
 
 func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.DetailRes, error) {
@@ -91,6 +92,9 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 	}
 	q := dao.Plan.Ctx(ctx).
 		Where(dao.Plan.Columns().MerchantId, req.MerchantId)
+	if len(req.ProductIds) > 0 {
+		q = q.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+	}
 	if len(req.Type) > 0 {
 		q = q.WhereIn(dao.Plan.Columns().Type, req.Type)
 	}

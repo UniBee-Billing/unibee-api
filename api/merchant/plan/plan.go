@@ -77,14 +77,15 @@ type AddonsBindingRes struct {
 
 type ListReq struct {
 	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"PlanList"`
-	Type          []int  `json:"type"  dc:"1-main plan，2-addon plan" `
-	Status        []int  `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
-	PublishStatus int    `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
-	Currency      string `json:"currency" dc:"Filter Currency"  `
-	SortField     string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `json:"page"  dc:"Page, Start 0" `
-	Count         int    `json:"count"  dc:"Count Of Per Page" `
+	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
+	Type          []int   `json:"type"  dc:"1-main plan，2-addon plan" `
+	Status        []int   `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
+	PublishStatus int     `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
+	Currency      string  `json:"currency" dc:"Filter Currency"  `
+	SortField     string  `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int     `json:"page"  dc:"Page, Start 0" `
+	Count         int     `json:"count"  dc:"Count Of Per Page" `
 }
 type ListRes struct {
 	Plans []*detail.PlanDetail `json:"plans" dc:"Plans"`
