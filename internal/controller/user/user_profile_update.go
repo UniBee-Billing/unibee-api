@@ -104,6 +104,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
 		dao.UserAccount.Columns().TimeZone:        req.TimeZone,
 		dao.UserAccount.Columns().City:            req.City,
+		dao.UserAccount.Columns().Language:        req.Language,
 		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, _interface.Context().Get(ctx).User.Id).OmitNil().Update()
