@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Product" method:"get,post" summary:"ProductList"`
+	g.Meta    `path:"/list" tags:"User-Product" method:"get,post" summary:"ProductList"`
 	SortField string `json:"sortField" dc:"Sort Field，id|create_time|gmt_modify，Default id" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page      int    `json:"page"  dc:"Page, Start 0" `
