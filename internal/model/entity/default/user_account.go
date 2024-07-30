@@ -61,4 +61,5 @@ type UserAccount struct {
 	Status             int         `json:"status"             description:"0-Active, 2-Suspend"`                                                                                       // 0-Active, 2-Suspend
 	City               string      `json:"city"               description:"city"`                                                                                                      // city
 	ZipCode            string      `json:"zipCode"            description:"zip_code"`                                                                                                  // zip_code
+	Language           string      `json:"language"           description:"language"`                                                                                                  // language
 }

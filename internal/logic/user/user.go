@@ -164,6 +164,7 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 		ZipCode:        req.ZipCode,
 		Custom:         req.Custom,
 		TaxPercentage:  taxPercentage,
+		Language:       req.Language,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
 	// todo mark vat check, countryCode check

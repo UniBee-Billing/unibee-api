@@ -17,4 +17,5 @@ type NewUserInternalReq struct {
 	ZipCode        string `json:"zipCode" dc:"zip_code"`
 	Custom         string `json:"custom" dc:"Custom"`
 	MerchantId     uint64 `json:"merchantId" dc:"MerchantId"`
+	Language       string `json:"language" dc:"Language"`
 }

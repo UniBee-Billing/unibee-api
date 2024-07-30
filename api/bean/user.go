@@ -68,6 +68,7 @@ type UserAccount struct {
 	Type               int64  `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
 	City               string `json:"city" dc:"city"`
 	ZipCode            string `json:"zipCode" dc:"zip_code"`
+	Language           string `json:"language" dc:"Language"`
 }
 
 func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
@@ -123,5 +124,6 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		Status:             one.Status,
 		City:               one.City,
 		ZipCode:            one.ZipCode,
+		Language:           one.Language,
 	}
 }

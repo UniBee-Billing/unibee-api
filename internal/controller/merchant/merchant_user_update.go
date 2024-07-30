@@ -79,6 +79,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
 		dao.UserAccount.Columns().City:            req.City,
 		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
+		dao.UserAccount.Columns().Language:        req.Language,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{

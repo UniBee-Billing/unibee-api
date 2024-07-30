@@ -15,6 +15,7 @@ type NewReq struct {
 	Password       string `json:"password" dc:"Password"`
 	Phone          string `json:"phone" dc:"Phone" `
 	Address        string `json:"address" dc:"Address"`
+	Language       string `json:"language" dc:"Language"`
 }
 
 type NewRes struct {
@@ -103,6 +104,7 @@ type UpdateReq struct {
 	PaymentMethodId *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 	City            string  `json:"city" dc:"city"`
 	ZipCode         string  `json:"zipCode" dc:"zip_code"`
+	Language        string  `json:"language" dc:"Language"`
 }
 
 type UpdateRes struct {

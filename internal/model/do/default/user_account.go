@@ -63,4 +63,5 @@ type UserAccount struct {
 	Status             interface{} // 0-Active, 2-Suspend
 	City               interface{} // city
 	ZipCode            interface{} // zip_code
+	Language           interface{} // language
 }

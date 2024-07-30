@@ -15,7 +15,7 @@ type Product struct {
 	GmtModify   *gtime.Time `json:"gmtModify"   description:"update time"`                                // update time
 	CompanyId   int64       `json:"companyId"   description:"company id"`                                 // company id
 	MerchantId  uint64      `json:"merchantId"  description:"merchant id"`                                // merchant id
-	ProductName string      `json:"productName" description:"PlanName"`                                   // PlanName
+	ProductName string      `json:"productName" description:"ProductName"`                                // ProductName
 	Description string      `json:"description" description:"description"`                                // description
 	ImageUrl    string      `json:"imageUrl"    description:"image_url"`                                  // image_url
 	HomeUrl     string      `json:"homeUrl"     description:"home_url"`                                   // home_url

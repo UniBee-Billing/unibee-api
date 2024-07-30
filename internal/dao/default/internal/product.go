@@ -25,7 +25,7 @@ type ProductColumns struct {
 	GmtModify   string // update time
 	CompanyId   string // company id
 	MerchantId  string // merchant id
-	ProductName string // PlanName
+	ProductName string // ProductName
 	Description string // description
 	ImageUrl    string // image_url
 	HomeUrl     string // home_url

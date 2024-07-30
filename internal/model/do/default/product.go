@@ -17,7 +17,7 @@ type Product struct {
 	GmtModify   *gtime.Time // update time
 	CompanyId   interface{} // company id
 	MerchantId  interface{} // merchant id
-	ProductName interface{} // PlanName
+	ProductName interface{} // ProductName
 	Description interface{} // description
 	ImageUrl    interface{} // image_url
 	HomeUrl     interface{} // home_url

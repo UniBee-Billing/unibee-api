@@ -25,6 +25,7 @@ func (c *ControllerUser) New(ctx context.Context, req *user.NewReq) (res *user.N
 		Password:       req.Password,
 		Phone:          req.Phone,
 		Address:        req.Address,
+		Language:       req.Language,
 		MerchantId:     _interface.GetMerchantId(ctx),
 	})
 	return &user.NewRes{User: bean.SimplifyUserAccount(one)}, nil
