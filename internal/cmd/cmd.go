@@ -207,6 +207,11 @@ var (
 						user.NewProfile(),
 					)
 				})
+				group.Group("/product", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewProduct(),
+					)
+				})
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewPlan(),
