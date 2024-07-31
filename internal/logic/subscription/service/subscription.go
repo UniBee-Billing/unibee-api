@@ -308,6 +308,7 @@ type CreatePreviewInternalReq struct {
 
 type CreatePreviewInternalRes struct {
 	Plan                     *entity.Plan               `json:"plan"`
+	User                     *bean.UserAccount          `json:"user"`
 	Quantity                 int64                      `json:"quantity"`
 	Gateway                  *entity.MerchantGateway    `json:"gateway"`
 	Merchant                 *entity.Merchant           `json:"merchantInfo"`
@@ -362,6 +363,7 @@ type CreateInternalReq struct {
 
 type CreateInternalRes struct {
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	User         *bean.UserAccount  `json:"user" dc:"user"`
 	Paid         bool               `json:"paid"`
 	Link         string             `json:"link"`
 }
@@ -558,6 +560,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		}
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
+			User:                     bean.SimplifyUserAccount(user),
 			TrialEnd:                 trialEnd,
 			Quantity:                 req.Quantity,
 			Gateway:                  gateway,
@@ -607,6 +610,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
+			User:                     bean.SimplifyUserAccount(user),
 			TrialEnd:                 trialEnd,
 			Quantity:                 req.Quantity,
 			Gateway:                  gateway,
@@ -860,6 +864,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(one),
+		User:         prepare.User,
 		Paid:         createRes.Paid,
 		Link:         one.Link,
 	}, nil
