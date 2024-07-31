@@ -17,6 +17,11 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, 
 		var subName = ""
 		if one != nil && user != nil && user.SubscriptionId == subscriptionId {
 			plan := query.GetPlanById(ctx, one.PlanId)
+			if plan.ProductId > 0 {
+				// only record the default subscription
+				return
+			}
+
 			if plan != nil {
 				subName = plan.PlanName
 			}
@@ -42,6 +47,10 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 		var subName = ""
 		if one != nil && user != nil {
 			plan := query.GetPlanById(ctx, one.PlanId)
+			if plan.ProductId > 0 {
+				// only record the default subscription
+				return
+			}
 			if plan != nil {
 				subName = plan.PlanName
 			}
