@@ -75,7 +75,7 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 	var productId int64 = 0
 	if one.PlanId > 0 {
 		var plan *entity.Plan
-		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, one.PlanId).OmitEmpty().Scan(&one)
+		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, one.PlanId).OmitEmpty().Scan(&plan)
 		if err == nil && plan != nil {
 			productId = plan.ProductId
 		}
