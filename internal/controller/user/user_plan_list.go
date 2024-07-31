@@ -16,9 +16,14 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 	}
 
+	var productIds = make([]int64, 0)
+	if req.ProductId > 0 {
+		productIds = append(productIds, req.ProductId)
+	}
+
 	publishPlans, total := plan2.PlanList(ctx, &plan2.ListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
-		ProductIds:    []int64{req.ProductId},
+		ProductIds:    productIds,
 		Type:          req.Type,
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
