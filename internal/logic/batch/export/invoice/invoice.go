@@ -155,6 +155,13 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 					}
 				}
 			}
+			var productId int64 = 0
+			if one.Subscription.PlanId > 0 {
+				onePlan := query.GetPlanById(ctx, one.Subscription.PlanId)
+				if onePlan != nil {
+					productId = onePlan.ProductId
+				}
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
@@ -198,6 +205,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				RefundId:                       one.RefundId,
 				SubscriptionId:                 one.SubscriptionId,
 				PlanId:                         fmt.Sprintf("%v", one.Subscription.PlanId),
+				ProductId:                      fmt.Sprintf("%v", productId),
 				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd),
 				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor),
 				OriginInvoiceId:                OriginInvoiceId,
@@ -251,6 +259,7 @@ type ExportInvoiceEntity struct {
 	PaymentId                      string      `json:"PaymentId"                      comment:"paymentId" comment:"The id of payment connected to invoice"`
 	RefundId                       string      `json:"RefundId"                       comment:"refundId" comment:"The id of refund connected to invoice, invoice will be credit not who contains refundId"`
 	SubscriptionId                 string      `json:"SubscriptionId"                 comment:"subscription_id" comment:"the id of subscription connected to invoice"`
+	ProductId                      string      `json:"ProductId"             comment:""`
 	PlanId                         string      `json:"PlanId"              comment:"The id of plan connected to invoice"`
 	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"   comment:"The time of trial end, will apply to subscription when invoice paid "`
 	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"   comment:"The subscription anchor time of billing cycle connected to invoice "`

@@ -114,6 +114,13 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 			if one.Plan == nil {
 				one.Plan = &bean.Plan{}
 			}
+			var productName = ""
+			if one.Plan.ProductId > 0 {
+				product := query.GetProductById(ctx, uint64(one.Plan.ProductId))
+				if product != nil {
+					productName = product.ProductName
+				}
+			}
 
 			mainList = append(mainList, &ExportSubscriptionEntity{
 				SubscriptionId:         one.Subscription.SubscriptionId,
@@ -126,6 +133,8 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				MerchantName:           merchant.Name,
 				Amount:                 utility.ConvertCentToDollarStr(one.Subscription.Amount, one.Subscription.Currency),
 				Currency:               one.Subscription.Currency,
+				ProductId:              fmt.Sprintf("%v", one.Plan.ProductId),
+				ProductName:            productName,
 				PlanId:                 fmt.Sprintf("%v", one.Plan.Id),
 				ExternalPlanId:         fmt.Sprintf("%v", one.Plan.ExternalPlanId),
 				PlanName:               one.Plan.PlanName,
@@ -157,6 +166,8 @@ type ExportSubscriptionEntity struct {
 	ExternalSubscriptionId string      `json:"ExternalSubscriptionId"     comment:""`
 	UserId                 string      `json:"UserId"             comment:""`
 	ExternalUserId         string      `json:"ExternalUserId"     comment:""`
+	ProductId              string      `json:"ProductId"             comment:""`
+	ProductName            string      `json:"ProductName"             comment:""`
 	PlanId                 string      `json:"PlanId"             comment:""`
 	ExternalPlanId         string      `json:"ExternalPlanId"     comment:""`
 	FirstName              string      `json:"FirstName"          comment:""`
