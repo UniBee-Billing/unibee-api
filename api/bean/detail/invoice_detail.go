@@ -135,7 +135,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Merchant:                       bean.SimplifyMerchant(query.GetMerchantById(ctx, invoice.MerchantId)),
 		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, invoice.UserId)),
 		UserSnapshot:                   bean.SimplifyUserAccount(userSnapShot),
-		Subscription:                   bean.SimplifySubscription(query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
+		Subscription:                   bean.SimplifySubscription(ctx, query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
 		Payment:                        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId)),
 		Refund:                         bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId)),
 		Discount:                       bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)),

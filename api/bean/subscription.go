@@ -1,10 +1,12 @@
 package bean
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/controller/link"
+	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -56,9 +58,10 @@ type Subscription struct {
 	Metadata               map[string]interface{} `json:"metadata" description:""`
 	GasPayer               string                 `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 	DefaultPaymentMethodId string                 `json:"defaultPaymentMethodId"    description:""`
+	ProductId              int64                  `json:"productId"                 description:"product id"` // product id
 }
 
-func SimplifySubscription(one *entity.Subscription) *Subscription {
+func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscription {
 	if one == nil {
 		return nil
 	}
@@ -67,6 +70,14 @@ func SimplifySubscription(one *entity.Subscription) *Subscription {
 		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+	var productId int64 = 0
+	if one.PlanId > 0 {
+		var plan *entity.Plan
+		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, one.PlanId).OmitEmpty().Scan(&one)
+		if err == nil && plan != nil {
+			productId = plan.ProductId
 		}
 	}
 	return &Subscription{
@@ -107,6 +118,7 @@ func SimplifySubscription(one *entity.Subscription) *Subscription {
 		Metadata:               metadata,
 		GasPayer:               one.GasPayer,
 		DefaultPaymentMethodId: one.GatewayDefaultPaymentMethod,
+		ProductId:              productId,
 	}
 }
 

@@ -282,7 +282,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 
 	return &CreateInternalRes{
-		Subscription: bean.SimplifySubscription(sub),
+		Subscription: bean.SimplifySubscription(ctx, sub),
 		Paid:         createRes.Status == consts.PaymentSuccess,
 		Link:         createRes.Link,
 	}, nil
@@ -865,7 +865,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.AssertError(err, "Start Active Temporarily")
 	}
 	return &CreateInternalRes{
-		Subscription: bean.SimplifySubscription(one),
+		Subscription: bean.SimplifySubscription(ctx, one),
 		User:         prepare.User,
 		Paid:         createRes.Paid,
 		Link:         one.Link,
