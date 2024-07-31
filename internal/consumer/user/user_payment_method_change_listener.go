@@ -37,85 +37,49 @@ func (t UserPaymentMethodChangeListener) Consume(ctx context.Context, message *r
 			userGatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
 			userPaymentMethod := user.PaymentMethod
 			if user != nil && userGatewayId > 0 {
-				sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, user.MerchantId)
-				if sub != nil && (userGatewayId != sub.GatewayId || userPaymentMethod != sub.GatewayDefaultPaymentMethod) {
-					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
-						dao.Subscription.Columns().GmtModify:                   gtime.Now(),
-						dao.Subscription.Columns().GatewayId:                   userGatewayId,
-						dao.Subscription.Columns().GatewayDefaultPaymentMethod: userPaymentMethod,
-					}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
-					sub.GatewayId = userGatewayId
-					sub.GatewayDefaultPaymentMethod = userPaymentMethod
-				}
-				if sub != nil && len(sub.LatestInvoiceId) > 0 {
-					invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
-					if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing && (userGatewayId != invoice.GatewayId || userPaymentMethod != invoice.GatewayPaymentMethod) {
-						if len(invoice.PaymentId) == 0 && len(invoice.PaymentLink) == 0 {
-							_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
-								dao.Invoice.Columns().GmtModify:            gtime.Now(),
-								dao.Invoice.Columns().GatewayId:            userGatewayId,
-								dao.Invoice.Columns().GatewayPaymentMethod: user.PaymentMethod,
-							}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
-						} else {
-							gateway := query.GetGatewayById(ctx, invoice.GatewayId)
-							if gateway != nil && gateway.GatewayType != consts.GatewayTypeCrypto {
-								// try cancel old payment
-								_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
-									dao.Invoice.Columns().PaymentId:   "",
-									dao.Invoice.Columns().PaymentLink: "",
-								}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
-								lastPayment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
-								if lastPayment != nil {
-									err := service.PaymentGatewayCancel(ctx, lastPayment)
-									if err != nil {
-										g.Log().Print(ctx, "UserPaymentMethodChangeListener CancelLastPayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
-									}
-								}
+				subs := query.GetLatestActiveOrIncompleteOrCreateSubscriptionsByUserId(ctx, user.Id, user.MerchantId)
+				for _, sub := range subs {
+					if sub != nil && (userGatewayId != sub.GatewayId || userPaymentMethod != sub.GatewayDefaultPaymentMethod) {
+						_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
+							dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+							dao.Subscription.Columns().GatewayId:                   userGatewayId,
+							dao.Subscription.Columns().GatewayDefaultPaymentMethod: userPaymentMethod,
+						}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+						sub.GatewayId = userGatewayId
+						sub.GatewayDefaultPaymentMethod = userPaymentMethod
+					}
+					if sub != nil && len(sub.LatestInvoiceId) > 0 {
+						invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+						if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing && (userGatewayId != invoice.GatewayId || userPaymentMethod != invoice.GatewayPaymentMethod) {
+							if len(invoice.PaymentId) == 0 && len(invoice.PaymentLink) == 0 {
 								_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
 									dao.Invoice.Columns().GmtModify:            gtime.Now(),
 									dao.Invoice.Columns().GatewayId:            userGatewayId,
 									dao.Invoice.Columns().GatewayPaymentMethod: user.PaymentMethod,
 								}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
+							} else {
+								gateway := query.GetGatewayById(ctx, invoice.GatewayId)
+								if gateway != nil && gateway.GatewayType != consts.GatewayTypeCrypto {
+									// try cancel old payment
+									_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+										dao.Invoice.Columns().PaymentId:   "",
+										dao.Invoice.Columns().PaymentLink: "",
+									}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
+									lastPayment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
+									if lastPayment != nil {
+										err := service.PaymentGatewayCancel(ctx, lastPayment)
+										if err != nil {
+											g.Log().Print(ctx, "UserPaymentMethodChangeListener CancelLastPayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
+										}
+									}
+									_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+										dao.Invoice.Columns().GmtModify:            gtime.Now(),
+										dao.Invoice.Columns().GatewayId:            userGatewayId,
+										dao.Invoice.Columns().GatewayPaymentMethod: user.PaymentMethod,
+									}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
+								}
 							}
 						}
-						//} else {
-						//	// recreate invoice
-						//	var lines []*bean.InvoiceItemSimplify
-						//	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
-						//	if err != nil {
-						//		g.Log().Errorf(ctx, "UserPaymentMethodChangeListener UnmarshalFromJsonString err:", err.Error())
-						//		return redismq.ReconsumeLater
-						//	}
-						//	_, err = service.CreateProcessingInvoiceForSub(ctx, &bean.InvoiceSimplify{
-						//		InvoiceName:                    invoice.InvoiceName,
-						//		ProductName:                    invoice.ProductName,
-						//		DiscountCode:                   invoice.DiscountCode,
-						//		TotalAmount:                    invoice.TotalAmount,
-						//		DiscountAmount:                 invoice.DiscountAmount,
-						//		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-						//		Currency:                       invoice.Currency,
-						//		TaxAmount:                      invoice.TaxAmount,
-						//		TaxPercentage:                  invoice.TaxPercentage,
-						//		SubscriptionAmount:             invoice.SubscriptionAmount,
-						//		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-						//		Lines:                          lines,
-						//		PeriodEnd:                      invoice.PeriodEnd,
-						//		PeriodStart:                    invoice.PeriodStart,
-						//		FinishTime:                     invoice.FinishTime,
-						//		SendNote:                       invoice.SendNote,
-						//		SubscriptionId:                 invoice.SubscriptionId,
-						//		BizType:                        invoice.BizType,
-						//		CryptoAmount:                   invoice.CryptoAmount,
-						//		CryptoCurrency:                 invoice.CryptoCurrency,
-						//		SendStatus:                     invoice.SendStatus,
-						//		DayUtilDue:                     invoice.DayUtilDue,
-						//		TrialEnd:                       invoice.TrialEnd,
-						//	}, sub)
-						//	if err != nil {
-						//		g.Log().Errorf(ctx, "UserPaymentMethodChangeListener CreateProcessingInvoiceForSub err:", err.Error())
-						//		return redismq.ReconsumeLater
-						//	}
-						//}
 					}
 				}
 			}

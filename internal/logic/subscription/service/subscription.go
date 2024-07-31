@@ -373,8 +373,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
-	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan != nil, "invalid planId")
+	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
 	user := query.GetUserAccountById(ctx, req.UserId)
@@ -393,7 +393,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	req.Quantity = utility.MaxInt64(1, req.Quantity)
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another active or incomplete subscription exist")
+	utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
 
 	//setup vat from user
 	//if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
@@ -658,7 +658,9 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.Assert(one.Type == 0, "invalid code, code is from external")
 	}
 
-	existOne := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, req.UserId, req.MerchantId)
+	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan != nil, "invalid planId")
+	existOne := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, req.UserId, req.MerchantId, plan.ProductId)
 	if existOne != nil {
 		err := SubscriptionCancel(ctx, existOne.SubscriptionId, false, false, "CancelledByAnotherCreation")
 		utility.AssertError(err, "Subscription cancel error")

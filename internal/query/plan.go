@@ -39,16 +39,21 @@ func GetPlansByIds(ctx context.Context, ids []int64) (list []*entity.Plan) {
 	return list
 }
 
-func GetPlansByProductId(ctx context.Context, productId int64) (list []*entity.Plan) {
+func GetPlansByProductId(ctx context.Context, merchantId uint64, productId int64) (list []*entity.Plan) {
 	if productId <= 0 {
-		q := dao.Plan.Ctx(ctx)
-		err := q.WhereOr(q.Builder().WhereOrNull(dao.Plan.Columns().ProductId).WhereOr(dao.Plan.Columns().ProductId, 0)).OmitNil().Scan(&list)
+		q := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().MerchantId, merchantId)
+		err := q.WhereOr(q.Builder().
+			WhereOrNull(dao.Plan.Columns().ProductId).WhereOr(dao.Plan.Columns().ProductId, 0)).
+			OmitNil().Scan(&list)
 		if err != nil {
 			return nil
 		}
 		return list
 	} else {
-		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().ProductId, productId).OmitEmpty().Scan(&list)
+		err := dao.Plan.Ctx(ctx).
+			Where(dao.Plan.Columns().MerchantId, merchantId).
+			Where(dao.Plan.Columns().ProductId, productId).
+			OmitEmpty().Scan(&list)
 		if err != nil {
 			return nil
 		}
@@ -56,8 +61,8 @@ func GetPlansByProductId(ctx context.Context, productId int64) (list []*entity.P
 	}
 }
 
-func GetPlanIdsByProductId(ctx context.Context, productId int64) (ids []uint64) {
-	list := GetPlansByProductId(ctx, productId)
+func GetPlanIdsByProductId(ctx context.Context, merchantId uint64, productId int64) (ids []uint64) {
+	list := GetPlansByProductId(ctx, merchantId, productId)
 	for _, one := range list {
 		ids = append(ids, one.Id)
 	}

@@ -13,6 +13,7 @@ import (
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/test"
+	"unibee/utility/unibee"
 )
 
 func TestSubscription(t *testing.T) {
@@ -26,7 +27,7 @@ func TestSubscription(t *testing.T) {
 			OnetimeAddonIds: []int64{int64(test.TestOneTimeAddon.Id)},
 		})
 		require.Nil(t, err)
-		current := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id)
+		current := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id, 0)
 		if current != nil {
 			err := service2.SubscriptionCancel(ctx, current.SubscriptionId, false, false, "test cancel")
 			require.Nil(t, err)
@@ -36,12 +37,12 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        1,
-			GatewayId:       test.TestGateway.Id,
+			GatewayId:       unibee.Uint64(test.TestGateway.Id),
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: 1, AddonPlanId: test.TestRecurringAddon.Id}},
 		})
 		require.Nil(t, err)
-		current = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id)
+		current = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id, 0)
 		if current != nil {
 			err := service2.SubscriptionCancel(ctx, current.SubscriptionId, false, false, "test cancel")
 			require.Nil(t, err)
@@ -51,7 +52,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        1,
-			GatewayId:       test.TestGateway.Id,
+			GatewayId:       unibee.Uint64(test.TestGateway.Id),
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: 1, AddonPlanId: test.TestRecurringAddon.Id}},
 		})

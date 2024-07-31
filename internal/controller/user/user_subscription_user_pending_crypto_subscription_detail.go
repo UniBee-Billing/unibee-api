@@ -14,7 +14,7 @@ import (
 func (c *ControllerSubscription) UserPendingCryptoSubscriptionDetail(ctx context.Context, req *subscription.UserPendingCryptoSubscriptionDetailReq) (res *subscription.UserPendingCryptoSubscriptionDetailRes, err error) {
 	user := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	utility.Assert(user != nil, "user not found")
-	one := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx))
+	one := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
 	if one != nil {
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		if gateway.GatewayType == consts.GatewayTypeCrypto {

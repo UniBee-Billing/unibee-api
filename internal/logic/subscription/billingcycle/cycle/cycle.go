@@ -311,6 +311,10 @@ func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.S
 
 func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow int64) {
 	g.Log().Infof(ctx, "trackForSubscription sub:%s", one.SubscriptionId)
+	plan := query.GetPlanById(ctx, one.PlanId)
+	if plan == nil {
+		return
+	}
 	if one.LastTrackTime+86400 <= timeNow && (timeNow-one.CurrentPeriodEnd) >= -15*86400 && (timeNow-one.CurrentPeriodEnd) <= 15*86400 {
 		// dunning: daily resend invoice, update track time
 		g.Log().Infof(ctx, "trackForSubscription start track SubscriptionId:%s", one.SubscriptionId)
@@ -326,7 +330,7 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 		if one.CancelAtPeriodEnd == 1 && (one.Status != consts.SubStatusCancelled && one.Status != consts.SubStatusExpired) {
 			subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL)
 		} else if one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusCancelled {
-			if query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, one.MerchantId) == nil {
+			if query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, one.MerchantId, plan.ProductId) == nil {
 				key := fmt.Sprintf("UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%d-%d", one.MerchantId, one.UserId)
 				if config2.GetConfigInstance().IsProd() {
 					if utility.TryLock(ctx, key, 1800) {

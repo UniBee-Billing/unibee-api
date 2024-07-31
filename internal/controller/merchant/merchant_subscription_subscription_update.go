@@ -14,7 +14,10 @@ import (
 func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error) {
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
-		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+		utility.Assert(req.NewPlanId > 0, "newPlanId should provide while SubscriptionId is blank")
+		plan := query.GetPlanById(ctx, req.NewPlanId)
+		utility.Assert(plan != nil, fmt.Sprintf("plan not found:%v", req.NewPlanId))
+		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), plan.ProductId)
 		utility.Assert(one != nil, "no active or incomplete subscription found")
 		req.SubscriptionId = one.SubscriptionId
 	}

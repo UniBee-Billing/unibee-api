@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantUserMetricWebhookBackground(userId uint64, event event.MerchantWebhookEvent) {
+func SendMerchantUserMetricWebhookBackground(userId uint64, subId string, event event.MerchantWebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -28,11 +28,15 @@ func SendMerchantUserMetricWebhookBackground(userId uint64, event event.Merchant
 			}
 		}()
 		user := query.GetUserAccountById(ctx, userId)
-		if user != nil {
-			userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user)
-			utility.AssertError(err, "SendMerchantUserMetricWebhookBackground Error")
+		sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
+		if user != nil && sub != nil {
+			plan := query.GetPlanById(ctx, sub.PlanId)
+			if plan != nil {
+				userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user, plan.ProductId)
+				utility.AssertError(err, "SendMerchantUserMetricWebhookBackground Error")
 
-			message.SendWebhookMessage(ctx, event, user.MerchantId, utility.FormatToGJson(userMetric), "", "")
+				message.SendWebhookMessage(ctx, event, user.MerchantId, utility.FormatToGJson(userMetric), "", "")
+			}
 		}
 	}()
 }

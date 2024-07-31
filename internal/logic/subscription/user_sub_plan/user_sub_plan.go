@@ -97,9 +97,11 @@ func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId uint64) {
 				return
 			}
 		}()
-		sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, userId, merchantId)
-		if sub != nil {
-			UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, true)
+		subs := query.GetLatestActiveOrIncompleteOrCreateSubscriptionsByUserId(ctx, userId, merchantId)
+		for _, sub := range subs {
+			if sub != nil {
+				UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, true)
+			}
 		}
 	}()
 }

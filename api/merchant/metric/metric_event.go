@@ -12,6 +12,7 @@ type NewEventReq struct {
 	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
 	MetricProperties *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
+	ProductId        int64       `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 type NewEventRes struct {

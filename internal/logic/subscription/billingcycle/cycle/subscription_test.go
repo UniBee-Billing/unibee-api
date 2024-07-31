@@ -42,7 +42,7 @@ func TestSubscription(t *testing.T) {
 	var testSubscriptionId string
 	var one *entity.Subscription
 	t.Run("Test case for subscription create preview with plan and addon, vat or not, vat number check", func(t *testing.T) {
-		one = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id)
+		one = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id, 0)
 		if one != nil {
 			err := service.SubscriptionCancel(ctx, one.SubscriptionId, false, false, "test cancel")
 			require.Nil(t, err)

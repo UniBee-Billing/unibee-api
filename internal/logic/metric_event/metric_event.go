@@ -22,6 +22,7 @@ type MerchantMetricEventInternalReq struct {
 	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
 	MetricProperties *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
+	ProductId        int64       `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) (*entity.MerchantMetricEvent, error) {
@@ -38,7 +39,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
 	// check the only paid subscription
-	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId)
+	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId, req.ProductId)
 	utility.Assert(sub != nil, "user has no active subscription")
 
 	// property determine

@@ -39,7 +39,7 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 		}
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
-		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
+		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 		if len(sub.PendingUpdateId) > 0 {
 			err := pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, sub.PendingUpdateId, "CancelByPaymentSuccess-"+sub.PendingUpdateId)
 			if err != nil {

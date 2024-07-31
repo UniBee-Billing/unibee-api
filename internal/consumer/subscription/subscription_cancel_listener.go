@@ -62,7 +62,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	timeline.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId, consts.SubStatusCancelled)
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED)
-	user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
+	user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 	return redismq.CommitMessage
 }
 

@@ -11,7 +11,7 @@ import (
 
 func (c *ControllerSubscription) UserCurrentSubscriptionDetail(ctx context.Context, req *subscription.UserCurrentSubscriptionDetailReq) (res *subscription.UserCurrentSubscriptionDetailRes, err error) {
 	user := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
-	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx))
+	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
 	if one != nil {
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err != nil {

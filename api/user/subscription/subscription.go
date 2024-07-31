@@ -8,7 +8,8 @@ import (
 )
 
 type UserCurrentSubscriptionDetailReq struct {
-	g.Meta `path:"/current/detail" tags:"User-Subscription" method:"get" summary:"User Current Subscription Detail"`
+	g.Meta    `path:"/current/detail" tags:"User-Subscription" method:"get" summary:"User Current Subscription Detail"`
+	ProductId int64 `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 type UserCurrentSubscriptionDetailRes struct {
 	User                                *bean.UserAccount                       `json:"user" dc:"user"`
@@ -246,7 +247,8 @@ type MarkWireTransferPaidRes struct {
 }
 
 type UserPendingCryptoSubscriptionDetailReq struct {
-	g.Meta `path:"/user_pending_crypto_subscription_detail" tags:"User-Subscription" method:"get" summary:"UserPendingCryptoSubscriptionDetail"`
+	g.Meta    `path:"/user_pending_crypto_subscription_detail" tags:"User-Subscription" method:"get" summary:"UserPendingCryptoSubscriptionDetail"`
+	ProductId int64 `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 type UserPendingCryptoSubscriptionDetailRes struct {

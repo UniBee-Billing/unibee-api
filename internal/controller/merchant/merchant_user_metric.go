@@ -20,5 +20,5 @@ func (c *ControllerMetric) UserMetric(ctx context.Context, req *metric.UserMetri
 		user = query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
 	}
 	utility.Assert(user != nil, "user not found")
-	return &metric.UserMetricRes{UserMetric: metric_event.GetUserMetricStat(ctx, _interface.GetMerchantId(ctx), user)}, nil
+	return &metric.UserMetricRes{UserMetric: metric_event.GetUserMetricStat(ctx, _interface.GetMerchantId(ctx), user, req.ProductId)}, nil
 }

@@ -15,6 +15,7 @@ func (c *ControllerMetric) NewEvent(ctx context.Context, req *metric.NewEventReq
 		ExternalUserId:   req.ExternalUserId,
 		ExternalEventId:  req.ExternalEventId,
 		MetricProperties: req.MetricProperties,
+		ProductId:        req.ProductId,
 	})
 	if err != nil {
 		return nil, err

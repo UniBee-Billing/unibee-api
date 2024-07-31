@@ -18,7 +18,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 
 	publishPlans, total := plan2.PlanList(ctx, &plan2.ListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
-		ProductIds:    req.ProductIds,
+		ProductIds:    []int64{req.ProductId},
 		Type:          req.Type,
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
@@ -26,7 +26,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		Page:          req.Page,
 		Count:         req.Count,
 	})
-	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx))
+	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx), req.ProductId)
 	if sub != nil {
 		subPlan := query.GetPlanById(ctx, sub.PlanId)
 		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {

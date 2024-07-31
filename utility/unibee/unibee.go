@@ -65,6 +65,11 @@ func Int32Value(v *int32) int32 {
 	return 0
 }
 
+// Uint64 returns a pointer to the int64 value passed in.
+func Uint64(v uint64) *uint64 {
+	return &v
+}
+
 // Int64 returns a pointer to the int64 value passed in.
 func Int64(v int64) *int64 {
 	return &v

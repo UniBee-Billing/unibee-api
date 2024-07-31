@@ -3,8 +3,6 @@ package metric_event
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	metric2 "unibee/api/merchant/metric"
@@ -18,8 +16,8 @@ import (
 	"unibee/utility"
 )
 
-func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *metric2.UserMetric {
-	sub := query.GetSubscriptionBySubscriptionId(ctx, user.SubscriptionId)
+func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, productId int64) *metric2.UserMetric {
+	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, user.MerchantId, productId)
 	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub)
 }
 
@@ -106,31 +104,6 @@ const (
 	UserMetricCacheKeyPrefix = "UserMetricCacheKeyPrefix_"
 	UserMetricCacheKeyExpire = 15 * 24 * 60 * 60 // 15 days cache expire
 )
-
-func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64, userId uint64, metricId uint64) {
-	go func() {
-		backgroundCtx := context.Background()
-		var err error
-		defer func() {
-			if exception := recover(); exception != nil {
-				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					err = v
-				} else {
-					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-				}
-				g.Log().Errorf(backgroundCtx, "ReloadUserSubPlanCacheListBackground panic error:%s", err.Error())
-				return
-			}
-		}()
-		met := query.GetMerchantMetric(backgroundCtx, metricId)
-		if met != nil {
-			sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(backgroundCtx, userId, merchantId)
-			if sub != nil {
-				GetUserMetricLimitCachedUseValue(backgroundCtx, merchantId, uint64(userId), met, sub, true)
-			}
-		}
-	}()
-}
 
 func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, userId uint64, met *entity.MerchantMetric, sub *entity.Subscription, reloadCache bool) uint64 {
 	cacheKey := metricUserCacheKey(merchantId, userId, met, sub)

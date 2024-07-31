@@ -17,11 +17,11 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 	g.Log().Infof(ctx, "Renew called by payload:%s", utility.MarshalToJsonString(req))
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
-		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)
 		if one != nil {
 			req.SubscriptionId = one.SubscriptionId
 		} else {
-			one = query.GetLatestSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+			one = query.GetLatestSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)
 			utility.Assert(one != nil, "no subscription found")
 			req.SubscriptionId = one.SubscriptionId
 		}

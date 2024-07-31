@@ -48,6 +48,7 @@ type UserPendingCryptoSubscriptionDetailReq struct {
 	g.Meta         `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserPendingCryptoSubscriptionDetail"`
 	UserId         uint64 `json:"userId" dc:"UserId"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 type UserPendingCryptoSubscriptionDetailRes struct {
@@ -78,6 +79,7 @@ type CancelReq struct {
 	g.Meta         `path:"/cancel" tags:"Subscription" method:"post" summary:"CancelSubscriptionImmediately" dc:"Cancel subscription immediately, no proration invoice will generate"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription, either SubscriptionId or UserId needed, The only one active subscription of userId will effect"`
 	UserId         uint64 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will effect if userId provide instead of subscriptionId"`
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 	InvoiceNow     bool   `json:"invoiceNow" dc:"Default false"  deprecated:"true"`
 	Prorate        bool   `json:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
 }
@@ -88,6 +90,7 @@ type CancelAtPeriodEndReq struct {
 	g.Meta         `path:"/cancel_at_period_end" tags:"Subscription" method:"post" summary:"CancelSubscriptionAtPeriodEnd" dc:"Cancel subscription at period end, the subscription will not turn to 'cancelled' at once but will cancelled at period end time, no invoice will generate, the flag 'cancelAtPeriodEnd' of subscription will be enabled"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription, either SubscriptionId or UserId needed, The only one active subscription of userId will effect"`
 	UserId         uint64 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will effect if userId provide instead of subscriptionId"`
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 type CancelAtPeriodEndRes struct {
 }
@@ -96,6 +99,7 @@ type CancelLastCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"Subscription" method:"post" summary:"CancelLastCancelSubscriptionAtPeriodEnd" dc:"This action should be request before subscription's period end, If subscription's flag 'cancelAtPeriodEnd' is enabled, this action will resume it to disable, and subscription will continue cycle recurring seems no cancelAtPeriod action be setting"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription, either SubscriptionId or UserId needed, The only one active subscription of userId will effect"`
 	UserId         uint64 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will effect if userId provide instead of subscriptionId"`
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 type CancelLastCancelAtPeriodEndRes struct {
 }
@@ -135,6 +139,7 @@ type RenewReq struct {
 	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
 	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription or latest subscription will renew if userId provide instead of subscriptionId"`
 	UserId         uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription or latest cancel|expire subscription will renew if userId provide instead of subscriptionId"`
+	ProductId      int64                       `json:"productId" dc:"Id of product" dc:"default product will use if not specified"`
 	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
@@ -280,6 +285,7 @@ type UserSubscriptionDetailReq struct {
 	g.Meta         `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserSubscriptionDetail"`
 	UserId         uint64 `json:"userId" dc:"UserId"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 type UserSubscriptionDetailRes struct {
