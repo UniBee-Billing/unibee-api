@@ -22,7 +22,7 @@ type InvoiceDetail struct {
 	GatewayInvoiceId               string                      `json:"gatewayInvoiceId"               description:"GatewayInvoiceId"`
 	UniqueId                       string                      `json:"uniqueId"                       description:"UniqueId"`
 	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      description:"GmtCreate"`
-	OriginAmount                   int64                       `json:"originAmount"                    description:"OriginAmount,Cents"`
+	OriginAmount                   int64                       `json:"originAmount"                   description:"OriginAmount,Cents"`
 	TotalAmount                    int64                       `json:"totalAmount"                    description:"TotalAmount,Cents"`
 	DiscountCode                   string                      `json:"discountCode"`
 	DiscountAmount                 int64                       `json:"discountAmount"                 description:"DiscountAmount,Cents"`
@@ -42,7 +42,7 @@ type InvoiceDetail struct {
 	GatewayPaymentId               string                      `json:"gatewayPaymentId"               description:"GatewayPaymentId PaymentId"`
 	GatewayUserId                  string                      `json:"gatewayUserId"                  description:"GatewayUserId Id"`
 	GatewayInvoicePdf              string                      `json:"gatewayInvoicePdf"              description:"GatewayInvoicePdf pdf"`
-	TaxPercentage                  int64                       `json:"taxPercentage"                       description:"TaxPercentage，1000 = 10%"`
+	TaxPercentage                  int64                       `json:"taxPercentage"                  description:"TaxPercentage，1000 = 10%"`
 	SendNote                       string                      `json:"sendNote"                       description:"SendNote"`
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        description:"TotalAmountExcludingTax,Cents"`
 	SubscriptionAmountExcludingTax int64                       `json:"subscriptionAmountExcludingTax" description:"SubscriptionAmountExcludingTax,Cents"`
@@ -64,8 +64,8 @@ type InvoiceDetail struct {
 	BillingCycleAnchor             int64                       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`      // billing_cycle_anchor
 	CreateFrom                     string                      `json:"createFrom"                     description:"create from"`               // create from
 	Metadata                       map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
-	CountryCode                    string                      `json:"countryCode"                    description:""` //
-	VatNumber                      string                      `json:"vatNumber"                    description:""`   //
+	CountryCode                    string                      `json:"countryCode"                    description:""`
+	VatNumber                      string                      `json:"vatNumber"                      description:""`
 	FinishTime                     int64                       `json:"finishTime"`
 	CreateTime                     int64                       `json:"createTime"`
 	BizType                        int                         `json:"bizType"`
