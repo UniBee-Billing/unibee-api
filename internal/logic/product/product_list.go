@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"unibee/internal/query"
 
 	"strings"
 	"unibee/api/bean"
@@ -48,6 +49,9 @@ func ProductList(ctx context.Context, req *ListInternalReq) (list []*bean.Produc
 		ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, 0
+	}
+	if len(req.Status) == 0 || utility.IsIntInArray(req.Status, 1) {
+		list = append(list, bean.SimplifyProduct(query.GetDefaultProduct()))
 	}
 	for _, one := range mainList {
 		list = append(list, bean.SimplifyProduct(one))
