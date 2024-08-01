@@ -93,7 +93,11 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 	q := dao.Plan.Ctx(ctx).
 		Where(dao.Plan.Columns().MerchantId, req.MerchantId)
 	if len(req.ProductIds) > 0 {
-		q = q.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+		if isInt64InArray(req.ProductIds, 0) {
+			q = q.Where(q.Builder().WhereOrIn(dao.Plan.Columns().ProductId, req.ProductIds).WhereOrNull(dao.Plan.Columns().ProductId))
+		} else {
+			q = q.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+		}
 	}
 	if len(req.Type) > 0 {
 		q = q.WhereIn(dao.Plan.Columns().Type, req.Type)
@@ -205,4 +209,16 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		}
 	}
 	return list, total
+}
+
+func isInt64InArray(arr []int64, target int64) bool {
+	if arr == nil || len(arr) == 0 {
+		return false
+	}
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
 }
