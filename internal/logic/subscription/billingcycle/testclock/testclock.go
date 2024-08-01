@@ -29,7 +29,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	if config.GetConfigInstance().IsProd() && sub.TestClock <= 0 {
 		return nil, gerror.New("AdvanceTime Does Not Work For Prod Env")
 	}
-	if utility.IsOpenSourceVersion() {
+	if config.IsOpenSourceVersion() {
 		return nil, gerror.New("AdvanceTime Not Support")
 	}
 	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
