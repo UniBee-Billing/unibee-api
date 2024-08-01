@@ -2,7 +2,6 @@ package merchant
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	role2 "unibee/internal/logic/role"
@@ -13,9 +12,7 @@ import (
 
 func (c *ControllerRole) New(ctx context.Context, req *role.NewReq) (res *role.NewRes, err error) {
 	utility.Assert(len(req.Role) > 0, "invalid role")
-	if config.IsOpenSourceVersion() {
-		return nil, gerror.New("Not Support")
-	}
+	utility.Assert(!config.IsOpenSourceVersion(), "This is a premium feature")
 	//utility.Assert(_interface.Context().Get(ctx).MerchantMember.IsOwner, "only owner can edit permission")
 	err = role2.NewMerchantRole(ctx, &role2.CreateRoleInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
