@@ -164,6 +164,7 @@ type TemplateVariable struct {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
+// Todo Switch to using Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
 func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)
 	if len(emailGatewayKey) == 0 {
