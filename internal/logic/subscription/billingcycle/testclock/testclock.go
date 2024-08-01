@@ -27,7 +27,10 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
 	utility.Assert(sub != nil, "Subscription Not Found")
 	if config.GetConfigInstance().IsProd() && sub.TestClock <= 0 {
-		return nil, gerror.New("Test Does Not Work For Prod Env")
+		return nil, gerror.New("AdvanceTime Does Not Work For Prod Env")
+	}
+	if config.GetConfigInstance().Mode != "standalone" || config.GetConfigInstance().Mode != "cloud" {
+		return nil, gerror.New("AdvanceTime Not Support")
 	}
 	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
 	utility.Assert(sub.TestClock < newTestClock, "The Subscription Has Walk To The TestClock Exceed The New One")

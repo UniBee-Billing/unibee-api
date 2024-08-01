@@ -46,7 +46,7 @@ var (
 func Init() {
 
 	flag.StringVar(&env, "env", utility.GetEnvParam("env"), "local|daily|prod")
-	flag.StringVar(&mode, "mode", utility.GetEnvParam("mode"), "standalone|cloud")
+	flag.StringVar(&mode, "mode", utility.GetEnvParam("mode"), "stand-alone|cloud")
 	flag.StringVar(&unibeeApiUrl, "unibee-api-url", utility.GetEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
 	flag.StringVar(&serverAddress, "server-address", utility.GetEnvParam("server.address"), "server address, default :8088")
 	flag.StringVar(&serverJwtKey, "server-jwtKey", utility.GetEnvParam("server.jwtKey"), "jwtKey to encrypt")
