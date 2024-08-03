@@ -13,6 +13,7 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/merchant_config/update"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/config"
 	vat "unibee/internal/logic/vat_gateway/github"
@@ -69,7 +70,7 @@ func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatNam
 
 func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName string, data string, isDefault bool) error {
 	utility.Assert(strings.Contains(VAT_IMPLEMENT_NAMES, vatName), "gateway not support, should be "+VAT_IMPLEMENT_NAMES)
-	err := merchant_config.SetMerchantConfig(ctx, merchantId, vatName, data)
+	err := update.SetMerchantConfig(ctx, merchantId, vatName, data)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     merchantId,
 		Target:         fmt.Sprintf("Vat(%s)", vatName),
@@ -84,13 +85,13 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName stri
 		return err
 	}
 	if isDefault {
-		err = merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantVatName, vatName)
+		err = update.SetMerchantConfig(ctx, merchantId, KeyMerchantVatName, vatName)
 	}
 	return err
 }
 
 func CleanMerchantDefaultVatConfig(ctx context.Context, merchantId uint64) error {
-	return merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantVatName, "")
+	return update.SetMerchantConfig(ctx, merchantId, KeyMerchantVatName, "")
 }
 
 func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error {

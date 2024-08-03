@@ -14,6 +14,7 @@ import (
 	log2 "unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/merchant_config/update"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -72,12 +73,12 @@ func GetDefaultMerchantEmailConfig(ctx context.Context, merchantId uint64) (name
 
 func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name string, data string, isDefault bool) error {
 	utility.Assert(strings.Contains(IMPLEMENT_NAMES, name), "gateway not support, should be "+IMPLEMENT_NAMES)
-	err := merchant_config.SetMerchantConfig(ctx, merchantId, name, data)
+	err := update.SetMerchantConfig(ctx, merchantId, name, data)
 	if err != nil {
 		return err
 	}
 	if isDefault {
-		err = merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantEmailName, name)
+		err = update.SetMerchantConfig(ctx, merchantId, KeyMerchantEmailName, name)
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     merchantId,
