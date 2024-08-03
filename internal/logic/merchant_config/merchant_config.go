@@ -2,10 +2,12 @@ package merchant_config
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -24,6 +26,16 @@ func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string,
 			err = gerror.Newf(`SetMerchantConfig %s`, err.Error())
 			return err
 		}
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     merchantId,
+			Target:         fmt.Sprintf("MerchantConfig(%v)", configKey),
+			Content:        fmt.Sprintf("Value(%s)", configValue),
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		return nil
 	} else {
 		one = &entity.MerchantConfig{
@@ -37,6 +49,16 @@ func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string,
 			err = gerror.Newf(`SetMerchantConfig %s`, err.Error())
 			return err
 		}
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     merchantId,
+			Target:         fmt.Sprintf("MerchantConfig(%v)", configKey),
+			Content:        fmt.Sprintf("Value(%s)", configValue),
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		return nil
 	}
 }
