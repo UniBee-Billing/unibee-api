@@ -35,4 +35,5 @@ type GatewayWebhookInterface interface {
 	GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error)
 	GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway)
 	GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error)
+	GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error)
 }

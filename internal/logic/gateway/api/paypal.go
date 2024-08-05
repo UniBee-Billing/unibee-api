@@ -47,7 +47,48 @@ func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment
 }
 
 func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
-	return nil, gerror.New("not support")
+	utility.Assert(gateway != nil, "gateway not found")
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(ctx)
+	utility.Assert(userId > 0, "userId is nil")
+	var paymentSource = &paypal.PaymentSource{
+		Paypal: &paypal.PaymentSourcePaypal{
+			//Attributes: &paypal.PaymentSourceAttributes{
+			//	Vault: &paypal.PaymentSourceAttributesVault{
+			//		StoreInVault: "ON_SUCCESS",
+			//		UsageType:    "MERCHANT",
+			//	},
+			//},
+			Description:  "Save Payment Method For Future Use",
+			UsagePattern: "IMMEDIATE",
+			UsageType:    "MERCHANT",
+			CustomerType: "CONSUMER",
+			ExperienceContext: &paypal.ExperienceContext{
+				ReturnURL: webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["SubscriptionId"]), fmt.Sprintf("%s", metadata["RedirectUrl"])),
+				CancelURL: webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["SubscriptionId"]), fmt.Sprintf("%s", metadata["RedirectUrl"])),
+			},
+		},
+	}
+	result, err := c.NewSetupTokens(ctx, nil, paymentSource, fmt.Sprintf("%v%v", userId, gtime.Now().Timestamp()))
+	log.SaveChannelHttpLog("GatewayUserCreateAndBindPaymentMethod", paymentSource, result, err, "", nil, gateway)
+	if err != nil {
+		return nil, err
+	}
+	var approveLink = ""
+	for _, link := range result.Links {
+		if strings.Compare(link.Rel, "approve") == 0 {
+			approveLink = link.Href
+			break
+		}
+		if strings.Compare(link.Rel, "payer-action") == 0 {
+			approveLink = link.Href
+			break
+		}
+	}
+	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{
+		PaymentMethod: nil,
+		Url:           approveLink,
+	}, nil
 }
 
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {

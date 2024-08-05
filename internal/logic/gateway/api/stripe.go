@@ -88,8 +88,8 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 		Metadata:           utility.ConvertToStringMetadata(metadata),
 		PaymentMethodTypes: []*string{stripe.String(string(stripe.PaymentMethodTypeCard))},
 		PaymentMethodData:  &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
-		SuccessURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
-		CancelURL:          stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		SuccessURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["SubscriptionId"]), fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		CancelURL:          stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["SubscriptionId"]), fmt.Sprintf("%s", metadata["RedirectUrl"]))),
 	}
 	if len(currency) > 0 {
 		params.Currency = stripe.String(strings.ToUpper(currency))

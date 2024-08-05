@@ -15,8 +15,11 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
+	handler3 "unibee/internal/logic/invoice/handler"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
+	"unibee/internal/logic/subscription/handler"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -25,11 +28,54 @@ import (
 type PaypalWebhook struct {
 }
 
-func init() {
-	//注册 gateway_webhook_entry
+func (p PaypalWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	subIdO := r.Get("subId")
+	successO := r.Get("success")
+	approvalTokenIdO := r.Get("approval_token_id")
+	if gateway != nil && subIdO != nil && successO != nil && approvalTokenIdO != nil {
+		subId := subIdO.String()
+		success := successO.Bool()
+		approvalTokenId := approvalTokenIdO.String()
+		if len(subId) > 0 && success && len(approvalTokenId) > 0 {
+			sub := query.GetSubscriptionBySubscriptionId(r.Context(), subId)
+			utility.Assert(sub != nil, "Sub Not Found")
+			//valid redirect
+			c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+			_, err = c.GetAccessToken(r.Context())
+			paymentSource := &paypal.PaymentSource{Token: &paypal.PaymentSourceToken{
+				ID:   approvalTokenId,
+				Type: "SETUP_TOKEN",
+			}}
+			result, err := c.NewPaymentTokens(r.Context(), paymentSource, subId)
+			log.SaveChannelHttpLog("GatewayPaypalNewPaymentToken", paymentSource, result, err, "", nil, gateway)
+			utility.AssertError(err, "Server Error")
+			utility.Assert(len(result.ID) > 0, "Invalid VaultId")
+			sub_update.UpdateUserDefaultGatewayPaymentMethod(r.Context(), sub.UserId, gateway.Id, result.ID)
+			_, err = handler.ChangeSubscriptionGateway(r.Context(), sub.SubscriptionId, gateway.Id, result.ID)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Paypal Redirect GatewayNewPaymentMethodRedirect Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+			}
+			utility.AssertError(err, "Error ChangeSubscriptionGateway")
+			if sub != nil && err == nil && len(sub.LatestInvoiceId) > 0 {
+				invoice := query.GetInvoiceByInvoiceId(r.Context(), sub.LatestInvoiceId)
+				if invoice != nil {
+					if invoice.TotalAmount == 0 {
+						invoice, err = handler3.MarkInvoiceAsPaidForZeroPayment(r.Context(), invoice.InvoiceId)
+						utility.AssertError(err, "MarkInvoiceAsPaidForZeroPayment Error")
+						err = handler.HandleSubscriptionFirstInvoicePaid(r.Context(), sub, invoice)
+						utility.AssertError(err, "HandleSubscriptionFirstInvoicePaid Error")
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
-// todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
+func init() {
+}
+
+// todo mark improve accessToken policy
 func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, error) {
 	if clientID == "" || secret == "" || APIBase == "" {
 		return nil, errors.New("ClientID, Secret and APIBase are required to create a Client")

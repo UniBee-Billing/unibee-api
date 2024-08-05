@@ -19,3 +19,26 @@ func (c *Client) GetPaymentMethodTokens(ctx context.Context, customerId string) 
 
 	return response, nil
 }
+
+func (c *Client) NewPaymentTokens(ctx context.Context, paymentSource *PaymentSource, requestID string) (*VaultToken, error) {
+	type createPaymentTokenRequest struct {
+		PaymentSource *PaymentSource `json:"payment_source,omitempty"`
+	}
+
+	setupToken := &VaultToken{}
+
+	req, err := c.NewRequest(ctx, "POST", fmt.Sprintf("%s%s", c.APIBase, "/v3/vault/payment-tokens"), createPaymentTokenRequest{PaymentSource: paymentSource})
+	if err != nil {
+		return setupToken, err
+	}
+
+	if requestID != "" {
+		req.Header.Set("PayPal-Request-Id", requestID)
+	}
+
+	if err = c.SendWithAuth(req, setupToken); err != nil {
+		return setupToken, err
+	}
+
+	return setupToken, nil
+}

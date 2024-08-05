@@ -28,6 +28,27 @@ type GatewayWebhookProxy struct {
 	GatewayName string
 }
 
+func (p GatewayWebhookProxy) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(r.Context(), err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	err = p.getRemoteGateway().GatewayNewPaymentMethodRedirect(r, gateway)
+	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayNewPaymentMethodRedirect cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return err
+}
+
 func (p GatewayWebhookProxy) getRemoteGateway() (one _interface.GatewayWebhookInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayWebhookNameMapping[p.GatewayName]

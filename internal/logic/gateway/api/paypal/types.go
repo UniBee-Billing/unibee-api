@@ -952,6 +952,20 @@ type (
 		UpdateTime    *time.Time             `json:"update_time,omitempty"`
 	}
 
+	// VaultToken struct
+	VaultToken struct {
+		ID            string         `json:"id,omitempty"`
+		Status        string         `json:"status,omitempty"`
+		Customer      *Customer      `json:"customer,omitempty"`
+		PaymentSource *PaymentSource `json:"payment_source,omitempty"`
+		Links         []Link         `json:"links,omitempty"`
+	}
+
+	Customer struct {
+		ID                 string `json:"id,omitempty"`
+		MerchantCustomerId string `json:"merchant_customer_id,omitempty"`
+	}
+
 	// ExchangeRate struct
 	//
 	// https://developer.paypal.com/docs/api/orders/v2/#definition-exchange_rate
@@ -1115,8 +1129,13 @@ type (
 
 	PaymentSourcePaypal struct {
 		//ExperienceContext *ExperienceContext       `json:"experience_context,omitempty"`
-		Attributes *PaymentSourceAttributes `json:"attributes,omitempty"`
-		VaultId    string                   `json:"vault_id,omitempty"`
+		Attributes        *PaymentSourceAttributes `json:"attributes,omitempty"`
+		VaultId           string                   `json:"vault_id,omitempty"`
+		ExperienceContext *ExperienceContext       `json:"experience_context,omitempty"`
+		Description       string                   `json:"description,omitempty"`
+		UsagePattern      string                   `json:"usage_pattern,omitempty"`
+		UsageType         string                   `json:"usage_type,omitempty"`
+		CustomerType      string                   `json:"customer_type,omitempty"`
 	}
 
 	// CardBillingAddress structure

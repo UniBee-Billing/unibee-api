@@ -68,6 +68,8 @@ func GatewayPaymentMethodRedirectEntrance(r *ghttp.Request) {
 	}
 	gateway := util.GetGatewayById(r.Context(), uint64(gatewayIdInt))
 	utility.Assert(gateway != nil, "gateway invalid")
+	err = webhook.GetGatewayWebhookServiceProvider(r.Context(), uint64(gatewayIdInt)).GatewayNewPaymentMethodRedirect(r, gateway)
+	utility.AssertError(err, "System Error")
 	redirectUrl, _ := url.QueryUnescape(r.Get("redirectUrl").String())
 	success := r.Get("success").Bool()
 	if len(redirectUrl) > 0 {

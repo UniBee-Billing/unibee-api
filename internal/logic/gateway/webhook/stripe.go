@@ -35,12 +35,16 @@ import (
 type StripeWebhook struct {
 }
 
-// 测试数据
-// 付款成功
+func (s StripeWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	return nil
+}
+
+// Test Data
+// Success
 // 4242 4242 4242 4242
-// 付款需要验证
+// Verification Need
 // 4000 0025 0000 3155
-// 付款被拒绝
+// Reject
 // 4000 0000 0000 9995
 func (s StripeWebhook) setUnibeeAppInfo() {
 	stripe.SetAppInfo(&stripe.AppInfo{

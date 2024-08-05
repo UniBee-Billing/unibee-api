@@ -10,6 +10,11 @@ import (
 type AutoTestCryptoWebhook struct {
 }
 
+func (b AutoTestCryptoWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b AutoTestCryptoWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	panic("implement me")

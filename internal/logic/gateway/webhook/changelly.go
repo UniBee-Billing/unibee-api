@@ -18,6 +18,10 @@ import (
 type ChangellyWebhook struct {
 }
 
+func (c ChangellyWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	return nil
+}
+
 func (c ChangellyWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	return nil
 }

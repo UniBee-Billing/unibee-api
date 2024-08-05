@@ -10,6 +10,11 @@ import (
 type InvalidWebhook struct {
 }
 
+func (b InvalidWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b InvalidWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	panic("implement me")
