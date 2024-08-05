@@ -10,6 +10,7 @@ import (
 	"unibee/api/system/information"
 	"unibee/api/system/invoice"
 	"unibee/api/system/payment"
+	"unibee/api/system/plan"
 	"unibee/api/system/refund"
 	"unibee/api/system/subscription"
 )
@@ -25,6 +26,10 @@ type ISystemInvoice interface {
 
 type ISystemPayment interface {
 	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
+}
+
+type ISystemPlan interface {
+	Detail(ctx context.Context, req *plan.DetailReq) (res *plan.DetailRes, err error)
 }
 
 type ISystemRefund interface {

@@ -31,6 +31,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 			VATNumber:      req.User.VatNumber,
 			City:           req.User.City,
 			ZipCode:        req.User.ZipCode,
+			Language:       req.User.Language,
 			MerchantId:     _interface.GetMerchantId(ctx),
 		})
 		utility.AssertError(err, "Server Error")

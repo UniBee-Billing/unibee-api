@@ -38,3 +38,9 @@ func NewInformation() system.ISystemInformation {
 	return &ControllerInformation{}
 }
 
+type ControllerPlan struct{}
+
+func NewPlan() system.ISystemPlan {
+	return &ControllerPlan{}
+}
+

@@ -159,10 +159,11 @@ type RenewRes struct {
 
 type CreatePreviewReq struct {
 	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"CreateSubscriptionPreview"`
-	ExternalUserId string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Email          string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId         uint64                 `json:"userId" dc:"UserId"`
-	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	ExternalUserId string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	User           *bean.NewUser          `json:"user" dc:"User Object"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
 	GatewayId      *uint64                `json:"gatewayId" dc:"GatewayId" `
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `

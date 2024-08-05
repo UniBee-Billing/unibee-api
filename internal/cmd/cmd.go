@@ -289,6 +289,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().OpenApiDetach,
 				)
+				group.Group("/plan", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewPlan(),
+					)
+				})
 				group.Group("/information", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						system.NewInformation(),
