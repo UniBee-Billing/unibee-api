@@ -248,6 +248,12 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().Address:   req.Address,
 			dao.UserAccount.Columns().Phone:     req.Phone,
+			dao.UserAccount.Columns().FirstName: req.FirstName,
+			dao.UserAccount.Columns().LastName:  req.LastName,
+			dao.UserAccount.Columns().City:      req.City,
+			dao.UserAccount.Columns().Type:      req.Type,
+			dao.UserAccount.Columns().ZipCode:   req.ZipCode,
+			dao.UserAccount.Columns().Language:  req.Language,
 			dao.UserAccount.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
 		utility.AssertError(err, "Server Error")
