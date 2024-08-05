@@ -57,7 +57,7 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			MerchantId:     user.MerchantId,
 			Target:         fmt.Sprintf("User(%v)", user.Id),
-			Content:        "Clear(VATNumber)",
+			Content:        "Clear(VatNumber)",
 			UserId:         user.Id,
 			SubscriptionId: "",
 			InvoiceId:      "",
