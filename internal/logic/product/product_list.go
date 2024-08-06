@@ -39,7 +39,8 @@ func ProductList(ctx context.Context, req *ListInternalReq) (list []*bean.Produc
 		}
 	}
 	q := dao.Product.Ctx(ctx).
-		Where(dao.Product.Columns().MerchantId, req.MerchantId)
+		Where(dao.Product.Columns().MerchantId, req.MerchantId).
+		Where(dao.Product.Columns().IsDeleted, 0)
 	if len(req.Status) > 0 {
 		q = q.WhereIn(dao.Product.Columns().Status, req.Status)
 	}
@@ -52,6 +53,7 @@ func ProductList(ctx context.Context, req *ListInternalReq) (list []*bean.Produc
 	}
 	if len(req.Status) == 0 || utility.IsIntInArray(req.Status, 1) {
 		list = append(list, bean.SimplifyProduct(query.GetDefaultProduct()))
+		total = total + 1
 	}
 	for _, one := range mainList {
 		list = append(list, bean.SimplifyProduct(one))

@@ -8,6 +8,7 @@ import (
 )
 
 func (c *ControllerProduct) Delete(ctx context.Context, req *product.DeleteReq) (res *product.DeleteRes, err error) {
+
 	err = product2.ProductDelete(ctx, req.ProductId)
 	if err != nil {
 		return nil, err
