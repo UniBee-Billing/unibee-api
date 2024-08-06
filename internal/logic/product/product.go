@@ -136,6 +136,9 @@ func ProductEdit(ctx context.Context, req *EditInternalReq) (one *entity.Product
 }
 
 func ProductActivate(ctx context.Context, productId uint64) error {
+	if productId == 0 {
+		utility.Assert(true, "Can't edit default product")
+	}
 	utility.Assert(productId > 0, "invalid productId")
 	one := query.GetProductById(ctx, productId)
 	utility.Assert(one != nil, "product not found, invalid productId")
@@ -164,6 +167,9 @@ func ProductActivate(ctx context.Context, productId uint64) error {
 }
 
 func ProductInactivate(ctx context.Context, productId uint64) error {
+	if productId == 0 {
+		utility.Assert(true, "Can't edit default product")
+	}
 	utility.Assert(productId > 0, "invalid productId")
 	one := query.GetProductById(ctx, productId)
 	utility.Assert(one != nil, "product not found, invalid productId")
@@ -192,6 +198,9 @@ func ProductInactivate(ctx context.Context, productId uint64) error {
 }
 
 func ProductCopy(ctx context.Context, productId uint64) (one *entity.Product, err error) {
+	if productId == 0 {
+		utility.Assert(true, "Can't copy from default product")
+	}
 	utility.Assert(productId > 0, "ProductId should > 0")
 	one = query.GetProductById(ctx, productId)
 	utility.Assert(one != nil, fmt.Sprintf("product not found, id:%d", productId))
@@ -226,6 +235,9 @@ func ProductCopy(ctx context.Context, productId uint64) (one *entity.Product, er
 }
 
 func ProductDelete(ctx context.Context, productId uint64) (err error) {
+	if productId == 0 {
+		utility.Assert(true, "Can't delete default product")
+	}
 	utility.Assert(productId > 0, "productId invalid")
 	one := query.GetProductById(ctx, productId)
 	utility.Assert(one != nil, fmt.Sprintf("product not found, id:%d", productId))
