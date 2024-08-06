@@ -56,7 +56,8 @@ type UserAccountDetail struct {
 	Gateway            *bean.Gateway `json:"gateway"            description:"Gateway"`
 	City               string        `json:"city" dc:"city"`
 	ZipCode            string        `json:"zipCode" dc:"zip_code"`
-	PlanId             uint64        `json:"planId"             description:"PlanId"` // PlanId
+	PlanId             uint64        `json:"planId"             description:"PlanId"`   // PlanId
+	Language           string        `json:"language"           description:"language"` // language
 }
 
 func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *UserAccountDetail {
@@ -113,5 +114,6 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		ZipCode:            one.ZipCode,
 		Gateway:            bean.SimplifyGateway(query.GetGatewayById(ctx, gatewayId)),
 		PlanId:             one.PlanId,
+		Language:           one.Language,
 	}
 }
