@@ -226,7 +226,7 @@ func ProductDelete(ctx context.Context, productId uint64) (err error) {
 	utility.Assert(productId > 0, "productId invalid")
 	one := query.GetProductById(ctx, productId)
 	utility.Assert(one != nil, fmt.Sprintf("product not found, id:%d", productId))
-	utility.Assert(one.Status == 2, fmt.Sprintf("product is not inactive status, id:%d", productId))
+	//utility.Assert(one.Status == 2, fmt.Sprintf("product is not inactive status, id:%d", productId))
 	list := query.GetPlansByProductId(ctx, one.MerchantId, int64(one.Id))
 	utility.Assert(list == nil || len(list) == 0, "product can not delete while has plan linked")
 	_, err = dao.Product.Ctx(ctx).Data(g.Map{
