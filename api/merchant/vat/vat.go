@@ -26,3 +26,11 @@ type CountryListReq struct {
 type CountryListRes struct {
 	VatCountryList []*bean.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }
+
+type NumberValidateReq struct {
+	g.Meta    `path:"/vat_number_validate" tags:"Vat" method:"post" summary:"Vat Number Validate"`
+	VatNumber string `json:"vatNumber" dc:"VatNumber" v:"required"`
+}
+type NumberValidateRes struct {
+	VatNumberValidate *bean.ValidResult `json:"vatNumberValidate"`
+}

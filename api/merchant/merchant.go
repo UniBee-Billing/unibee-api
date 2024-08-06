@@ -250,6 +250,7 @@ type IMerchantVat interface {
 	SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error)
 	InitDefaultGateway(ctx context.Context, req *vat.InitDefaultGatewayReq) (res *vat.InitDefaultGatewayRes, err error)
 	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
+	NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error)
 }
 
 type IMerchantWebhook interface {
