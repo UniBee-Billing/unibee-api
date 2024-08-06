@@ -19,7 +19,7 @@ type NewUser struct {
 	VatNumber      string `json:"vatNumber" dc:"vat number"`
 	City           string `json:"city" dc:"city"`
 	ZipCode        string `json:"zipCode" dc:"zip_code"`
-	Language       string `json:"language" dc:"Language"`
+	Language       string `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
 }
 
 type UserAccount struct {

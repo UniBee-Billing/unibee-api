@@ -104,7 +104,7 @@ type UpdateReq struct {
 	PaymentMethodId *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 	City            string  `json:"city" dc:"city"`
 	ZipCode         string  `json:"zipCode" dc:"zip_code"`
-	Language        string  `json:"language" dc:"Language"`
+	Language        string  `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
 }
 
 type UpdateRes struct {
