@@ -19,6 +19,8 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 	var productIds = make([]int64, 0)
 	if req.ProductId > 0 {
 		productIds = append(productIds, req.ProductId)
+	} else if req.ProductId == 0 {
+		productIds = append(productIds, 0)
 	}
 
 	publishPlans, total := plan2.PlanList(ctx, &plan2.ListInternalReq{
