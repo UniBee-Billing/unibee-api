@@ -39,12 +39,12 @@ func ProductList(ctx context.Context, req *ListInternalReq) (list []*bean.Produc
 		}
 	}
 	q := dao.Product.Ctx(ctx).
-		Where(dao.Product.Columns().MerchantId, req.MerchantId).
-		Where(dao.Product.Columns().IsDeleted, 0)
+		Where(dao.Product.Columns().IsDeleted, 0).
+		Where(dao.Product.Columns().MerchantId, req.MerchantId)
 	if len(req.Status) > 0 {
 		q = q.WhereIn(dao.Product.Columns().Status, req.Status)
 	}
-	err := q.OmitEmpty().
+	err := q.OmitNil().
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		ScanAndCount(&mainList, &total, true)
