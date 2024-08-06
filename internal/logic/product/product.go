@@ -88,6 +88,9 @@ type EditInternalReq struct {
 
 func ProductEdit(ctx context.Context, req *EditInternalReq) (one *entity.Product, err error) {
 	utility.Assert(req != nil, "Req not found")
+	if req.ProductId == 0 {
+		utility.Assert(true, "Can't edit default product")
+	}
 	utility.Assert(req.ProductId > 0, "ProductId should > 0")
 	one = query.GetProductById(ctx, req.ProductId)
 	utility.Assert(one != nil, fmt.Sprintf("product not found, id:%d", req.ProductId))
