@@ -246,7 +246,7 @@ func ProductDelete(ctx context.Context, productId uint64) (err error) {
 	count := 0
 	if list != nil {
 		for _, onePlan := range list {
-			if onePlan.IsDeleted > 0 {
+			if onePlan.IsDeleted == 0 {
 				count = count + 1
 			}
 		}
