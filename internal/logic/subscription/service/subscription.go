@@ -92,19 +92,19 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.Nu
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
 }
 
-func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId uint64) *entity.MerchantGateway {
-	if reqGatewayId > 0 {
-		gateway := query.GetGatewayById(ctx, reqGatewayId)
-		utility.Assert(gateway != nil, "gateway not found")
-		utility.Assert(gateway.MerchantId == merchantId, "gateway not match")
-		return gateway
-	} else {
-		list := query.GetMerchantGatewayList(ctx, merchantId)
-		utility.Assert(len(list) > 0, "merchant gateway need setup")
-		utility.Assert(len(list) == 1, "gateway need specify")
-		return list[0]
-	}
-}
+//func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId uint64) *entity.MerchantGateway {
+//	if reqGatewayId > 0 {
+//		gateway := query.GetGatewayById(ctx, reqGatewayId)
+//		utility.Assert(gateway != nil, "gateway not found")
+//		utility.Assert(gateway.MerchantId == merchantId, "gateway not match")
+//		return gateway
+//	} else {
+//		list := query.GetMerchantGatewayList(ctx, merchantId)
+//		utility.Assert(len(list) > 0, "merchant gateway need setup")
+//		utility.Assert(len(list) == 1, "gateway need specify")
+//		return list[0]
+//	}
+//}
 
 type RenewInternalReq struct {
 	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
@@ -291,7 +291,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 type CreatePreviewInternalReq struct {
 	MerchantId      uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	PlanId          uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	UserId          uint64                 `json:"userId" dc:"UserId" v:"required"`
+	UserId          uint64                 `json:"userId" dc:"UserId"`
 	Quantity        int64                  `json:"quantity" dc:"Quantity" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 	GatewayId       *uint64                `json:"gatewayId" dc:"Id"`
@@ -371,37 +371,49 @@ type CreateInternalRes struct {
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.UserId > 0, "UserId invalid")
+	//utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	user := query.GetUserAccountById(ctx, req.UserId)
-	utility.Assert(user != nil, "user not found")
-	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
-	utility.Assert(gatewayId > 0, "gateway need specified")
-	if !_interface.Context().Get(ctx).IsOpenApiCall {
+	var user *entity.UserAccount = nil
+	if req.UserId > 0 {
+		user = query.GetUserAccountById(ctx, req.UserId)
+		utility.Assert(user != nil, "user not found")
+	}
+	var gatewayId uint64 = 0
+	var paymentMethodId = ""
+	var gateway *entity.MerchantGateway = nil
+	if user != nil {
+		gatewayId, paymentMethodId = sub_update.VerifyPaymentGatewayMethod(ctx, user.Id, req.GatewayId, req.PaymentMethodId, "")
+		utility.Assert(gatewayId > 0, "gateway need specified")
+	} else if req.GatewayId != nil {
+		gateway = query.GetGatewayById(ctx, *req.GatewayId)
+		utility.Assert(gateway != nil, "gateway not found")
+		utility.Assert(gateway.MerchantId == req.MerchantId, "invalid gateway")
+		gatewayId = gateway.Id
+	}
+	if !_interface.Context().Get(ctx).IsOpenApiCall && user != nil && gatewayId > 0 {
 		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
 	}
-	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, gatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
-	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
+	// todo mark confirm can comment this part
+	//if gateway != nil {
+	//	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
+	//}
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
 	req.Quantity = utility.MaxInt64(1, req.Quantity)
+	userEmail := ""
+	if user != nil {
+		userEmail = user.Email
+	}
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
-
-	//setup vat from user
-	//if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
-	//	req.VatCountryCode = user.CountryCode
-	//}
-	//if len(req.VatNumber) == 0 {
-	//	req.VatNumber = user.VATNumber
-	//}
+	if user != nil {
+		utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
+	}
 
 	var vatCountryCode = req.VatCountryCode
 	var subscriptionTaxPercentage int64 = 0
@@ -410,10 +422,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidate *bean.ValidResult
 	var vatNumberValidateMessage string
 	var discountMessage string
-
-	//if len(req.VatCountryCode) == 0 {
-	//	req.VatNumber = user.CountryCode
-	//}
 
 	if len(req.VatNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat gateway need setup")
@@ -444,8 +452,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "External TaxPercentage only available for api call")
 		utility.Assert(*req.TaxPercentage >= 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
 		subscriptionTaxPercentage = *req.TaxPercentage
-	} else if len(vatCountryCode) > 0 {
-		taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, vatCountryCode, gatewayId, validVatNumber)
+	} else if len(vatCountryCode) > 0 && gateway != nil {
+		utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support countryCode:"+vatCountryCode)
+		taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, req.MerchantId, vatCountryCode, gateway.Id, validVatNumber)
 		subscriptionTaxPercentage = taxPercentage
 	}
 
@@ -580,7 +589,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			VatNumberValidate:        vatNumberValidate,
 			VatVerifyData:            utility.MarshalToJsonString(vatNumberValidate),
 			UserId:                   req.UserId,
-			Email:                    user.Email,
+			Email:                    userEmail,
 			VatCountryRate:           vatCountryRate,
 			Gateways:                 service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
 			TaxPercentage:            subscriptionTaxPercentage,
@@ -630,7 +639,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			VatNumberValidate:        vatNumberValidate,
 			VatVerifyData:            utility.MarshalToJsonString(vatNumberValidate),
 			UserId:                   req.UserId,
-			Email:                    user.Email,
+			Email:                    userEmail,
 			VatCountryRate:           vatCountryRate,
 			Gateways:                 service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
 			TaxPercentage:            subscriptionTaxPercentage,

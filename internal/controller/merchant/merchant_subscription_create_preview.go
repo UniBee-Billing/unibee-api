@@ -42,7 +42,6 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		utility.AssertError(err, "Server Error")
 		req.UserId = user.Id
 	}
-	utility.Assert(req.UserId > 0, "Invalid UserId")
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
 		PlanId:         req.PlanId,
