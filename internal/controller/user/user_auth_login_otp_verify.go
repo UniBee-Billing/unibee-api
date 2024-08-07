@@ -23,7 +23,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	var one *entity.UserAccount
 	one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(one != nil, "Login Failed")
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email, one.Language)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)

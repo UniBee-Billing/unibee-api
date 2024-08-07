@@ -11,7 +11,7 @@ import (
 func TestCreatePortalToken(t *testing.T) {
 	ctx := context.Background()
 	t.Run("Test for jwt token ", func(t *testing.T) {
-		token, err := CreatePortalToken(TOKENTYPEUSER, test.TestMerchant.Id, test.TestUser.Id, test.TestUser.Email)
+		token, err := CreatePortalToken(TOKENTYPEUSER, test.TestMerchant.Id, test.TestUser.Id, test.TestUser.Email, "en")
 		require.Nil(t, err)
 		require.NotNil(t, token)
 		require.Equal(t, true, IsPortalToken(token))
@@ -20,7 +20,7 @@ func TestCreatePortalToken(t *testing.T) {
 		require.Equal(t, claim.MerchantId, test.TestMerchant.Id)
 		require.Equal(t, claim.Id, test.TestUser.Id)
 		require.Equal(t, claim.Email, test.TestUser.Email)
-		token, err = CreatePortalToken(TOKENTYPEUSER, test.TestMerchant.Id, test.TestMerchantMember.Id, test.TestMerchantMember.Email)
+		token, err = CreatePortalToken(TOKENTYPEUSER, test.TestMerchant.Id, test.TestMerchantMember.Id, test.TestMerchantMember.Email, "en")
 		require.Nil(t, err)
 		require.NotNil(t, token)
 		require.Equal(t, true, IsPortalToken(token))

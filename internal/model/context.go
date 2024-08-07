@@ -24,6 +24,7 @@ type ContextUser struct {
 	MerchantId uint64
 	Token      string
 	Email      string
+	Lang       string
 }
 
 type ContextMerchantMember struct {

@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
@@ -36,7 +37,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	//	return false, false, "Invalid userId"
 	//}
 	if len(req.DiscountCode) == 0 {
-		return false, false, "Invalid code"
+		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}")
 	}
 	discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 	if discountCode == nil {
@@ -46,7 +47,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 		return false, false, "Code not active"
 	}
 	if discountCode.StartTime > req.TimeNow {
-		return false, false, "Code not ready"
+		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeNotStart}")
 	}
 	if discountCode.EndTime != 0 && discountCode.EndTime < req.TimeNow {
 		return false, false, "Code expired"
@@ -59,7 +60,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	}
 	if len(discountCode.PlanIds) > 0 {
 		if req.PLanId <= 0 {
-			return false, false, "Code not allow to use on this plan"
+			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
 		}
 		var match = false
 		planIds := strings.Split(discountCode.PlanIds, ",")
@@ -71,7 +72,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			}
 		}
 		if !match {
-			return false, false, "Code not allow to use on this plan"
+			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
 		}
 	}
 	if discountCode.UserLimit > 0 && req.UserId > 0 {
@@ -88,7 +89,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Server Error"
 		}
 		if discountCode.UserLimit <= count+1 {
-			return false, false, "Code reach out the limit"
+			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
 		}
 	}
 	if discountCode.SubscriptionLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
@@ -106,7 +107,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Server Error"
 		}
 		if discountCode.SubscriptionLimit <= count+1 {
-			return false, false, "Code reach out the limit"
+			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
 		}
 	}
 	if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
@@ -121,10 +122,11 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			Count()
 		if err != nil {
 			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
+
 			return false, false, "Server Error"
 		}
 		if discountCode.CycleLimit <= count+1 {
-			return false, false, "Code reach out the limit"
+			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
 		}
 	}
 

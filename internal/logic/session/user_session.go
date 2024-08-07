@@ -64,7 +64,7 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 		utility.AssertError(err, "Server Error")
 	}
 
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email, one.Language)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", one.Id)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")

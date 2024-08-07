@@ -14,6 +14,7 @@ import (
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
 	config2 "unibee/internal/cmd/config"
+	"unibee/internal/cmd/i18n"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -418,7 +419,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	var err error
 	if user != nil {
-		utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
+		//utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
+		utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, i18n.LocalizationFormat(ctx, "{#SubDuplicateCreation}"))
 	}
 
 	var vatCountryCode = req.VatCountryCode
@@ -430,7 +432,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var discountMessage string
 
 	if len(req.VatNumber) > 0 {
-		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat gateway need setup")
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, i18n.LocalizationFormat(ctx, "{#VatGatewayNeedSetup}"))
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil || !vatNumberValidate.Valid {
 			if err != nil {
@@ -441,12 +443,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			}
 		} else {
 			if len(req.VatCountryCode) > 0 && !_interface.Context().Get(ctx).IsOpenApiCall {
-				utility.Assert(vatCountryCode == vatNumberValidate.CountryCode, "CountryCode error, "+"Your country from vat number is "+vatNumberValidate.CountryCode)
+				utility.Assert(vatCountryCode == vatNumberValidate.CountryCode, i18n.LocalizationFormat(ctx, "{#CountryCodeVatNumberNotMatch}", vatNumberValidate.CountryCode))
 			}
 			vatCountryCode = vatNumberValidate.CountryCode
 		}
 		if req.IsSubmit {
-			utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("VatNumber validate failure, number:"+req.VatNumber))
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VatNumber))
 		}
 	}
 
@@ -704,7 +706,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	// todo mark countryCode is required or node
 	// utility.Assert(len(prepare.VatCountryCode) > 0, "CountryCode Needed")
 	if req.ConfirmTotalAmount > 0 {
-		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch preview again")
+		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, i18n.LocalizationFormat(ctx, "{#AmountNotMatch}"))
 	}
 	if len(req.ConfirmCurrency) > 0 {
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch preview again")
@@ -715,7 +717,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	//}
 
 	if prepare.Invoice.TotalAmount == 0 && strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
-		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeCard || prepare.Gateway.GatewayType == consts.GatewayTypePaypal, "card or paypal payment gateway need")
+		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeCard || prepare.Gateway.GatewayType == consts.GatewayTypePaypal, i18n.LocalizationFormat(ctx, "{#PlanTrialGatewayError}"))
 	}
 
 	var subType = consts.SubTypeDefault
@@ -1386,7 +1388,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 
 	//subscription prepare
 	if req.ConfirmTotalAmount > 0 {
-		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch preview again")
+		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, i18n.LocalizationFormat(ctx, "{#AmountNotMatch}"))
 	}
 	if len(req.ConfirmCurrency) > 0 {
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")

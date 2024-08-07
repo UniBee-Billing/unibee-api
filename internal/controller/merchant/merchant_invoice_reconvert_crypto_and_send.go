@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/utility"
 
@@ -15,7 +16,7 @@ import (
 func (c *ControllerInvoice) ReconvertCryptoAndSend(ctx context.Context, req *invoice.ReconvertCryptoAndSendReq) (res *invoice.ReconvertCryptoAndSendRes, err error) {
 	redisKey := fmt.Sprintf("Merchant-Invoice-ReconvertCryptoAndSend:%s", req.InvoiceId)
 	if !utility.TryLock(ctx, redisKey, 10) {
-		utility.Assert(false, "click too fast, please wait for second")
+		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 	err = handler.ReconvertCryptoDataForInvoice(ctx, req.InvoiceId)
 	if err != nil {

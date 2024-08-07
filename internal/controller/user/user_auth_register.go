@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee/api/user/auth"
+	"unibee/internal/cmd/i18n"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/user"
@@ -26,7 +27,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	redisKey := fmt.Sprintf("UserAuth-Regist-Email:%s", req.Email)
 
 	if !utility.TryLock(ctx, redisKey, 10) {
-		utility.Assert(false, "click too fast, please wait for second")
+		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 
 	var newOne *entity.UserAccount

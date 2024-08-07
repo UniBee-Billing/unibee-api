@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"fmt"
+	"github.com/gogf/gf/v2/i18n/gi18n"
 	"net/url"
 	"strconv"
 	"strings"
 	"unibee/internal/cmd/config"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	_ "unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -53,7 +55,7 @@ func doubleRequestLimit(id string, r *ghttp.Request) {
 		}
 		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
 		if !utility.TryLock(r.Context(), md5, 2) {
-			utility.Assert(false, "click too fast, please wait for second")
+			utility.Assert(false, i18n.LocalizationFormat(r.Context(), "{#ClickTooFast}"))
 		}
 	}
 }
@@ -68,6 +70,9 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})
+
+	// System Default Language
+	r.SetCtx(gi18n.WithLanguage(r.Context(), "en"))
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
 		json, _ := r.GetJson()
@@ -252,11 +257,18 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				Token:      tokenString,
 				MerchantId: userAccount.MerchantId,
 				Email:      token.Email,
+				Lang:       token.Lang,
 			}
 			customCtx.MerchantId = userAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 			//UserPortalTrack
 			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.URL.Path, nil)
+			lang := r.Get("lang")
+			if lang != nil && i18n.IsLangAvailable(lang.String()) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
+			} else if len(customCtx.User.Lang) > 0 && i18n.IsLangAvailable(customCtx.User.Lang) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(customCtx.User.Lang))))
+			}
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
@@ -283,6 +295,10 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = merchantAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
+			lang := r.Get("lang")
+			if lang != nil && i18n.IsLangAvailable(lang.String()) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
+			}
 		} else {
 			g.Log().Infof(r.Context(), "TokenAuth invalid token type token:%v", utility.MarshalToJsonString(token))
 			_interface.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
@@ -303,6 +319,10 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		} else {
 			customCtx.MerchantId = merchantInfo.Id
 			customCtx.OpenApiKey = tokenString
+		}
+		lang := r.Get("lang")
+		if lang != nil && i18n.IsLangAvailable(lang.String()) {
+			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
 		}
 	}
 

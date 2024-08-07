@@ -28,6 +28,7 @@ type TokenClaims struct {
 	Email         string    `json:"email"`
 	MerchantId    uint64    `json:"merchantId"`
 	PermissionKey string    `json:"permissionKey"`
+	Lang          string    `json:"lang"`
 	jwt.RegisteredClaims
 }
 
@@ -44,7 +45,7 @@ func ParsePortalToken(accessToken string) *TokenClaims {
 	return parsedAccessToken.Claims.(*TokenClaims)
 }
 
-func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email string) (string, error) {
+func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email string, lang string) (string, error) {
 	utility.Assert(len(config.GetConfigInstance().Server.JwtKey) > 0, "server error: tokenKey is nil")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
@@ -52,6 +53,7 @@ func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email 
 			"merchantId": merchantId,
 			"id":         id,
 			"email":      email,
+			"lang":       lang,
 			"exp":        time.Now().Add(time.Hour * 1).Unix(),
 		})
 

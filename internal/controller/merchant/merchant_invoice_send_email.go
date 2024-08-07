@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"unibee/api/merchant/invoice"
+	"unibee/internal/cmd/i18n"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/operation_log"
@@ -14,7 +15,7 @@ import (
 func (c *ControllerInvoice) SendEmail(ctx context.Context, req *invoice.SendEmailReq) (res *invoice.SendEmailRes, err error) {
 	redisKey := fmt.Sprintf("Merchant-Invoice-Send-Email:%s", req.InvoiceId)
 	if !utility.TryLock(ctx, redisKey, 10) {
-		utility.Assert(false, "click too fast, please wait for second")
+		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, "invoice not found")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/email"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -14,7 +15,7 @@ import (
 func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error) {
 	redisKey := fmt.Sprintf("MerchantAuth-PasswordForgetOtp-Email:%s", req.Email)
 	if !utility.TryLock(ctx, redisKey, 10) {
-		utility.Assert(false, "click too fast, please wait for second")
+		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 
 	verificationCode := utility.GenerateRandomCode(6)
