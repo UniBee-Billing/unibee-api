@@ -383,16 +383,19 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		utility.Assert(user != nil, "user not found")
 	}
 	var gatewayId uint64 = 0
-	var paymentMethodId = ""
-	var gateway *entity.MerchantGateway = nil
+	if req.GatewayId != nil {
+		gatewayId = *req.GatewayId
+	}
+	var paymentMethodId = req.PaymentMethodId
 	if user != nil {
 		gatewayId, paymentMethodId = sub_update.VerifyPaymentGatewayMethod(ctx, user.Id, req.GatewayId, req.PaymentMethodId, "")
 		utility.Assert(gatewayId > 0, "gateway need specified")
-	} else if req.GatewayId != nil {
-		gateway = query.GetGatewayById(ctx, *req.GatewayId)
+	}
+	var gateway *entity.MerchantGateway
+	if gatewayId > 0 {
+		gateway = query.GetGatewayById(ctx, gatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.Assert(gateway.MerchantId == req.MerchantId, "invalid gateway")
-		gatewayId = gateway.Id
 	}
 	if !_interface.Context().Get(ctx).IsOpenApiCall && user != nil && gatewayId > 0 {
 		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
