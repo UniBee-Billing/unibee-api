@@ -42,8 +42,7 @@ func GetPlansByIds(ctx context.Context, ids []int64) (list []*entity.Plan) {
 func GetPlansByProductId(ctx context.Context, merchantId uint64, productId int64) (list []*entity.Plan) {
 	if productId <= 0 {
 		q := dao.Plan.Ctx(ctx).
-			Where(dao.Plan.Columns().MerchantId, merchantId).
-			Where(dao.Plan.Columns().IsDeleted, 0)
+			Where(dao.Plan.Columns().MerchantId, merchantId)
 		err := q.WhereOr(q.Builder().
 			WhereOrNull(dao.Plan.Columns().ProductId).
 			WhereOr(dao.Plan.Columns().ProductId, 0)).
@@ -55,7 +54,6 @@ func GetPlansByProductId(ctx context.Context, merchantId uint64, productId int64
 	} else {
 		err := dao.Plan.Ctx(ctx).
 			Where(dao.Plan.Columns().MerchantId, merchantId).
-			Where(dao.Plan.Columns().IsDeleted, 0).
 			Where(dao.Plan.Columns().ProductId, productId).
 			OmitEmpty().Scan(&list)
 		if err != nil {

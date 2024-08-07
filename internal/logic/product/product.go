@@ -243,7 +243,15 @@ func ProductDelete(ctx context.Context, productId uint64) (err error) {
 	utility.Assert(one != nil, fmt.Sprintf("product not found, id:%d", productId))
 	//utility.Assert(one.Status == 2, fmt.Sprintf("product is not inactive status, id:%d", productId))
 	list := query.GetPlansByProductId(ctx, one.MerchantId, int64(one.Id))
-	utility.Assert(list == nil || len(list) == 0, "product can not delete while has plan linked")
+	count := 0
+	if list != nil {
+		for _, onePlan := range list {
+			if onePlan.IsDeleted > 0 {
+				count = count + 1
+			}
+		}
+	}
+	utility.Assert(count == 0, "product can not delete while has plan linked")
 	_, err = dao.Product.Ctx(ctx).Data(g.Map{
 		dao.Product.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.Product.Columns().GmtModify: gtime.Now(),
