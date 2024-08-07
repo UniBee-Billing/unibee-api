@@ -11,7 +11,7 @@ ENV WORKDIR                 /app
 ADD resource                $WORKDIR/
 ADD ./temp/linux_amd64/main $WORKDIR/main
 ADD ./version.txt $WORKDIR/version.txt
-#ADD ./i18n  $WORKDIR/i18n
+ADD ./manifest/i18n  $WORKDIR/i18n
 RUN chmod +x $WORKDIR/main
 
 ###############################################################################
