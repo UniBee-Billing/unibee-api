@@ -378,7 +378,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
 	var user *entity.UserAccount = nil
-	if req.UserId > 0 {
+	if req.UserId > 0 || req.IsSubmit {
 		user = query.GetUserAccountById(ctx, req.UserId)
 		utility.Assert(user != nil, "user not found")
 	}
@@ -389,10 +389,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var paymentMethodId = req.PaymentMethodId
 	if user != nil {
 		gatewayId, paymentMethodId = sub_update.VerifyPaymentGatewayMethod(ctx, user.Id, req.GatewayId, req.PaymentMethodId, "")
-		utility.Assert(gatewayId > 0, "gateway need specified")
 	}
 	var gateway *entity.MerchantGateway
-	if gatewayId > 0 {
+	if gatewayId > 0 || req.IsSubmit {
+		utility.Assert(gatewayId > 0, "gateway need specified")
 		gateway = query.GetGatewayById(ctx, gatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.Assert(gateway.MerchantId == req.MerchantId, "invalid gateway")
