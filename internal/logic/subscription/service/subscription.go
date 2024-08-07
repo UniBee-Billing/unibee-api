@@ -371,7 +371,10 @@ type CreateInternalRes struct {
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	//utility.Assert(req.UserId > 0, "UserId invalid")
+	if req.IsSubmit {
+		utility.Assert(req.UserId > 0, "UserId invalid")
+		utility.Assert(req.GatewayId != nil, "Gateway invalid")
+	}
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
