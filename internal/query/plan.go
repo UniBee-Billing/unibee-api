@@ -55,6 +55,7 @@ func GetPlansByProductId(ctx context.Context, merchantId uint64, productId int64
 	} else {
 		err := dao.Plan.Ctx(ctx).
 			Where(dao.Plan.Columns().MerchantId, merchantId).
+			Where(dao.Plan.Columns().IsDeleted, 0).
 			Where(dao.Plan.Columns().ProductId, productId).
 			OmitEmpty().Scan(&list)
 		if err != nil {
