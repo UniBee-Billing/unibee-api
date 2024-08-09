@@ -123,7 +123,7 @@ func fetchColumnAppendListFromCloudApi() []*bean.TableUpgrade {
 	if config.GetConfigInstance().IsProd() {
 		env = 2
 	}
-	response, err := sendRequestInMainCtxStart(fmt.Sprintf("https://api.cloud.unibee.top/cloud/table/column_append?databaseType=%s&env=%v", g.DB("default").GetConfig().Type, env), "GET", nil, nil)
+	response, err := sendRequestInMainCtxStart(fmt.Sprintf("https://api.unibee.dev/cloud/table/column_append?databaseType=%s&env=%v", g.DB("default").GetConfig().Type, env), "GET", nil, nil)
 	if err != nil {
 		return list
 	}
