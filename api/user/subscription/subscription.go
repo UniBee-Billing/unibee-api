@@ -147,7 +147,7 @@ type UpdateRes struct {
 }
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
+	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active Create&Active&Incomplete List) "`
 }
 type ListRes struct {
 	Subscriptions []*detail.SubscriptionDetail `json:"subscriptions" dc:"Subscription List"`
