@@ -37,7 +37,7 @@ func InitDefaultEmailTemplate(ctx context.Context) {
 
 func FetchDefaultEmailTemplateFromCloudApi() []*entity.EmailDefaultTemplate {
 	var list = make([]*entity.EmailDefaultTemplate, 0)
-	response, err := utility.SendRequest("http://api.cloud.unibee.top/cloud/email/default_template_list", "GET", nil, nil)
+	response, err := utility.SendRequest("http://api.unibee.dev/cloud/email/default_template_list", "GET", nil, nil)
 	if err != nil {
 		return list
 	}
