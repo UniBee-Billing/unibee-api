@@ -21,6 +21,7 @@ type InvoiceDao struct {
 // InvoiceColumns defines and stores column names for table invoice.
 type InvoiceColumns struct {
 	Id                             string //
+	MetaData                       string // meta_data(json)
 	BizType                        string // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     string // merchant_id
 	UserId                         string // userId
@@ -74,13 +75,13 @@ type InvoiceColumns struct {
 	GatewayPaymentMethod           string // gateway_payment_method
 	BillingCycleAnchor             string // billing_cycle_anchor
 	CreateFrom                     string // create from
-	MetaData                       string // meta_data(json)
 	VatNumber                      string //
 }
 
 // invoiceColumns holds the columns for table invoice.
 var invoiceColumns = InvoiceColumns{
 	Id:                             "id",
+	MetaData:                       "meta_data",
 	BizType:                        "biz_type",
 	MerchantId:                     "merchant_id",
 	UserId:                         "user_id",
@@ -134,7 +135,6 @@ var invoiceColumns = InvoiceColumns{
 	GatewayPaymentMethod:           "gateway_payment_method",
 	BillingCycleAnchor:             "billing_cycle_anchor",
 	CreateFrom:                     "create_from",
-	MetaData:                       "meta_data",
 	VatNumber:                      "vat_number",
 }
 

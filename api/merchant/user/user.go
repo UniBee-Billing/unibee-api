@@ -82,29 +82,31 @@ type SearchRes struct {
 
 type UpdateReq struct {
 	g.Meta          `path:"/update" tags:"User" method:"post" summary:"UpdateUserProfile"`
-	UserId          uint64  `json:"userId" dc:"User Id" v:"required"`
-	FirstName       string  `json:"firstName" dc:"First name" v:"required"`
-	LastName        string  `json:"lastName" dc:"Last Name" v:"required"`
-	Email           string  `json:"email" dc:"Email" v:"required"`
-	Address         string  `json:"address" dc:"Billing Address" v:"required"`
-	CompanyName     string  `json:"companyName" dc:"Company Name"`
-	VATNumber       *string `json:"vATNumber" dc:"VAT Number"`
-	Phone           string  `json:"phone" dc:"Phone"`
-	Telegram        string  `json:"telegram" dc:"Telegram"`
-	WhatsApp        string  `json:"whatsApp" dc:"WhatsApp"`
-	WeChat          string  `json:"weChat" dc:"WeChat"`
-	LinkedIn        string  `json:"LinkedIn" dc:"LinkedIn"`
-	Facebook        string  `json:"facebook" dc:"Facebook"`
-	TikTok          string  `json:"tiktok" dc:"Tiktok"`
-	OtherSocialInfo string  `json:"otherSocialInfo" dc:"Other Social Info"`
-	CountryCode     *string `json:"countryCode" dc:"Country Code"`
-	CountryName     *string `json:"countryName" dc:"Country Name"`
-	Type            *int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
-	GatewayId       *uint64 `json:"gatewayId" dc:"GatewayId"`
-	PaymentMethodId *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
-	City            string  `json:"city" dc:"city"`
-	ZipCode         string  `json:"zipCode" dc:"zip_code"`
-	Language        string  `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
+	UserId          *uint64                 `json:"userId" dc:"The id of user, either Email or UserId needed"`
+	Email           *string                 `json:"email" dc:"The email of user, either Email or UserId needed"`
+	FirstName       *string                 `json:"firstName" dc:"First name"`
+	LastName        *string                 `json:"lastName" dc:"Last Name"`
+	Address         *string                 `json:"address" dc:"Billing Address"`
+	CompanyName     *string                 `json:"companyName" dc:"Company Name"`
+	VATNumber       *string                 `json:"vATNumber" dc:"VAT Number"`
+	Phone           *string                 `json:"phone" dc:"Phone"`
+	Telegram        *string                 `json:"telegram" dc:"Telegram"`
+	WhatsApp        *string                 `json:"whatsApp" dc:"WhatsApp"`
+	WeChat          *string                 `json:"weChat" dc:"WeChat"`
+	LinkedIn        *string                 `json:"LinkedIn" dc:"LinkedIn"`
+	Facebook        *string                 `json:"facebook" dc:"Facebook"`
+	TikTok          *string                 `json:"tiktok" dc:"Tiktok"`
+	OtherSocialInfo *string                 `json:"otherSocialInfo" dc:"Other Social Info"`
+	CountryCode     *string                 `json:"countryCode" dc:"Country Code"`
+	CountryName     *string                 `json:"countryName" dc:"Country Name"`
+	Type            *int64                  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	GatewayId       *uint64                 `json:"gatewayId" dc:"GatewayId"`
+	PaymentMethodId *string                 `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
+	City            *string                 `json:"city" dc:"city"`
+	ZipCode         *string                 `json:"zipCode" dc:"zip_code"`
+	Language        *string                 `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
+	ExternalUserId  *string                 `json:"externalUserId" dc:"ExternalUserId"`
+	Metadata        *map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 type UpdateRes struct {

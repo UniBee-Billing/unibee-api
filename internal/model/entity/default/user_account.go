@@ -62,4 +62,5 @@ type UserAccount struct {
 	City               string      `json:"city"               description:"city"`                                                                                                      // city
 	ZipCode            string      `json:"zipCode"            description:"zip_code"`                                                                                                  // zip_code
 	Language           string      `json:"language"           description:"language"`                                                                                                  // language
+	MetaData           string      `json:"metaData"           description:"meta_data(json)"`                                                                                           // meta_data(json)
 }

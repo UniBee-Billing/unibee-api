@@ -18,19 +18,35 @@ import (
 )
 
 func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
+	if req.UserId == nil {
+		utility.Assert(req.Email != nil && len(*req.Email) > 0, "either Email or UserId needed")
+		one := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), *req.Email)
+		utility.Assert(one != nil, "user not found")
+		req.UserId = unibee.Uint64(one.Id)
+	}
+	utility.Assert(req.UserId != nil, "either Email or UserId needed")
+	if req.ExternalUserId != nil && len(*req.ExternalUserId) > 0 {
+		//update externalUserId
+		one := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), *req.ExternalUserId)
+		utility.Assert(one == nil || one.Id == *req.UserId, fmt.Sprintf("ExternalUserId has bean used by another user:%v email:%s", one.Id, one.Email))
+		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
+		}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
+	}
+
 	if req.GatewayId != nil && *req.GatewayId > 0 {
 		var paymentMethodId = ""
 		if req.PaymentMethodId != nil {
 			paymentMethodId = *req.PaymentMethodId
 		}
-		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, *req.UserId, *req.GatewayId, paymentMethodId)
 	}
-	one := query.GetUserAccountById(ctx, req.UserId)
+	one := query.GetUserAccountById(ctx, *req.UserId)
 	var vatNumber = one.VATNumber
 	if req.VATNumber != nil {
 		if len(*req.VATNumber) > 0 {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), req.UserId, *req.VATNumber, "")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), *req.UserId, *req.VATNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 			if req.CountryCode != nil {
@@ -46,14 +62,14 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		if len(vatNumber) > 0 {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
-			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), req.UserId, vatNumber, "")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), *req.UserId, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 		}
 		if one.CountryCode != *req.CountryCode {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			sub_update.UpdateUserCountryCode(ctx, req.UserId, *req.CountryCode)
+			sub_update.UpdateUserCountryCode(ctx, *req.UserId, *req.CountryCode)
 		}
 	}
 
@@ -95,6 +111,12 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 	if err != nil {
 		return nil, err
 	}
-	one = query.GetUserAccountById(ctx, req.UserId)
+	if req.Metadata != nil {
+		_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().MetaData: utility.MarshalToJsonString(req.Metadata),
+		}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
+	}
+	one = query.GetUserAccountById(ctx, *req.UserId)
+
 	return &user.UpdateRes{User: detail.ConvertUserAccountToDetail(ctx, one)}, nil
 }

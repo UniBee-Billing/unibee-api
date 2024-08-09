@@ -64,4 +64,5 @@ type UserAccount struct {
 	City               interface{} // city
 	ZipCode            interface{} // zip_code
 	Language           interface{} // language
+	MetaData           interface{} // meta_data(json)
 }

@@ -13,6 +13,7 @@ import (
 type Invoice struct {
 	g.Meta                         `orm:"table:invoice, do:true"`
 	Id                             interface{} //
+	MetaData                       interface{} // meta_data(json)
 	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     interface{} // merchant_id
 	UserId                         interface{} // userId
@@ -66,6 +67,5 @@ type Invoice struct {
 	GatewayPaymentMethod           interface{} // gateway_payment_method
 	BillingCycleAnchor             interface{} // billing_cycle_anchor
 	CreateFrom                     interface{} // create from
-	MetaData                       interface{} // meta_data(json)
 	VatNumber                      interface{} //
 }

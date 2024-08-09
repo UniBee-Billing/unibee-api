@@ -11,6 +11,7 @@ import (
 // Invoice is the golang structure for table invoice.
 type Invoice struct {
 	Id                             uint64      `json:"id"                             description:""`                                                                       //
+	MetaData                       string      `json:"metaData"                       description:"meta_data(json)"`                                                        // meta_data(json)
 	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     uint64      `json:"merchantId"                     description:"merchant_id"`                                                            // merchant_id
 	UserId                         uint64      `json:"userId"                         description:"userId"`                                                                 // userId
@@ -64,6 +65,5 @@ type Invoice struct {
 	GatewayPaymentMethod           string      `json:"gatewayPaymentMethod"           description:"gateway_payment_method"`                                                 // gateway_payment_method
 	BillingCycleAnchor             int64       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`                                                   // billing_cycle_anchor
 	CreateFrom                     string      `json:"createFrom"                     description:"create from"`                                                            // create from
-	MetaData                       string      `json:"metaData"                       description:"meta_data(json)"`                                                        // meta_data(json)
 	VatNumber                      string      `json:"vatNumber"                      description:""`                                                                       //
 }
