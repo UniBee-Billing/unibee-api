@@ -101,7 +101,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			needInvoiceGenerate = false
 		}
 		// lock the invoice and payment creation half an hour before period end
-		if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-27*60 {
+		if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-27*60 && timeNow < utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) {
 			needInvoiceGenerate = false
 			needTryInvoiceAutomaticPayment = false
 		}
