@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/default"
-	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
+	"unibee/internal/logic/platform"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -149,11 +149,18 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	}
 	merchant := query.GetMerchantById(ctx, one.MerchantId)
 	utility.Assert(merchant != nil, "Invalid Merchant")
-	err = email2.SendTemplateEmail(ctx, merchantId, email, "", email2.TemplateMerchantMemberInvite, "", &email2.TemplateVariable{
-		UserName:     one.FirstName + " " + one.LastName,
-		MerchantName: merchant.Name,
-		Email:        email,
-		Link:         "<a href=\"" + link + "\">Link</a>",
+	//err = email2.SendTemplateEmail(ctx, merchantId, email, "", email2.TemplateMerchantMemberInvite, "", &email2.TemplateVariable{
+	//	UserName:     one.FirstName + " " + one.LastName,
+	//	MerchantName: merchant.Name,
+	//	Email:        email,
+	//	Link:         "<a href=\"" + link + "\">Link</a>",
+	//})
+	err = platform.SentPlatformMerchantInviteMember(map[string]string{
+		"ownerEmail":  merchant.Email,
+		"memberEmail": email,
+		"firstName":   one.FirstName,
+		"lastName":    one.LastName,
+		"link":        link,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,

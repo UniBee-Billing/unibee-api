@@ -1,30 +1,22 @@
 package dbupgrade
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
-	"io"
-	"net/http"
-	"time"
 	"unibee/api/bean"
-	"unibee/internal/cmd/config"
 	_ "unibee/internal/dao/default"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/platform"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 	"unibee/utility/liberr"
 )
 
 func StandAloneInit(ctx context.Context) {
-	list := fetchColumnAppendListFromCloudApi()
+	list := platform.FetchColumnAppendListFromPlatformApi()
 	if len(list) > 0 {
 		glog.Infof(ctx, "StandAloneInit DBUpgrade start")
 		historyList := GetUpgradeList(ctx)
@@ -115,54 +107,6 @@ func StandAloneInit(ctx context.Context) {
 		}
 		glog.Infof(ctx, "StandAloneInit DBUpgrade end")
 	}
-}
-
-func fetchColumnAppendListFromCloudApi() []*bean.TableUpgrade {
-	var list = make([]*bean.TableUpgrade, 0)
-	var env = 1
-	if config.GetConfigInstance().IsProd() {
-		env = 2
-	}
-	response, err := sendRequestInMainCtxStart(fmt.Sprintf("https://api.unibee.dev/cloud/table/column_append?databaseType=%s&env=%v", g.DB("default").GetConfig().Type, env), "GET", nil, nil)
-	if err != nil {
-		return list
-	}
-	data := gjson.New(response)
-	if data.Contains("code") && data.Get("code").String() == "0" && data.Contains("data") && data.GetJson("data").Contains("tableUpgrades") {
-		_ = gjson.Unmarshal([]byte(data.GetJson("data").Get("tableUpgrades").String()), &list)
-	}
-	return list
-}
-
-func sendRequestInMainCtxStart(url string, method string, data []byte, headers map[string]string) ([]byte, error) {
-	bodyReader := bytes.NewReader(data)
-	request, err := http.NewRequest(method, url, bodyReader)
-	if err != nil {
-		return nil, err
-	}
-	for key, value := range headers {
-		request.Header.Set(key, value)
-	}
-	client := &http.Client{Timeout: 30 * time.Second}
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(response.Body)
-
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	if response.StatusCode != 200 {
-		return nil, gerror.NewCode(gcode.New(response.StatusCode, response.Status, response.Status+" "+string(responseBody)), response.Status+" "+string(responseBody))
-	}
-	return responseBody, nil
 }
 
 func GetUpgradeList(ctx context.Context) (list []*entity.TableUpgradeHistory) {

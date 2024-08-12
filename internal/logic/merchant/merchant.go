@@ -7,10 +7,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/cmd/config"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/email"
 	"unibee/internal/logic/operation_log"
+	"unibee/internal/logic/platform"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -125,16 +124,31 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	return merchant, newOne, err
 }
 
-func SendMerchantRegisterEmail(ctx context.Context, to string, verificationCode string) {
-	if config.GetConfigInstance().Mode == "cloud" {
-		err := email.SendTemplateEmail(ctx, consts.CloudModeManagerMerchantId, to, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
-			CodeExpireMinute: "3",
-			Code:             verificationCode,
-		})
-		utility.AssertError(err, "Server Error")
-	} else {
-		utility.Assert(true, "not support")
+func SendMerchantRegisterEmail(ctx context.Context, req *CreateMerchantInternalReq, verificationCode string) {
+	//if config.GetConfigInstance().Mode == "cloud" {
+	//	err := email.SendTemplateEmail(ctx, consts.CloudModeManagerMerchantId, req.Email, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
+	//		CodeExpireMinute: "3",
+	//		Code:             verificationCode,
+	//	})
+	//	utility.AssertError(err, "Server Error")
+	//} else {
+	//	utility.Assert(true, "not support")
+	//}
+	utility.Assert(req != nil, "Server Error,nil")
+	publicIp := utility.GetPublicIP()
+	if len(publicIp) == 0 {
+		publicIp = "0.0.0.0"
 	}
+	err := platform.SentPlatformMerchantRegisterEmail(map[string]string{
+		"ownerEmail": req.Email,
+		"ip":         publicIp,
+		"firstName":  req.FirstName,
+		"lastName":   req.LastName,
+		"Phone":      req.Phone,
+		"userName":   req.UserName,
+		"code":       verificationCode,
+	})
+	utility.AssertError(err, "Server Error")
 }
 
 func HardDeleteMerchant(ctx context.Context, merchantId uint64) error {

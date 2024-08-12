@@ -2,7 +2,10 @@ package utility
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
+	"net/http"
 )
 
 func DetectLocalIP() string {
@@ -42,4 +45,31 @@ func DetectLocalIP() string {
 		}
 	}
 	return ""
+}
+
+var publicIP = ""
+
+func GetPublicIP() string {
+	if len(publicIP) > 0 {
+		return publicIP
+	}
+	url := "https://api.ipify.org" // or "https://api.ipify.org?format=text"
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("GetPublicIP Error:%s", err.Error())
+		return ""
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("GetPublicIP Error:%s", err.Error())
+		}
+	}(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("GetPublicIP Error:%s", err.Error())
+		return ""
+	}
+	publicIP = string(body)
+	return publicIP
 }

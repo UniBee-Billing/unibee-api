@@ -29,16 +29,16 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 	utility.Assert(config.GetConfigInstance().Mode == "cloud", "unsupported")
-
+	internalReq := &merchant.CreateMerchantInternalReq{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Password:  req.Password,
+		Phone:     req.Phone,
+		UserName:  req.UserName,
+	}
 	userStr, err := json.Marshal(
-		&merchant.CreateMerchantInternalReq{
-			FirstName: req.FirstName,
-			LastName:  req.LastName,
-			Email:     req.Email,
-			Password:  req.Password,
-			Phone:     req.Phone,
-			UserName:  req.UserName,
-		},
+		internalReq,
 	)
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Set(ctx, CacheKeyMerchantRegisterPrefix+req.Email, userStr)
@@ -52,6 +52,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	merchant.SendMerchantRegisterEmail(ctx, req.Email, verificationCode)
+	merchant.SendMerchantRegisterEmail(ctx, internalReq, verificationCode)
 	return &auth.RegisterRes{}, nil
 }
