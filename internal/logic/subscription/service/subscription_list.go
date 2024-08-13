@@ -14,20 +14,20 @@ import (
 )
 
 type SubscriptionListInternalReq struct {
-	MerchantId      uint64 `json:"merchantId" dc:"MerchantId"`
-	UserId          int64  `json:"userId"  dc:"UserId" `
-	Status          []int  `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	Currency        string `json:"currency" dc:"The currency of subscription" `
-	PlanIds         []int  `json:"planIds" dc:"The filter ids of plan" `
-	ProductIds      []int  `json:"productIds" dc:"The filter ids of product" `
-	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of subscription" `
-	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of subscription" `
-	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page" dc:"Page, Start With 0" `
-	Count           int    `json:"count" dc:"Count Of Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	MerchantId      uint64   `json:"merchantId" dc:"MerchantId"`
+	UserId          int64    `json:"userId"  dc:"UserId" `
+	Status          []int    `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	Currency        string   `json:"currency" dc:"The currency of subscription" `
+	PlanIds         []uint64 `json:"planIds" dc:"The filter ids of plan" `
+	ProductIds      []int64  `json:"productIds" dc:"The filter ids of product" `
+	AmountStart     *int64   `json:"amountStart" dc:"The filter start amount of subscription" `
+	AmountEnd       *int64   `json:"amountEnd" dc:"The filter end amount of subscription" `
+	SortField       string   `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int      `json:"page" dc:"Page, Start With 0" `
+	Count           int      `json:"count" dc:"Count Of Page" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
 }
 
@@ -87,20 +87,19 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if req.Status != nil && len(req.Status) > 0 {
 		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().Status, req.Status)
 	}
-	if req.PlanIds != nil && len(req.PlanIds) > 0 {
-		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
-	} else if req.ProductIds != nil && len(req.ProductIds) > 0 {
-		var planIds = make([]uint64, 0)
+	if req.ProductIds != nil && len(req.ProductIds) > 0 {
+		if req.PlanIds == nil {
+			req.PlanIds = make([]uint64, 0)
+		}
 		var plans []*entity.Plan
 		planQuery := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
 		_ = planQuery.Where(dao.Plan.Columns().IsDeleted, 0).Scan(&plans)
 		for _, plan := range plans {
-			planIds = append(planIds, plan.Id)
+			req.PlanIds = append(req.PlanIds, plan.Id)
 		}
-		if len(planIds) == 0 {
-			return make([]*detail.SubscriptionDetail, 0), 0
-		}
-		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, planIds)
+	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
 	}
 	if req.CreateTimeStart > 0 {
 		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().CreateTime, req.CreateTimeStart)
