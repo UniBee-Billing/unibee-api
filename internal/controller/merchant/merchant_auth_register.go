@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee/api/merchant/auth"
-	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/merchant"
 	"unibee/utility"
@@ -28,7 +27,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	if !utility.TryLock(ctx, redisKey, 10) {
 		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
-	utility.Assert(config.GetConfigInstance().Mode == "cloud", "unsupported")
 	internalReq := &merchant.CreateMerchantInternalReq{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
