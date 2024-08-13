@@ -61,6 +61,7 @@ type ListReq struct {
 	Status          []int  `json:"status" dc:"Filter, Default All，Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
 	Currency        string `json:"currency" dc:"The currency of subscription" `
 	PlanIds         []int  `json:"planIds" dc:"The filter ids of plan" `
+	ProductIds      []int  `json:"productIds" dc:"The filter ids of product" `
 	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of subscription" `
 	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of subscription" `
 	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `

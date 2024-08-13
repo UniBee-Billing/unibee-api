@@ -17,6 +17,7 @@ func (c *ControllerSubscription) List(ctx context.Context, req *subscription.Lis
 		AmountStart:     req.AmountStart,
 		AmountEnd:       req.AmountEnd,
 		PlanIds:         req.PlanIds,
+		ProductIds:      req.ProductIds,
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		Page:            req.Page,
