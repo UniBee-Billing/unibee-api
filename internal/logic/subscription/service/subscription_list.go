@@ -92,7 +92,12 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			req.PlanIds = make([]uint64, 0)
 		}
 		var plans []*entity.Plan
-		planQuery := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+		planQuery := dao.Plan.Ctx(ctx)
+		if isInt64InArray(req.ProductIds, 0) {
+			planQuery = planQuery.Where(planQuery.Builder().WhereOrIn(dao.Plan.Columns().ProductId, req.ProductIds).WhereOrNull(dao.Plan.Columns().ProductId))
+		} else {
+			planQuery = planQuery.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+		}
 		_ = planQuery.Where(dao.Plan.Columns().IsDeleted, 0).Scan(&plans)
 		for _, plan := range plans {
 			req.PlanIds = append(req.PlanIds, plan.Id)
@@ -192,4 +197,16 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		}
 	}
 	return list, total
+}
+
+func isInt64InArray(arr []int64, target int64) bool {
+	if arr == nil || len(arr) == 0 {
+		return false
+	}
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
 }
