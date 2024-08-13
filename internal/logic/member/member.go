@@ -178,7 +178,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	utility.AssertError(err, "AddMerchantMember")
+	utility.AssertError(err, "AddMerchantMember Error")
 	return nil
 }
 
