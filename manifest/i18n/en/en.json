@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Another active or incomplete subscription exists",
+  "ClickTooFast": "You are clicking too fast. Please wait a moment and try again.",
+  "AmountNotMatch": "The total amount is outdated. Please refresh and try again.",
+  "PlanTrialGatewayError": "A Card or PayPal payment gateway is required for this plan.",
+  "VatValidateError": "VAT number validation failed. Number: %s",
+  "VatGatewayNeedSetup": "VAT gateway needs to be set up.",
+  "CountryCodeVatNumberNotMatch": "Country code error. The country from your VAT number is %s.",
+  "DiscountCodeInvalid": "The discount code is invalid.",
+  "DiscountCodeNotStart": "The discount code haven't started.",
+  "DiscountCodePlanError": "The discount code cannot be used with this plan.",
+  "DiscountCodeReachLimitation": "The discount code usage limit has been reached."
+}
