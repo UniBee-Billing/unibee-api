@@ -31,7 +31,7 @@ func SentPlatformMerchantOTP(param map[string]string) error {
 }
 
 func SentPlatformMerchantInviteMember(param map[string]string) error {
-	response, err := utility.SendRequest(fmt.Sprintf("%s/cloud/email/merchant_register", ApiHost), "POST", []byte(utility.MarshalToJsonString(param)), map[string]string{"Content-Type": "application/json"})
+	response, err := utility.SendRequest(fmt.Sprintf("%s/cloud/email/invite_member", ApiHost), "POST", []byte(utility.MarshalToJsonString(param)), map[string]string{"Content-Type": "application/json"})
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func SentPlatformMerchantInviteMember(param map[string]string) error {
 }
 
 func SentPlatformMerchantRegisterEmail(param map[string]string) error {
-	response, err := utility.SendRequest(fmt.Sprintf("%s/cloud/email/invite_member", ApiHost), "POST", []byte(utility.MarshalToJsonString(param)), map[string]string{"Content-Type": "application/json"})
+	response, err := utility.SendRequest(fmt.Sprintf("%s/cloud/email/merchant_register", ApiHost), "POST", []byte(utility.MarshalToJsonString(param)), map[string]string{"Content-Type": "application/json"})
 	if err != nil {
 		return err
 	}
