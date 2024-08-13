@@ -8,7 +8,6 @@ import (
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/merchant"
 )
 
 func printStandaloneInitPanic(ctx context.Context, err error) {
@@ -36,7 +35,7 @@ func StandaloneInit(ctx context.Context) {
 				}
 			}()
 			time.Sleep(10 * time.Second)
-			merchant.StandAloneInit(backgroundCtx)
+			//merchant.StandAloneInit(backgroundCtx) //
 			email.StandAloneInit(backgroundCtx)
 		}()
 	}
