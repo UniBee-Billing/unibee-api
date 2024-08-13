@@ -80,6 +80,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	}
 	merchant := &entity.Merchant{
 		Phone:  req.Phone,
+		Email:  req.Email,
 		ApiKey: utility.GenerateRandomAlphanumeric(32), //32 bit open api key
 	}
 	// transaction create Merchant

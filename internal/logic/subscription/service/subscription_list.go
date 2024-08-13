@@ -19,6 +19,7 @@ type SubscriptionListInternalReq struct {
 	Status          []int  `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	Currency        string `json:"currency" dc:"The currency of subscription" `
 	PlanIds         []int  `json:"planIds" dc:"The filter ids of plan" `
+	ProductIds      []int  `json:"productIds" dc:"The filter ids of product" `
 	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of subscription" `
 	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of subscription" `
 	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
@@ -88,6 +89,18 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	}
 	if req.PlanIds != nil && len(req.PlanIds) > 0 {
 		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
+	} else if req.ProductIds != nil && len(req.ProductIds) > 0 {
+		var planIds = make([]uint64, 0)
+		var plans []*entity.Plan
+		planQuery := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
+		_ = planQuery.Where(dao.Plan.Columns().IsDeleted, 0).Scan(&plans)
+		for _, plan := range plans {
+			planIds = append(planIds, plan.Id)
+		}
+		if len(planIds) == 0 {
+			return make([]*detail.SubscriptionDetail, 0), 0
+		}
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, planIds)
 	}
 	if req.CreateTimeStart > 0 {
 		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().CreateTime, req.CreateTimeStart)
