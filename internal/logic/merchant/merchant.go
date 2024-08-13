@@ -111,7 +111,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		_, err = dao.Merchant.Ctx(ctx).Data(g.Map{
 			dao.Merchant.Columns().UserId:    merchant.UserId,
 			dao.Merchant.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.Merchant.Columns().Id, id).Update()
+		}).Where(dao.Merchant.Columns().Id, merchant.Id).Update()
 		if err != nil {
 			return err
 		}

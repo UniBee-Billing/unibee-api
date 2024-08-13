@@ -89,3 +89,17 @@ func GetMerchantMemberByEmail(ctx context.Context, email string) (one *entity.Me
 	}
 	return one
 }
+
+func GetMerchantOwnerMember(ctx context.Context, merchantId uint64) (one *entity.MerchantMember) {
+	if merchantId <= 0 {
+		return nil
+	}
+	err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().MerchantId, merchantId).
+		Where(dao.MerchantMember.Columns().Role, "Owner").
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}

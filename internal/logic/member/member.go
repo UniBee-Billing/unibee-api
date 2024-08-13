@@ -155,8 +155,14 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	//	Email:        email,
 	//	Link:         "<a href=\"" + link + "\">Link</a>",
 	//})
+	ownerEmail := ""
+	ownerMember := query.GetMerchantOwnerMember(ctx, merchant.Id)
+	if ownerMember != nil {
+		ownerEmail = ownerMember.Email
+	}
+
 	err = platform.SentPlatformMerchantInviteMember(map[string]string{
-		"ownerEmail":  merchant.Email,
+		"ownerEmail":  ownerEmail,
 		"memberEmail": email,
 		"firstName":   one.FirstName,
 		"lastName":    one.LastName,

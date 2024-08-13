@@ -40,8 +40,13 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		merchant := query.GetMerchantById(ctx, merchantMember.MerchantId)
 		utility.Assert(merchant != nil, "merchant not found")
 		// send to UniBee platform api
+		ownerEmail := ""
+		ownerMember := query.GetMerchantOwnerMember(ctx, merchant.Id)
+		if ownerMember != nil {
+			ownerEmail = ownerMember.Email
+		}
 		err = platform.SentPlatformMerchantOTP(map[string]string{
-			"ownerEmail":  merchant.Email,
+			"ownerEmail":  ownerEmail,
 			"memberEmail": req.Email,
 			"firstName":   merchantMember.FirstName,
 			"lastName":    merchantMember.LastName,
