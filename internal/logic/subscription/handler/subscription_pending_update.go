@@ -91,11 +91,11 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 
 	timeline.SubscriptionNewTimeline(ctx, invoice)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
-		UserName:            user.FirstName + " " + user.LastName,
-		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,
-		MerchantCustomEmail: merchant.Email,
-		MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
-		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+		UserName:              user.FirstName + " " + user.LastName,
+		MerchantProductName:   query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,
+		MerchantCustomerEmail: merchant.Email,
+		MerchantName:          query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
+		PeriodEnd:             gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {
 		g.Log().Errorf(ctx, "SendTemplateEmail HandlePendingUpdatePaymentSuccess:%s", err.Error())

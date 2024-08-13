@@ -60,13 +60,13 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 				merchant := query.GetMerchantById(ctx, sub.MerchantId)
 				if merchant != nil {
 					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
-						UserName:            oneUser.FirstName + " " + oneUser.LastName,
-						MerchantProductName: plan.PlanName,
-						MerchantCustomEmail: merchant.Email,
-						MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
-						PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
-						Currency:            strings.ToUpper(invoice.Currency),
-						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+						UserName:              oneUser.FirstName + " " + oneUser.LastName,
+						MerchantProductName:   plan.PlanName,
+						MerchantCustomerEmail: merchant.Email,
+						MerchantName:          query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
+						PaymentAmount:         utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
+						Currency:              strings.ToUpper(invoice.Currency),
+						PeriodEnd:             gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 					})
 					if err != nil {
 						g.Log().Errorf(ctx, "SendTemplateEmail PaymentNeedAuthorisedCallback err:%s", err.Error())

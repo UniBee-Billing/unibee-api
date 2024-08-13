@@ -548,20 +548,20 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				template = email.TemplateInvoiceCancel
 			}
 			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
-				InvoiceId:           one.InvoiceId,
-				UserName:            user.FirstName + " " + user.LastName,
-				MerchantProductName: one.ProductName,
-				MerchantCustomEmail: merchant.Email,
-				MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
-				DateNow:             gtime.Now(),
-				PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
-				PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
-				TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
-				Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
-				AccountHolder:       accountHolder,
-				BIC:                 bic,
-				IBAN:                iban,
-				Address:             address,
+				InvoiceId:             one.InvoiceId,
+				UserName:              user.FirstName + " " + user.LastName,
+				MerchantProductName:   one.ProductName,
+				MerchantCustomerEmail: merchant.Email,
+				MerchantName:          query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
+				DateNow:               gtime.Now(),
+				PeriodEnd:             gtime.Now().AddDate(0, 0, 5),
+				PaymentAmount:         strconv.FormatInt(one.TotalAmount, 10),
+				TokenExpireMinute:     strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
+				Link:                  "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+				AccountHolder:         accountHolder,
+				BIC:                   bic,
+				IBAN:                  iban,
+				Address:               address,
 			})
 			if err != nil {
 				g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())
@@ -593,16 +593,16 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 					return nil
 				}
 				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
-					InvoiceId:           one.InvoiceId,
-					UserName:            user.FirstName + " " + user.LastName,
-					MerchantProductName: one.ProductName,
-					MerchantCustomEmail: merchant.Email,
-					MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
-					DateNow:             gtime.Now(),
-					PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
-					RefundAmount:        utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
-					TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
-					Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+					InvoiceId:             one.InvoiceId,
+					UserName:              user.FirstName + " " + user.LastName,
+					MerchantProductName:   one.ProductName,
+					MerchantCustomerEmail: merchant.Email,
+					MerchantName:          query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
+					DateNow:               gtime.Now(),
+					PeriodEnd:             gtime.Now().AddDate(0, 0, 5),
+					RefundAmount:          utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
+					TokenExpireMinute:     strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
+					Link:                  "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
 				})
 				if err != nil {
 					g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())

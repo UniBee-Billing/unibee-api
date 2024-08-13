@@ -143,25 +143,25 @@ func SendPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subject str
 }
 
 type TemplateVariable struct {
-	InvoiceId           string      `json:"InvoiceId"`
-	UserName            string      `json:"User name"`
-	MerchantProductName string      `json:"Merchant Product Name"`
-	MerchantCustomEmail string      `json:"Merchant’s customer support email address"`
-	MerchantName        string      `json:"Merchant Name"`
-	DateNow             *gtime.Time `json:"DateNow" layout:"2006-01-02"`
-	PeriodEnd           *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
-	PaymentAmount       string      `json:"Payment Amount"`
-	RefundAmount        string      `json:"Refund Amount"`
-	Currency            string      `json:"Currency"`
-	TokenExpireMinute   string      `json:"TokenExpireMinute"`
-	CodeExpireMinute    string      `json:"CodeExpireMinute"`
-	Code                string      `json:"Code"`
-	Link                string      `json:"Link"`
-	AccountHolder       string      `json:"Account Holder"`
-	BIC                 string      `json:"BIC"`
-	IBAN                string      `json:"IBAN"`
-	Address             string      `json:"Address"`
-	Email               string      `json:"Email"`
+	InvoiceId             string      `json:"InvoiceId"`
+	UserName              string      `json:"User name"`
+	MerchantProductName   string      `json:"Merchant Product Name"`
+	MerchantCustomerEmail string      `json:"Merchant’s customer support email address"`
+	MerchantName          string      `json:"Merchant Name"`
+	DateNow               *gtime.Time `json:"DateNow" layout:"2006-01-02"`
+	PeriodEnd             *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
+	PaymentAmount         string      `json:"Payment Amount"`
+	RefundAmount          string      `json:"Refund Amount"`
+	Currency              string      `json:"Currency"`
+	TokenExpireMinute     string      `json:"TokenExpireMinute"`
+	CodeExpireMinute      string      `json:"CodeExpireMinute"`
+	Code                  string      `json:"Code"`
+	Link                  string      `json:"Link"`
+	AccountHolder         string      `json:"Account Holder"`
+	BIC                   string      `json:"BIC"`
+	IBAN                  string      `json:"IBAN"`
+	Address               string      `json:"Address"`
+	Email                 string      `json:"Email"`
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html

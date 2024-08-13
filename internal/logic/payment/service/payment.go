@@ -385,13 +385,13 @@ func SendAuthorizedEmailBackground(invoice *entity.Invoice) {
 		oneUser := query.GetUserAccountById(ctx, invoice.UserId)
 		if oneUser != nil && merchant != nil {
 			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
-				UserName:            oneUser.FirstName + " " + oneUser.LastName,
-				MerchantProductName: invoice.ProductName,
-				MerchantCustomEmail: merchant.Email,
-				MerchantName:        query.GetMerchantCountryConfigName(ctx, invoice.MerchantId, oneUser.CountryCode),
-				PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
-				Currency:            strings.ToUpper(invoice.Currency),
-				PeriodEnd:           gtime.NewFromTimeStamp(invoice.PeriodEnd),
+				UserName:              oneUser.FirstName + " " + oneUser.LastName,
+				MerchantProductName:   invoice.ProductName,
+				MerchantCustomerEmail: merchant.Email,
+				MerchantName:          query.GetMerchantCountryConfigName(ctx, invoice.MerchantId, oneUser.CountryCode),
+				PaymentAmount:         utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
+				Currency:              strings.ToUpper(invoice.Currency),
+				PeriodEnd:             gtime.NewFromTimeStamp(invoice.PeriodEnd),
 			})
 			if err != nil {
 				g.Log().Errorf(ctx, "SendTemplateEmail SendAuthorizedEmailBackground err:%s", err.Error())

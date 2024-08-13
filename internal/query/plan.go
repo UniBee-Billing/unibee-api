@@ -43,7 +43,7 @@ func GetPlansByProductId(ctx context.Context, merchantId uint64, productId int64
 	if productId <= 0 {
 		q := dao.Plan.Ctx(ctx).
 			Where(dao.Plan.Columns().MerchantId, merchantId)
-		err := q.WhereOr(q.Builder().
+		err := q.Where(q.Builder().
 			WhereOrNull(dao.Plan.Columns().ProductId).
 			WhereOr(dao.Plan.Columns().ProductId, 0)).
 			OmitNil().Scan(&list)
