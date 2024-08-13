@@ -404,10 +404,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	if !_interface.Context().Get(ctx).IsOpenApiCall && user != nil && gatewayId > 0 {
 		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
 	}
-	// todo mark confirm can comment this part
-	//if gateway != nil {
-	//	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
-	//}
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
@@ -419,7 +415,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	var err error
 	if user != nil {
-		//utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, "Another active or incomplete subscription exist")
 		utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, merchantInfo.Id, plan.ProductId) == nil, i18n.LocalizationFormat(ctx, "{#SubDuplicateCreation}"))
 	}
 
