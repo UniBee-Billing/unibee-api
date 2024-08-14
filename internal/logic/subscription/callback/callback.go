@@ -59,7 +59,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 			if oneUser != nil {
 				merchant := query.GetMerchantById(ctx, sub.MerchantId)
 				if merchant != nil {
-					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
+					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
 						UserName:              oneUser.FirstName + " " + oneUser.LastName,
 						MerchantProductName:   plan.PlanName,
 						MerchantCustomerEmail: merchant.Email,

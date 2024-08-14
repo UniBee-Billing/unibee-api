@@ -2,17 +2,16 @@ package email
 
 import (
 	"context"
-	"encoding/base64"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
-	"os"
 	"strings"
 	"unibee/api/bean"
 	log2 "unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/email/gateway"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/merchant_config/update"
 	"unibee/internal/logic/operation_log"
@@ -23,10 +22,6 @@ import (
 	// entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	// "os"
 	"fmt"
-	"log"
-
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 const (
@@ -93,55 +88,6 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 	return err
 }
 
-func SendTemplateEmailToUser(emailGatewayKey string, mailTo string, subject string, body string) (result string, err error) {
-	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
-	to := mail.NewEmail(mailTo, mailTo)
-	plainTextContent := body
-	htmlContent := "<div>" + body + " </div>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(emailGatewayKey)
-	response, err := client.Send(message)
-	if err != nil {
-		log.Println(err)
-		return "", err
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-	}
-	return utility.MarshalToJsonString(response), nil
-}
-
-func SendPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
-	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
-	to := mail.NewEmail(mailTo, mailTo)
-	plainTextContent := body
-	htmlContent := "<div>" + body + " </div>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	attach := mail.NewAttachment()
-	dat, err := os.ReadFile(pdfFilePath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	encoded := base64.StdEncoding.EncodeToString(dat)
-	attach.SetContent(encoded)
-	attach.SetType("application/pdf")
-	attach.SetFilename(pdfFileName)
-	attach.SetDisposition("attachment")
-	message.AddAttachment(attach)
-	client := sendgrid.NewSendClient(emailGatewayKey)
-	response, err := client.Send(message)
-	if err != nil {
-		fmt.Printf("SendPdfAttachEmailToUser error:%s\n", err.Error())
-		return "", err
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-	}
-	return utility.MarshalToJsonString(response), nil
-}
-
 type TemplateVariable struct {
 	InvoiceId             string      `json:"InvoiceId"`
 	UserName              string      `json:"User name"`
@@ -165,8 +111,7 @@ type TemplateVariable struct {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-// Todo Switch to using Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
-func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)
 	if len(emailGatewayKey) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
@@ -189,13 +134,13 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 				return
 			}
 		}()
-		err = sendTemplateEmailInternal(backgroundCtx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables, emailGatewayKey)
+		err = sendTemplateEmailInternal(backgroundCtx, merchantId, mailTo, timezone, language, templateName, pdfFilePath, templateVariables, emailGatewayKey)
 		utility.AssertError(err, "sendTemplateEmailInternal")
 	}()
 	return nil
 }
 
-func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
+func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
 	var template *bean.MerchantEmailTemplate
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
@@ -232,12 +177,17 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		attachName = "attach"
 	}
 
+	var response string
 	if len(pdfFilePath) > 0 {
 		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		response, err := SendPdfAttachEmailToUser(emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
+		if len(template.GatewayTemplateId) > 0 {
+			response, err = gateway.SendDynamicPdfAttachEmailToUser(emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language, pdfFilePath, attachName+".pdf")
+		} else {
+			response, err = gateway.SendPdfAttachEmailToUser(emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
+		}
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
 		} else {
@@ -249,7 +199,11 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		response, err := SendTemplateEmailToUser(emailGatewayKey, mailTo, title, content)
+		if len(template.GatewayTemplateId) > 0 {
+			response, err = gateway.SendDynamicTemplateEmailToUser(emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language)
+		} else {
+			response, err = gateway.SendEmailToUser(emailGatewayKey, mailTo, title, content)
+		}
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
 		} else {

@@ -31,6 +31,8 @@ type MerchantEmailTemplateColumns struct {
 	IsDeleted          string // 0-UnDeleted，1-Deleted
 	CreateTime         string // create utc time
 	Status             string // 0-Active,1-InActive
+	GatewayTemplateId  string //
+	LanguageData       string //
 }
 
 // merchantEmailTemplateColumns holds the columns for table merchant_email_template.
@@ -46,6 +48,8 @@ var merchantEmailTemplateColumns = MerchantEmailTemplateColumns{
 	IsDeleted:          "is_deleted",
 	CreateTime:         "create_time",
 	Status:             "status",
+	GatewayTemplateId:  "gateway_template_id",
+	LanguageData:       "language_data",
 }
 
 // NewMerchantEmailTemplateDao creates and returns a new DAO object for table data access.

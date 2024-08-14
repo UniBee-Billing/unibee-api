@@ -1620,7 +1620,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 				//first trial period without payment
 				template = email.TemplateSubscriptionCancelledByTrialEnd
 			}
-			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, template, "", &email.TemplateVariable{
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, template, "", &email.TemplateVariable{
 				UserName:              user.FirstName + " " + user.LastName,
 				MerchantProductName:   plan.PlanName,
 				MerchantCustomerEmail: merchant.Email,
@@ -1678,7 +1678,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	// SendEmail
 	if merchantMemberId > 0 {
 		//merchant Cancel
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
 			UserName:              user.FirstName + " " + user.LastName,
 			MerchantProductName:   plan.PlanName,
 			MerchantCustomerEmail: merchant.Email,
@@ -1689,7 +1689,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelAtPeriodEnd:%s", err.Error())
 		}
 	} else {
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
 			UserName:              user.FirstName + " " + user.LastName,
 			MerchantProductName:   plan.PlanName,
 			MerchantCustomerEmail: merchant.Email,
@@ -1738,7 +1738,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
 		UserName:              user.FirstName + " " + user.LastName,
 		MerchantProductName:   plan.PlanName,
 		MerchantCustomerEmail: merchant.Email,
@@ -1848,7 +1848,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if oneUser != nil && plan != nil && merchant != nil {
-			err := email.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionTrialStart, "", &email.TemplateVariable{
+			err := email.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionTrialStart, "", &email.TemplateVariable{
 				UserName:              oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName:   plan.PlanName,
 				MerchantCustomerEmail: merchant.Email,

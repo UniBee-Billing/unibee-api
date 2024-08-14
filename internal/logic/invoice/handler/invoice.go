@@ -547,7 +547,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 			} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
 				template = email.TemplateInvoiceCancel
 			}
-			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
+			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &email.TemplateVariable{
 				InvoiceId:             one.InvoiceId,
 				UserName:              user.FirstName + " " + user.LastName,
 				MerchantProductName:   one.ProductName,
@@ -592,7 +592,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				} else {
 					return nil
 				}
-				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
+				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &email.TemplateVariable{
 					InvoiceId:             one.InvoiceId,
 					UserName:              user.FirstName + " " + user.LastName,
 					MerchantProductName:   one.ProductName,

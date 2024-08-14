@@ -13,6 +13,8 @@ type MerchantEmailTemplate struct {
 	CreateTime          int64  `json:"createTime"         description:"create utc time"` // create utc time
 	UpdateTime          int64  `json:"updateTime"         description:"update utc time"` // create utc time
 	Status              string `json:"status"             description:""`                //
+	GatewayTemplateId   string `json:"gatewayTemplateId"  description:""`                //
+	LanguageData        string `json:"languageData"       description:""`                //
 }
 
 func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) *MerchantEmailTemplate {
@@ -31,5 +33,7 @@ func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) 
 		CreateTime:          emailTemplate.CreateTime,
 		UpdateTime:          emailTemplate.GmtModify.Timestamp(),
 		Status:              status,
+		GatewayTemplateId:   emailTemplate.GatewayTemplateId,
+		LanguageData:        emailTemplate.LanguageData,
 	}
 }

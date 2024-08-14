@@ -75,7 +75,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	_, err = g.Redis().Expire(ctx, CacheKeyUserRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	err = email.SendTemplateEmail(ctx, _interface.GetMerchantId(ctx), req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, _interface.GetMerchantId(ctx), req.Email, "", "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

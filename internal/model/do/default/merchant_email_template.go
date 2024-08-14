@@ -23,4 +23,6 @@ type MerchantEmailTemplate struct {
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
 	CreateTime         interface{} // create utc time
 	Status             interface{} // 0-Active,1-InActive
+	GatewayTemplateId  interface{} //
+	LanguageData       interface{} //
 }

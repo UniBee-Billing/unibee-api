@@ -384,7 +384,7 @@ func SendAuthorizedEmailBackground(invoice *entity.Invoice) {
 		merchant := query.GetMerchantById(ctx, invoice.MerchantId)
 		oneUser := query.GetUserAccountById(ctx, invoice.UserId)
 		if oneUser != nil && merchant != nil {
-			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
+			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
 				UserName:              oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName:   invoice.ProductName,
 				MerchantCustomerEmail: merchant.Email,
