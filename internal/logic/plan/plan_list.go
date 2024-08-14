@@ -19,7 +19,7 @@ import (
 type ListInternalReq struct {
 	MerchantId    uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
 	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
-	Type          []int   `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
+	Type          []int   `json:"type" dc:"Default All，,1-main plan，2-recurring addon, 3-one time addon" `
 	Status        []int   `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int     `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
 	Currency      string  `json:"currency" dc:"Currency"  `
