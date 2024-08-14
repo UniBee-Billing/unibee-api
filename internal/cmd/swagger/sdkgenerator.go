@@ -26,6 +26,14 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 				_ = api.Remove("components#schemas#" + key)
 				continue
 			}
+			if strings.HasPrefix(key, "unibee.api.merchant.oss") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, "unibee.api.merchant.task") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
 		}
 		for key, path := range api.GetJsonMap("paths") {
 			//if path.Contains("post") {
@@ -66,6 +74,14 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 		for key, path := range api.GetJsonMap("components#schemas") {
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if strings.HasPrefix(key, "unibee.api.user") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, "unibee.api.merchant.oss") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, "unibee.api.merchant.task") {
 				_ = api.Remove("components#schemas#" + key)
 				continue
 			}
