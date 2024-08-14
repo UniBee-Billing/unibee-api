@@ -58,6 +58,7 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 				continue
 			}
 		}
+
 		// generator error to format type of map[string]interface {}
 		response := api.String()
 		//response := strings.Replace(api.String(), "map[string]interface {}", "interface {}", -1)
