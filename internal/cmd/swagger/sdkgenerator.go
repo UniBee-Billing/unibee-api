@@ -49,6 +49,14 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 				_ = api.Remove("paths#" + key)
 				continue
 			}
+			if strings.HasPrefix(key, fmt.Sprintf("/merchant/task")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, fmt.Sprintf("/merchant/oss")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
 		}
 		// generator error to format type of map[string]interface {}
 		response := api.String()
@@ -97,6 +105,14 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/merchant")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, fmt.Sprintf("/merchant/task")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, fmt.Sprintf("/merchant/oss")) {
 				_ = api.Remove("paths#" + key)
 				continue
 			}
