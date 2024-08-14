@@ -11,7 +11,7 @@ import (
 func (c *ControllerProduct) List(ctx context.Context, req *product.ListReq) (res *product.ListRes, err error) {
 	list, total := product2.ProductList(ctx, &product2.ListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
-		Status:     []int{1},
+		Status:     []int{1, 2},
 		SortField:  req.SortField,
 		SortType:   req.SortType,
 		Page:       req.Page,
