@@ -16,16 +16,13 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 	}
 
-	var productIds = make([]int64, 0)
-	if req.ProductId > 0 {
-		productIds = append(productIds, req.ProductId)
-	} else if req.ProductId == 0 {
-		productIds = append(productIds, 0)
+	if len(req.ProductIds) == 0 {
+		req.ProductIds = append(req.ProductIds, 0)
 	}
 
 	publishPlans, total := plan2.PlanList(ctx, &plan2.ListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
-		ProductIds:    productIds,
+		ProductIds:    req.ProductIds,
 		Type:          req.Type,
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
@@ -33,13 +30,15 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		Page:          req.Page,
 		Count:         req.Count,
 	})
-	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx), req.ProductId)
-	if sub != nil {
-		subPlan := query.GetPlanById(ctx, sub.PlanId)
-		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {
-			userPlan, _ := plan2.PlanDetail(ctx, _interface.GetMerchantId(ctx), subPlan.Id)
-			if userPlan != nil {
-				publishPlans = append(publishPlans, userPlan.Plan)
+	for _, productId := range req.ProductIds {
+		sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx), productId)
+		if sub != nil {
+			subPlan := query.GetPlanById(ctx, sub.PlanId)
+			if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {
+				userPlan, _ := plan2.PlanDetail(ctx, _interface.GetMerchantId(ctx), subPlan.Id)
+				if userPlan != nil {
+					publishPlans = append(publishPlans, userPlan.Plan)
+				}
 			}
 		}
 	}
