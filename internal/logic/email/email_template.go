@@ -41,6 +41,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*be
 					} else {
 						vo.Status = "InActive"
 					}
+					vo.TemplateDescription = merchantEmailTemplate.TemplateDescription
 					vo.TemplateTitle = merchantEmailTemplate.TemplateTitle
 					vo.TemplateContent = merchantEmailTemplate.TemplateContent
 					vo.CreateTime = merchantEmailTemplate.CreateTime
@@ -74,26 +75,28 @@ func UpdateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templat
 	if one == nil {
 		//insert
 		one = &entity.MerchantEmailTemplate{
-			MerchantId:         merchantId,
-			TemplateName:       defaultTemplate.TemplateName,
-			TemplateTitle:      templateTitle,
-			TemplateContent:    templateContent,
-			TemplateAttachName: defaultTemplate.TemplateAttachName,
-			CreateTime:         gtime.Now().Timestamp(),
-			Status:             0,
+			MerchantId:          merchantId,
+			TemplateName:        defaultTemplate.TemplateName,
+			TemplateDescription: defaultTemplate.TemplateDescription,
+			TemplateTitle:       templateTitle,
+			TemplateContent:     templateContent,
+			TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			CreateTime:          gtime.Now().Timestamp(),
+			Status:              0,
 		}
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(one).Insert(one)
 		return err
 	} else {
 		//update
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(g.Map{
-			dao.MerchantEmailTemplate.Columns().MerchantId:         merchantId,
-			dao.MerchantEmailTemplate.Columns().TemplateName:       defaultTemplate.TemplateName,
-			dao.MerchantEmailTemplate.Columns().TemplateTitle:      templateTitle,
-			dao.MerchantEmailTemplate.Columns().TemplateContent:    templateContent,
-			dao.MerchantEmailTemplate.Columns().TemplateAttachName: defaultTemplate.TemplateAttachName,
-			dao.MerchantEmailTemplate.Columns().GmtModify:          gtime.Now(),
-			dao.MerchantEmailTemplate.Columns().Status:             0,
+			dao.MerchantEmailTemplate.Columns().MerchantId:          merchantId,
+			dao.MerchantEmailTemplate.Columns().TemplateName:        defaultTemplate.TemplateName,
+			dao.MerchantEmailTemplate.Columns().TemplateDescription: defaultTemplate.TemplateDescription,
+			dao.MerchantEmailTemplate.Columns().TemplateTitle:       templateTitle,
+			dao.MerchantEmailTemplate.Columns().TemplateContent:     templateContent,
+			dao.MerchantEmailTemplate.Columns().TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			dao.MerchantEmailTemplate.Columns().GmtModify:           gtime.Now(),
+			dao.MerchantEmailTemplate.Columns().Status:              0,
 		}).Where(dao.Invoice.Columns().Id, one.Id).Update()
 		return err
 	}
@@ -117,26 +120,28 @@ func SetMerchantEmailTemplateDefault(ctx context.Context, merchantId uint64, tem
 	if one == nil {
 		//insert
 		one = &entity.MerchantEmailTemplate{
-			MerchantId:         merchantId,
-			TemplateName:       defaultTemplate.TemplateName,
-			TemplateTitle:      defaultTemplate.TemplateTitle,
-			TemplateContent:    defaultTemplate.TemplateContent,
-			TemplateAttachName: defaultTemplate.TemplateAttachName,
-			CreateTime:         gtime.Now().Timestamp(),
-			Status:             0,
+			MerchantId:          merchantId,
+			TemplateName:        defaultTemplate.TemplateName,
+			TemplateDescription: defaultTemplate.TemplateDescription,
+			TemplateTitle:       defaultTemplate.TemplateTitle,
+			TemplateContent:     defaultTemplate.TemplateContent,
+			TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			CreateTime:          gtime.Now().Timestamp(),
+			Status:              0,
 		}
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(one).Insert(one)
 		return err
 	} else {
 		//update
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(g.Map{
-			dao.MerchantEmailTemplate.Columns().MerchantId:         merchantId,
-			dao.MerchantEmailTemplate.Columns().TemplateName:       defaultTemplate.TemplateName,
-			dao.MerchantEmailTemplate.Columns().TemplateTitle:      defaultTemplate.TemplateTitle,
-			dao.MerchantEmailTemplate.Columns().TemplateContent:    defaultTemplate.TemplateContent,
-			dao.MerchantEmailTemplate.Columns().TemplateAttachName: defaultTemplate.TemplateAttachName,
-			dao.MerchantEmailTemplate.Columns().GmtModify:          gtime.Now(),
-			dao.MerchantEmailTemplate.Columns().Status:             0,
+			dao.MerchantEmailTemplate.Columns().MerchantId:          merchantId,
+			dao.MerchantEmailTemplate.Columns().TemplateName:        defaultTemplate.TemplateName,
+			dao.MerchantEmailTemplate.Columns().TemplateDescription: defaultTemplate.TemplateDescription,
+			dao.MerchantEmailTemplate.Columns().TemplateTitle:       defaultTemplate.TemplateTitle,
+			dao.MerchantEmailTemplate.Columns().TemplateContent:     defaultTemplate.TemplateContent,
+			dao.MerchantEmailTemplate.Columns().TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			dao.MerchantEmailTemplate.Columns().GmtModify:           gtime.Now(),
+			dao.MerchantEmailTemplate.Columns().Status:              0,
 		}).Where(dao.Invoice.Columns().Id, one.Id).Update()
 		return err
 	}
@@ -161,13 +166,14 @@ func ActivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templ
 	if one == nil {
 		//insert
 		one = &entity.MerchantEmailTemplate{
-			MerchantId:         merchantId,
-			TemplateName:       defaultTemplate.TemplateName,
-			TemplateTitle:      defaultTemplate.TemplateTitle,
-			TemplateContent:    defaultTemplate.TemplateContent,
-			TemplateAttachName: defaultTemplate.TemplateAttachName,
-			CreateTime:         gtime.Now().Timestamp(),
-			Status:             0,
+			MerchantId:          merchantId,
+			TemplateName:        defaultTemplate.TemplateName,
+			TemplateDescription: defaultTemplate.TemplateDescription,
+			TemplateTitle:       defaultTemplate.TemplateTitle,
+			TemplateContent:     defaultTemplate.TemplateContent,
+			TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			CreateTime:          gtime.Now().Timestamp(),
+			Status:              0,
 		}
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(one).Insert(one)
 		return err
@@ -202,13 +208,14 @@ func DeactivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, tem
 	if one == nil {
 		//insert
 		one = &entity.MerchantEmailTemplate{
-			MerchantId:         merchantId,
-			TemplateName:       defaultTemplate.TemplateName,
-			TemplateTitle:      defaultTemplate.TemplateTitle,
-			TemplateContent:    defaultTemplate.TemplateContent,
-			TemplateAttachName: defaultTemplate.TemplateAttachName,
-			CreateTime:         gtime.Now().Timestamp(),
-			Status:             1,
+			MerchantId:          merchantId,
+			TemplateName:        defaultTemplate.TemplateName,
+			TemplateDescription: defaultTemplate.TemplateDescription,
+			TemplateTitle:       defaultTemplate.TemplateTitle,
+			TemplateContent:     defaultTemplate.TemplateContent,
+			TemplateAttachName:  defaultTemplate.TemplateAttachName,
+			CreateTime:          gtime.Now().Timestamp(),
+			Status:              1,
 		}
 		_, err = dao.MerchantEmailTemplate.Ctx(ctx).Data(one).Insert(one)
 		return err

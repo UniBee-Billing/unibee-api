@@ -11,18 +11,19 @@ import (
 
 // MerchantEmailTemplate is the golang structure of table merchant_email_template for DAO operations like Where/Data.
 type MerchantEmailTemplate struct {
-	g.Meta             `orm:"table:merchant_email_template, do:true"`
-	Id                 interface{} //
-	MerchantId         interface{} //
-	TemplateName       interface{} //
-	TemplateTitle      interface{} //
-	TemplateContent    interface{} //
-	TemplateAttachName interface{} //
-	GmtCreate          *gtime.Time // create time
-	GmtModify          *gtime.Time // update time
-	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
-	CreateTime         interface{} // create utc time
-	Status             interface{} // 0-Active,1-InActive
-	GatewayTemplateId  interface{} //
-	LanguageData       interface{} //
+	g.Meta              `orm:"table:merchant_email_template, do:true"`
+	Id                  interface{} //
+	MerchantId          interface{} //
+	TemplateName        interface{} //
+	TemplateTitle       interface{} //
+	TemplateContent     interface{} //
+	TemplateAttachName  interface{} //
+	GmtCreate           *gtime.Time // create time
+	GmtModify           *gtime.Time // update time
+	IsDeleted           interface{} // 0-UnDeleted，1-Deleted
+	CreateTime          interface{} // create utc time
+	Status              interface{} // 0-Active,1-InActive
+	GatewayTemplateId   interface{} //
+	LanguageData        interface{} //
+	TemplateDescription interface{} //
 }

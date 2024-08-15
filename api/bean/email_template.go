@@ -37,3 +37,15 @@ func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) 
 		LanguageData:        emailTemplate.LanguageData,
 	}
 }
+
+type MerchantLocalizationEmailTemplate struct {
+	TemplateName        string                      `json:"templateName"       description:""`  //
+	TemplateDescription string                      `json:"templateDescription" description:""` //
+	Localizations       []EmailLocalizationTemplate `json:"localizations" description:""`       //
+}
+
+type EmailLocalizationTemplate struct {
+	Language string `json:"language"       description:""` //
+	Title    string `json:"title"       description:""`    //
+	Content  string `json:"content"       description:""`  //
+}

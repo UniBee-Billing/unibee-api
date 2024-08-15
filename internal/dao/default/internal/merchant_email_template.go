@@ -20,36 +20,38 @@ type MerchantEmailTemplateDao struct {
 
 // MerchantEmailTemplateColumns defines and stores column names for table merchant_email_template.
 type MerchantEmailTemplateColumns struct {
-	Id                 string //
-	MerchantId         string //
-	TemplateName       string //
-	TemplateTitle      string //
-	TemplateContent    string //
-	TemplateAttachName string //
-	GmtCreate          string // create time
-	GmtModify          string // update time
-	IsDeleted          string // 0-UnDeleted，1-Deleted
-	CreateTime         string // create utc time
-	Status             string // 0-Active,1-InActive
-	GatewayTemplateId  string //
-	LanguageData       string //
+	Id                  string //
+	MerchantId          string //
+	TemplateName        string //
+	TemplateTitle       string //
+	TemplateContent     string //
+	TemplateAttachName  string //
+	GmtCreate           string // create time
+	GmtModify           string // update time
+	IsDeleted           string // 0-UnDeleted，1-Deleted
+	CreateTime          string // create utc time
+	Status              string // 0-Active,1-InActive
+	GatewayTemplateId   string //
+	LanguageData        string //
+	TemplateDescription string //
 }
 
 // merchantEmailTemplateColumns holds the columns for table merchant_email_template.
 var merchantEmailTemplateColumns = MerchantEmailTemplateColumns{
-	Id:                 "id",
-	MerchantId:         "merchant_id",
-	TemplateName:       "template_name",
-	TemplateTitle:      "template_title",
-	TemplateContent:    "template_content",
-	TemplateAttachName: "template_attach_name",
-	GmtCreate:          "gmt_create",
-	GmtModify:          "gmt_modify",
-	IsDeleted:          "is_deleted",
-	CreateTime:         "create_time",
-	Status:             "status",
-	GatewayTemplateId:  "gateway_template_id",
-	LanguageData:       "language_data",
+	Id:                  "id",
+	MerchantId:          "merchant_id",
+	TemplateName:        "template_name",
+	TemplateTitle:       "template_title",
+	TemplateContent:     "template_content",
+	TemplateAttachName:  "template_attach_name",
+	GmtCreate:           "gmt_create",
+	GmtModify:           "gmt_modify",
+	IsDeleted:           "is_deleted",
+	CreateTime:          "create_time",
+	Status:              "status",
+	GatewayTemplateId:   "gateway_template_id",
+	LanguageData:        "language_data",
+	TemplateDescription: "template_description",
 }
 
 // NewMerchantEmailTemplateDao creates and returns a new DAO object for table data access.

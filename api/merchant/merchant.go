@@ -66,6 +66,7 @@ type IMerchantEmail interface {
 	TemplateSetDefault(ctx context.Context, req *email.TemplateSetDefaultReq) (res *email.TemplateSetDefaultRes, err error)
 	TemplateActivate(ctx context.Context, req *email.TemplateActivateReq) (res *email.TemplateActivateRes, err error)
 	TemplateDeactivate(ctx context.Context, req *email.TemplateDeactivateReq) (res *email.TemplateDeactivateRes, err error)
+	CustomizeLocalizationTemplateSync(ctx context.Context, req *email.CustomizeLocalizationTemplateSyncReq) (res *email.CustomizeLocalizationTemplateSyncRes, err error)
 }
 
 type IMerchantGateway interface {
