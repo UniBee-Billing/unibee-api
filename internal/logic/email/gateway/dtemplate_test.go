@@ -41,7 +41,7 @@ func TestSendgridTemplate(t *testing.T) {
 		request := sendgrid.GetRequest(apiKey, "/v3/templates", host)
 		request.Method = "POST"
 		request.Body = []byte(` {
-  "name": "example_template",
+  "name": "[UniBee][MLX]example_template[Linked]",
   "generation":"dynamic"
 }`)
 		response, err := sendgrid.API(request)

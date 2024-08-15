@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"github.com/sendgrid/sendgrid-go"
@@ -96,4 +97,8 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 		fmt.Println(response.Headers)
 	}
 	return utility.MarshalToJsonString(response), nil
+}
+
+func SyncGatewayTemplate(ctx context.Context) {
+
 }
