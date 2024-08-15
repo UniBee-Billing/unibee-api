@@ -263,10 +263,16 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 			//UserPortalTrack
 			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.URL.Path, nil)
-			lang := r.Get("lang")
-			if lang != nil && i18n.IsLangAvailable(lang.String()) {
-				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
-			} else if len(customCtx.User.Lang) > 0 && i18n.IsLangAvailable(customCtx.User.Lang) {
+			lang := ""
+			if r.Get("lang") != nil {
+				lang = r.Get("lang").String()
+			}
+			if len(lang) == 0 {
+				lang = r.GetHeader("lang")
+			}
+			if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+			} else if customCtx.User != nil && len(customCtx.User.Lang) > 0 && i18n.IsLangAvailable(customCtx.User.Lang) {
 				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(customCtx.User.Lang))))
 			}
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
@@ -295,9 +301,15 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = merchantAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
-			lang := r.Get("lang")
-			if lang != nil && i18n.IsLangAvailable(lang.String()) {
-				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
+			lang := ""
+			if r.Get("lang") != nil {
+				lang = r.Get("lang").String()
+			}
+			if len(lang) == 0 {
+				lang = r.GetHeader("lang")
+			}
+			if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
 			}
 		} else {
 			g.Log().Infof(r.Context(), "TokenAuth invalid token type token:%v", utility.MarshalToJsonString(token))
@@ -320,9 +332,15 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			customCtx.MerchantId = merchantInfo.Id
 			customCtx.OpenApiKey = tokenString
 		}
-		lang := r.Get("lang")
-		if lang != nil && i18n.IsLangAvailable(lang.String()) {
-			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang.String()))))
+		lang := ""
+		if r.Get("lang") != nil {
+			lang = r.Get("lang").String()
+		}
+		if len(lang) == 0 {
+			lang = r.GetHeader("lang")
+		}
+		if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
 		}
 	}
 
