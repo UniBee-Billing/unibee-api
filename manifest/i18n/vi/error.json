@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Bạn có một đăng ký khác đang hoạt động hoặc đang chờ xử lý.",
+  "ClickTooFast": "Bạn đang nhấp chuột quá nhanh. Hãy cho nó một giây và thử lại.",
+  "AmountNotMatch": "Bạn cần một thẻ hoặc Paypal để thanh toán cho gói này.",
+  "PlanTrialGatewayError": "Bạn cần một thẻ hoặc Paypal để thanh toán cho gói này.",
+  "VatValidateError": "Số VAT không hợp lệ: %s.",
+  "VatGatewayNeedSetup": "Cổng VAT cần được thiết lập.",
+  "CountryCodeVatNumberNotMatch": "Mã quốc gia không hợp lệ. Quốc gia có số VAT của bạn: %s.",
+  "DiscountCodeInvalid": "Mã giảm giá không hợp lệ.",
+  "DiscountCodeNotStart": "Mã giảm giá không hoạt động.",
+  "DiscountCodePlanError": "Bạn không thể áp dụng chiết khấu này cho gói đã chọn.",
+  "DiscountCodeReachLimitation": "Mã giảm giá đã đạt đến giới hạn."
+}

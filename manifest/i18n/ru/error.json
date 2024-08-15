@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "У вас уже есть подписка.",
+  "ClickTooFast": "Вы работаете слишком быстро. Подождите немного и попробуйте снова.",
+  "AmountNotMatch": "Эту подписку можно оплатить только картой или PayPal.",
+  "PlanTrialGatewayError": "Эту подписку можно оплатить только картой или PayPal.",
+  "VatValidateError": "Неверный номер НДС: %s.",
+  "VatGatewayNeedSetup": "Необходима настройка НДС.",
+  "CountryCodeVatNumberNotMatch": "Неверный код страны. Страна вашего номера НДС: %s.",
+  "DiscountCodeInvalid": "Неверный промокод.",
+  "DiscountCodeNotStart": "Неактивный промокод.",
+  "DiscountCodePlanError": "Эту скидку нельзя применить к выбранной подписке.",
+  "DiscountCodeReachLimitation": "Лимит промокода достигнут."
+}

@@ -17,7 +17,8 @@ var LangMap = map[string]string{
 	"pt": "portuguese",
 }
 
-// Todo Switch to using Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
+// Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
+// https://www.twilio.com/docs/sendgrid/api-reference
 func SendDynamicTemplateEmailToUser(emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
