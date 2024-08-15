@@ -380,6 +380,10 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 }
 
 func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool, manualSend bool) (err error) {
+	return InvoicePdfGenerateAndEmailSendByTargetTemplateBackground(invoiceId, sendUserEmail, manualSend, "")
+}
+
+func InvoicePdfGenerateAndEmailSendByTargetTemplateBackground(invoiceId string, sendUserEmail bool, manualSend bool, targetTemplate string) (err error) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -419,7 +423,7 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
-			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend)
+			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend, targetTemplate)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()
@@ -483,7 +487,7 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	return err
 }
 
-func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bool) error {
+func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bool, sendTemplate string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	if one.TotalAmount <= 0 {
@@ -546,6 +550,9 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				}
 			} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
 				template = email.TemplateInvoiceCancel
+			}
+			if len(sendTemplate) > 0 {
+				template = sendTemplate
 			}
 			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &email.TemplateVariable{
 				InvoiceId:             one.InvoiceId,

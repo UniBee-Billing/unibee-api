@@ -110,6 +110,83 @@ type TemplateVariable struct {
 	Email                 string      `json:"Email"`
 }
 
+func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, variableMap map[string]interface{}) (err error) {
+	_, emailGatewayKey := GetDefaultMerchantEmailConfig(ctx, merchantId)
+	if len(emailGatewayKey) == 0 {
+		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
+			utility.Assert(false, "Default Email Gateway Need Setup")
+		} else {
+			return gerror.New("Default Email Gateway Need Setup")
+		}
+	}
+	var template *bean.MerchantEmailTemplate
+	if merchantId > 0 {
+		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
+	} else {
+		template = query.GetEmailDefaultTemplateByTemplateName(ctx, templateName)
+	}
+	utility.Assert(template != nil, "template not found:"+templateName)
+	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
+	utility.Assert(template != nil, "template not found")
+	utility.Assert(variableMap != nil, "variableMap not found")
+	var title = template.TemplateTitle
+	var content = template.TemplateContent
+	var attachName = template.TemplateAttachName
+	utility.Assert(variableMap != nil, "template parse error")
+	for key, value := range variableMap {
+		mapKey := "{" + key + "}"
+		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
+		htmlValue := "<strong>" + value.(string) + "</strong>"
+		if len(title) > 0 {
+			title = strings.Replace(title, mapKey, value.(string), -1)
+		}
+		if len(content) > 0 {
+			content = strings.Replace(content, htmlKey, htmlValue, -1)
+		}
+		if len(attachName) > 0 {
+			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
+		}
+	}
+	if len(pdfFilePath) > 0 && len(attachName) == 0 {
+		attachName = "attach"
+	}
+
+	var response string
+	if len(pdfFilePath) > 0 {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
+		if !utility.TryLock(ctx, md5, 10) {
+			utility.Assert(false, "duplicate email too fast")
+		}
+		if len(template.GatewayTemplateId) > 0 {
+			response, err = gateway.SendDynamicPdfAttachEmailToUser(emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language, pdfFilePath, attachName+".pdf")
+		} else {
+			response, err = gateway.SendPdfAttachEmailToUser(emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
+		}
+		if err != nil {
+			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
+		} else {
+			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
+		}
+		return err
+	} else {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s", mailTo, title, content))
+		if !utility.TryLock(ctx, md5, 10) {
+			utility.Assert(false, "duplicate email too fast")
+		}
+		if len(template.GatewayTemplateId) > 0 {
+			response, err = gateway.SendDynamicTemplateEmailToUser(emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language)
+		} else {
+			response, err = gateway.SendEmailToUser(emailGatewayKey, mailTo, title, content)
+		}
+		if err != nil {
+			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
+		} else {
+			SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
+		}
+		return err
+	}
+}
+
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)

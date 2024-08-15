@@ -25,6 +25,7 @@ type PdfUpdateReq struct {
 	LocalizedExchangeRate *float64 `json:"localizedExchangeRate" dc:"LocalizedExchangeRate, exchange rate must set while LocalizedCurrency enabled"`
 	ShowDetailItem        *bool    `json:"showDetailItem" d:"false" dc:"ShowDetailItem, whether to display detail item information in pdf generate, unitAmount, quantity, etc."`
 	SendUserEmail         bool     `json:"sendUserEmail" d:"false" dc:"Whether sen invoice email to user or not，default false"`
+	Template              string   `json:"template" dc:"Template"`
 }
 type PdfUpdateRes struct {
 }

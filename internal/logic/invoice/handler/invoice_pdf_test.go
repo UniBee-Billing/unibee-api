@@ -33,7 +33,7 @@ func TestGenerateInvoicePdf(t *testing.T) {
 }
 
 func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
-	_ = SendInvoiceEmailToUser(context.Background(), "iv20240316QYuw5DQGcABgHDn", true)
+	_ = SendInvoiceEmailToUser(context.Background(), "iv20240316QYuw5DQGcABgHDn", true, "")
 }
 
 func TestGenerate(t *testing.T) {

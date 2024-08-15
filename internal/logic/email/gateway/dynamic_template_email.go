@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"os"
@@ -99,6 +103,36 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 	return utility.MarshalToJsonString(response), nil
 }
 
-func SyncGatewayTemplate(ctx context.Context) {
+var sendGridHost = "https://api.sendgrid.com"
 
+func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName string, title string, content string) (templateId string, err error) {
+	name := fmt.Sprintf("[UniBee]%s", templateName)
+	request := sendgrid.GetRequest(apiKey, "/v3/templates", sendGridHost)
+	request.Method = "POST"
+	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": name, "generation": "dynamic"}))
+	response, err := sendgrid.API(request)
+	if err != nil {
+		g.Log().Error(ctx, "Create Sendgrid template error:%s", err.Error())
+		return "", gerror.New(fmt.Sprintf("Create template error:%s", err.Error()))
+	}
+	data := gjson.New(response.Body)
+	if data == nil || !data.Contains("id") || data.Get("id") == nil || len(data.Get("id").String()) == 0 || response.StatusCode != 201 {
+		return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
+	}
+	templateId = data.Get("id").String()
+	if len(templateId) == 0 {
+		return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
+	}
+	request = sendgrid.GetRequest(apiKey, fmt.Sprintf("/v3/templates/%s/versions", templateId), sendGridHost)
+	request.Method = "POST"
+	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": fmt.Sprintf("[UniBeeVersion]%d", gtime.Now().Timestamp()), "html_content": content, "subject": title}))
+	response, err = sendgrid.API(request)
+	if err != nil {
+		g.Log().Error(ctx, "Create Sendgrid template version error:%s", err.Error())
+		return "", gerror.New(fmt.Sprintf("Create template version error:%s", err.Error()))
+	}
+	if data == nil || !data.Contains("id") || data.Get("id") == nil || len(data.Get("id").String()) == 0 || response.StatusCode != 201 {
+		return "", gerror.Newf("Create template version error,no templateVersionId, code:%v", response.StatusCode)
+	}
+	return templateId, nil
 }

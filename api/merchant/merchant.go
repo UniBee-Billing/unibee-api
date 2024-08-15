@@ -60,6 +60,7 @@ type IMerchantDiscount interface {
 
 type IMerchantEmail interface {
 	GatewaySetup(ctx context.Context, req *email.GatewaySetupReq) (res *email.GatewaySetupRes, err error)
+	SendTemplateEmailToUser(ctx context.Context, req *email.SendTemplateEmailToUserReq) (res *email.SendTemplateEmailToUserRes, err error)
 	TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error)
 	TemplateUpdate(ctx context.Context, req *email.TemplateUpdateReq) (res *email.TemplateUpdateRes, err error)
 	TemplateSetDefault(ctx context.Context, req *email.TemplateSetDefaultReq) (res *email.TemplateSetDefaultRes, err error)
