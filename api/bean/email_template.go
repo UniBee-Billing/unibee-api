@@ -39,13 +39,15 @@ func SimplifyMerchantEmailTemplate(emailTemplate *entity.MerchantEmailTemplate) 
 }
 
 type MerchantLocalizationEmailTemplate struct {
-	TemplateName        string                      `json:"templateName"       description:""`  //
-	TemplateDescription string                      `json:"templateDescription" description:""` //
-	Localizations       []EmailLocalizationTemplate `json:"localizations" description:""`       //
+	TemplateName        string                       `json:"templateName"       description:""`  //
+	TemplateDescription string                       `json:"templateDescription" description:""` //
+	Attach              string                       `json:"attach"       description:""`        //
+	Localizations       []*EmailLocalizationTemplate `json:"localizations" description:""`       //
 }
 
 type EmailLocalizationTemplate struct {
 	Language string `json:"language"       description:""` //
 	Title    string `json:"title"       description:""`    //
 	Content  string `json:"content"       description:""`  //
+
 }

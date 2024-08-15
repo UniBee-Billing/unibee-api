@@ -1,4 +1,4 @@
-package email
+package gateway
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 )
 
 func readEmailHtmlTemplate() (string, error) {
-	data, err := os.ReadFile("./email/template.html")
+	data, err := os.ReadFile("template.html")
 	if err != nil {
 		return "", gerror.New(fmt.Sprintf("readEmailHtmlTemplate error:%s", err.Error()))
 	}
 	return string(data), nil
 }
 
-func ContentToHtmlPage(content string) string {
+func ConvertToHtmlPage(content string) string {
 	template, err := readEmailHtmlTemplate()
 	utility.AssertError(err, "ReadEmailHtmlTemplate")
 	template = strings.ReplaceAll(template, "{{content}}", content)
@@ -25,7 +25,7 @@ func ContentToHtmlPage(content string) string {
 
 func ConvertPainToHtmlContent(content string) string {
 	content = fmt.Sprintf("<p>%s</p>", content)
-	content = strings.ReplaceAll(content, "\n", "</p><p>")
+	content = strings.ReplaceAll(content, "\n", "</p>\n<p>")
 	return content
 }
 

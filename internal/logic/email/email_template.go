@@ -20,8 +20,8 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*be
 			for _, emailTemplate := range defaultTemplateList {
 				var merchantEmailTemplate *entity.MerchantEmailTemplate
 				err = dao.MerchantEmailTemplate.Ctx(ctx).
-					Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-					Where(entity.MerchantEmailTemplate{TemplateName: emailTemplate.TemplateName}).
+					Where(dao.MerchantEmailTemplate.Columns().MerchantId, merchantId).
+					Where(dao.MerchantEmailTemplate.Columns().TemplateName, emailTemplate.TemplateName).
 					Scan(&merchantEmailTemplate)
 				vo := &bean.MerchantEmailTemplate{
 					Id:                  emailTemplate.Id,
@@ -62,14 +62,14 @@ func UpdateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templat
 	utility.Assert(len(templateContent) > 0, "Invalid TemplateContent")
 	var defaultTemplate *entity.EmailDefaultTemplate
 	err := dao.EmailDefaultTemplate.Ctx(ctx).
-		Where(entity.EmailDefaultTemplate{TemplateName: templateName}).
+		Where(dao.EmailDefaultTemplate.Columns().TemplateName, templateName).
 		Scan(&defaultTemplate)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(defaultTemplate != nil, "Default Template Not Found")
 	var one *entity.MerchantEmailTemplate
 	err = dao.MerchantEmailTemplate.Ctx(ctx).
-		Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-		Where(entity.MerchantEmailTemplate{TemplateName: templateName}).
+		Where(dao.MerchantEmailTemplate.Columns().MerchantId, merchantId).
+		Where(dao.MerchantEmailTemplate.Columns().TemplateName, templateName).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
 	if one == nil {
@@ -107,14 +107,14 @@ func SetMerchantEmailTemplateDefault(ctx context.Context, merchantId uint64, tem
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate
 	err := dao.EmailDefaultTemplate.Ctx(ctx).
-		Where(entity.EmailDefaultTemplate{TemplateName: templateName}).
+		Where(dao.EmailDefaultTemplate.Columns().TemplateName, templateName).
 		Scan(&defaultTemplate)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(defaultTemplate != nil, "Default Template Not Found")
 	var one *entity.MerchantEmailTemplate
 	err = dao.MerchantEmailTemplate.Ctx(ctx).
-		Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-		Where(entity.MerchantEmailTemplate{TemplateName: templateName}).
+		Where(dao.MerchantEmailTemplate.Columns().MerchantId, merchantId).
+		Where(dao.MerchantEmailTemplate.Columns().TemplateName, templateName).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
 	if one == nil {
@@ -152,14 +152,14 @@ func ActivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templ
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate
 	err := dao.EmailDefaultTemplate.Ctx(ctx).
-		Where(entity.EmailDefaultTemplate{TemplateName: templateName}).
+		Where(dao.EmailDefaultTemplate.Columns().TemplateName, templateName).
 		Scan(&defaultTemplate)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(defaultTemplate != nil, "Default Template Not Found")
 	var one *entity.MerchantEmailTemplate
 	err = dao.MerchantEmailTemplate.Ctx(ctx).
-		Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-		Where(entity.MerchantEmailTemplate{TemplateName: templateName}).
+		Where(dao.MerchantEmailTemplate.Columns().MerchantId, merchantId).
+		Where(dao.MerchantEmailTemplate.Columns().TemplateName, templateName).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
 
@@ -195,14 +195,14 @@ func DeactivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, tem
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate
 	err := dao.EmailDefaultTemplate.Ctx(ctx).
-		Where(entity.EmailDefaultTemplate{TemplateName: templateName}).
+		Where(dao.EmailDefaultTemplate.Columns().TemplateName, templateName).
 		Scan(&defaultTemplate)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(defaultTemplate != nil, "Default Template Not Found")
 	var one *entity.MerchantEmailTemplate
 	err = dao.MerchantEmailTemplate.Ctx(ctx).
-		Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-		Where(entity.MerchantEmailTemplate{TemplateName: templateName}).
+		Where(dao.MerchantEmailTemplate.Columns().MerchantId, merchantId).
+		Where(dao.MerchantEmailTemplate.Columns().TemplateName, templateName).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
 	if one == nil {
