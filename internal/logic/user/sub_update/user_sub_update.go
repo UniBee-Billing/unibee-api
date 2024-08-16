@@ -17,10 +17,6 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, 
 		var subName = ""
 		if one != nil && user != nil && user.SubscriptionId == subscriptionId {
 			plan := query.GetPlanById(ctx, one.PlanId)
-			if plan.ProductId > 0 {
-				// only record the default subscription
-				return
-			}
 
 			if plan != nil {
 				subName = plan.PlanName
@@ -47,10 +43,6 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 		var subName = ""
 		if one != nil && user != nil {
 			plan := query.GetPlanById(ctx, one.PlanId)
-			if plan.ProductId > 0 {
-				// only record the default subscription
-				return
-			}
 			if plan != nil {
 				subName = plan.PlanName
 			}
@@ -60,7 +52,6 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
 				dao.UserAccount.Columns().SubscriptionName:   subName,
 				dao.UserAccount.Columns().BillingType:        1,
-				dao.UserAccount.Columns().RecurringAmount:    user.RecurringAmount + one.Amount,
 				dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, userId).OmitNil().Update()
 			if err != nil {
