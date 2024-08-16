@@ -13,16 +13,13 @@ import (
 	"unibee/utility"
 )
 
-func SyncMerchantEmailTemplateToGateway(ctx context.Context, id int64) error {
+func SyncMerchantEmailTemplateToGateway(ctx context.Context, id int64, versionEnable bool) error {
 	var one *entity.MerchantEmailTemplate
 	err := dao.MerchantEmailTemplate.Ctx(ctx).
 		Where(dao.MerchantEmailTemplate.Columns().Id, id).
 		Scan(&one)
 	if err != nil {
 		return err
-	}
-	if len(one.GatewayTemplateId) > 0 {
-		return gerror.New("Already Sync To Gateway")
 	}
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(ctx, one.MerchantId)
 	if len(emailGatewayKey) == 0 {
@@ -41,7 +38,7 @@ func SyncMerchantEmailTemplateToGateway(ctx context.Context, id int64) error {
 	if len(one.TemplateDescription) > 0 {
 		gatewayTemplateName = fmt.Sprintf("[%d][%d][%s][%s]", one.Id, one.MerchantId, one.TemplateName, TruncateWithEllipsis(one.TemplateDescription, 30, "..."))
 	}
-	templateId, err := gateway.SyncToGatewayTemplate(ctx, emailGatewayKey, gatewayTemplateName, content)
+	templateId, err := gateway.SyncToGatewayTemplate(ctx, emailGatewayKey, gatewayTemplateName, content, one.GatewayTemplateId, versionEnable)
 	if err != nil {
 		return err
 	}

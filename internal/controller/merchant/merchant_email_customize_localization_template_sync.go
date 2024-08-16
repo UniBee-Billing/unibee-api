@@ -65,7 +65,7 @@ func (c *ControllerEmail) CustomizeLocalizationTemplateSync(ctx context.Context,
 			}).Where(dao.Invoice.Columns().Id, one.Id).Update()
 		}
 		//Sync to Gateway
-		err = email2.SyncMerchantEmailTemplateToGateway(ctx, one.Id)
+		err = email2.SyncMerchantEmailTemplateToGateway(ctx, one.Id, req.VersionEnable)
 		if err != nil {
 			g.Log().Errorf(ctx, `SyncMerchantEmailTemplateToGateway error %s`, err.Error())
 			continue

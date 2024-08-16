@@ -117,32 +117,41 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 
 var sendGridHost = "https://api.sendgrid.com"
 
-func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName string, content string) (templateId string, err error) {
+func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName string, content string, oldTemplateId string, versionEnable bool) (templateId string, err error) {
 	name := fmt.Sprintf("[UniBee]%s", templateName)
-	request := sendgrid.GetRequest(apiKey, "/v3/templates", sendGridHost)
+	if len(oldTemplateId) == 0 {
+		request := sendgrid.GetRequest(apiKey, "/v3/templates", sendGridHost)
+		request.Method = "POST"
+		request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": name, "generation": "dynamic"}))
+		response, err := sendgrid.API(request)
+		if err != nil {
+			g.Log().Error(ctx, "Create Sendgrid template error:%s", err.Error())
+			return "", gerror.New(fmt.Sprintf("Create template error:%s", err.Error()))
+		}
+		data := gjson.New(response.Body)
+		if data == nil || !data.Contains("id") || data.Get("id") == nil || len(data.Get("id").String()) == 0 || response.StatusCode != 201 {
+			return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
+		}
+		templateId = data.Get("id").String()
+		if len(templateId) == 0 {
+			return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
+		}
+	} else {
+		templateId = oldTemplateId
+	}
+	param := map[string]interface{}{"name": fmt.Sprintf("[UniBeeVersion]%d", gtime.Now().Timestamp()), "html_content": content, "subject": "{{Subject}}"}
+	if versionEnable {
+		param["active"] = 1
+	}
+	request := sendgrid.GetRequest(apiKey, fmt.Sprintf("/v3/templates/%s/versions", templateId), sendGridHost)
 	request.Method = "POST"
-	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": name, "generation": "dynamic"}))
+	request.Body = []byte(utility.MarshalToJsonString(param))
 	response, err := sendgrid.API(request)
-	if err != nil {
-		g.Log().Error(ctx, "Create Sendgrid template error:%s", err.Error())
-		return "", gerror.New(fmt.Sprintf("Create template error:%s", err.Error()))
-	}
-	data := gjson.New(response.Body)
-	if data == nil || !data.Contains("id") || data.Get("id") == nil || len(data.Get("id").String()) == 0 || response.StatusCode != 201 {
-		return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
-	}
-	templateId = data.Get("id").String()
-	if len(templateId) == 0 {
-		return "", gerror.Newf("Create template error,no templateId, code:%v", response.StatusCode)
-	}
-	request = sendgrid.GetRequest(apiKey, fmt.Sprintf("/v3/templates/%s/versions", templateId), sendGridHost)
-	request.Method = "POST"
-	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": fmt.Sprintf("[UniBeeVersion]%d", gtime.Now().Timestamp()), "html_content": content, "subject": "{{Subject}}"}))
-	response, err = sendgrid.API(request)
 	if err != nil {
 		g.Log().Error(ctx, "Create Sendgrid template version error:%s", err.Error())
 		return "", gerror.New(fmt.Sprintf("Create template version error:%s", err.Error()))
 	}
+	data := gjson.New(response.Body)
 	if data == nil || !data.Contains("id") || data.Get("id") == nil || len(data.Get("id").String()) == 0 || response.StatusCode != 201 {
 		return "", gerror.Newf("Create template version error,no templateVersionId, code:%v", response.StatusCode)
 	}

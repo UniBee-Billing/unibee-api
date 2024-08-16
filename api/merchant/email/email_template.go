@@ -49,8 +49,9 @@ type TemplateDeactivateRes struct {
 }
 
 type CustomizeLocalizationTemplateSyncReq struct {
-	g.Meta       `path:"/custom_localization_template_sync" tags:"EmailTemplate" method:"post" summary:"CustomizeLocalizationTemplateSync" dc:"Sync the custom localization email template to gateway (sendgrid)"`
-	TemplateData []bean.MerchantLocalizationEmailTemplate `json:"templateData" dc:"TemplateData" v:"required"`
+	g.Meta        `path:"/custom_localization_template_sync" tags:"EmailTemplate" method:"post" summary:"CustomizeLocalizationTemplateSync" dc:"Sync the custom localization email template to gateway (sendgrid)"`
+	TemplateData  []bean.MerchantLocalizationEmailTemplate `json:"templateData" dc:"TemplateData" v:"required"`
+	VersionEnable bool                                     `json:"versionEnable" dc:"VersionEnable"`
 }
 
 type CustomizeLocalizationTemplateSyncRes struct {
