@@ -133,7 +133,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	for key, value := range variableMap {
-		mapKey := "{" + key + "}"
+		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
@@ -147,7 +147,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 		}
 	}
 	for key, value := range variableMap {
-		mapKey := "{{" + key + "}}"
+		mapKey := "{" + key + "}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
@@ -250,7 +250,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	for key, value := range variableMap {
-		mapKey := "{" + key + "}"
+		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
@@ -264,7 +264,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		}
 	}
 	for key, value := range variableMap {
-		mapKey := "{{" + key + "}}"
+		mapKey := "{" + key + "}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
