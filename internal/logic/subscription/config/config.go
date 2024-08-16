@@ -53,9 +53,9 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 			config.TryAutomaticPaymentBeforePeriodEnd = value
 		}
 	}
-	vatREPLACERuleConfig := merchant_config.GetMerchantConfig(ctx, merchantId, GatewayVATRule)
-	if vatREPLACERuleConfig != nil && len(vatREPLACERuleConfig.ConfigValue) > 0 {
-		config.GatewayVATRule = vatREPLACERuleConfig.ConfigValue
+	gatewayVATRule := merchant_config.GetMerchantConfig(ctx, merchantId, GatewayVATRule)
+	if gatewayVATRule != nil && len(gatewayVATRule.ConfigValue) > 0 {
+		config.GatewayVATRule = gatewayVATRule.ConfigValue
 	}
 	return config
 }
