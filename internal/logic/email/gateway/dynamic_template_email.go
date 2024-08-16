@@ -34,7 +34,8 @@ func SendDynamicTemplateEmailToUser(emailGatewayKey string, mailTo string, subje
 		to,
 	}
 	p.AddTos(tos...)
-	p.SetDynamicTemplateData("subject", subject)
+	p.SetDynamicTemplateData("Subject", subject)
+	p.Subject = subject
 	lang := LangMap[language]
 	if len(lang) > 0 {
 		p.SetDynamicTemplateData(lang, true)
@@ -44,6 +45,7 @@ func SendDynamicTemplateEmailToUser(emailGatewayKey string, mailTo string, subje
 	}
 	message.AddPersonalizations(p)
 	message.SetTemplateID(templateId)
+	message.Subject = subject
 
 	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
@@ -72,7 +74,8 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 		to,
 	}
 	p.AddTos(tos...)
-	p.SetDynamicTemplateData("subject", subject)
+	p.SetDynamicTemplateData("Subject", subject)
+	p.Subject = subject
 	lang := LangMap[language]
 	if len(lang) > 0 {
 		p.SetDynamicTemplateData(lang, true)
@@ -82,6 +85,7 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 	}
 	message.AddPersonalizations(p)
 	message.SetTemplateID(templateId)
+	message.Subject = subject
 
 	attach := mail.NewAttachment()
 	dat, err := os.ReadFile(pdfFilePath)
