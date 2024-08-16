@@ -38,6 +38,9 @@ func ReflectTemplateStructToMap(in interface{}, timeZone string) (map[string]int
 				}
 			}
 			out[tagValue] = target
+			if key := fi.Tag.Get("key"); key != "" {
+				out[key] = target
+			}
 		}
 	}
 	return out, nil

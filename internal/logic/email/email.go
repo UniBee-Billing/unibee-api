@@ -90,24 +90,23 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 
 type TemplateVariable struct {
 	InvoiceId             string      `json:"InvoiceId"`
-	UserName              string      `json:"User name"`
-	MerchantProductName   string      `json:"Merchant Product Name"`
-	MerchantCustomerEmail string      `json:"Merchant’s customer support email address"`
-	MerchantName          string      `json:"Merchant Name"`
+	UserName              string      `json:"User name" key:"UserName"`
+	MerchantProductName   string      `json:"Merchant Product Name" key:"ProductName"`
+	MerchantCustomerEmail string      `json:"Merchant’s customer support email address" key:"SupportEmail"`
+	MerchantName          string      `json:"Merchant Name" key:"MerchantName"`
 	DateNow               *gtime.Time `json:"DateNow" layout:"2006-01-02"`
 	PeriodEnd             *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
-	PaymentAmount         string      `json:"Payment Amount"`
-	RefundAmount          string      `json:"Refund Amount"`
-	Currency              string      `json:"Currency"`
+	PaymentAmount         string      `json:"Payment Amount" key:"PaymentAmount"`
+	RefundAmount          string      `json:"Refund Amount" key:"RefundAmount"`
+	Currency              string      `json:"Currency" key:"Currency"`
 	TokenExpireMinute     string      `json:"TokenExpireMinute"`
 	CodeExpireMinute      string      `json:"CodeExpireMinute"`
 	Code                  string      `json:"Code"`
 	Link                  string      `json:"Link"`
-	AccountHolder         string      `json:"Account Holder"`
-	BIC                   string      `json:"BIC"`
-	IBAN                  string      `json:"IBAN"`
-	Address               string      `json:"Address"`
-	Email                 string      `json:"Email"`
+	AccountHolder         string      `json:"Account Holder" key:"WireTransferAccountHolder"`
+	Address               string      `json:"Address" key:"WireTransferAddress"`
+	BIC                   string      `json:"BIC" key:"WireTransferBIC"`
+	IBAN                  string      `json:"IBAN" key:"WireTransferIBAN"`
 }
 
 func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, variableMap map[string]interface{}) (err error) {
