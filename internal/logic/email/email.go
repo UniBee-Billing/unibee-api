@@ -131,6 +131,9 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	var content = template.TemplateContent
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
+	merchant := query.GetMerchantById(ctx, merchantId)
+	utility.Assert(merchant != nil, "merchant not found")
+	variableMap["CompanyName"] = merchant.CompanyName
 	for key, value := range variableMap {
 		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
@@ -248,6 +251,9 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	var content = template.TemplateContent
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
+	merchant := query.GetMerchantById(ctx, merchantId)
+	utility.Assert(merchant != nil, "merchant not found")
+	variableMap["CompanyName"] = merchant.CompanyName
 	for key, value := range variableMap {
 		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
