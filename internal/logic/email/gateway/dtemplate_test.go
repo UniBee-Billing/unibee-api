@@ -77,7 +77,7 @@ func TestSendgridTemplate(t *testing.T) {
 		}
 	})
 	t.Run("Test Create Template By Api", func(t *testing.T) {
-		templateId, err := SyncToGatewayTemplate(context.Background(), apiKey, "SubscriptionCancelledAtPeriodEndByUser", "Title", "Content")
+		templateId, err := SyncToGatewayTemplate(context.Background(), apiKey, "SubscriptionCancelledAtPeriodEndByUser", "Content")
 		if err != nil {
 			log.Println(err)
 		}

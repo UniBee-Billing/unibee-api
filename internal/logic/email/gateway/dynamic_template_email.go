@@ -117,7 +117,7 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 
 var sendGridHost = "https://api.sendgrid.com"
 
-func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName string, title string, content string) (templateId string, err error) {
+func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName string, content string) (templateId string, err error) {
 	name := fmt.Sprintf("[UniBee]%s", templateName)
 	request := sendgrid.GetRequest(apiKey, "/v3/templates", sendGridHost)
 	request.Method = "POST"
