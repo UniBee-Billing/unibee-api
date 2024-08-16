@@ -146,6 +146,20 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
 		}
 	}
+	for key, value := range variableMap {
+		mapKey := "{{" + key + "}}"
+		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
+		htmlValue := "<strong>" + value.(string) + "</strong>"
+		if len(title) > 0 {
+			title = strings.Replace(title, mapKey, value.(string), -1)
+		}
+		if len(content) > 0 {
+			content = strings.Replace(content, htmlKey, htmlValue, -1)
+		}
+		if len(attachName) > 0 {
+			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
+		}
+	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = "attach"
 	}
@@ -249,6 +263,20 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
 		}
 	}
+	for key, value := range variableMap {
+		mapKey := "{{" + key + "}}"
+		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
+		htmlValue := "<strong>" + value.(string) + "</strong>"
+		if len(title) > 0 {
+			title = strings.Replace(title, mapKey, value.(string), -1)
+		}
+		if len(content) > 0 {
+			content = strings.Replace(content, htmlKey, htmlValue, -1)
+		}
+		if len(attachName) > 0 {
+			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
+		}
+	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = "attach"
 	}
@@ -265,9 +293,17 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 			response, err = gateway.SendPdfAttachEmailToUser(emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
 		}
 		if err != nil {
-			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
+			if len(template.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), attachName+".pdf", err.Error())
+			} else {
+				SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
+			}
 		} else {
-			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
+			if len(template.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), attachName+".pdf", response)
+			} else {
+				SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
+			}
 		}
 		return err
 	} else {
@@ -281,9 +317,17 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 			response, err = gateway.SendEmailToUser(emailGatewayKey, mailTo, title, content)
 		}
 		if err != nil {
-			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
+			if len(template.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), "", err.Error())
+			} else {
+				SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
+			}
 		} else {
-			SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
+			if len(template.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), "", response)
+			} else {
+				SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
+			}
 		}
 		return err
 	}
