@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
@@ -128,7 +127,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(variableMap != nil, "variableMap not found")
-	var title = template.TemplateTitle
+	var title = toLocalizationTitle(template.LanguageData, template.TemplateTitle, language)
 	var content = template.TemplateContent
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
@@ -245,7 +244,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	if err != nil {
 		return err
 	}
-	var title = template.TemplateTitle
+	var title = toLocalizationTitle(template.LanguageData, template.TemplateTitle, language)
 	var content = template.TemplateContent
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
@@ -358,6 +357,19 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 	_, _ = dao.MerchantEmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }
 
-func doubleRequestLimit(id string, r *ghttp.Request) {
-
+func toLocalizationTitle(languageData string, defaultTitle string, lang string) (title string) {
+	title = defaultTitle
+	if len(languageData) == 0 || len(lang) == 0 {
+		return title
+	}
+	var list []*bean.EmailLocalizationTemplate
+	err := bean.UnmarshalFromJsonString(languageData, &list)
+	if err == nil {
+		for _, one := range list {
+			if one.Language == lang {
+				title = one.Title
+			}
+		}
+	}
+	return title
 }

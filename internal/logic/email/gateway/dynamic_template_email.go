@@ -137,7 +137,7 @@ func SyncToGatewayTemplate(ctx context.Context, apiKey string, templateName stri
 	}
 	request = sendgrid.GetRequest(apiKey, fmt.Sprintf("/v3/templates/%s/versions", templateId), sendGridHost)
 	request.Method = "POST"
-	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": fmt.Sprintf("[UniBeeVersion]%d", gtime.Now().Timestamp()), "html_content": content, "subject": title}))
+	request.Body = []byte(utility.MarshalToJsonString(map[string]string{"name": fmt.Sprintf("[UniBeeVersion]%d", gtime.Now().Timestamp()), "html_content": content, "subject": "{{Subject}}"}))
 	response, err = sendgrid.API(request)
 	if err != nil {
 		g.Log().Error(ctx, "Create Sendgrid template version error:%s", err.Error())
