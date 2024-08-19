@@ -65,4 +65,5 @@ type UserAccount struct {
 	ZipCode            interface{} // zip_code
 	Language           interface{} // language
 	MetaData           interface{} // meta_data(json)
+	RegistrationNumber interface{} // registration number
 }

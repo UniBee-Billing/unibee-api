@@ -63,4 +63,5 @@ type UserAccount struct {
 	ZipCode            string      `json:"zipCode"            description:"zip_code"`                                                                                                  // zip_code
 	Language           string      `json:"language"           description:"language"`                                                                                                  // language
 	MetaData           string      `json:"metaData"           description:"meta_data(json)"`                                                                                           // meta_data(json)
+	RegistrationNumber string      `json:"registrationNumber" description:"registration number"`                                                                                       // registration number
 }

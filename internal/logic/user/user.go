@@ -148,26 +148,27 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 	}
 
 	one = &entity.UserAccount{
-		FirstName:      req.FirstName,
-		LastName:       req.LastName,
-		Password:       utility.PasswordEncrypt(req.Password),
-		Email:          req.Email,
-		Phone:          req.Phone,
-		Address:        req.Address,
-		ExternalUserId: req.ExternalUserId,
-		CountryCode:    req.CountryCode,
-		CountryName:    countryName,
-		UserName:       req.UserName,
-		MerchantId:     req.MerchantId,
-		Type:           req.Type,
-		CompanyName:    req.CompanyName,
-		VATNumber:      req.VATNumber,
-		City:           req.City,
-		ZipCode:        req.ZipCode,
-		Custom:         req.Custom,
-		TaxPercentage:  taxPercentage,
-		Language:       req.Language,
-		CreateTime:     gtime.Now().Timestamp(),
+		FirstName:          req.FirstName,
+		LastName:           req.LastName,
+		Password:           utility.PasswordEncrypt(req.Password),
+		Email:              req.Email,
+		Phone:              req.Phone,
+		Address:            req.Address,
+		ExternalUserId:     req.ExternalUserId,
+		CountryCode:        req.CountryCode,
+		CountryName:        countryName,
+		UserName:           req.UserName,
+		MerchantId:         req.MerchantId,
+		Type:               req.Type,
+		CompanyName:        req.CompanyName,
+		VATNumber:          req.VATNumber,
+		City:               req.City,
+		ZipCode:            req.ZipCode,
+		Custom:             req.Custom,
+		TaxPercentage:      taxPercentage,
+		Language:           req.Language,
+		RegistrationNumber: req.RegistrationNumber,
+		CreateTime:         gtime.Now().Timestamp(),
 	}
 	// todo mark vat check, countryCode check
 	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -246,15 +247,16 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 		}
 		utility.Assert(one.Status == 0, "account status abnormal")
 		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-			dao.UserAccount.Columns().Address:   req.Address,
-			dao.UserAccount.Columns().Phone:     req.Phone,
-			dao.UserAccount.Columns().FirstName: req.FirstName,
-			dao.UserAccount.Columns().LastName:  req.LastName,
-			dao.UserAccount.Columns().City:      req.City,
-			dao.UserAccount.Columns().Type:      req.Type,
-			dao.UserAccount.Columns().ZipCode:   req.ZipCode,
-			dao.UserAccount.Columns().Language:  req.Language,
-			dao.UserAccount.Columns().GmtModify: gtime.Now(),
+			dao.UserAccount.Columns().Address:            req.Address,
+			dao.UserAccount.Columns().Phone:              req.Phone,
+			dao.UserAccount.Columns().FirstName:          req.FirstName,
+			dao.UserAccount.Columns().LastName:           req.LastName,
+			dao.UserAccount.Columns().City:               req.City,
+			dao.UserAccount.Columns().Type:               req.Type,
+			dao.UserAccount.Columns().ZipCode:            req.ZipCode,
+			dao.UserAccount.Columns().Language:           req.Language,
+			dao.UserAccount.Columns().RegistrationNumber: req.RegistrationNumber,
+			dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
 		utility.AssertError(err, "Server Error")
 	}

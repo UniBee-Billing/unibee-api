@@ -18,21 +18,22 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	token := ""
 	if req.UserId == 0 && req.User != nil {
 		user, err := user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
-			ExternalUserId: req.User.ExternalUserId,
-			Email:          req.User.Email,
-			FirstName:      req.User.FirstName,
-			LastName:       req.User.LastName,
-			Phone:          req.User.Phone,
-			Address:        req.User.Address,
-			UserName:       req.User.UserName,
-			CountryCode:    req.User.CountryCode,
-			Type:           req.User.Type,
-			CompanyName:    req.User.CompanyName,
-			VATNumber:      req.User.VatNumber,
-			City:           req.User.City,
-			ZipCode:        req.User.ZipCode,
-			Language:       req.User.Language,
-			MerchantId:     _interface.GetMerchantId(ctx),
+			ExternalUserId:     req.User.ExternalUserId,
+			Email:              req.User.Email,
+			FirstName:          req.User.FirstName,
+			LastName:           req.User.LastName,
+			Phone:              req.User.Phone,
+			Address:            req.User.Address,
+			UserName:           req.User.UserName,
+			CountryCode:        req.User.CountryCode,
+			Type:               req.User.Type,
+			CompanyName:        req.User.CompanyName,
+			VATNumber:          req.User.VatNumber,
+			City:               req.User.City,
+			ZipCode:            req.User.ZipCode,
+			Language:           req.User.Language,
+			RegistrationNumber: req.User.RegistrationNumber,
+			MerchantId:         _interface.GetMerchantId(ctx),
 		})
 		utility.AssertError(err, "Server Error")
 		req.UserId = user.Id

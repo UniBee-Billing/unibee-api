@@ -73,6 +73,7 @@ type UserAccountColumns struct {
 	ZipCode            string // zip_code
 	Language           string // language
 	MetaData           string // meta_data(json)
+	RegistrationNumber string // registration number
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -130,6 +131,7 @@ var userAccountColumns = UserAccountColumns{
 	ZipCode:            "zip_code",
 	Language:           "language",
 	MetaData:           "meta_data",
+	RegistrationNumber: "registration_number",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.
