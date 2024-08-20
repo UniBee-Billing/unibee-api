@@ -169,10 +169,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	var userCountry = ""
 	var userRegNumber = ""
 	if user != nil {
-		userName = user.FirstName + " " + user.LastName
+		userName = fmt.Sprintf("%s %s(%s)", user.FirstName, user.LastName, user.Email)
 		userAddress = user.Address
 		userPostalCode = user.ZipCode
 		userCountry = user.CountryName
+		userCity = user.City
 		userRegNumber = user.RegistrationNumber
 	}
 

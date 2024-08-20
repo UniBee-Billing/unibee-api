@@ -65,12 +65,16 @@ func TestGenerate(t *testing.T) {
 		Location:    "Supluse",
 		Address:     "Supluse ",
 		IsDeleted:   0,
-		CompanyLogo: "https://imagesize.hknet-inc.com/sp/files/f18f4fce-802b-471c-9418-9640384594f6.jpg",
+		CompanyLogo: "http://unibee.top/files/invoice/cm/czi8o0j0jqd87mqwta.png",
 	}, &entity.UserAccount{
-		IsDeleted: 0,
-		Address:   "Best Billing Team Ltd Dubai Hills, Duai, UAE 12345",
-		FirstName: "Yvonne",
-		LastName:  "Wang",
+		IsDeleted:          0,
+		Email:              "jack.fu@wowow.io",
+		Address:            "Best Billing Team Ltd Dubai Hills, Duai, UAE 12345",
+		FirstName:          "jack",
+		LastName:           "fu",
+		ZipCode:            "zipCode",
+		City:               "Hangzhou",
+		RegistrationNumber: "Regxxxddd",
 	}, nil, savePath)
 	if err != nil {
 		fmt.Printf("err :%s", err.Error())
