@@ -73,6 +73,7 @@ type UserAccount struct {
 	City               string                 `json:"city" dc:"city"`
 	ZipCode            string                 `json:"zipCode" dc:"zip_code"`
 	Language           string                 `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
+	RegistrationNumber string                 `json:"registrationNumber" dc:"RegistrationNumber"`
 	Metadata           map[string]interface{} `json:"metadata"                  description:""`
 }
 
@@ -136,6 +137,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		City:               one.City,
 		ZipCode:            one.ZipCode,
 		Language:           one.Language,
+		RegistrationNumber: one.RegistrationNumber,
 		Metadata:           metadata,
 	}
 }

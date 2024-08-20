@@ -60,6 +60,7 @@ type UserAccountDetail struct {
 	ZipCode            string                 `json:"zipCode" dc:"zip_code"`
 	PlanId             uint64                 `json:"planId"             description:"PlanId"`                        // PlanId
 	Language           string                 `json:"language"           description:"User Language, en|ru|cn|vi|bp"` // language
+	RegistrationNumber string                 `json:"registrationNumber" dc:"RegistrationNumber"`
 	Metadata           map[string]interface{} `json:"metadata"                  description:""`
 }
 
@@ -125,6 +126,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		Gateway:            bean.SimplifyGateway(query.GetGatewayById(ctx, gatewayId)),
 		PlanId:             one.PlanId,
 		Language:           one.Language,
+		RegistrationNumber: one.RegistrationNumber,
 		Metadata:           metadata,
 	}
 }
