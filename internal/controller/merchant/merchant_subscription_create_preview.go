@@ -3,9 +3,12 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
+	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 	user2 "unibee/internal/logic/user"
+	"unibee/internal/query"
 	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
@@ -59,6 +62,16 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	if err != nil {
 		return nil, err
 	}
+	var pendingCryptoSub *detail.SubscriptionDetail
+	if prepare.UserId > 0 {
+		one := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, prepare.UserId, _interface.GetMerchantId(ctx), prepare.Plan.ProductId)
+		if one != nil {
+			gateway := query.GetGatewayById(ctx, one.GatewayId)
+			if gateway.GatewayType == consts.GatewayTypeCrypto {
+				pendingCryptoSub, _ = service.SubscriptionDetail(ctx, one.SubscriptionId)
+			}
+		}
+	}
 	return &subscription.CreatePreviewRes{
 		Plan:              bean.SimplifyPlan(prepare.Plan),
 		TrialEnd:          prepare.TrialEnd,
@@ -93,5 +106,6 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		Discount:                 prepare.Discount,
 		VatNumberValidateMessage: prepare.VatNumberValidateMessage,
 		DiscountMessage:          prepare.DiscountMessage,
+		OtherPendingCryptoSub:    pendingCryptoSub,
 	}, nil
 }

@@ -198,6 +198,7 @@ type CreatePreviewRes struct {
 	Discount                 *bean.MerchantDiscountCode `json:"discount" `
 	VatNumberValidateMessage string                     `json:"vatNumberValidateMessage" `
 	DiscountMessage          string                     `json:"discountMessage" `
+	OtherPendingCryptoSub    *detail.SubscriptionDetail `json:"otherPendingCryptoSub" `
 }
 
 type CreateReq struct {
