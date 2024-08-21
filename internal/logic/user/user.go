@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/internal/cmd/i18n"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/analysis/segment"
@@ -140,7 +141,7 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 		if len(req.VATNumber) > 0 {
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, req.VATNumber, "")
 			utility.AssertError(err, "Validate vatNumber error")
-			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VATNumber))
 		}
 		taxPercentage, countryName = vat_gateway.ComputeMerchantVatPercentage(ctx, req.MerchantId, req.CountryCode, 0, req.VATNumber)
 	} else if len(req.VATNumber) > 0 {

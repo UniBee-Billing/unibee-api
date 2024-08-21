@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"unibee/api/bean/detail"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/user/sub_update"
@@ -57,7 +58,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
 			utility.AssertError(err, "Update VAT number error")
-			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", *req.VATNumber))
 			if req.CountryCode != nil {
 				utility.Assert(*req.CountryCode == vatNumberValidate.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 			} else {
@@ -73,7 +74,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
-			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", vatNumber))
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 		}
 		if one.CountryCode != *req.CountryCode {

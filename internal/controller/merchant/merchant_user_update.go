@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/user"
+	"unibee/internal/cmd/i18n"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
@@ -48,7 +49,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), *req.UserId, *req.VATNumber, "")
 			utility.AssertError(err, "Update VAT number error")
-			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", *req.VATNumber))
 			if req.CountryCode != nil {
 				utility.Assert(*req.CountryCode == vatNumberValidate.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 			} else {
@@ -64,7 +65,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), *req.UserId, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
-			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", vatNumber))
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 		}
 		if one.CountryCode != *req.CountryCode {
