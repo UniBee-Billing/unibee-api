@@ -434,7 +434,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				g.Log().Error(ctx, "ValidateVatNumberByDefaultGateway error:%s", err.Error())
 				vatNumberValidateMessage = "Server Error"
 			} else {
-				vatNumberValidateMessage = "Validate Failure"
+				vatNumberValidateMessage = i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VatNumber)
 			}
 		} else {
 			if len(req.VatCountryCode) > 0 {

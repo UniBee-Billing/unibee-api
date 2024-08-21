@@ -142,6 +142,7 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, req.VATNumber, "")
 			utility.AssertError(err, "Validate vatNumber error")
 			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VATNumber))
+			utility.Assert(req.CountryCode == vatNumberValidate.CountryCode, i18n.LocalizationFormat(ctx, "{#CountryCodeVatNumberNotMatch}", vatNumberValidate.CountryCode))
 		}
 		taxPercentage, countryName = vat_gateway.ComputeMerchantVatPercentage(ctx, req.MerchantId, req.CountryCode, 0, req.VATNumber)
 	} else if len(req.VATNumber) > 0 {
