@@ -90,7 +90,9 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(invoice != nil, "payment of BizTypeSubscription invalid invoice")
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
-			utility.Assert(sub != nil, "payment sub not found")
+			utility.Assert(sub != nil, "sub not found")
+			gateway := query.GetGatewayById(ctx, payment.GatewayId)
+			utility.Assert(gateway != nil, "gateway not found")
 			_ = handler.UpdateSubscriptionDefaultPaymentMethod(ctx, sub.SubscriptionId, payment.GatewayPaymentMethod)
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingUpdate != nil {
@@ -105,8 +107,10 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
 				}
-			} else if strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
-				// SubscriptionCycle
+			} else if strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 ||
+				(gateway.GatewayType == consts.GatewayTypeCrypto && strings.Compare(payment.BillingReason, "SubscriptionRenew") == 0) ||
+				(gateway.GatewayType == consts.GatewayTypeCrypto && strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0) {
+				// SubscriptionCycle or SubscriptionRenew
 				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, invoice)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCycle error:%s", err.Error())

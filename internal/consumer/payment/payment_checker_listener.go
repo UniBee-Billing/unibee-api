@@ -36,12 +36,16 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 	}
 	one := query.GetPaymentByPaymentId(ctx, message.Body)
 	if one != nil {
+		if one.Status == consts.PaymentSuccess {
+			g.Log().Infof(ctx, "PaymentCheckerListener_Commit payment already success paymentId:%s", message.Body)
+			return redismq.CommitMessage
+		}
 		if len(one.GatewayPaymentId) == 0 {
 			return redismq.ReconsumeLater
 		}
-		if one.Status == consts.PaymentCreated {
-			gateway := query.GetGatewayById(ctx, one.GatewayId)
-			if gateway != nil && gateway.GatewayType != consts.GatewayTypeWireTransfer && len(one.GatewayPaymentId) > 0 {
+		gateway := query.GetGatewayById(ctx, one.GatewayId)
+		if gateway != nil && (one.Status == consts.PaymentCreated || gateway.GatewayType == consts.GatewayTypeCrypto) {
+			if gateway.GatewayType != consts.GatewayTypeWireTransfer && len(one.GatewayPaymentId) > 0 {
 				gatewayPaymentRo, err := api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewayPaymentDetail(ctx, gateway, one.GatewayPaymentId, one)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback paymentId:%s error:%s", message.Body, err.Error())
@@ -110,10 +114,10 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 				}
 				return redismq.ReconsumeLater
 			} else {
-				g.Log().Infof(ctx, "PaymentCheckerListener_Commit by gateway not found or wire transfer or gatewayPaymentId nil paymentId:%s", message.Body)
+				g.Log().Infof(ctx, "PaymentCheckerListener_Commit by wire transfer or gatewayPaymentId nil paymentId:%s", message.Body)
 			}
 		} else {
-			g.Log().Infof(ctx, "PaymentCheckerListener_Commit by status:%d paymentId:%s", one.Status, message.Body)
+			g.Log().Infof(ctx, "PaymentCheckerListener_Commit gateway not found or status:%d paymentId:%s", one.Status, message.Body)
 		}
 	} else {
 		g.Log().Infof(ctx, "PaymentCheckerListener_Commit by can't find payment paymentId:%s", message.Body)
