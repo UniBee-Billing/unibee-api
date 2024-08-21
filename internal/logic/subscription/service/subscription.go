@@ -363,6 +363,7 @@ type CreateInternalReq struct {
 }
 
 type CreateInternalRes struct {
+	Plan         *entity.Plan       `json:"plan"`
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
 	User         *bean.UserAccount  `json:"user" dc:"user"`
 	Paid         bool               `json:"paid"`
@@ -877,6 +878,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.AssertError(err, "Start Active Temporarily")
 	}
 	return &CreateInternalRes{
+		Plan:         prepare.Plan,
 		Subscription: bean.SimplifySubscription(ctx, one),
 		User:         prepare.User,
 		Paid:         createRes.Paid,

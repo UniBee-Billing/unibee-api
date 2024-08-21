@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean/detail"
+	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	user2 "unibee/internal/logic/user"
+	"unibee/internal/query"
 	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
@@ -86,12 +89,22 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 			DiscountCode:   "",
 		}, err)
 	}
-
+	var pendingCryptoSub *detail.SubscriptionDetail
+	if createRes.Subscription != nil && createRes.Subscription.UserId > 0 {
+		one := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, createRes.Subscription.UserId, _interface.GetMerchantId(ctx), createRes.Plan.ProductId)
+		if one != nil {
+			gateway := query.GetGatewayById(ctx, one.GatewayId)
+			if gateway.GatewayType == consts.GatewayTypeCrypto {
+				pendingCryptoSub, _ = service.SubscriptionDetail(ctx, one.SubscriptionId)
+			}
+		}
+	}
 	return &subscription.CreateRes{
-		Subscription: createRes.Subscription,
-		User:         createRes.User,
-		Paid:         createRes.Paid,
-		Link:         createRes.Link,
-		Token:        token,
+		OtherPendingCryptoSubscription: pendingCryptoSub,
+		Subscription:                   createRes.Subscription,
+		User:                           createRes.User,
+		Paid:                           createRes.Paid,
+		Link:                           createRes.Link,
+		Token:                          token,
 	}, nil
 }

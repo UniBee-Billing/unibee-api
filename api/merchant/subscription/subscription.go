@@ -228,11 +228,12 @@ type CreateReq struct {
 }
 
 type CreateRes struct {
-	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
-	User         *bean.UserAccount  `json:"user" dc:"user"`
-	Paid         bool               `json:"paid"`
-	Link         string             `json:"link"`
-	Token        string             `json:"token" dc:"token"`
+	Subscription                   *bean.Subscription         `json:"subscription" dc:"Subscription"`
+	User                           *bean.UserAccount          `json:"user" dc:"user"`
+	Paid                           bool                       `json:"paid"`
+	Link                           string                     `json:"link"`
+	Token                          string                     `json:"token" dc:"token"`
+	OtherPendingCryptoSubscription *detail.SubscriptionDetail `json:"otherPendingCryptoSubscription" `
 }
 
 type UpdatePreviewReq struct {
