@@ -1059,6 +1059,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	isUpgrade, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
 	utility.Assert(changed, "subscription update should have plan or addons changed")
 	if isUpgrade {
+		if req.Metadata == nil {
+			req.Metadata = make(map[string]interface{})
+		}
+		req.Metadata["IsUpgrade"] = true
 		effectImmediate = true
 	} else {
 		effectImmediate = config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately
