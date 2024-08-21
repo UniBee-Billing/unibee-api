@@ -437,7 +437,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				vatNumberValidateMessage = "Validate Failure"
 			}
 		} else {
-			if len(req.VatCountryCode) > 0 && !_interface.Context().Get(ctx).IsOpenApiCall {
+			if len(req.VatCountryCode) > 0 {
 				utility.Assert(vatCountryCode == vatNumberValidate.CountryCode, i18n.LocalizationFormat(ctx, "{#CountryCodeVatNumberNotMatch}", vatNumberValidate.CountryCode))
 			}
 			vatCountryCode = vatNumberValidate.CountryCode
