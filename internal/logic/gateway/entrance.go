@@ -20,17 +20,25 @@ func GetPaymentMethodRedirectEntranceUrlCheckout(gatewayId uint64, success bool,
 }
 
 func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
+	invoiceId := ""
+	if len(pay.InvoiceId) > 0 {
+		invoiceId = pay.InvoiceId
+	}
 	if len(pay.SubscriptionId) > 0 {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&invoiceId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, invoiceId, success)
 	} else {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&invoiceId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, invoiceId, success)
 	}
 }
 
 func GetPaypalPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
+	invoiceId := ""
+	if len(pay.InvoiceId) > 0 {
+		invoiceId = pay.InvoiceId
+	}
 	if len(pay.SubscriptionId) > 0 {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&invoiceId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, invoiceId, success)
 	} else {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&invoiceId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, invoiceId, success)
 	}
 }
