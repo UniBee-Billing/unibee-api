@@ -1,8 +1,6 @@
 module unibee
 
-go 1.21
-
-toolchain go1.21.3
+go 1.21.3
 
 require (
 	github.com/creasty/defaults v1.7.0
