@@ -1441,6 +1441,10 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+	if prepare.Invoice.Metadata == nil {
+		prepare.Invoice.Metadata = make(map[string]interface{})
+	}
+	prepare.Invoice.Metadata["SubscriptionPendingUpdateId"] = one.PendingUpdateId
 	var subUpdateRes *UpdateSubscriptionInternalResp
 	if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 		// createAndPayNewProrationInvoice

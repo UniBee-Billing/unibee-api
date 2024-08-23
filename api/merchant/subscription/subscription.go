@@ -45,6 +45,15 @@ type DetailRes struct {
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
+type PendingUpdateDetailReq struct {
+	g.Meta                      `path:"/pending_update_detail" tags:"Subscription" method:"get" summary:"SubscriptionPendingUpdateDetail"`
+	SubscriptionPendingUpdateId string `json:"subscriptionPendingUpdateId" dc:"SubscriptionPendingUpdateId" v:"required"`
+}
+
+type PendingUpdateDetailRes struct {
+	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"SubscriptionPendingUpdate" dc:"subscription pending update"`
+}
+
 type UserPendingCryptoSubscriptionDetailReq struct {
 	g.Meta         `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserPendingCryptoSubscriptionDetail"`
 	UserId         uint64 `json:"userId" dc:"UserId"`
