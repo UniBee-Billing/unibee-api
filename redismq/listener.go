@@ -31,7 +31,7 @@ func RegisterListener(i IMessageListener) {
 		return
 	}
 	if Topics == nil {
-		Topics = make([]string, 0, 100) //最多容纳 60 个 topic
+		Topics = make([]string, 0, 100)
 	}
 	if len(Topics) > 60 {
 		fmt.Println("Project Register Topic Too Much ，Merge Please")
