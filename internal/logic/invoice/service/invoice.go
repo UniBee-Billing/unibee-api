@@ -560,7 +560,7 @@ func HardDeleteInvoice(ctx context.Context, merchantId uint64, invoiceId string)
 	return err
 }
 
-func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, transferNumber string, reason string) (*entity.Invoice, error) {
+func MarkWireTransferInvoiceAsPaid(ctx context.Context, invoiceId string, transferNumber string, reason string) (*entity.Invoice, error) {
 	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
 	utility.Assert(len(transferNumber) > 0, "invalid transferNumber")
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
@@ -574,7 +574,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	utility.Assert(strings.ToUpper(one.Currency) == strings.ToUpper(gateway.Currency), "Invoice currency not reach the gateway's currency")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
-		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "", "MarkWireTransferInvoiceAsSuccess", 0)
+		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "", "MarkWireTransferInvoiceAsPaid", 0)
 		utility.AssertError(err, "Mark as success error")
 		payment = res.Payment
 		utility.Assert(payment != nil, "payment not found")
@@ -589,12 +589,12 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 		PaymentAmount:          payment.TotalAmount,
 		Reason:                 reason,
 	})
-	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
+	utility.AssertError(err, "MarkWireTransferInvoiceAsPaid")
 	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
-		Content:        "MarkInvoiceAsSuccess(WireTransfer)",
+		Content:        "MarkInvoiceAsPaid(WireTransfer)",
 		UserId:         one.UserId,
 		SubscriptionId: one.SubscriptionId,
 		InvoiceId:      one.InvoiceId,

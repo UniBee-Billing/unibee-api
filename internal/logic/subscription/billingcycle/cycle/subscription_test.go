@@ -298,7 +298,7 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusPending)
 		require.NotNil(t, one.LatestInvoiceId)
-		_, err = service3.MarkWireTransferInvoiceAsSuccess(ctx, one.LatestInvoiceId, "automatic_transfer_number", "automatic_transfer_number")
+		_, err = service3.MarkWireTransferInvoiceAsPaid(ctx, one.LatestInvoiceId, "automatic_transfer_number", "automatic_transfer_number")
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
 		require.NotNil(t, one)

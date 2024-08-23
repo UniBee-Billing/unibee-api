@@ -7,36 +7,38 @@ import (
 )
 
 var (
-	TopicTest1                            = redismq.MQTopicEnum{"unibee", "test1", "redismq test1"}
-	TopicTest2                            = redismq.MQTopicEnum{"unibee", "test2", "redismq test2"}
-	TopicGatewayPayV2WebHookReceive       = redismq.MQTopicEnum{"unibee", "gatewaypaywebhookreceivev2", "gatewaypaywebhookv2"}
-	TopicUserPaymentMethodChanged         = redismq.MQTopicEnum{"unibee_user", "payment_method_changed", "user change payment method"}
-	TopicPaymentCreated                   = redismq.MQTopicEnum{"unibee_payment", "payment_created", "payment created"}
-	TopicPaymentChecker                   = redismq.MQTopicEnum{"unibee_payment", "payment_checker", "payment status checker"}
-	TopicPaymentCancel                    = redismq.MQTopicEnum{"unibee_payment", "payment_cancelled", "payment cancelled"}
-	TopicPaymentAuthorized                = redismq.MQTopicEnum{"unibee_payment", "payment_authorized", "payment authorized"}
-	TopicPaymentSuccess                   = redismq.MQTopicEnum{"unibee_payment", "payment_success", "payment success"}
-	TopicRefundCreated                    = redismq.MQTopicEnum{"unibee_refund", "refund_created", "refund created"}
-	TopicRefundChecker                    = redismq.MQTopicEnum{"unibee_refund", "refund_checker", "refund status checker"}
-	TopicRefundSuccess                    = redismq.MQTopicEnum{"unibee_refund", "refund_success", "refund success"}
-	TopicRefundFailed                     = redismq.MQTopicEnum{"unibee_refund", "refund_failed", "refund success"}
-	TopicSubscriptionCancel               = redismq.MQTopicEnum{"unibee_subscription", "subscription_cancelled", "subscription cancelled"}
-	TopicSubscriptionExpire               = redismq.MQTopicEnum{"unibee_subscription", "subscription_expired", "subscription expired"}
-	TopicSubscriptionFailed               = redismq.MQTopicEnum{"unibee_subscription", "subscription_failed", "subscription failed"}
-	TopicSubscriptionCreate               = redismq.MQTopicEnum{"unibee_subscription", "subscription_created", "subscription created"}
-	TopicSubscriptionCreatePaymentCheck   = redismq.MQTopicEnum{"unibee_subscription", "subscription_create_payment_check", "subscription create payment check"}
-	TopicSubscriptionIncomplete           = redismq.MQTopicEnum{"unibee_subscription", "subscription_incomplete", "subscription incomplete"}
-	TopicSubscriptionPaymentSuccess       = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}
-	TopicSubscriptionAutoRenewSuccess     = redismq.MQTopicEnum{"unibee_subscription", "subscription_auto_renew_success", "subscription auto renew success"}
-	TopicSubscriptionAutoRenewFailure     = redismq.MQTopicEnum{"unibee_subscription", "subscription_auto_renew_failure", "subscription auto renew failure"}
-	TopicSubscriptionActiveWithoutPayment = redismq.MQTopicEnum{"unibee_subscription", "subscription_active_without_payment", "subscription become active without payment"}
-	TopicMerchantWebhook                  = redismq.MQTopicEnum{"unibee_merchant_webhook", "webhook", "merchant webhook"}
-	TopicInvoiceCreated                   = redismq.MQTopicEnum{"unibee_invoice", "invoice_created", "invoice created"}
-	TopicInvoiceProcessed                 = redismq.MQTopicEnum{"unibee_invoice", "invoice_processed", "invoice processed"}
-	TopicInvoicePaid                      = redismq.MQTopicEnum{"unibee_invoice", "invoice_paid", "invoice paid"}
-	TopicInvoiceCancelled                 = redismq.MQTopicEnum{"unibee_invoice", "invoice_cancelled", "invoice cancelled"}
-	TopicInvoiceFailed                    = redismq.MQTopicEnum{"unibee_invoice", "invoice_failed", "invoice failed"}
-	TopicInvoiceReversed                  = redismq.MQTopicEnum{"unibee_invoice", "invoice_reversed", "invoice reversed"}
+	TopicTest1                          = redismq.MQTopicEnum{Topic: "unibee", Tag: "test1", Description: "redismq test1"}
+	TopicTest2                          = redismq.MQTopicEnum{Topic: "unibee", Tag: "test2", Description: "redismq test2"}
+	TopicGatewayPayV2WebHookReceive     = redismq.MQTopicEnum{Topic: "unibee", Tag: "gatewaypaywebhookreceivev2", Description: "gatewaypaywebhookv2"}
+	TopicUserPaymentMethodChanged       = redismq.MQTopicEnum{Topic: "unibee_user", Tag: "payment_method_changed", Description: "user change payment method"}
+	TopicPaymentCreated                 = redismq.MQTopicEnum{Topic: "unibee_payment", Tag: "payment_created", Description: "payment created"}
+	TopicPaymentChecker                 = redismq.MQTopicEnum{Topic: "unibee_payment", Tag: "payment_checker", Description: "payment status checker"}
+	TopicPaymentCancel                  = redismq.MQTopicEnum{Topic: "unibee_payment", Tag: "payment_cancelled", Description: "payment cancelled"}
+	TopicPaymentAuthorized              = redismq.MQTopicEnum{Topic: "unibee_payment", Tag: "payment_authorized", Description: "payment authorized"}
+	TopicPaymentSuccess                 = redismq.MQTopicEnum{Topic: "unibee_payment", Tag: "payment_success", Description: "payment success"}
+	TopicRefundCreated                  = redismq.MQTopicEnum{Topic: "unibee_refund", Tag: "refund_created", Description: "refund created"}
+	TopicRefundChecker                  = redismq.MQTopicEnum{Topic: "unibee_refund", Tag: "refund_checker", Description: "refund status checker"}
+	TopicRefundSuccess                  = redismq.MQTopicEnum{Topic: "unibee_refund", Tag: "refund_success", Description: "refund success"}
+	TopicRefundFailed                   = redismq.MQTopicEnum{Topic: "unibee_refund", Tag: "refund_failed", Description: "refund success"}
+	TopicSubscriptionCancel             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_cancelled", Description: "subscription cancelled"}
+	TopicSubscriptionExpire             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_expired", Description: "subscription expired"}
+	TopicSubscriptionFailed             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_failed", Description: "subscription failed"}
+	TopicSubscriptionCreate             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_created", Description: "subscription created"}
+	TopicSubscriptionUpdate             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_update", Description: "subscription updated"}
+	TopicSubscriptionActive             = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_active", Description: "subscription active"}
+	TopicSubscriptionCreatePaymentCheck = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_create_payment_check", Description: "subscription create payment check"}
+	TopicSubscriptionIncomplete         = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_incomplete", Description: "subscription incomplete"}
+	TopicSubscriptionPaymentSuccess     = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_payment_success", Description: "subscription payment success"}
+	TopicSubscriptionAutoRenewSuccess   = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_auto_renew_success", Description: "subscription auto renew success"}
+	TopicSubscriptionAutoRenewFailure   = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_auto_renew_failure", Description: "subscription auto renew failure"}
+	//TopicSubscriptionActivateWithoutPayment = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_active_without_payment", Description: "subscription become active without payment"} //deprecated
+	TopicMerchantWebhook  = redismq.MQTopicEnum{Topic: "unibee_merchant_webhook", Tag: "webhook", Description: "merchant webhook"}
+	TopicInvoiceCreated   = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_created", Description: "invoice created"}
+	TopicInvoiceProcessed = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_processed", Description: "invoice processed"}
+	TopicInvoicePaid      = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_paid", Description: "invoice paid"}
+	TopicInvoiceCancelled = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_cancelled", Description: "invoice cancelled"}
+	TopicInvoiceFailed    = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_failed", Description: "invoice failed"}
+	TopicInvoiceReversed  = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_reversed", Description: "invoice reversed"}
 )
 
 type SRedisMqConfig struct{}

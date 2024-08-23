@@ -90,7 +90,8 @@ type CancelReq struct {
 	g.Meta         `path:"/cancel" tags:"Subscription" method:"post" summary:"CancelSubscriptionImmediately" dc:"Cancel subscription immediately, no proration invoice will generate"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription, either SubscriptionId or UserId needed, The only one active subscription of userId will effect"`
 	UserId         uint64 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will effect if userId provide instead of subscriptionId"`
-	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
+	ProductId      int64  `json:"productId" dc:"default product will use if productId not specified and subscriptionId is blank"`
+	Reason         string `json:"reason" dc:"Reason"`
 	InvoiceNow     bool   `json:"invoiceNow" dc:"Default false"  deprecated:"true"`
 	Prorate        bool   `json:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
 }

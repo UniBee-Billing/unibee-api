@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/email"
@@ -13,6 +14,7 @@ import (
 	"unibee/internal/logic/subscription/timeline"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
+	"unibee/redismq"
 	"unibee/utility"
 )
 
@@ -101,5 +103,17 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		g.Log().Errorf(ctx, "SendTemplateEmail HandlePendingUpdatePaymentSuccess:%s", err.Error())
 	}
 
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionUpdate.Topic,
+		Tag:   redismq2.TopicSubscriptionUpdate.Tag,
+		Body:  one.SubscriptionId,
+	})
+	if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActive.Topic,
+			Tag:   redismq2.TopicSubscriptionActive.Tag,
+			Body:  one.SubscriptionId,
+		})
+	}
 	return true, nil
 }

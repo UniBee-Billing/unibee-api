@@ -15,36 +15,36 @@ import (
 	"unibee/utility"
 )
 
-type SubscriptionActiveWithoutPaymentListener struct {
+type SubscriptionActiveListener struct {
 }
 
-func (t SubscriptionActiveWithoutPaymentListener) GetTopic() string {
-	return redismq2.TopicSubscriptionActiveWithoutPayment.Topic
+func (t SubscriptionActiveListener) GetTopic() string {
+	return redismq2.TopicSubscriptionActive.Topic
 }
 
-func (t SubscriptionActiveWithoutPaymentListener) GetTag() string {
-	return redismq2.TopicSubscriptionActiveWithoutPayment.Tag
+func (t SubscriptionActiveListener) GetTag() string {
+	return redismq2.TopicSubscriptionActive.Tag
 }
 
-func (t SubscriptionActiveWithoutPaymentListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
+func (t SubscriptionActiveListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Debugf(ctx, "SubscriptionActiveWithoutPaymentListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Debugf(ctx, "SubscriptionActiveListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ACTIVATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 	}
 	return redismq.CommitMessage
 }
 
 func init() {
-	redismq.RegisterListener(NewSubscriptionActiveWithoutPaymentListener())
-	fmt.Println("SubscriptionActiveWithoutPaymentListener RegisterListener")
+	redismq.RegisterListener(NewSubscriptionActiveListener())
+	fmt.Println("SubscriptionActiveListener RegisterListener")
 }
 
-func NewSubscriptionActiveWithoutPaymentListener() *SubscriptionActiveWithoutPaymentListener {
-	return &SubscriptionActiveWithoutPaymentListener{}
+func NewSubscriptionActiveListener() *SubscriptionActiveListener {
+	return &SubscriptionActiveListener{}
 }

@@ -82,7 +82,7 @@ func FrozenUser(ctx context.Context, userId int64) {
 	subs := query.GetLatestActiveOrIncompleteOrCreateSubscriptionsByUserId(ctx, one.Id, one.MerchantId)
 	for _, sub := range subs {
 		if sub != nil {
-			err = service.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "User suspend by Admin")
+			err = service.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelledByAdminSuspendUser")
 			utility.AssertError(err, "server error")
 		}
 	}

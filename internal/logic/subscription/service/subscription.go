@@ -793,20 +793,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				Paid:                  true,
 			}
 		}
-		// todo mark subscription become active with payment mq message
-		//} else if len(req.PaymentMethodId) > 0 {
-		//	// createAndPayNewProrationInvoice
-		//	var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, false, req.ReturnUrl, "SubscriptionCreate")
-		//	if err != nil {
-		//		g.Log().Print(ctx, "SubscriptionCreate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
-		//		return nil, err
-		//	}
-		//	createRes = &gateway_bean.GatewayCreateSubscriptionResp{
-		//		GatewaySubscriptionId: createPaymentResult.Payment.PaymentId,
-		//		Data:                  utility.MarshalToJsonString(createPaymentResult),
-		//		Link:                  createPaymentResult.Link,
-		//		Paid:                  createPaymentResult.Status == consts.PaymentSuccess,
-		//	}
 	} else {
 		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, len(req.PaymentMethodId) == 0, req.ReturnUrl, req.CancelUrl, "SubscriptionCreate", 0)
 		if err != nil {
@@ -865,14 +851,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		err = handler.HandleSubscriptionFirstInvoicePaid(ctx, one, oneInvoice)
 		one = query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 		utility.AssertError(err, "Finish Subscription Error")
-		if prepare.Invoice.TotalAmount == 0 {
-			// zero invoice will not create payment
-			_, _ = redismq.Send(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
-				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
-				Body:  one.SubscriptionId,
-			})
-		}
 	} else if req.StartIncomplete {
 		err = SubscriptionActiveTemporarily(ctx, one.SubscriptionId, one.CurrentPeriodEnd)
 		utility.AssertError(err, "Start Active Temporarily")
@@ -1805,10 +1783,15 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if err != nil {
 		return err
 	}
-	if sub.Status != consts.SubStatusActive {
+	if sub.Status == consts.SubStatusActive {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
-			Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
+			Topic: redismq2.TopicSubscriptionActive.Topic,
+			Tag:   redismq2.TopicSubscriptionActive.Tag,
+			Body:  sub.SubscriptionId,
+		})
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionUpdate.Topic,
+			Tag:   redismq2.TopicSubscriptionUpdate.Tag,
 			Body:  sub.SubscriptionId,
 		})
 	}

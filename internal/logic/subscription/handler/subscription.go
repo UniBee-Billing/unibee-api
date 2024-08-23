@@ -75,13 +75,6 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		return err
 	}
 	timeline.SubscriptionFirstPaidTimeline(ctx, invoice)
-	if invoice.Status == consts.InvoiceStatusPaid && invoice.TotalAmount == 0 && len(invoice.PaymentId) == 0 {
-		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
-			Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
-			Body:  sub.SubscriptionId,
-		})
-	}
 	if invoice.TrialEnd > 0 && invoice.TrialEnd > invoice.PeriodStart {
 		// trial start
 		oneUser := query.GetUserAccountById(ctx, sub.UserId)
@@ -99,12 +92,23 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 			}
 		}
 	}
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionActive.Topic,
+		Tag:   redismq2.TopicSubscriptionActive.Tag,
+		Body:  sub.SubscriptionId,
+	})
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionUpdate.Topic,
+		Tag:   redismq2.TopicSubscriptionUpdate.Tag,
+		Body:  sub.SubscriptionId,
+	})
 	return nil
 }
 
 func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, paymentInvoice *entity.Invoice) error {
 	//utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
 	//utility.Assert(payment.Status == consts.PaymentSuccess, fmt.Sprintf("payment not success:%v", payment.Status))
+	utility.Assert(sub != nil, "sub is nil")
 	utility.Assert(len(paymentInvoice.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
 
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
@@ -150,7 +154,18 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return err
 	}
 	timeline.SubscriptionNewTimeline(ctx, invoice)
-
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionUpdate.Topic,
+		Tag:   redismq2.TopicSubscriptionUpdate.Tag,
+		Body:  sub.SubscriptionId,
+	})
+	if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActive.Topic,
+			Tag:   redismq2.TopicSubscriptionActive.Tag,
+			Body:  sub.SubscriptionId,
+		})
+	}
 	// need cancel payment、 invoice and send invoice email
 	return nil
 }

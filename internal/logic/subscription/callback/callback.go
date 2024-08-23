@@ -119,11 +119,11 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				//utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 				g.Log().Infof(ctx, "PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId)
 			}
-			_, _ = redismq.Send(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
-				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
-				Body:  payment.SubscriptionId,
-			})
+			//_, _ = redismq.Send(&redismq.Message{
+			//	Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
+			//	Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
+			//	Body:  payment.SubscriptionId,
+			//})
 			if invoice != nil && len(invoice.CreateFrom) > 0 && invoice.CreateFrom == "AutoRenew" {
 				_, _ = redismq.Send(&redismq.Message{
 					Topic: redismq2.TopicSubscriptionAutoRenewSuccess.Topic,

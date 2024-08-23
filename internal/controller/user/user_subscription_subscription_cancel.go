@@ -26,7 +26,7 @@ func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.C
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing, "subscription not in pending or processing status")
 
-	err = service.SubscriptionCancel(ctx, req.SubscriptionId, false, false, "User Cancel Create Subscription")
+	err = service.SubscriptionCancel(ctx, req.SubscriptionId, false, false, "CancelledByUser")
 	if err != nil {
 		return nil, err
 	}

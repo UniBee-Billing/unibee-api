@@ -16,7 +16,10 @@ func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.C
 		utility.Assert(one != nil, "no active or incomplete subscription found")
 		req.SubscriptionId = one.SubscriptionId
 	}
-	err = service.SubscriptionCancel(ctx, req.SubscriptionId, req.Prorate, req.InvoiceNow, "Admin Cancel")
+	if len(req.Reason) == 0 {
+		req.Reason = "CancelledByAdmin"
+	}
+	err = service.SubscriptionCancel(ctx, req.SubscriptionId, req.Prorate, req.InvoiceNow, req.Reason)
 	if err != nil {
 		return nil, err
 	}
