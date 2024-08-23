@@ -1100,7 +1100,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:        "SubscriptionUpgrade",
+				InvoiceName:        "SubscriptionUpdate",
 				Currency:           sub.Currency,
 				DiscountCode:       req.DiscountCode,
 				TimeNow:            prorationDate,
@@ -1120,7 +1120,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			currentInvoice = &bean.Invoice{
-				InvoiceName:                    "SubscriptionUpgrade",
+				InvoiceName:                    "SubscriptionUpdate",
 				ProductName:                    plan.PlanName,
 				OriginAmount:                   0,
 				TotalAmount:                    0,
@@ -1143,7 +1143,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:        "SubscriptionUpgrade",
+				InvoiceName:        "SubscriptionUpdate",
 				Currency:           sub.Currency,
 				DiscountCode:       req.DiscountCode,
 				TimeNow:            prorationDate,
@@ -1189,7 +1189,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			}
 			if !hasIntervalChange {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
-					InvoiceName:       "SubscriptionUpgrade",
+					InvoiceName:       "SubscriptionUpdate",
 					ProductName:       plan.PlanName,
 					Currency:          sub.Currency,
 					DiscountCode:      req.DiscountCode,
@@ -1206,7 +1206,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
-					InvoiceName:        "SubscriptionUpgrade",
+					InvoiceName:        "SubscriptionUpdate",
 					ProductName:        plan.PlanName,
 					Currency:           sub.Currency,
 					DiscountCode:       req.DiscountCode,
@@ -1228,7 +1228,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	} else {
 		prorationDate = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 		currentInvoice = &bean.Invoice{
-			InvoiceName:                    "SubscriptionUpgrade",
+			InvoiceName:                    "SubscriptionUpdate",
 			ProductName:                    plan.PlanName,
 			OriginAmount:                   0,
 			TotalAmount:                    0,
