@@ -33,6 +33,7 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		"Content-Gateway": "application/json",
 		"Msg-id":          one.RequestId,
 		"Datetime":        datetime,
+		"EventType":       one.WebhookEvent,
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	body := []byte(one.Body)
@@ -79,6 +80,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Content-Gateway": "application/json",
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
+		"EventType":       string(webhookMessage.Event),
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
