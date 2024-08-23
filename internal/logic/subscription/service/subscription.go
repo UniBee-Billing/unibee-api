@@ -1040,6 +1040,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		if req.Metadata == nil {
 			req.Metadata = make(map[string]interface{})
 		}
+		req.Metadata["SubscriptionUpdate"] = true
 		req.Metadata["IsUpgrade"] = true
 		effectImmediate = true
 	} else {
