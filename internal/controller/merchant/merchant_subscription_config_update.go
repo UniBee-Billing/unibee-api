@@ -6,6 +6,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/merchant_config/update"
 	"unibee/internal/logic/subscription/config"
+	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
 )
@@ -42,7 +43,7 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 		}
 	}
 	if req.GatewayVATRule != nil {
-		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.GatewayVATRule, fmt.Sprintf("%s", *req.GatewayVATRule))
+		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.GatewayVATRule, fmt.Sprintf("%s", utility.MarshalToJsonString(*req.GatewayVATRule)))
 		if err != nil {
 			return nil, err
 		}
