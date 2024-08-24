@@ -611,6 +611,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 					RefundAmount:          utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
 					TokenExpireMinute:     strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 					Link:                  "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+					HttpLink:              link.GetInvoiceLink(one.InvoiceId, one.SendTerms),
 				})
 				if err != nil {
 					g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())
