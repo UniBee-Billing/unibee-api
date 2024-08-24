@@ -42,8 +42,8 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 			return nil, err
 		}
 	}
-	if req.GatewayVATRule != nil {
-		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.GatewayVATRule, fmt.Sprintf("%s", utility.MarshalToJsonString(*req.GatewayVATRule)))
+	if len(req.GatewayVATRule) > 0 {
+		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.GatewayVATRule, fmt.Sprintf("%s", utility.MarshalToJsonString(req.GatewayVATRule)))
 		if err != nil {
 			return nil, err
 		}

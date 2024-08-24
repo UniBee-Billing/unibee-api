@@ -341,12 +341,23 @@ func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countr
 				}
 				var gatewayVATRules = make([]*bean.MerchantVatRule, 0)
 				_ = utility.UnmarshalFromJsonString(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule, &gatewayVATRules)
-				for _, gatewayVatRule := range gatewayVATRules {
-					if gatewayVatRule.GatewayNames == "" {
-						continue
-					}
-					if gatewayVatRule.GatewayNames == "*" {
-						if strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
+				if len(gatewayVATRules) > 0 {
+					for _, gatewayVatRule := range gatewayVATRules {
+						if gatewayVatRule.GatewayNames == "" {
+							continue
+						}
+						if gatewayVatRule.GatewayNames == "*" {
+							if strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
+								if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
+									taxPercentage = *gatewayVatRule.TaxPercentage
+								} else {
+									taxPercentage = vatCountryRate.StandardTaxPercentage
+								}
+								ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
+								break
+							}
+						}
+						if strings.Contains(gatewayVatRule.GatewayNames, gatewayName) && strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
 							if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
 								taxPercentage = *gatewayVatRule.TaxPercentage
 							} else {
@@ -356,15 +367,8 @@ func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countr
 							break
 						}
 					}
-					if strings.Contains(gatewayVatRule.GatewayNames, gatewayName) && strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
-						if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
-							taxPercentage = *gatewayVatRule.TaxPercentage
-						} else {
-							taxPercentage = vatCountryRate.StandardTaxPercentage
-						}
-						ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
-						break
-					}
+				} else {
+					taxPercentage = vatCountryRate.StandardTaxPercentage
 				}
 			} else {
 				taxPercentage = vatCountryRate.StandardTaxPercentage
