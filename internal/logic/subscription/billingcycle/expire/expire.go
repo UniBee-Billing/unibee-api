@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -15,7 +16,6 @@ import (
 	service2 "unibee/internal/logic/subscription/pending_update_cancel"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
-	"unibee/redismq"
 )
 
 func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason string) error {

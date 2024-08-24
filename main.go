@@ -13,11 +13,9 @@ import (
 	_ "unibee/internal/consumer"
 	_ "unibee/internal/driver/pgsql"
 	_ "unibee/internal/logic"
-	"unibee/redismq"
 )
 
 func main() {
 	config.Init()
-	redismq.StartRedisMqConsumer()
 	cmd.Main.Run(gctx.GetInitCtx())
 }

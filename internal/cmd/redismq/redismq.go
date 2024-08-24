@@ -1,9 +1,7 @@
 package redismq
 
 import (
-	"github.com/redis/go-redis/v9"
-	"unibee/internal/cmd/config"
-	"unibee/redismq"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 var (
@@ -41,21 +39,21 @@ var (
 	TopicInvoiceReversed  = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_reversed", Description: "invoice reversed"}
 )
 
-type SRedisMqConfig struct{}
-
-func (s SRedisMqConfig) GetRedisStreamConfig() (res *redis.Options) {
-	one := &redis.Options{
-		Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
-		Password: config.GetConfigInstance().RedisConfig.Default.Pass,
-		DB:       config.GetConfigInstance().RedisConfig.Default.DB,
-	}
-	return one
-}
-
-func init() {
-	redismq.RegisterRedisMqConfig(New())
-}
-
-func New() *SRedisMqConfig {
-	return &SRedisMqConfig{}
-}
+//type SRedisMqConfig struct{}
+//
+//func (s SRedisMqConfig) GetRedisStreamConfig() (res *redis.Options) {
+//	one := &redis.Options{
+//		Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
+//		Password: config.GetConfigInstance().RedisConfig.Default.Pass,
+//		DB:       config.GetConfigInstance().RedisConfig.Default.DB,
+//	}
+//	return one
+//}
+//
+//func init() {
+//	redismq.RegisterRedisMqConfig(New())
+//}
+//
+//func New() *SRedisMqConfig {
+//	return &SRedisMqConfig{}
+//}

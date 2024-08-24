@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	redismq "github.com/jackyang-hk/go-redismq"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	"unibee/internal/query"
-	"unibee/redismq"
 	"unibee/utility"
 )
 

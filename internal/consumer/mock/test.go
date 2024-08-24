@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	redismq "github.com/jackyang-hk/go-redismq"
 	redismq2 "unibee/internal/cmd/redismq"
-	"unibee/redismq"
 	"unibee/utility"
 )
 

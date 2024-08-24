@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
 	"strings"
 	config2 "unibee/internal/cmd/config"
@@ -14,7 +15,6 @@ import (
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"
-	"unibee/redismq"
 	"unibee/utility"
 )
 

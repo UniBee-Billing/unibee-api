@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
 	"strings"
 	redismqcmd "unibee/internal/cmd/redismq"
@@ -20,7 +21,6 @@ import (
 	"unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
-	"unibee/redismq"
 	"unibee/utility"
 )
 

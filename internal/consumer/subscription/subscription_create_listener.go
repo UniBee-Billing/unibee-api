@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	redismq "github.com/jackyang-hk/go-redismq"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
@@ -12,7 +13,6 @@ import (
 	"unibee/internal/logic/subscription/user_sub_plan"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/query"
-	"unibee/redismq"
 	"unibee/utility"
 )
 

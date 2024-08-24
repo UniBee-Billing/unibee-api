@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/net/goai"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"os"
 	"time"
 	"unibee/internal/cmd/config"
@@ -378,6 +379,16 @@ var (
 				logic.StandaloneInit(ctx)
 				//SetupAllWebhooks
 				webhook.SetupAllWebhooksBackground()
+			}
+
+			{
+				redismq.RegisterRedisMqConfig(&redismq.RedisMqConfig{
+					Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
+					Password: config.GetConfigInstance().RedisConfig.Default.Pass,
+					Database: config.GetConfigInstance().RedisConfig.Default.DB,
+					Group:    "GID_UniBee_Recurring",
+				})
+				redismq.StartRedisMqConsumer()
 			}
 
 			s.Run()

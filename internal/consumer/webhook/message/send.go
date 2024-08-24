@@ -6,13 +6,13 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	event2 "unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
-	"unibee/redismq"
 	"unibee/utility"
 )
 
