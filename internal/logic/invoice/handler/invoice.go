@@ -565,6 +565,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				PaymentAmount:         strconv.FormatInt(one.TotalAmount, 10),
 				TokenExpireMinute:     strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 				Link:                  "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+				HttpLink:              link.GetInvoiceLink(one.InvoiceId, one.SendTerms),
 				AccountHolder:         accountHolder,
 				BIC:                   bic,
 				IBAN:                  iban,

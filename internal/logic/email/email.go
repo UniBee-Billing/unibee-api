@@ -102,6 +102,7 @@ type TemplateVariable struct {
 	CodeExpireMinute      string      `json:"CodeExpireMinute"`
 	Code                  string      `json:"Code"`
 	Link                  string      `json:"Link"`
+	HttpLink              string      `json:"HttpLink"`
 	AccountHolder         string      `json:"Account Holder" key:"WireTransferAccountHolder"`
 	Address               string      `json:"Address" key:"WireTransferAddress"`
 	BIC                   string      `json:"BIC" key:"WireTransferBIC"`
