@@ -36,7 +36,7 @@ func SyncMerchantEmailTemplateToGateway(ctx context.Context, id int64, versionEn
 	}
 	gatewayTemplateName := fmt.Sprintf("[%d][%s]", one.Id, one.TemplateName)
 	if len(one.TemplateDescription) > 0 {
-		gatewayTemplateName = fmt.Sprintf("[%d][%d][%s][%s]", one.Id, one.MerchantId, one.TemplateName, TruncateWithEllipsis(one.TemplateDescription, 30, "..."))
+		gatewayTemplateName = TruncateWithEllipsis(fmt.Sprintf("[%d][%d][%s][%s]", one.Id, one.MerchantId, one.TemplateName, one.TemplateDescription), 90, "...")
 	}
 	templateId, err := gateway.SyncToGatewayTemplate(ctx, emailGatewayKey, gatewayTemplateName, content, one.GatewayTemplateId, versionEnable)
 	if err != nil {
