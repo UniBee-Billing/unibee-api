@@ -18,3 +18,10 @@ func SimplifyMerchantCountryConfig(one *entity.MerchantCountryConfig) *MerchantC
 		Name:        one.Name,
 	}
 }
+
+type MerchantVatRule struct {
+	GatewayNames      string `json:"gatewayNames" dc:""`
+	ValidCountryCodes string `json:"validCountryCodes" dc:""`
+	TaxPercentage     *int64 `json:"taxPercentage" dc:""`
+	IgnoreVatNumber   bool   `json:"ignoreVatNumber" dc:""`
+}

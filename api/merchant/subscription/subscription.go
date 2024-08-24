@@ -17,12 +17,12 @@ type ConfigRes struct {
 
 type ConfigUpdateReq struct {
 	g.Meta                             `path:"/config/update" tags:"Subscription" method:"post" summary:"Update Merchant Subscription Config"`
-	DowngradeEffectImmediately         *bool   `json:"downgradeEffectImmediately" dc:"DowngradeEffectImmediately, whether subscription downgrade should effect immediately or at period end, default at period end"`
-	UpgradeProration                   *bool   `json:"upgradeProration" dc:"UpgradeProration, whether subscription update generation proration invoice or not, default yes"`
-	IncompleteExpireTime               *int64  `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
-	InvoiceEmail                       *bool   `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
-	TryAutomaticPaymentBeforePeriodEnd *int64  `json:"tryAutomaticPaymentBeforePeriodEnd" dc:"TryAutomaticPaymentBeforePeriodEnd, default 30 min"`
-	GatewayVATRule                     *string `json:"gatewayVATRule" dc:""`
+	DowngradeEffectImmediately         *bool                    `json:"downgradeEffectImmediately" dc:"DowngradeEffectImmediately, whether subscription downgrade should effect immediately or at period end, default at period end"`
+	UpgradeProration                   *bool                    `json:"upgradeProration" dc:"UpgradeProration, whether subscription update generation proration invoice or not, default yes"`
+	IncompleteExpireTime               *int64                   `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
+	InvoiceEmail                       *bool                    `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
+	TryAutomaticPaymentBeforePeriodEnd *int64                   `json:"tryAutomaticPaymentBeforePeriodEnd" dc:"TryAutomaticPaymentBeforePeriodEnd, default 30 min"`
+	GatewayVATRule                     *[]*bean.MerchantVatRule `json:"gatewayVATRule" dc:""`
 }
 
 type ConfigUpdateRes struct {

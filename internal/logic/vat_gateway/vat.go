@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
-	config2 "unibee/internal/cmd/config"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
@@ -328,23 +327,19 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	}, nil
 }
 
-type GatewayVATRule struct {
-	GatewayNames      string `json:"gatewayNames" dc:""`
-	ValidCountryCodes string `json:"validCountryCodes" dc:""`
-}
-
 func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countryCode string, gatewayId uint64, validVatNumber string) (taxPercentage int64, countryName string) {
 	if GetDefaultVatGateway(ctx, merchantId) != nil {
 		vatCountryRate, err := QueryVatCountryRateByMerchant(ctx, merchantId, countryCode)
 		if err == nil && vatCountryRate != nil {
 			countryName = vatCountryRate.CountryName
+			var ignoreVatNumber = false
 			if len(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule) > 0 {
 				var gatewayName string
 				gateway := query.GetGatewayById(ctx, gatewayId)
 				if gateway != nil {
 					gatewayName = gateway.GatewayName
 				}
-				var gatewayVATRules = make([]*GatewayVATRule, 0)
+				var gatewayVATRules = make([]*bean.MerchantVatRule, 0)
 				_ = utility.UnmarshalFromJsonString(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule, &gatewayVATRules)
 				for _, gatewayVatRule := range gatewayVATRules {
 					if gatewayVatRule.GatewayNames == "" {
@@ -352,19 +347,29 @@ func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countr
 					}
 					if gatewayVatRule.GatewayNames == "*" {
 						if strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
-							taxPercentage = vatCountryRate.StandardTaxPercentage
+							if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
+								taxPercentage = *gatewayVatRule.TaxPercentage
+							} else {
+								taxPercentage = vatCountryRate.StandardTaxPercentage
+							}
+							ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
 							break
 						}
 					}
 					if strings.Contains(gatewayVatRule.GatewayNames, gatewayName) && strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
-						taxPercentage = vatCountryRate.StandardTaxPercentage
+						if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
+							taxPercentage = *gatewayVatRule.TaxPercentage
+						} else {
+							taxPercentage = vatCountryRate.StandardTaxPercentage
+						}
+						ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
 						break
 					}
 				}
 			} else {
 				taxPercentage = vatCountryRate.StandardTaxPercentage
 			}
-			if len(validVatNumber) > 0 && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, countryCode) {
+			if len(validVatNumber) > 0 && !ignoreVatNumber {
 				taxPercentage = 0
 			}
 		}
