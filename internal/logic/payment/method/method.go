@@ -88,6 +88,16 @@ func QueryPaymentMethodList(ctx context.Context, req *PaymentMethodListInternalR
 	if err != nil {
 		return nil
 	}
+	if req.UserId > 0 {
+		user := query.GetUserAccountById(ctx, req.UserId)
+		if user != nil && listQuery != nil && len(listQuery.PaymentMethods) > 0 {
+			for _, one := range listQuery.PaymentMethods {
+				if one.Id == user.PaymentMethod && user.GatewayId == fmt.Sprintf("%d", req.GatewayId) {
+					one.IsDefault = true
+				}
+			}
+		}
+	}
 	return listQuery.PaymentMethods
 }
 
