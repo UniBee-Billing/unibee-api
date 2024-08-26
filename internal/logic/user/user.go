@@ -261,6 +261,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 			dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
 		utility.AssertError(err, "Server Error")
+		one = query.GetUserAccountById(ctx, one.Id)
 	}
 	return
 }
