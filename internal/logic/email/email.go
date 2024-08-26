@@ -255,6 +255,8 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	merchant := query.GetMerchantById(ctx, merchantId)
 	utility.Assert(merchant != nil, "merchant not found")
 	variableMap["CompanyName"] = merchant.CompanyName
+	variableMap["UserLanguage"] = language
+	variableMap["UserTimezone"] = timezone
 	for key, value := range variableMap {
 		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
