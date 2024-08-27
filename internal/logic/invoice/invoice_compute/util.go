@@ -246,6 +246,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Quantity:               req.Quantity,
 		Name:                   name,
 		Description:            description,
+		PdfDescription:         fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period),
 		Plan:                   bean.SimplifyPlan(plan),
 	})
 	for _, addon := range addons {
