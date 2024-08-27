@@ -115,6 +115,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 
 	// Name
 	doc.pdf.SetX(ItemColNameOffset)
+	//doc.pdf.SetFont("SimSun", "", 10)
 	doc.pdf.MultiCell(
 		ItemColUnitPriceOffset-ItemColNameOffset,
 		3,

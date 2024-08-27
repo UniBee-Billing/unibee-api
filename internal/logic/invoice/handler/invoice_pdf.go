@@ -62,11 +62,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	}
 
 	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
-	doc, _ := generator2.New(generator2.Invoice, &generator2.Options{
+	doc, _ := generator2.New(generator2.Invoice, "/usr/share/fonts", &generator2.Options{
 		AutoPrint:      true,
 		CurrencySymbol: symbol,
 	})
-
+	//doc.Pdf().AddUTF8Font("SimSun", "", "simsun.ttf")
 	doc.SetFooter(&generator2.HeaderFooter{
 		Text:       fmt.Sprintf("PDF Generated on %s                                                    -%s-", time.Now().Format(time.RFC850), one.CountryCode),
 		Pagination: true,
