@@ -64,7 +64,7 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
-	var status = []int{consts.SubStatusCancelled, consts.SubStatusExpired}
+	var status = []int{consts.SubStatusCancelled, consts.SubStatusExpired, consts.SubStatusFailed}
 	// query sub which dunningTime expired
 	q := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
