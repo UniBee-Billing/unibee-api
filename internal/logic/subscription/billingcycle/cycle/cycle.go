@@ -106,7 +106,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			needTryInvoiceAutomaticPayment = false
 		}
 
-		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
+		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusFailed || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
 		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing {
 			if sub.GmtCreate.Timestamp()+consts.SubPendingTimeout < timeNow {
