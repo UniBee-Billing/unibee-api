@@ -164,7 +164,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 		}
 	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
-		attachName = "attach"
+		attachName = "invoice"
 	}
 
 	var response string
@@ -286,7 +286,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		}
 	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
-		attachName = "attach"
+		attachName = "invoice"
 	}
 
 	var response string
