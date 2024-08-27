@@ -2,8 +2,8 @@
 FROM loads/alpine:3.8
 
 RUN apk add --update ttf-dejavu fontconfig && rm -rf /var/cache/apk/*
-COPY *.ttc /usr/share/fonts/
-COPY *.ttf /usr/share/fonts/
+COPY ./manifest/fonts/*.ttc /usr/share/fonts/
+COPY ./manifest/fonts/*.ttf /usr/share/fonts/
 
 RUN apk add --update curl && rm -rf /var/cache/apk/*
 
