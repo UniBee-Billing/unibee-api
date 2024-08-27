@@ -490,7 +490,7 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bool, sendTemplate string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
-	if one.TotalAmount <= 0 {
+	if len(one.RefundId) == 0 && one.TotalAmount <= 0 {
 		g.Log().Infof(ctx, "SendInvoiceEmailToUser invoice totalAmount lower then zero, email not send")
 		return nil
 	}
