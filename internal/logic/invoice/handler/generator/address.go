@@ -44,7 +44,7 @@ func (a *Address) ToString() string {
 
 	if len(a.RegNumber) > 0 {
 		addrString += "\n"
-		addrString += fmt.Sprintf("%s", a.RegNumber)
+		addrString += fmt.Sprintf("Registration Number:%s", a.RegNumber)
 	}
 
 	if len(a.VatNumber) > 0 {
