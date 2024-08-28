@@ -54,9 +54,9 @@ func TestGenerate(t *testing.T) {
 		GmtModify:                      gtime.Now(),
 		Link:                           "http://unibee.top",
 		TaxPercentage:                  2000,
-		//RefundId:                       "dddd",
-		CreateFrom: "Refund Requested: xxxxxxxxx",
-		MetaData:   utility.MarshalToJsonString(map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrencys": "EUR", "LocalizedExchangeRate": 1.0, "IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
+		RefundId:                       "dddd",
+		CreateFrom:                     "Refund Requested: xxxxxxxxx",
+		MetaData:                       utility.MarshalToJsonString(map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrencys": "EUR", "LocalizedExchangeRate": 1.0, "IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
 	}, &entity.Merchant{
 		CompanyName: "Multilogin OÜ",
 		BusinessNum: "EE101775690",
@@ -67,15 +67,15 @@ func TestGenerate(t *testing.T) {
 		IsDeleted:   0,
 		CompanyLogo: "http://unibee.top/files/invoice/cm/czi8o0j0jqd87mqwta.png",
 	}, &entity.UserAccount{
-		IsDeleted: 0,
-		Email:     "jack.fu@wowow.io",
-		Address:   "Best Billing Team Ltd Dubai Hills, Duai, UAE 12345",
-		FirstName: "jack",
-		LastName:  "fu",
-		ZipCode:   "zipCode",
-		City:      "Hangzhou",
-		//RegistrationNumber: "Regxxxddd",
-		VATNumber: "EE101775690",
+		IsDeleted:          0,
+		Email:              "jack.fu@wowow.io",
+		Address:            "Best Billing Team Ltd Dubai Hills, Duai, UAE 12345",
+		FirstName:          "jack",
+		LastName:           "fu",
+		ZipCode:            "zipCode",
+		City:               "Hangzhou",
+		RegistrationNumber: "Regxxxddd",
+		VATNumber:          "EE101775690",
 	}, nil, savePath)
 	if err != nil {
 		fmt.Printf("err :%s", err.Error())
