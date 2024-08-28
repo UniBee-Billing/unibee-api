@@ -192,8 +192,8 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.SetCustomer(&generator2.Contact{
 		Name: userName,
 		Address: &generator2.Address{
-			RegNumber:  userRegNumber,
-			VatNumber:  one.VatNumber,
+			RegNumber: userRegNumber,
+			//VatNumber:  one.VatNumber,
 			Country:    userCountry,
 			City:       userCity,
 			PostalCode: userPostalCode,
