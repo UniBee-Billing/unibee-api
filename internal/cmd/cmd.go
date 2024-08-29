@@ -358,9 +358,9 @@ var (
 				liberr.ErrIsNil(ctx, err, "Redis read check failure")
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
 				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
-				g.Log().Infof(ctx, "Public IP: %s ", utility.GetPublicIP())
-				g.Log().Infof(ctx, "Public IP: %s ", utility.GetPublicIP())
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
+				g.Log().Infof(ctx, "Public IP: %s ", utility.GetPublicIP())
+				g.Log().Infof(ctx, "Public IP: %s ", utility.GetPublicIP())
 				g.Log().Infof(ctx, "Redocly address: http://127.0.0.1%s/swagger", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "SwaggerV3 address: http://127.0.0.1%s/swagger-ui.html", config.GetConfigInstance().Server.Address)
 				if !config.GetConfigInstance().IsServerDev() && !config.GetConfigInstance().IsLocal() {
