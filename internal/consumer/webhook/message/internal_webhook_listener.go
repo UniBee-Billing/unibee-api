@@ -21,7 +21,7 @@ func (t InternalWebhookListener) GetTag() string {
 func (t InternalWebhookListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	return redismq.ReconsumeLater
+	return redismq.CommitMessage
 }
 
 func init() {
