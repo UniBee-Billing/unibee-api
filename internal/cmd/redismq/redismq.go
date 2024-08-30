@@ -31,6 +31,7 @@ var (
 	TopicSubscriptionAutoRenewFailure   = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_auto_renew_failure", Description: "subscription auto renew failure"}
 	//TopicSubscriptionActivateWithoutPayment = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_active_without_payment", Description: "subscription become active without payment"} //deprecated
 	TopicMerchantWebhook  = redismq.MQTopicEnum{Topic: "unibee_merchant_webhook", Tag: "webhook", Description: "merchant webhook"}
+	TopicInternalWebhook  = redismq.MQTopicEnum{Topic: "unibee_internal_webhook", Tag: "webhook", Description: "internal webhook"}
 	TopicInvoiceCreated   = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_created", Description: "invoice created"}
 	TopicInvoiceProcessed = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_processed", Description: "invoice processed"}
 	TopicInvoicePaid      = redismq.MQTopicEnum{Topic: "unibee_invoice", Tag: "invoice_paid", Description: "invoice paid"}
