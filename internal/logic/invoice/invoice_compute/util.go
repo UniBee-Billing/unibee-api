@@ -92,17 +92,17 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if err != nil {
 		return nil
 	}
-	var totalAmountExcludingTax int64 = 0
+	var totalAmount int64 = 0
 	for _, item := range items {
-		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
+		totalAmount = totalAmount + item.AmountExcludingTax
 	}
 	var leftRefundAmount = refund.RefundAmount
 	//proration to the items
 	for _, item := range items {
 		item.DiscountAmount = 0
-		itemRefundAmount := utility.MinInt64(int64(float64(leftRefundAmount)*float64(item.AmountExcludingTax)/float64(totalAmountExcludingTax)), item.AmountExcludingTax)
-		item.Amount = -itemRefundAmount
 		item.OriginAmount = item.Amount
+		itemRefundAmount := utility.MinInt64(int64(float64(leftRefundAmount)*float64(item.Amount)/float64(totalAmount)), item.Amount)
+		item.Amount = -itemRefundAmount
 		item.Tax = int64(float64(item.Amount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
 		item.AmountExcludingTax = item.Amount - item.Tax
 		item.UnitAmountExcludingTax = int64(float64(item.AmountExcludingTax) / float64(item.Quantity))
@@ -112,10 +112,11 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if leftRefundAmount > 0 {
 		for _, item := range items {
 			if leftRefundAmount > 0 {
-				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.Amount)
+				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.OriginAmount-(-item.Amount))
 				item.Amount = item.Amount - tempLeftDiscountAmount
-				item.OriginAmount = item.OriginAmount - tempLeftDiscountAmount
-				item.AmountExcludingTax = item.AmountExcludingTax - tempLeftDiscountAmount
+				item.Tax = int64(float64(item.Amount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
+				item.AmountExcludingTax = item.Amount - item.Tax
+				item.UnitAmountExcludingTax = int64(float64(item.AmountExcludingTax) / float64(item.Quantity))
 				leftRefundAmount = leftRefundAmount - tempLeftDiscountAmount
 			} else {
 				break
