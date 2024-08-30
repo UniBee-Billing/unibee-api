@@ -24,19 +24,23 @@ func FileEntry(r *ghttp.Request) {
 	}
 	extension := filepath.Ext(filename)
 	var download bool
-	if len(one.Data) > 0 {
+	if extension == "jpg" || extension == "jpeg" || extension == "png" {
+		download = false
+	} else {
+		download = true
+	}
+	var exist bool
+	_, err := os.Stat(filename)
+	if !os.IsNotExist(err) && err == nil {
+		exist = true
+	}
+	if len(one.Data) > 0 && !exist {
 		err := os.WriteFile(filename, one.Data, 0644)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "LinkEntry error:%s", err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			r.Response.Writeln("Bad request")
 			return
-		}
-
-		if extension == "jpg" || extension == "jpeg" || extension == "png" {
-			download = false
-		} else {
-			download = true
 		}
 	}
 	if download {
