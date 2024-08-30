@@ -409,19 +409,19 @@ func InvoicePdfGenerateAndEmailSendByTargetTemplateBackground(invoiceId string, 
 			return
 		}
 
-		filepath := GenerateInvoicePdf(backgroundCtx, one)
-		if len(filepath) > 0 {
-			url, _ := UploadInvoicePdf(backgroundCtx, one.InvoiceId, filepath)
-			if len(url) > 0 {
-				_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
-					dao.Invoice.Columns().SendPdf:   url,
-					dao.Invoice.Columns().GmtModify: gtime.Now(),
-				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-				if err != nil {
-					fmt.Printf("UploadInvoice SendPdf err:%s", err.Error())
-				}
-			}
-		}
+		//filepath := GenerateInvoicePdf(backgroundCtx, one)
+		//if len(filepath) > 0 {
+		//	url, _ := UploadInvoicePdf(backgroundCtx, one.InvoiceId, filepath)
+		//	if len(url) > 0 {
+		//		_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
+		//			dao.Invoice.Columns().SendPdf:   url,
+		//			dao.Invoice.Columns().GmtModify: gtime.Now(),
+		//		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+		//		if err != nil {
+		//			fmt.Printf("UploadInvoice SendPdf err:%s", err.Error())
+		//		}
+		//	}
+		//}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
 			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend, targetTemplate)
 			utility.Assert(err == nil, "SendInvoiceEmail error")

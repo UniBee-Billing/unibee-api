@@ -1,15 +1,11 @@
 package oss
 
 import (
-	"bytes"
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -64,27 +60,29 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 	if err != nil {
 		return nil, err
 	}
-
-	minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.GetConfigInstance().MinioConfig.AccessKey, config.GetConfigInstance().MinioConfig.SecretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = minioClient.PutObject(ctx, config.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
-		ContentType: http.DetectContentType(data),
-	})
-	if err != nil {
-		return nil, err
-	}
+	// remove minio dependency
+	//minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
+	//	Creds:  credentials.NewStaticV4(config.GetConfigInstance().MinioConfig.AccessKey, config.GetConfigInstance().MinioConfig.SecretKey, ""),
+	//	Secure: false,
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//_, err = minioClient.PutObject(ctx, config.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
+	//	ContentType: http.DetectContentType(data),
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	toSave := entity.FileUpload{
-		UserId:     uploadUserId,
-		Url:        config.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		UserId: uploadUserId,
+		//Url:        config.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		Url:        config.GetConfigInstance().Server.DomainPath + "/oss/file/" + uploadFileName,
 		FileName:   uploadFileName,
 		Tag:        uploadPath,
+		Data:       data,
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitNil().Insert()

@@ -17,6 +17,7 @@ import (
 	"unibee/internal/controller/link/_import"
 	"unibee/internal/controller/link/export"
 	"unibee/internal/controller/link/invoice"
+	"unibee/internal/controller/link/oss"
 	"unibee/internal/controller/link/payment"
 	"unibee/internal/controller/merchant"
 	"unibee/internal/controller/system"
@@ -329,6 +330,7 @@ var (
 			// Invoice Link
 			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
 			s.BindHandler("GET:/in/pdf/{invoiceId}", invoice.LinkPdfEntry)
+			s.BindHandler("GET:/oss/file/{filename}", oss.FileEntry)
 			s.BindHandler("GET:/export/{taskId}", export.LinkExportEntry)
 			s.BindHandler("GET:/import/template/{task}", _import.LinkImportTemplateEntry)
 			s.BindHandler("GET:/pay/{paymentId}", payment.LinkEntry)

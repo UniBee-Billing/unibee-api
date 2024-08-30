@@ -29,6 +29,7 @@ type FileUploadColumns struct {
 	GmtModify  string //
 	IsDeleted  string // 0-UnDeleted，1-Deleted
 	CreateTime string // create utc time
+	Data       string //
 }
 
 // fileUploadColumns holds the columns for table file_upload.
@@ -42,6 +43,7 @@ var fileUploadColumns = FileUploadColumns{
 	GmtModify:  "gmt_modify",
 	IsDeleted:  "is_deleted",
 	CreateTime: "create_time",
+	Data:       "data",
 }
 
 // NewFileUploadDao creates and returns a new DAO object for table data access.
