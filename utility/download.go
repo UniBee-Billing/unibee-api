@@ -10,6 +10,7 @@ import (
 
 func DownloadFile(url string) string {
 	fileName := filepath.Base(url)
+	fileName = fmt.Sprintf("down_%s", fileName)
 
 	currentDir, err := os.Getwd()
 	localFilePath := filepath.Join(currentDir, fileName)
