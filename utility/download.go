@@ -53,6 +53,6 @@ func DownloadFile(url string) string {
 		fmt.Println("Error writing to file:", err)
 		return ""
 	}
-	fmt.Println("Image downloaded successfully:", localFilePath)
+	fmt.Println("File downloaded successfully:", localFilePath)
 	return localFilePath
 }

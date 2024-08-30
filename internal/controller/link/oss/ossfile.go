@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"io"
@@ -36,7 +37,7 @@ func FileEntry(r *ghttp.Request) {
 		exist = true
 	}
 	if len(one.Data) > 0 && !exist {
-		err := os.WriteFile(filename, one.Data, 0644)
+		err = os.WriteFile(filename, one.Data, 0644)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "LinkEntry error:%s", err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
@@ -44,6 +45,7 @@ func FileEntry(r *ghttp.Request) {
 			return
 		}
 	}
+	r.Response.Header().Add("Content-Length", fmt.Sprintf("%d", len(one.Data)))
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+filename+"\"")
