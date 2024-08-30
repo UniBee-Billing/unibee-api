@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"unibee/internal/query"
 )
 
@@ -24,7 +25,7 @@ func FileEntry(r *ghttp.Request) {
 	}
 	extension := filepath.Ext(filename)
 	var download bool
-	if extension == "jpg" || extension == "jpeg" || extension == "png" {
+	if extension == ".jpg" || extension == ".jpeg" || extension == ".png" {
 		download = false
 	} else {
 		download = true
@@ -47,7 +48,7 @@ func FileEntry(r *ghttp.Request) {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+filename+"\"")
 	} else {
-		r.Response.Header().Add("Content-type", "application/"+extension)
+		r.Response.Header().Add("Content-type", "image/"+strings.ReplaceAll(extension, ".", ""))
 	}
 	file, err := os.Open(filename)
 	if err != nil {
