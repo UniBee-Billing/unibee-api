@@ -19,7 +19,7 @@ func DownloadFile(url string) string {
 		return ""
 	}
 	defer func(file *os.File) {
-		err := file.Close()
+		err = file.Close()
 		if err != nil {
 			fmt.Printf("Error creating file:%s\n", err.Error())
 		}
@@ -31,7 +31,7 @@ func DownloadFile(url string) string {
 		return ""
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+		err = Body.Close()
 		if err != nil {
 			fmt.Printf("Error creating file:%s\n", err.Error())
 		}
