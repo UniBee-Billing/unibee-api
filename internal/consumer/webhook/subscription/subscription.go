@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.MerchantWebhookEvent) {
+func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		g.Log().Infof(ctx, "SendMerchantSubscriptionWebhookBackground event:%v", event)

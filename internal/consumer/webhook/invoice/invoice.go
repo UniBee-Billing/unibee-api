@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.MerchantWebhookEvent) {
+func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error

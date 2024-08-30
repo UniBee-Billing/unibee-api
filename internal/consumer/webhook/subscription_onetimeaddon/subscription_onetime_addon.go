@@ -11,7 +11,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantSubscriptionOnetimeAddonWebhookBackground(merchantId uint64, one *detail.SubscriptionOnetimeAddonDetail, event event.MerchantWebhookEvent) {
+func SendMerchantSubscriptionOnetimeAddonWebhookBackground(merchantId uint64, one *detail.SubscriptionOnetimeAddonDetail, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error

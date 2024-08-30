@@ -1,6 +1,6 @@
 package event
 
-type MerchantWebhookEvent string
+type WebhookEvent string
 
 const (
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED                   = "subscription.created"
@@ -78,7 +78,7 @@ var ListeningEventList = []string{
 	UNIBEE_WEBHOOK_EVENT_INVOICE_REVERSED,
 }
 
-func WebhookEventInListeningEvents(target MerchantWebhookEvent) bool {
+func WebhookEventInListeningEvents(target WebhookEvent) bool {
 	if len(target) <= 0 {
 		return false
 	}

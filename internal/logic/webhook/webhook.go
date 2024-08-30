@@ -82,7 +82,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
 	// events valid check
 	for _, e := range events {
-		utility.Assert(event.WebhookEventInListeningEvents(event.MerchantWebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))
+		utility.Assert(event.WebhookEventInListeningEvents(event.WebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))
 	}
 	one := query.GetMerchantWebhookByUrl(ctx, merchantId, url)
 	if one == nil {
@@ -144,7 +144,7 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
 	// events valid check
 	for _, e := range events {
-		utility.Assert(event.WebhookEventInListeningEvents(event.MerchantWebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))
+		utility.Assert(event.WebhookEventInListeningEvents(event.WebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))
 	}
 	one := query.GetMerchantWebhook(ctx, endpointId)
 	utility.Assert(one != nil, "endpoint not found")

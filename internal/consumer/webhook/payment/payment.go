@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SendPaymentWebhookBackground(paymentId string, event event.MerchantWebhookEvent) {
+func SendPaymentWebhookBackground(paymentId string, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error

@@ -18,7 +18,7 @@ import (
 
 type WebhookMessage struct {
 	Id                uint64
-	Event             event2.MerchantWebhookEvent
+	Event             event2.WebhookEvent
 	EndpointId        uint64
 	Url               string
 	MerchantId        uint64
@@ -28,7 +28,7 @@ type WebhookMessage struct {
 	EndpointEventList string
 }
 
-func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string) {
+func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string) {
 	webhookMessage := &entity.MerchantWebhookMessage{
 		MerchantId:      merchantId,
 		WebhookEvent:    string(event),

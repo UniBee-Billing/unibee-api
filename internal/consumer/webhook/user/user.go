@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantUserMetricWebhookBackground(userId uint64, subId string, event event.MerchantWebhookEvent) {
+func SendMerchantUserMetricWebhookBackground(userId uint64, subId string, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error
