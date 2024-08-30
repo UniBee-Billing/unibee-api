@@ -42,6 +42,21 @@ func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, 
 	utility.AssertError(err, "webhook message LastInsertId error")
 	webhookMessage.Id = uint64(id)
 
+	{
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicInternalWebhook.Topic,
+			Tag:   redismq2.TopicInternalWebhook.Tag,
+			Body: utility.MarshalToJsonString(&WebhookMessage{
+				Id:            webhookMessage.Id,
+				Event:         event,
+				MerchantId:    merchantId,
+				Data:          data,
+				SequenceKey:   sequenceKey,
+				DependencyKey: dependencyKey,
+			}),
+		})
+	}
+
 	utility.Assert(event2.WebhookEventInListeningEvents(event), fmt.Sprintf("Event:%s Not In Event List", event))
 	list := query.GetMerchantWebhooksByMerchantId(ctx, merchantId)
 	if list != nil {
