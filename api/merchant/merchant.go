@@ -247,6 +247,7 @@ type IMerchantUser interface {
 	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
 	Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error)
 	ChangeGateway(ctx context.Context, req *user.ChangeGatewayReq) (res *user.ChangeGatewayRes, err error)
+	ChangeEmail(ctx context.Context, req *user.ChangeEmailReq) (res *user.ChangeEmailRes, err error)
 }
 
 type IMerchantVat interface {

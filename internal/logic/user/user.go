@@ -19,6 +19,21 @@ import (
 	"unibee/utility"
 )
 
+func ChangeUserEmail(ctx context.Context, userId uint64, newEmail string) {
+	one := query.GetUserAccountById(ctx, userId)
+	utility.Assert(one != nil, "user not found")
+	if one.Email == newEmail {
+		return
+	}
+	exist := query.GetUserAccountByEmail(ctx, one.MerchantId, newEmail)
+	utility.Assert(exist == nil, "email has bean used by other user")
+	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+		dao.UserAccount.Columns().Email:     newEmail,
+		dao.UserAccount.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+	utility.AssertError(err, "update user email err")
+}
+
 func ChangeUserPasswordWithOutOldVerify(ctx context.Context, merchantId uint64, email string, newPassword string) {
 	one := query.GetUserAccountByEmail(ctx, merchantId, email)
 	utility.Assert(one != nil, "user not found")

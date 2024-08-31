@@ -122,3 +122,13 @@ type ChangeGatewayReq struct {
 }
 type ChangeGatewayRes struct {
 }
+
+type ChangeEmailReq struct {
+	g.Meta         `path:"/change_email" tags:"User" method:"post" summary:"ChangeUserEmail"`
+	UserId         uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" `
+	ExternalUserId string `json:"externalUserId" dc:"The externalUserId of user, either ExternalUserId or UserId needed"`
+	NewEmail       string `json:"newEmail" dc:"Target Email want to change" v:"required"`
+}
+
+type ChangeEmailRes struct {
+}
