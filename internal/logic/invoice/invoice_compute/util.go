@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"math"
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -103,7 +104,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		item.OriginAmount = item.Amount
 		itemRefundAmount := utility.MinInt64(int64(float64(leftRefundAmount)*float64(item.Amount)/float64(totalAmount)), item.Amount)
 		item.Amount = -itemRefundAmount
-		item.Tax = int64(float64(item.Amount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)))))
+		item.Tax = int64(math.Floor(float64(item.Amount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))))))
 		item.AmountExcludingTax = item.Amount - item.Tax
 		item.UnitAmountExcludingTax = int64(float64(item.AmountExcludingTax) / float64(item.Quantity))
 		leftRefundAmount = leftRefundAmount - itemRefundAmount
@@ -114,7 +115,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 			if leftRefundAmount > 0 {
 				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.OriginAmount-(-item.Amount))
 				item.Amount = item.Amount - tempLeftDiscountAmount
-				item.Tax = int64(float64(item.Amount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)))))
+				item.Tax = int64(math.Floor(float64(item.Amount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))))))
 				item.AmountExcludingTax = item.Amount - item.Tax
 				item.UnitAmountExcludingTax = int64(float64(item.AmountExcludingTax) / float64(item.Quantity))
 				leftRefundAmount = leftRefundAmount - tempLeftDiscountAmount
@@ -127,7 +128,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if payment.TotalAmount == refund.RefundAmount {
 		refundType = "Full Refund"
 	}
-	totalTax := -int64(float64(refund.RefundAmount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)))))
+	totalTax := -int64(math.Ceil(float64(refund.RefundAmount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))))))
 	return &bean.Invoice{
 		InvoiceName:                    "Credit Note",
 		ProductName:                    originalInvoice.ProductName,

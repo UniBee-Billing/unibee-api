@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"math"
 	"os"
 	"testing"
 	"unibee/internal/consts"
@@ -92,5 +93,6 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestTimeFormat(t *testing.T) {
-	fmt.Println(gtime.Now().Layout("2006-01-02 15:04:05"))
+	v := 1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(2000)))
+	fmt.Println(int(math.Floor(float64(-12000) * v)))
 }
