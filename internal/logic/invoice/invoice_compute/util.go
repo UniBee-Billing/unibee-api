@@ -94,7 +94,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	}
 	var totalAmount int64 = 0
 	for _, item := range items {
-		totalAmount = totalAmount + item.AmountExcludingTax
+		totalAmount = totalAmount + item.Amount
 	}
 	var leftRefundAmount = refund.RefundAmount
 	//proration to the items
