@@ -127,7 +127,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if payment.TotalAmount == refund.RefundAmount {
 		refundType = "Full Refund"
 	}
-	totalTax := -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage))
+	totalTax := -int64(float64(refund.RefundAmount) * (1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)))))
 	return &bean.Invoice{
 		InvoiceName:                    "Credit Note",
 		ProductName:                    originalInvoice.ProductName,
