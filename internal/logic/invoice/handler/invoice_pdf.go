@@ -76,7 +76,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	if gateway != nil {
 		invoiceGateway = gateway.GatewayName
 	}
-	doc.SetInvoiceId(one.InvoiceId)
+	//doc.SetInvoiceId(one.InvoiceId)
 	doc.SetInvoiceNumber(fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId))
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
 

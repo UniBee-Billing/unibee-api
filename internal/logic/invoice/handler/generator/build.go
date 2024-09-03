@@ -154,7 +154,7 @@ func (doc *Document) appendLogo() float64 {
 func (doc *Document) appendMetas() {
 	x, _, _, _ := doc.pdf.GetMargins()
 	startY := doc.pdf.GetY() + 8
-	// Append InvoiceOriginNumber
+	// Append InvoiceId
 	if len(doc.InvoiceId) > 0 {
 		doc.pdf.SetXY(x, startY)
 		doc.pdf.SetFont(doc.Options.Font, "", 10)
