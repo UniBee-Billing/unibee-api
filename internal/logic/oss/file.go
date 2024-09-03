@@ -61,8 +61,8 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 	if err != nil {
 		return nil, err
 	}
-	if len(data) == 0 {
-		return nil, gerror.New("invalid file, size 0")
+	if data == nil || len(data) == 0 {
+		return nil, gerror.Newf("invalid file, size 0 or nil, localFilePath:%s", localFilePath)
 	}
 	// remove minio dependency
 	//minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
