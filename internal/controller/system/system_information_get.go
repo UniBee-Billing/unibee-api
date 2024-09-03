@@ -3,10 +3,10 @@ package system
 import (
 	"context"
 	"unibee/api/system/information"
-	"unibee/internal/cmd"
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/currency"
 	"unibee/time"
+	"unibee/utility"
 )
 
 func (c *ControllerInformation) Get(ctx context.Context, req *information.GetReq) (res *information.GetRes, err error) {
@@ -17,7 +17,7 @@ func (c *ControllerInformation) Get(ctx context.Context, req *information.GetReq
 	res.IsProd = config.GetConfigInstance().IsProd()
 	res.SupportCurrency = currency.GetMerchantCurrencies()
 	res.Mode = config.GetConfigInstance().Mode
-	res.BuildVersion = cmd.ReadBuildVersionInfo(ctx)
+	res.BuildVersion = utility.ReadBuildVersionInfo(ctx)
 
 	return res, nil
 }
