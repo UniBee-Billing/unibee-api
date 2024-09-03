@@ -2,6 +2,7 @@ package oss
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -59,6 +60,9 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 	data, err := os.ReadFile(localFilePath)
 	if err != nil {
 		return nil, err
+	}
+	if len(data) == 0 {
+		return nil, gerror.New("invalid file, size 0")
 	}
 	// remove minio dependency
 	//minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
