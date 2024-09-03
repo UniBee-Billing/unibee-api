@@ -26,7 +26,7 @@ func ChangeUserEmail(ctx context.Context, userId uint64, newEmail string) {
 		return
 	}
 	exist := query.GetUserAccountByEmail(ctx, one.MerchantId, newEmail)
-	utility.Assert(exist == nil, "email has bean used by other user")
+	utility.Assert(exist == nil, "email has been used by another user")
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Email:     newEmail,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
