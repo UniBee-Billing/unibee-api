@@ -477,7 +477,11 @@ func (doc *Document) appendTotal() {
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
-	doc.pdf.CellFormat(38, 10, doc.encodeString(fmt.Sprintf("%s(%s)", doc.Options.TextTotalTax, doc.TaxPercentageString)), "0", 0, "R", false, 0, "")
+	if doc.IsRefund {
+		doc.pdf.CellFormat(38, 10, doc.encodeString(fmt.Sprintf("VAT Reverse Charge(%s)", doc.TaxPercentageString)), "0", 0, "R", false, 0, "")
+	} else {
+		doc.pdf.CellFormat(38, 10, doc.encodeString(fmt.Sprintf("%s(%s)", doc.Options.TextTotalTax, doc.TaxPercentageString)), "0", 0, "R", false, 0, "")
+	}
 
 	// Draw tax amount
 	doc.pdf.SetX(moneyX)
