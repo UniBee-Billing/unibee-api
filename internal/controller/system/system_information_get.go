@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"unibee/api/system/information"
+	"unibee/internal/cmd"
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/currency"
 	"unibee/time"
@@ -16,6 +17,7 @@ func (c *ControllerInformation) Get(ctx context.Context, req *information.GetReq
 	res.IsProd = config.GetConfigInstance().IsProd()
 	res.SupportCurrency = currency.GetMerchantCurrencies()
 	res.Mode = config.GetConfigInstance().Mode
+	res.BuildVersion = cmd.ReadBuildVersionInfo(ctx)
 
 	return res, nil
 }

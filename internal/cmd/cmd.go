@@ -36,10 +36,10 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 )
 
-func readBuildVersionInfo(ctx context.Context) string {
+func ReadBuildVersionInfo(ctx context.Context) string {
 	buildInfo, err := os.ReadFile("./version.txt")
 	if err != nil {
-		glog.Errorf(ctx, "readBuildVersionInfo error:%s", err.Error())
+		glog.Errorf(ctx, "ReadBuildVersionInfo error:%s", err.Error())
 	}
 	return string(buildInfo)
 }
@@ -59,7 +59,7 @@ var (
 				Name: "Apache-2.0",
 				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
 			}
-			openapi.Info.Version = readBuildVersionInfo(ctx)
+			openapi.Info.Version = ReadBuildVersionInfo(ctx)
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
 			openapi.Servers = &goai.Servers{
