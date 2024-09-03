@@ -11,6 +11,7 @@ type GetReq struct {
 
 type GetRes struct {
 	Env             string           `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	Mode            string           `json:"mode" description:"System Mode" `
 	IsProd          bool             `json:"isProd" description:"Check System Env Is Prod, true|false" `
 	SupportTimeZone []string         `json:"supportTimeZone" description:"Support TimeZone List" `
 	SupportCurrency []*bean.Currency `json:"supportCurrency" description:"Support Currency List" `

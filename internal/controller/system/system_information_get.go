@@ -15,6 +15,7 @@ func (c *ControllerInformation) Get(ctx context.Context, req *information.GetReq
 	res.Env = config.GetConfigInstance().Env
 	res.IsProd = config.GetConfigInstance().IsProd()
 	res.SupportCurrency = currency.GetMerchantCurrencies()
+	res.Mode = config.GetConfigInstance().Mode
 
 	return res, nil
 }
