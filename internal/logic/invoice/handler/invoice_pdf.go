@@ -247,9 +247,10 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 				description = line.PdfDescription
 			}
 			doc.AppendItem(&generator2.Item{
-				Name:         fmt.Sprintf("%s #%d", description, i),
-				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
-				UnitCostStr:  fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
+				Name:        fmt.Sprintf("%s #%d", description, i),
+				UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
+				UnitCostStr: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
+				//TaxString:    fmt.Sprintf("%f", float64(line.Tax)/100.0),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
 				AmountString: amountString,
 			})
@@ -270,7 +271,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 
 	if localized {
-		//doc.ExchangeRate = fmt.Sprintf("%v", localizedExchangeRate)
+		doc.ExchangeRate = fmt.Sprintf("%.4f", localizedExchangeRate)
 		doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
 		doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
 		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))

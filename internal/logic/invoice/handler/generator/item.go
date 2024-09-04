@@ -13,6 +13,7 @@ type Item struct {
 	UnitCost     string    `json:"unit_cost,omitempty"`
 	Quantity     string    `json:"quantity,omitempty"`
 	AmountString string    `json:"amountString,omitempty"`
+	TaxString    string    `json:"taxString,omitempty"`
 	Tax          *Tax      `json:"tax,omitempty"`
 	Discount     *Discount `json:"discount,omitempty"`
 

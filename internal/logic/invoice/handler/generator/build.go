@@ -76,6 +76,9 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	// Append items
 	doc.appendItems()
 
+	// Append Exchange Rate
+	doc.appendExchangeRate()
+
 	// Check page height (total bloc height = 30, 45 when doc discount)
 	offset := doc.pdf.GetY() + 30
 	if doc.Discount != nil {
@@ -388,6 +391,28 @@ func (doc *Document) appendItems() {
 	}
 }
 
+func (doc *Document) appendExchangeRate() {
+	if len(doc.ExchangeRate) == 0 {
+		return
+	}
+
+	currentX := doc.pdf.GetX()
+	currentY := doc.pdf.GetY()
+
+	doc.pdf.SetFont(doc.Options.Font, "", 8)
+	//doc.pdf.SetRightMargin(20)
+	doc.pdf.SetY(currentY - 5)
+	doc.pdf.SetX(165)
+
+	_, lineHt := doc.pdf.GetFontSize()
+	html := doc.pdf.HTMLBasicNew()
+	html.Write(lineHt, doc.encodeString(fmt.Sprintf("(Rates: %s)", doc.ExchangeRate)))
+
+	doc.pdf.SetRightMargin(BaseMargin)
+	doc.pdf.SetX(currentX)
+	doc.pdf.SetY(currentY)
+}
+
 // appendNotes to document
 func (doc *Document) appendNotes() {
 	if len(doc.Notes) == 0 {
@@ -420,6 +445,29 @@ func (doc *Document) appendTotal() {
 		doc.Options.BaseTextColor[1],
 		doc.Options.BaseTextColor[2],
 	)
+	//
+	//if len(doc.ExchangeRate) > 0 {
+	//	doc.pdf.SetX(120)
+	//	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+	//	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+	//	doc.pdf.CellFormat(38, 10, doc.encodeString("Exchange Rate"), "0", 0, "R", false, 0, "")
+	//
+	//	doc.pdf.SetX(moneyX)
+	//	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+	//	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+	//	doc.pdf.CellFormat(
+	//		40,
+	//		10,
+	//		doc.encodeString(doc.ExchangeRate),
+	//		"0",
+	//		0,
+	//		"L",
+	//		false,
+	//		0,
+	//		"",
+	//	)
+	//	doc.pdf.SetY(doc.pdf.GetY() + 10)
+	//}
 
 	// Draw SUB TOTAL HT title
 	doc.pdf.SetX(120)
@@ -498,29 +546,6 @@ func (doc *Document) appendTotal() {
 		0,
 		"",
 	)
-
-	if len(doc.ExchangeRate) > 0 {
-		doc.pdf.SetY(doc.pdf.GetY() + 10)
-		doc.pdf.SetX(120)
-		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
-		doc.pdf.CellFormat(38, 10, doc.encodeString("Exchange Rate"), "0", 0, "R", false, 0, "")
-
-		doc.pdf.SetX(moneyX)
-		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
-		doc.pdf.CellFormat(
-			40,
-			10,
-			doc.encodeString(doc.ExchangeRate),
-			"0",
-			0,
-			"L",
-			false,
-			0,
-			"",
-		)
-	}
 
 	// Draw total with tax title
 	doc.pdf.SetY(doc.pdf.GetY() + 10)
