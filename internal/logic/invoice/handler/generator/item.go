@@ -169,7 +169,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 			doc.encodeString(i.UnitCostStr),
 			"0",
 			0,
-			"",
+			"C",
 			false,
 			0,
 			"",
@@ -179,14 +179,14 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Quantity
 	if ItemColTaxOffset-ItemColQuantityOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
-		doc.pdf.SetX(ItemColQuantityOffset)
+		doc.pdf.SetX(ItemColQuantityOffset - 4)
 		doc.pdf.CellFormat(
 			ItemColTaxOffset-ItemColQuantityOffset,
 			colHeight,
 			doc.encodeString(i._quantity.String()),
 			"0",
 			0,
-			"",
+			"C",
 			false,
 			0,
 			"",
@@ -297,7 +297,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Tax
 	if ItemColDiscountOffset-ItemColTaxOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
-		doc.pdf.SetX(ItemColTaxOffset)
+		doc.pdf.SetX(ItemColTaxOffset - 8)
 		if len(i.TaxString) > 0 {
 			// If no tax
 			doc.pdf.CellFormat(
@@ -306,7 +306,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 				doc.encodeString(i.TaxString),
 				"0",
 				0,
-				"",
+				"C",
 				false,
 				0,
 				"",
