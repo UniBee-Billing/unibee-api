@@ -11,7 +11,6 @@ import (
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/service"
 	"unibee/internal/query"
-	"unibee/utility"
 )
 
 func VerifyInvoiceLinkSecurityToken(ctx context.Context, invoiceId string, token string) bool {
@@ -64,11 +63,11 @@ func LinkPdfEntry(r *ghttp.Request) {
 		return
 	}
 	var pdfFileName string
-	if len(one.SendPdf) > 0 {
-		pdfFileName = utility.DownloadFile(one.SendPdf)
-	} else {
-		pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
-	}
+	//if len(one.SendPdf) > 0 {
+	//	pdfFileName = utility.DownloadFile(one.SendPdf)
+	//} else {
+	pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
+	//}
 	if len(pdfFileName) == 0 {
 		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
 		r.Response.WriteHeader(http.StatusBadRequest)

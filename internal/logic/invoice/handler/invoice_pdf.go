@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/number"
 	"os"
@@ -13,11 +11,9 @@ import (
 	"strings"
 	"time"
 	"unibee/api/bean"
-	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
-	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -36,21 +32,21 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	return savePath
 }
 
-func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (string, error) {
-	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
-		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
-		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
-		len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
-		g.Log().Errorf(ctx, "UploadInvoicePdf error:Oss service not setup")
-		return "", gerror.New("File service need setup")
-	}
-	upload, err := oss.UploadLocalFile(ctx, filePath, invoiceId, filePath, "0")
-	if err != nil {
-		g.Log().Errorf(ctx, fmt.Sprintf("UploadInvoicePdf error:%v", err))
-		return "", err
-	}
-	return upload.Url, nil
-}
+//func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (string, error) {
+//	//if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
+//	//	len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
+//	//	len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
+//	//	len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
+//	//	g.Log().Errorf(ctx, "UploadInvoicePdf error:Oss service not setup")
+//	//	return "", gerror.New("File service need setup")
+//	//}
+//	upload, err := oss.UploadLocalFile(ctx, filePath, invoiceId, filePath, "0")
+//	if err != nil {
+//		g.Log().Errorf(ctx, fmt.Sprintf("UploadInvoicePdf error:%v", err))
+//		return "", err
+//	}
+//	return upload.Url, nil
+//}
 
 func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
 	var metadata = make(map[string]interface{})
