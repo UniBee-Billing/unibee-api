@@ -2,6 +2,7 @@ package utility
 
 import (
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"io"
 	"net/http"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 func DownloadFile(url string) string {
 	fileName := filepath.Base(url)
-	fileName = fmt.Sprintf("down_%s", fileName)
+	fileName = fmt.Sprintf("down_%s_%d", fileName, gtime.Now().Timestamp())
 
 	currentDir, err := os.Getwd()
 	localFilePath := filepath.Join(currentDir, fileName)
