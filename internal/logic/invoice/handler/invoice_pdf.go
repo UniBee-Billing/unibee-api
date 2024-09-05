@@ -242,19 +242,21 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 		for i, line := range lines {
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency))
+			taxString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			if localized {
 				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.UnitAmountExcludingTax*line.Quantity)*localizedExchangeRate), localizedCurrencyStr))
+				taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
 			}
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
 			}
 			doc.AppendItem(&generator2.Item{
-				Name:        fmt.Sprintf("%s #%d", description, i),
-				UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
-				UnitCostStr: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
-				//TaxString:    fmt.Sprintf("%f", float64(line.Tax)/100.0),
+				Name:         fmt.Sprintf("%s #%d", description, i),
+				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
+				UnitCostStr:  fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
+				TaxString:    taxString,
 				AmountString: amountString,
 			})
 		}
