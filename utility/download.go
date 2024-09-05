@@ -11,7 +11,7 @@ import (
 
 func DownloadFile(url string) string {
 	fileName := filepath.Base(url)
-	fileName = fmt.Sprintf("down_%s_%d", fileName, gtime.Now().Timestamp())
+	fileName = fmt.Sprintf("down_%d_%s", gtime.Now().Timestamp(), fileName)
 
 	currentDir, err := os.Getwd()
 	localFilePath := filepath.Join(currentDir, fileName)

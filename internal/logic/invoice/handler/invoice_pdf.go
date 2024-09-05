@@ -242,10 +242,10 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
 		for i, line := range lines {
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
 			taxString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			if localized {
-				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.UnitAmountExcludingTax*line.Quantity)*localizedExchangeRate), localizedCurrencyStr))
+				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
 				taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
 			}
 			description := line.Description
