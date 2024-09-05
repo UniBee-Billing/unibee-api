@@ -129,6 +129,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 	}
 
+	doc.ShowDetailItem = true
 	showDetailItem := metadata["ShowDetailItem"]
 	if showDetailItem != nil {
 		if _showDetailItem, ok := showDetailItem.(bool); ok {
