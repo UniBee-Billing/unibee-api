@@ -30,11 +30,11 @@ const (
 
 	// ItemColUnitPriceOffset ...
 	//ItemColUnitPriceOffset float64 = 80
-	ItemColUnitPriceOffset float64 = 103
+	ItemColUnitPriceOffset float64 = 95
 
 	// ItemColQuantityOffset ...
 	//ItemColQuantityOffset float64 = 103
-	ItemColQuantityOffset float64 = 140
+	ItemColQuantityOffset float64 = 117
 
 	// ItemColTotalHTOffset ...
 	//ItemColTotalHTOffset float64 = 113
@@ -46,7 +46,7 @@ const (
 
 	// ItemColTaxOffset ...
 	//ItemColTaxOffset float64 = 157
-	ItemColTaxOffset float64 = ItemColTotalTTCOffset
+	ItemColTaxOffset float64 = 140
 
 	// ItemColTotalTTCOffset ...
 	ItemColTotalTTCOffset float64 = 165

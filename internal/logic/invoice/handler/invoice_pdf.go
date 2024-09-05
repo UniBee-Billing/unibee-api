@@ -216,9 +216,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 		doc.SetIsRefund(true)
 		for i, line := range lines {
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
+			taxString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			if localized {
-				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.AmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
+				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
+				taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
 			}
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
@@ -229,6 +231,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 				UnitCostStr:  fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
+				TaxString:    taxString,
 				AmountString: amountString,
 			})
 		}
@@ -271,7 +274,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 
 	if localized {
-		doc.ExchangeRate = fmt.Sprintf("%.4f", localizedExchangeRate)
+		doc.ExchangeRateString = fmt.Sprintf("(%s1 = %s%s)", symbol, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(100)*localizedExchangeRate), localizedCurrencyStr))
 		doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
 		doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
 		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))

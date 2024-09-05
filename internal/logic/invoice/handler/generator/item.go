@@ -298,7 +298,20 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	if ItemColDiscountOffset-ItemColTaxOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
 		doc.pdf.SetX(ItemColTaxOffset)
-		if i.Tax == nil {
+		if len(i.TaxString) > 0 {
+			// If no tax
+			doc.pdf.CellFormat(
+				ItemColDiscountOffset-ItemColTaxOffset,
+				colHeight,
+				doc.encodeString(i.TaxString),
+				"0",
+				0,
+				"",
+				false,
+				0,
+				"",
+			)
+		} else if i.Tax == nil {
 			// If no tax
 			doc.pdf.CellFormat(
 				ItemColDiscountOffset-ItemColTaxOffset,

@@ -330,7 +330,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	}
 
 	// Tax
-	if ItemColTotalTTCOffset-ItemColDiscountOffset > 0 && doc.ShowDetailItem {
+	if ItemColDiscountOffset-ItemColTaxOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetX(ItemColTaxOffset)
 		doc.pdf.CellFormat(
 			ItemColTotalTTCOffset-ItemColDiscountOffset,
@@ -392,7 +392,7 @@ func (doc *Document) appendItems() {
 }
 
 func (doc *Document) appendExchangeRate() {
-	if len(doc.ExchangeRate) == 0 {
+	if len(doc.ExchangeRateString) == 0 {
 		return
 	}
 
@@ -406,7 +406,7 @@ func (doc *Document) appendExchangeRate() {
 
 	_, lineHt := doc.pdf.GetFontSize()
 	html := doc.pdf.HTMLBasicNew()
-	html.Write(lineHt, doc.encodeString(fmt.Sprintf("(Rates: %s)", doc.ExchangeRate)))
+	html.Write(lineHt, doc.encodeString(fmt.Sprintf("%s", doc.ExchangeRateString)))
 
 	doc.pdf.SetRightMargin(BaseMargin)
 	doc.pdf.SetX(currentX)
@@ -446,7 +446,7 @@ func (doc *Document) appendTotal() {
 		doc.Options.BaseTextColor[2],
 	)
 	//
-	//if len(doc.ExchangeRate) > 0 {
+	//if len(doc.ExchangeRateString) > 0 {
 	//	doc.pdf.SetX(120)
 	//	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	//	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
@@ -458,7 +458,7 @@ func (doc *Document) appendTotal() {
 	//	doc.pdf.CellFormat(
 	//		40,
 	//		10,
-	//		doc.encodeString(doc.ExchangeRate),
+	//		doc.encodeString(doc.ExchangeRateString),
 	//		"0",
 	//		0,
 	//		"L",

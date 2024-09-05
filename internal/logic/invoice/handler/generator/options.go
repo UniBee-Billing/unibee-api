@@ -24,12 +24,12 @@ type Options struct {
 	TextPaymentTermTitle         string `default:"Payment term" json:"text_payment_term_title,omitempty"`
 
 	TextItemsNameTitle     string `default:"Description" json:"text_items_name_title,omitempty"`
-	TextItemsUnitCostTitle string `default:"Unit price" json:"text_items_unit_cost_title,omitempty"`
+	TextItemsUnitCostTitle string `default:"Unit Price" json:"text_items_unit_cost_title,omitempty"`
 	TextItemsQuantityTitle string `default:"Quantity" json:"text_items_quantity_title,omitempty"`
 	TextItemsTotalHTTitle  string `default:"Total no tax" json:"text_items_total_ht_title,omitempty"`
-	TextItemsTaxTitle      string `default:"Tax" json:"text_items_tax_title,omitempty"`
+	TextItemsTaxTitle      string `default:"VAT" json:"text_items_tax_title,omitempty"`
 	TextItemsDiscountTitle string `default:"Discount" json:"text_items_discount_title,omitempty"`
-	TextItemsTotalTTCTitle string `default:"Amount" json:"text_items_total_ttc_title,omitempty"`
+	TextItemsTotalTTCTitle string `default:"Total" json:"text_items_total_ttc_title,omitempty"`
 
 	TextSubTotal        string `default:"SUB TOTAL" json:"text_sub_total,omitempty"`
 	TextTotalDiscounted string `default:"TOTAL DISCOUNTED" json:"text_total_discounted,omitempty"`
