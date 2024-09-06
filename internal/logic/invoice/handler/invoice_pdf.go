@@ -277,7 +277,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		if localizedExchangeRateDescription != nil {
 			doc.ExchangeRateString = fmt.Sprintf("%s", localizedExchangeRateDescription)
 		} else {
-			doc.ExchangeRateString = fmt.Sprintf("* %s1 = %s%s", symbol, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(100)*localizedExchangeRate), localizedCurrencyStr))
+			doc.ExchangeRateString = fmt.Sprintf("* %s1 = %s%.6f", symbol, localizedSymbol, localizedExchangeRate)
 		}
 		//doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
 		//doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
