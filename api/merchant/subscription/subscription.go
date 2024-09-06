@@ -276,7 +276,7 @@ type UpdateReq struct {
 	Quantity           int64                       `json:"quantity" dc:"Quantity"  v:"required"`
 	GatewayId          *uint64                     `json:"gatewayId" dc:"Id of gateway" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
-	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	EffectImmediate    int                         `json:"effectImmediate" dc:"Force Effect Immediate，1-Immediate，2-Next Period, this api will check upgrade|downgrade automatically" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"          `
 	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency to verify if provide"   `
 	ProrationDate      *int64                      `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
