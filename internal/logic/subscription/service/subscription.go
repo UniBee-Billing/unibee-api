@@ -1459,6 +1459,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else {
 		prepare.EffectImmediate = false
+		effectImmediate = 0
 		subUpdateRes = &UpdateSubscriptionInternalResp{
 			Paid: false,
 			Link: "",
@@ -1506,14 +1507,15 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	one.Link = subUpdateRes.Link
 	one.Status = consts.PendingSubStatusCreate
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:       consts.PendingSubStatusCreate,
-		dao.SubscriptionPendingUpdate.Columns().ResponseData: subUpdateRes.Data,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify:    gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Paid:         PaidInt,
-		dao.SubscriptionPendingUpdate.Columns().Link:         subUpdateRes.Link,
-		dao.SubscriptionPendingUpdate.Columns().InvoiceId:    subUpdateRes.GatewayUpdateId,
-		dao.SubscriptionPendingUpdate.Columns().Note:         note,
-		dao.SubscriptionPendingUpdate.Columns().MetaData:     utility.MarshalToJsonString(req.Metadata),
+		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData:    subUpdateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
+		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().InvoiceId:       subUpdateRes.GatewayUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().Note:            note,
+		dao.SubscriptionPendingUpdate.Columns().MetaData:        utility.MarshalToJsonString(req.Metadata),
+		dao.SubscriptionPendingUpdate.Columns().EffectImmediate: effectImmediate,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, one.PendingUpdateId).OmitNil().Update()
 	if err != nil {
 		return nil, err
@@ -1551,7 +1553,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 			Paid:            one.Paid,
 			Link:            one.Link,
 			MerchantMember:  detail.ConvertMemberToDetail(ctx, query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
-			EffectImmediate: one.EffectImmediate,
+			EffectImmediate: effectImmediate,
 			EffectTime:      one.EffectTime,
 			Note:            one.Note,
 			Plan:            bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
