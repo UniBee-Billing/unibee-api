@@ -29,7 +29,9 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 	if req.ExternalUserId != nil && len(*req.ExternalUserId) > 0 {
 		//update externalUserId
 		one := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), *req.ExternalUserId)
-		utility.Assert(one == nil || one.Id == *req.UserId, fmt.Sprintf("ExternalUserId has bean used by another user:%v email:%s", one.Id, one.Email))
+		if one != nil {
+			utility.Assert(one.Id == *req.UserId, fmt.Sprintf("ExternalUserId has bean used by another user:%v email:%s", one.Id, one.Email))
+		}
 		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
 		}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
