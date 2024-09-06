@@ -45,6 +45,9 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	if req.LocalizedExchangeRate != nil {
 		metadata["LocalizedExchangeRate"] = *req.LocalizedExchangeRate
 	}
+	if req.LocalizedExchangeRateDescription != nil {
+		metadata["LocalizedExchangeRateDescription"] = *req.LocalizedExchangeRateDescription
+	}
 	if req.LocalizedCurrency != nil {
 		metadata["LocalizedCurrency"] = *req.LocalizedCurrency
 	}
