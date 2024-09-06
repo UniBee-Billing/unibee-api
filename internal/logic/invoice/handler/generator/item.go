@@ -119,10 +119,10 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	//doc.pdf.SetFont("SimSun", "", 10)
 	doc.pdf.MultiCell(
 		ItemColUnitPriceOffset-ItemColNameOffset,
-		3,
+		5,
 		doc.encodeString(i.Name),
 		"",
-		"",
+		"L",
 		false,
 	)
 

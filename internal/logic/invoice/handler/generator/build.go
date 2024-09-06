@@ -76,8 +76,8 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	// Append items
 	doc.appendItems()
 
-	// Append Exchange Rate
-	doc.appendExchangeRate()
+	//// Append Exchange Rate
+	//doc.appendExchangeRate()
 
 	// Check page height (total bloc height = 30, 45 when doc discount)
 	offset := doc.pdf.GetY() + 30
@@ -546,6 +546,27 @@ func (doc *Document) appendTotal() {
 		0,
 		"",
 	)
+
+	// Append Exchange Rate
+	if len(doc.ExchangeRateString) > 0 {
+		doc.pdf.SetY(doc.pdf.GetY() + 5)
+		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
+		doc.pdf.SetX(moneyX)
+		//doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		//doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+		doc.pdf.CellFormat(
+			40,
+			10,
+			doc.encodeString(doc.ExchangeRateString),
+			"0",
+			0,
+			"L",
+			false,
+			0,
+			"",
+		)
+		doc.pdf.SetFont(doc.Options.Font, "", LargeTextFontSize)
+	}
 
 	// Draw total with tax title
 	doc.pdf.SetY(doc.pdf.GetY() + 10)

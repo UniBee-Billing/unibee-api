@@ -109,6 +109,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	localizedCurrencyRate := metadata["LocalizedExchangeRate"]
 	localizedSymbol := ""
 	localizedCurrencyStr := ""
+	localizedExchangeRateDescription := metadata["LocalizedExchangeRateDescription"]
 	var localizedExchangeRate float64
 	localized := false
 	if localizedCurrencyRate != nil && localizedCurrency != nil {
@@ -202,6 +203,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
+	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 	if len(one.RefundId) > 0 {
 		doc.IsRefund = true
 		doc.SetOriginInvoiceNumber(one.SendNote)
@@ -214,11 +216,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		doc.SetIsRefund(true)
 		for i, line := range lines {
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
-			taxString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
-			if localized {
-				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
-				taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
-			}
+			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
+			//if localized {
+			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
+			//	taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
+			//}
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
@@ -239,11 +241,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 		for i, line := range lines {
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
-			taxString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
-			if localized {
-				amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
-				taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
-			}
+			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
+			//if localized {
+			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
+			//	taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
+			//}
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
@@ -270,16 +272,19 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	}
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency))
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TaxAmount, one.Currency))
-	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 
 	if localized {
-		doc.ExchangeRateString = fmt.Sprintf("(%s1 = %s%s)", symbol, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(100)*localizedExchangeRate), localizedCurrencyStr))
-		doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
-		doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
-		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))
-		if one.DiscountAmount > 0 {
-			doc.DiscountTotalString = fmt.Sprintf("%s -%s  |  %s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency), localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.DiscountAmount)*localizedExchangeRate), localizedCurrencyStr))
+		if localizedExchangeRateDescription != nil {
+			doc.ExchangeRateString = fmt.Sprintf("%s", localizedExchangeRateDescription)
+		} else {
+			doc.ExchangeRateString = fmt.Sprintf("* %s1 = %s%s", symbol, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(100)*localizedExchangeRate), localizedCurrencyStr))
 		}
+		//doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
+		//doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
+		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))
+		//if one.DiscountAmount > 0 {
+		//	doc.DiscountTotalString = fmt.Sprintf("%s -%s  |  %s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency), localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.DiscountAmount)*localizedExchangeRate), localizedCurrencyStr))
+		//}
 	}
 
 	pdf, err := doc.Build()
