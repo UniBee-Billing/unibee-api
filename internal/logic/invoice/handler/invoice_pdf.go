@@ -215,7 +215,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 		doc.SetIsRefund(true)
 		for i, line := range lines {
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			//if localized {
 			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
@@ -240,7 +240,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
 		for i, line := range lines {
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.Amount, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			//if localized {
 			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
