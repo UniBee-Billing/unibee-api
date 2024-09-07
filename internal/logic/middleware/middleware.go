@@ -137,7 +137,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
-func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
+func (s *SMiddleware) OpenApiHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	userAgent := r.Header.Get("User-Agent")
 	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
@@ -147,10 +147,11 @@ func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
 	if len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ") {
 		customCtx.IsOpenApiCall = true
 	}
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] OpenApiHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	r.Middleware.Next()
 }
 
-func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
+func (s *SMiddleware) UserPortalHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	list := query.GetActiveMerchantList(r.Context())
 	userAgent := r.Header.Get("User-Agent")
@@ -158,19 +159,19 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 	}
 	tokenString := r.Header.Get("Authorization")
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] userAgent:%s token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] UserPortalHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	if customCtx.IsOpenApiCall == true || (len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ")) {
 		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
 		_interface.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
 		r.Exit()
 	}
 	if len(list) == 0 {
-		g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Need Init")
+		g.Log().Infof(r.Context(), "UserPortalHandler Merchant Need Init")
 		_interface.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
 		r.Exit()
 	} else if len(list) == 1 {
 		//SingleMerchant
-		g.Log().Infof(r.Context(), "UserPortalPreAuth SingleMerchant")
+		g.Log().Infof(r.Context(), "UserPortalHandler SingleMerchant")
 		customCtx.MerchantId = list[0].Id
 		r.Middleware.Next()
 		return
@@ -185,7 +186,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 			//try match merchant from Http Origin
 			origin := r.GetHeader("Origin")
 			if len(origin) > 0 {
-				g.Log().Infof(r.Context(), "UserPortalPreAuth Try Extract Domain From Origin:%s", origin)
+				g.Log().Infof(r.Context(), "UserPortalHandler Try Extract Domain From Origin:%s", origin)
 				parsedURL, err := url.Parse(origin)
 				if err == nil {
 					// Extract the host (domain) from the parsed URL
@@ -195,11 +196,11 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 			}
 		}
 		if one == nil {
-			g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Not Found For Host:%s", r.GetHost())
+			g.Log().Infof(r.Context(), "UserPortalHandler Merchant Not Found For Host:%s", r.GetHost())
 			_interface.JsonRedirectExit(r, 61, "Merchant Not Ready", s.LoginUrl)
 			r.Exit()
 		} else {
-			g.Log().Infof(r.Context(), "UserPortalPreAuth Checked Merchant:%d", one.Id)
+			g.Log().Infof(r.Context(), "UserPortalHandler Checked Merchant:%d", one.Id)
 			customCtx.MerchantId = one.Id
 			r.Middleware.Next()
 			return
@@ -207,7 +208,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	}
 }
 
-func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
+func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	if config.GetConfigInstance().IsServerDev() {
 		customCtx.MerchantId = consts.CloudModeManagerMerchantId
@@ -219,9 +220,9 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 	}
 	tokenString := r.Header.Get("Authorization")
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] userAgent:%s token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] MerchantHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	if len(tokenString) == 0 {
-		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
+		g.Log().Infof(r.Context(), "MerchantHandler empty token string of auth header")
 		if customCtx.IsOpenApiCall {
 			r.Response.Status = 401
 			_interface.OpenApiJsonExit(r, 61, "invalid token")
@@ -237,22 +238,22 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	if !customCtx.IsOpenApiCall || jwt.IsPortalToken(tokenString) {
 		// Portal Call
 		if !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
-			g.Log().Infof(r.Context(), "TokenAuth Invalid Token:%s", tokenString)
+			g.Log().Infof(r.Context(), "MerchantHandler Invalid Token:%s", tokenString)
 			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 			r.Exit()
 		}
 
 		token := jwt.ParsePortalToken(tokenString)
-		g.Log().Debugf(r.Context(), "TokenAuth Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
+		g.Log().Debugf(r.Context(), "MerchantHandler Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
 
 		if token.TokenType == jwt.TOKENTYPEUSER {
 			userAccount := query.GetUserAccountById(r.Context(), token.Id)
 			if userAccount == nil {
-				g.Log().Infof(r.Context(), "TokenAuth user not found :%v", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler user not found :%v", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "account not found", s.LoginUrl)
 				r.Exit()
 			} else if userAccount.Status == 2 {
-				g.Log().Infof(r.Context(), "TokenAuth user has suspend :%v", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler user has suspend :%v", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
 			}
@@ -283,15 +284,15 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
 			if merchantAccount == nil {
-				g.Log().Infof(r.Context(), "TokenAuth merchant member not found token:%s", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member not found token:%s", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 				r.Exit()
 			} else if merchantAccount.Status == 2 {
-				g.Log().Infof(r.Context(), "TokenAuth merchant member has suspend :%v", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member has suspend :%v", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
 			} else if strings.Compare(permissionKey, token.PermissionKey) != 0 && !strings.Contains(r.GetUrl(), "logout") {
-				g.Log().Infof(r.Context(), "TokenAuth merchant member permission has change, need reLogin")
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member permission has change, need reLogin")
 				_interface.JsonRedirectExit(r, 62, "Your permission has changed. Please reLogin.", s.LoginUrl)
 				r.Exit()
 			}
@@ -316,7 +317,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
 			}
 		} else {
-			g.Log().Infof(r.Context(), "TokenAuth invalid token type token:%v", utility.MarshalToJsonString(token))
+			g.Log().Infof(r.Context(), "MerchantHandler invalid token type token:%v", utility.MarshalToJsonString(token))
 			_interface.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
 			r.Exit()
 		}

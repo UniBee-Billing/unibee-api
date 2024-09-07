@@ -79,7 +79,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenAuth,
+					_interface.Middleware().MerchantHandler,
 				)
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
@@ -192,7 +192,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenAuth,
+					_interface.Middleware().MerchantHandler,
 				)
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
@@ -253,7 +253,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().UserPortalPreAuth,
+					_interface.Middleware().UserPortalHandler,
 				)
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
@@ -266,7 +266,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().UserPortalPreAuth,
+					_interface.Middleware().UserPortalHandler,
 				)
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
@@ -279,7 +279,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().OpenApiDetach,
+					_interface.Middleware().OpenApiHandler,
 				)
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
 					group.Bind(
