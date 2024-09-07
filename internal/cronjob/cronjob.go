@@ -22,7 +22,7 @@ func StartCronJobs() {
 	//}
 	// every 10 second
 	var name = "JobSubscriptionCycle"
-	g.Log().Print(ctx, "CronJob Start......")
+	g.Log().Infof(ctx, "CronJob Start......")
 	_, err = gcron.AddSingleton(ctx, "@every 10s", func(ctx context.Context) {
 		sub.TaskForSubscriptionBillingCycleDunningInvoice(ctx, name)
 	}, name)

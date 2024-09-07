@@ -22,7 +22,7 @@ func mainTask(ctx context.Context) {
 }
 
 func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
-	g.Log().Infof(ctx, "%s:%s", taskName, "Start......")
+	g.Log().Debugf(ctx, "%s:%s", taskName, "Start......")
 	var timeNow = gtime.Now().Timestamp()
 
 	var subs []*entity.Subscription
@@ -51,7 +51,7 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 		if err != nil {
 			g.Log().Errorf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk SubId:%s error:%s", sub.SubscriptionId, err.Error())
 		}
-		g.Log().Infof(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk SubId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
+		g.Log().Debugf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk SubId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
 		time.Sleep(2 * time.Second)
 	}
 
@@ -59,7 +59,7 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 }
 
 func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskName string) {
-	g.Log().Infof(ctx, "%s:%s", taskName, "TaskForSubscriptionTrackAfterCancelledOrExpired Start......")
+	g.Log().Debugf(ctx, "%s:%s", taskName, "TaskForSubscriptionTrackAfterCancelledOrExpired Start......")
 	var timeNow = gtime.Now().Timestamp()
 
 	var subs []*entity.Subscription
@@ -97,7 +97,7 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 }
 
 func TaskForSubscriptionInitFailed(ctx context.Context, taskName string) {
-	g.Log().Infof(ctx, "%s:%s", taskName, "TaskForSubscriptionInitFailed Start......")
+	g.Log().Debugf(ctx, "%s:%s", taskName, "TaskForSubscriptionInitFailed Start......")
 	var timeNow = gtime.Now().Timestamp()
 
 	var subs []*entity.Subscription
@@ -120,14 +120,14 @@ func TaskForSubscriptionInitFailed(ctx context.Context, taskName string) {
 		if err != nil {
 			g.Log().Errorf(ctx, "TaskForSubscriptionInitFailed subId:%s error:%s", sub.SubscriptionId, err.Error())
 		} else {
-			g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s", sub.SubscriptionId)
+			g.Log().Debugf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s", sub.SubscriptionId)
 		}
 		time.Sleep(2 * time.Second)
 	}
 }
 
 func TaskForUserSubCompensate(ctx context.Context, taskName string) {
-	g.Log().Infof(ctx, "%s:%s", taskName, "TaskForUserSubCompensate Start......")
+	g.Log().Debugf(ctx, "%s:%s", taskName, "TaskForUserSubCompensate Start......")
 
 	var users []*entity.UserAccount
 	// query user who's planId is null but subId is not null

@@ -14,7 +14,7 @@ import (
 )
 
 func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error) {
-	g.Log().Infof(ctx, "Renew called by payload:%s", utility.MarshalToJsonString(req))
+	g.Log().Debugf(ctx, "Subscription Renew called by payload:%s\n", utility.MarshalToJsonString(req))
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
 		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)

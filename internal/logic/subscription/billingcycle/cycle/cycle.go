@@ -317,13 +317,13 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 	}
 	if one.LastTrackTime+86400 <= timeNow && (timeNow-one.CurrentPeriodEnd) >= -15*86400 && (timeNow-one.CurrentPeriodEnd) <= 15*86400 {
 		// dunning: daily resend invoice, update track time
-		g.Log().Infof(ctx, "trackForSubscription start track SubscriptionId:%s", one.SubscriptionId)
+		g.Log().Debugf(ctx, "trackForSubscription start track SubscriptionId:%s", one.SubscriptionId)
 		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().LastTrackTime: timeNow,
 			dao.Subscription.Columns().GmtModify:     gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			fmt.Printf("trackForSubscription update err:%s", err.Error())
+			g.Log().Errorf(ctx, "trackForSubscription update err:%s", err.Error())
 		}
 		dayLeft := int((one.CurrentPeriodEnd - timeNow + 7200) / 86400)
 		subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK)
