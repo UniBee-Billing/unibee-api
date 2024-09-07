@@ -89,7 +89,7 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 		if err != nil {
 			g.Log().Errorf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s error:%s", sub.SubscriptionId, err.Error())
 		}
-		g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
+		g.Log().Debugf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
 		time.Sleep(2 * time.Second)
 	}
 
