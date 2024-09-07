@@ -62,7 +62,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished && pendingUpdate.CreateTime+3600 < timeNow { // one hour
 				err = pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, pendingUpdate.PendingUpdateId, "EffectTimeout")
 				if err != nil {
-					g.Log().Print(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
+					g.Log().Errorf(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
 				}
 			}
 		}
@@ -113,7 +113,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				// first time create sub expired
 				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter36Hours")
 				if err != nil {
-					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
+					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
 					return nil, err
 				} else {
 					return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionExpire From Create Status As Payment Out Of 2 Days"}, nil
@@ -126,7 +126,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			needInvoiceGenerate = false
 			err = service2.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelAtPeriodEndBySystem")
 			if err != nil {
-				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionCancel err:", err.Error())
+				g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionCancel err:", err.Error())
 				return nil, err
 			} else {
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionCancel At Billing Cycle End By CurrentPeriodEnd Set"}, nil
@@ -135,7 +135,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			// invoice not generate and sub out of time, need expired by system
 			err = expire.SubscriptionExpire(ctx, sub, "AutoRenewFailure")
 			if err != nil {
-				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
+				g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
 				return nil, err
 			} else {
 				_, _ = redismq.Send(&redismq.Message{
@@ -153,7 +153,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.Status != consts.SubStatusIncomplete {
 				err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow)
 				if err != nil {
-					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice HandleSubscriptionIncomplete err:", err.Error())
+					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice HandleSubscriptionIncomplete err:", err.Error())
 					return nil, err
 				} else {
 					return &BillingCycleWalkRes{WalkUnfinished: true, Message: "HandleSubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
@@ -245,7 +245,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true, timeNow)
 				if err != nil {
-					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
+					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
 					return nil, err
 				}
 				if pendingUpdate != nil {
@@ -254,10 +254,11 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						dao.SubscriptionPendingUpdate.Columns().InvoiceId: one.InvoiceId,
 					}).Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, pendingUpdate.PendingUpdateId).OmitNil().Update()
 					if err != nil {
+						g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice update pendingUpdate err:", err.Error())
 						return nil, err
 					}
 				}
-				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
+				g.Log().Debugf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
@@ -269,7 +270,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "", "SubscriptionBillingCycle", timeNow)
 					if err != nil {
-						g.Log().Print(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
+						g.Log().Errorf(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 						return nil, err
 					}
 
@@ -285,7 +286,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 		}
 	} else {
-		g.Log().Infof(ctx, source, "GetLock Failure", key)
+		g.Log().Debugf(ctx, source, "GetLock Failure", key)
 		return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Sub Get Lock Failure"}, nil
 	}
 }
@@ -310,7 +311,7 @@ func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.S
 }
 
 func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow int64) {
-	g.Log().Infof(ctx, "trackForSubscription sub:%s", one.SubscriptionId)
+	g.Log().Debugf(ctx, "trackForSubscription sub:%s", one.SubscriptionId)
 	plan := query.GetPlanById(ctx, one.PlanId)
 	if plan == nil {
 		return
