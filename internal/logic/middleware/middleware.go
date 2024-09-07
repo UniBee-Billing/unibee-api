@@ -66,6 +66,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		Data:    make(g.Map),
 	}
 	customCtx.RequestId = utility.CreateRequestId()
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] Body:%s", customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString()))
 	_interface.Context().Init(r, customCtx)
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,

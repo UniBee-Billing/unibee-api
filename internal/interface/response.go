@@ -31,7 +31,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 		RequestId: requestId,
 	}
 	r.Response.WriteJson(responseJson)
-	g.Log().Info(r.Context(), fmt.Sprintf("[RequestId:%s][Method:%s][Url:%s] ---------- Body:%s ---------- Response:%s", requestId, r.Method, r.GetUrl(), r.GetBodyString(), utility.MarshalToJsonString(responseJson)))
+	g.Log().Info(r.Context(), fmt.Sprintf("[Response][%s][%s][%s] %s", requestId, r.Method, r.GetUrl(), utility.MarshalToJsonString(responseJson)))
 }
 
 func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
@@ -49,12 +49,15 @@ func JsonRedirect(r *ghttp.Request, code int, message, redirect string, data ...
 	if len(data) > 0 {
 		responseData = data[0]
 	}
-	r.Response.WriteJson(JsonRes{
+	requestId := Context().Get(r.Context()).RequestId
+	responseJson := JsonRes{
 		Code:     code,
 		Message:  message,
 		Data:     responseData,
 		Redirect: redirect,
-	})
+	}
+	r.Response.WriteJson(responseJson)
+	g.Log().Info(r.Context(), fmt.Sprintf("[Response][%s][%s][%s] %s", requestId, r.Method, r.GetUrl(), utility.MarshalToJsonString(responseJson)))
 }
 
 func JsonRedirectExit(r *ghttp.Request, code int, message, redirect string, data ...interface{}) {
