@@ -105,7 +105,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		if strings.Contains(message, "Session Expired") {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, customCtx, gcode.CodeValidationFailed.Code(), "Session Expired")
+				_interface.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), "Session Expired")
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
 				_interface.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
@@ -113,7 +113,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		} else if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, customCtx, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+				_interface.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
 				_interface.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
@@ -121,7 +121,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		} else {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, customCtx, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
+				_interface.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
 				_interface.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
@@ -130,7 +130,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	} else {
 		r.Response.Status = 200
 		if customCtx.IsOpenApiCall {
-			_interface.OpenApiJsonExit(r, customCtx, code.Code(), "", res)
+			_interface.OpenApiJsonExit(r, code.Code(), "", res)
 		} else {
 			_interface.JsonExit(r, code.Code(), "", res)
 		}
@@ -224,7 +224,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
 		if customCtx.IsOpenApiCall {
 			r.Response.Status = 401
-			_interface.OpenApiJsonExit(r, customCtx, 61, "invalid token")
+			_interface.OpenApiJsonExit(r, 61, "invalid token")
 		} else {
 			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		}
@@ -331,7 +331,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		}
 		if merchantInfo == nil {
 			r.Response.Status = 401
-			_interface.OpenApiJsonExit(r, customCtx, 61, "invalid token")
+			_interface.OpenApiJsonExit(r, 61, "invalid token")
 		} else {
 			customCtx.MerchantId = merchantInfo.Id
 			customCtx.OpenApiKey = tokenString
