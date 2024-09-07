@@ -17,7 +17,7 @@ import (
 func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.WebhookEvent) {
 	go func() {
 		ctx := context.Background()
-		g.Log().Infof(ctx, "SendMerchantSubscriptionWebhookBackground event:%v", event)
+		g.Log().Debugf(ctx, "SendMerchantSubscriptionWebhookBackground event:%v", event)
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {
