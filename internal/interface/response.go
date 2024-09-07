@@ -3,6 +3,8 @@ package _interface
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"unibee/internal/model"
+	"unibee/utility"
 )
 
 type JsonRes struct {
@@ -20,12 +22,15 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 	} else {
 		responseData = g.Map{}
 	}
-	r.Response.WriteJson(JsonRes{
+	requestId := Context().Get(r.Context()).RequestId
+	responseJson := JsonRes{
 		Code:      code,
 		Message:   message,
 		Data:      responseData,
-		RequestId: Context().Get(r.Context()).RequestId,
-	})
+		RequestId: requestId,
+	}
+	r.Response.WriteJson(responseJson)
+	g.Log().Infof(r.Context(), "[RequestId:%s][Method:%s][Url:%s] Body:%s Response:%s", requestId, r.Method, r.GetUrl(), r.GetBodyString(), utility.MarshalMetadataToJsonString(responseJson))
 }
 
 func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
@@ -33,7 +38,7 @@ func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
 	r.Exit()
 }
 
-func OpenApiJsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
+func OpenApiJsonExit(r *ghttp.Request, context *model.Context, code int, message string, data ...interface{}) {
 	portalJson(r, code, message, data...)
 	r.Exit()
 }
