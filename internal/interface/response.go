@@ -1,6 +1,7 @@
 package _interface
 
 import (
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"unibee/internal/model"
@@ -30,7 +31,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 		RequestId: requestId,
 	}
 	r.Response.WriteJson(responseJson)
-	g.Log().Infof(r.Context(), "[RequestId:%s][Method:%s][Url:%s] Body:%s Response:%s", requestId, r.Method, r.GetUrl(), r.GetBodyString(), utility.MarshalMetadataToJsonString(responseJson))
+	g.Log().Info(r.Context(), fmt.Sprintf("[RequestId:%s][Method:%s][Url:%s] Body:%s Response:%s", requestId, r.Method, r.GetUrl(), r.GetBodyString(), utility.MarshalToJsonString(responseJson)))
 }
 
 func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
