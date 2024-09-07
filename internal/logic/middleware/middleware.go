@@ -76,10 +76,11 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	r.SetCtx(gi18n.WithLanguage(r.Context(), "en"))
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
-		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_Exception Panic Url: %s Params:%s Error:%v", r.GetUrl(), json, err)
+		//json, _ := r.GetJson()
+		g.Log().Errorf(r.Context(), "[Request][%s][%s][%s] Global_Exception Panic Body:%s Error:%v", customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString(), err)
 		return
 	})
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] MerchantId:%d", customCtx.RequestId, r.Method, r.GetUrl(), customCtx.MerchantId))
 
 	var (
 		err             = r.GetError()
@@ -157,6 +158,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 	}
 	tokenString := r.Header.Get("Authorization")
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] userAgent:%s token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	if customCtx.IsOpenApiCall == true || (len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ")) {
 		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
 		_interface.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
@@ -217,6 +219,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 	}
 	tokenString := r.Header.Get("Authorization")
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] userAgent:%s token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	if len(tokenString) == 0 {
 		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
 		if customCtx.IsOpenApiCall {
@@ -344,6 +347,5 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
 		}
 	}
-
 	r.Middleware.Next()
 }
