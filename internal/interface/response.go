@@ -31,7 +31,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 		RequestId: requestId,
 	}
 	r.Response.WriteJson(responseJson)
-	g.Log().Info(r.Context(), fmt.Sprintf("[Response][%s][%s][%s] %s", requestId, r.Method, r.GetUrl(), utility.MarshalToJsonString(responseJson)))
+	g.Log().Info(r.Context(), fmt.Sprintf("[Response][%s][%s][%s] code:%d message:%s", requestId, r.Method, r.GetUrl(), code, message))
 }
 
 func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
