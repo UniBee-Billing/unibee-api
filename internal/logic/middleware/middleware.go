@@ -260,7 +260,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 			customCtx.User = &model.ContextUser{
 				Id:         token.Id,
 				Token:      tokenString,
-				MerchantId: userAccount.MerchantId,
+				MerchantId: token.MerchantId,
 				Email:      token.Email,
 				Lang:       token.Lang,
 			}
@@ -299,7 +299,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 
 			customCtx.MerchantMember = &model.ContextMerchantMember{
 				Id:         token.Id,
-				MerchantId: merchantAccount.MerchantId,
+				MerchantId: token.MerchantId,
 				Token:      tokenString,
 				Email:      token.Email,
 				IsOwner:    strings.Compare(strings.Trim(merchantAccount.Role, " "), "Owner") == 0,
