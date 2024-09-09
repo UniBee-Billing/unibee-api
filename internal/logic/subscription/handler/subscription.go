@@ -92,17 +92,19 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 			}
 		}
 	}
-	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionActive.Topic,
-		Tag:   redismq2.TopicSubscriptionActive.Tag,
-		Body:  sub.SubscriptionId,
-	})
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicSubscriptionUpdate.Topic,
-		Tag:        redismq2.TopicSubscriptionUpdate.Tag,
-		Body:       sub.SubscriptionId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
+	if !utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionFirstInvoicePaid_%s", invoice.InvoiceId), 60) {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActive.Topic,
+			Tag:   redismq2.TopicSubscriptionActive.Tag,
+			Body:  sub.SubscriptionId,
+		})
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
+			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+	}
 	return nil
 }
 
@@ -155,18 +157,20 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return err
 	}
 	timeline.SubscriptionNewTimeline(ctx, invoice)
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicSubscriptionUpdate.Topic,
-		Tag:        redismq2.TopicSubscriptionUpdate.Tag,
-		Body:       sub.SubscriptionId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
-	if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
+	if !utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionNextBillingCyclePaymentSuccess_%s", invoice.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionActive.Topic,
-			Tag:   redismq2.TopicSubscriptionActive.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
+			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
+		if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicSubscriptionActive.Topic,
+				Tag:   redismq2.TopicSubscriptionActive.Tag,
+				Body:  sub.SubscriptionId,
+			})
+		}
 	}
 	// need cancel payment、 invoice and send invoice email
 	return nil
