@@ -113,7 +113,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPayment_%s", one.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPayment_%s", one.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicInvoiceCreated.Topic,
 			Tag:        redismq2.TopicInvoiceCreated.Tag,
@@ -157,7 +157,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				one.GatewayPaymentId = payment.GatewayPaymentId
 				one.Link = payment.Link
 				g.Log().Infof(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
-				if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+				if utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
 					_, _ = redismq.Send(&redismq.Message{
 						Topic:      redismq2.TopicInvoicePaid.Topic,
 						Tag:        redismq2.TopicInvoicePaid.Tag,
@@ -193,7 +193,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-		if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+		if utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
 			if status == consts.InvoiceStatusPaid {
 				_, _ = redismq.Send(&redismq.Message{
 					Topic:      redismq2.TopicInvoicePaid.Topic,
@@ -289,7 +289,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPaymentRefund_%s", one.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPaymentRefund_%s", one.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicInvoiceCreated.Topic,
 			Tag:        redismq2.TopicInvoiceCreated.Tag,
@@ -340,7 +340,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	}
 	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-		if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+		if utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
 			if status == consts.InvoiceStatusPaid {
 				_, _ = redismq.Send(&redismq.Message{
 					Topic:      redismq2.TopicInvoicePaid.Topic,
@@ -390,7 +390,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	one.Status = consts.InvoiceStatusPaid
 	go func() {
 		time.Sleep(1 * time.Second)
-		if !utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {
+		if utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic:      redismq2.TopicInvoicePaid.Topic,
 				Tag:        redismq2.TopicInvoicePaid.Tag,

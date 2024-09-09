@@ -102,7 +102,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	if err != nil {
 		g.Log().Errorf(ctx, "SendTemplateEmail HandlePendingUpdatePaymentSuccess:%s", err.Error())
 	}
-	if !utility.TryLock(ctx, fmt.Sprintf("HandlePendingUpdatePaymentSuccess_%s", invoice.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("HandlePendingUpdatePaymentSuccess_%s", invoice.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,

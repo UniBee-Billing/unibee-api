@@ -116,7 +116,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.Invoice, 
 			utility.AssertError(err, "CreateProcessingInvoiceForSub")
 		}
 	}
-	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessingInvoiceForSub_%s", one.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("CreateProcessingInvoiceForSub_%s", one.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicInvoiceCreated.Topic,
 			Tag:        redismq2.TopicInvoiceCreated.Tag,

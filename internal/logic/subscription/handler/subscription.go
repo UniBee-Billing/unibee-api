@@ -92,7 +92,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 			}
 		}
 	}
-	if !utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionFirstInvoicePaid_%s", invoice.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionFirstInvoicePaid_%s", invoice.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionActive.Topic,
 			Tag:        redismq2.TopicSubscriptionActive.Tag,
@@ -158,7 +158,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return err
 	}
 	timeline.SubscriptionNewTimeline(ctx, invoice)
-	if !utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionNextBillingCyclePaymentSuccess_%s", invoice.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionNextBillingCyclePaymentSuccess_%s", invoice.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
