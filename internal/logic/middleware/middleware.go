@@ -16,7 +16,7 @@ import (
 	"unibee/internal/logic/merchant"
 	"unibee/internal/model"
 	"unibee/internal/query"
-	utility "unibee/utility"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
