@@ -19,6 +19,7 @@ import (
 type WebhookMessage struct {
 	Id                uint64
 	Event             event2.WebhookEvent
+	EventId           string
 	EndpointId        uint64
 	Url               string
 	MerchantId        uint64
@@ -42,6 +43,8 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 	utility.AssertError(err, "webhook message LastInsertId error")
 	webhookMessage.Id = uint64(id)
 
+	eventId := utility.CreateEventId()
+
 	{
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicInternalWebhook.Topic,
@@ -49,6 +52,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 			Body: utility.MarshalToJsonString(&WebhookMessage{
 				Id:            webhookMessage.Id,
 				Event:         event,
+				EventId:       eventId,
 				MerchantId:    merchantId,
 				Data:          data,
 				SequenceKey:   sequenceKey,
@@ -69,6 +73,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 					Body: utility.MarshalToJsonString(&WebhookMessage{
 						Id:            webhookMessage.Id,
 						Event:         event,
+						EventId:       eventId,
 						EndpointId:    merchantWebhook.Id,
 						Url:           merchantWebhook.WebhookUrl,
 						MerchantId:    merchantId,

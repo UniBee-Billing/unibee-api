@@ -34,6 +34,7 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		"Msg-id":          one.RequestId,
 		"Datetime":        datetime,
 		"EventType":       one.WebhookEvent,
+		"EventId":         one.Mamo,
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	body := []byte(one.Body)
@@ -67,6 +68,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		g.Log().Errorf(ctx, "Webhook_Send %s %s error %s\n", "POST", webhookMessage.Url, err.Error())
 		return false
 	}
+	_ = webhookMessage.Data.Set("eventId", webhookMessage.EventId)
 	merchant := query.GetMerchantById(ctx, webhookMessage.MerchantId)
 	if merchant == nil {
 		g.Log().Errorf(ctx, "Webhook_Send %s %s merchant not found\n", "POST", webhookMessage.Url)
@@ -81,6 +83,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
 		"EventType":       string(webhookMessage.Event),
+		"EventId":         webhookMessage.EventId,
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
@@ -105,8 +108,8 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		Body:           jsonString,
 		ReconsumeCount: reconsumeTimes,
 		Response:       response,
-		//Mamo:           utility.MarshalToJsonString(err),
-		CreateTime: gtime.Now().Timestamp(),
+		Mamo:           webhookMessage.EventId,
+		CreateTime:     gtime.Now().Timestamp(),
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if saveErr != nil {
