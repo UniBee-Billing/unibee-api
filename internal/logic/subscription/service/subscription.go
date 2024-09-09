@@ -1793,9 +1793,10 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 			Body:  sub.SubscriptionId,
 		})
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionUpdate.Topic,
-			Tag:   redismq2.TopicSubscriptionUpdate.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
+			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{

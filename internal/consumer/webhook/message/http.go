@@ -110,6 +110,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		Response:       response,
 		WebhookEventId: webhookMessage.EventId,
 		CreateTime:     gtime.Now().Timestamp(),
+		Mamo:           webhookMessage.MetaData,
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if saveErr != nil {

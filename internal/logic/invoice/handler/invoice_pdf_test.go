@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"math"
 	"os"
-	"runtime"
 	"testing"
 	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/default"
@@ -34,13 +33,8 @@ func TestGenerateInvoicePdf(t *testing.T) {
 	}
 }
 
-func getCurrentFunctionName() string {
-	pc, _, _, _ := runtime.Caller(1)
-	return runtime.FuncForPC(pc).Name()
-}
-
 func exampleFunction() {
-	fmt.Println("FunctionName:", getCurrentFunctionName())
+	fmt.Println("FunctionName:", utility.ReflectCurrentFunctionName())
 }
 
 func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {

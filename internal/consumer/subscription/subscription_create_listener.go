@@ -43,7 +43,7 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	}, 3*60)
 	{
 		sub.Status = consts.SubStatusPending
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED, message.CustomData, message.CustomData)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 		sub_update.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
 	}

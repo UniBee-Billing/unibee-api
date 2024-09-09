@@ -27,9 +27,10 @@ type WebhookMessage struct {
 	SequenceKey       string
 	DependencyKey     string
 	EndpointEventList string
+	MetaData          string
 }
 
-func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string) {
+func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string, metadata map[string]interface{}) {
 	webhookMessage := &entity.MerchantWebhookMessage{
 		MerchantId:      merchantId,
 		WebhookEvent:    string(event),
@@ -57,6 +58,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 				Data:          data,
 				SequenceKey:   sequenceKey,
 				DependencyKey: dependencyKey,
+				MetaData:      utility.MarshalToJsonString(metadata),
 			}),
 		})
 	}
@@ -80,6 +82,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 						Data:          data,
 						SequenceKey:   sequenceKey,
 						DependencyKey: dependencyKey,
+						MetaData:      utility.MarshalToJsonString(metadata),
 					}),
 				})
 				g.Log().Infof(ctx, "SendWebhookMessage event:%s, merchantWebhookUrl:%s send:%v err:%v", event, merchantWebhook.WebhookUrl, send, err)

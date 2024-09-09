@@ -32,7 +32,7 @@ func SendPaymentWebhookBackground(paymentId string, event event.WebhookEvent) {
 			paymentDetail := detail.GetPaymentDetail(ctx, one.MerchantId, one.PaymentId)
 			utility.Assert(paymentDetail != nil, "SendPaymentWebhookBackground Error")
 
-			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(paymentDetail), "", "")
+			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(paymentDetail), "", "", nil)
 		}
 	}()
 }

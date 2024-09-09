@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.WebhookEvent) {
+func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.WebhookEvent, metadata map[string]interface{}) {
 	go func() {
 		ctx := context.Background()
 		g.Log().Debugf(ctx, "SendMerchantSubscriptionWebhookBackground event:%v", event)
@@ -37,6 +37,6 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft
 		} else {
 			subDetailRes.DayLeft = dayLeft
 		}
-		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes), "", "")
+		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes), "", "", metadata)
 	}()
 }

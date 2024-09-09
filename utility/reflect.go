@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"reflect"
+	"runtime"
 	"time"
 )
+
+func ReflectCurrentFunctionName() string {
+	pc, _, _, _ := runtime.Caller(1)
+	return runtime.FuncForPC(pc).Name()
+}
 
 func ReflectTemplateStructToMap(in interface{}, timeZone string) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
