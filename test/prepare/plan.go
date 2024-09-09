@@ -25,7 +25,7 @@ func CreateTestPlan(ctx context.Context, merchantId uint64) (one *entity.Plan, e
 	one = &entity.Plan{
 		MerchantId:                merchantId,
 		PlanName:                  "autotest_x",
-		Amount:                    100,
+		Amount:                    1999,
 		Currency:                  "USD",
 		IntervalUnit:              "day",
 		IntervalCount:             1,
@@ -57,7 +57,7 @@ func CreateTestAddon(ctx context.Context, merchantId uint64, name string, addonT
 	one = &entity.Plan{
 		MerchantId:                merchantId,
 		PlanName:                  name,
-		Amount:                    100,
+		Amount:                    999,
 		Currency:                  "USD",
 		IntervalUnit:              "day",
 		IntervalCount:             1,

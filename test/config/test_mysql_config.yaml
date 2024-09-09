@@ -5,10 +5,10 @@ server:
 
 database:
   default:
-    link:    "mysql:unibee:changeme@tcp(192.168.17.82:3306)/unibee?loc=UTC&parseTime=false"
+    link:    "mysql:unibee:changeme@tcp(127.0.0.1:3306)/unibee?loc=UTC&parseTime=false"
 
 # Redis Stage
 redis:
   default:
-    address:  192.168.17.84:6379
-    pass: p9KIMXc8OXI5HnaA
+    address:  127.0.0.1:6379
+    pass: changeme

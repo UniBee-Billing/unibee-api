@@ -153,10 +153,28 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	}
 }
 
-func ProrationDiscountToItem(totalDiscountAmount int64, totalTaxAmount int64, items []*bean.InvoiceItemSimplify) {
+func CompensateTotalToItems(totalDiscountAmount int64, totalTaxAmount int64, items []*bean.InvoiceItemSimplify) {
+	var leftDiscountAmount = totalDiscountAmount
+	var leftTotalTaxAmount = totalTaxAmount
 	if len(items) == 0 {
-		fmt.Printf("ProrationDiscountToItem error: items is blank")
+		fmt.Printf("CompensateTotalToItems error: items is blank")
 		return
+	}
+	for _, item := range items {
+		leftTotalTaxAmount = leftTotalTaxAmount - item.Tax
+	}
+	//compensate to the first one
+	if leftTotalTaxAmount != 0 {
+		for _, item := range items {
+			if leftTotalTaxAmount != 0 {
+				item.Tax = item.Tax + leftTotalTaxAmount
+				item.Amount = item.AmountExcludingTax + item.Tax
+				item.OriginAmount = item.Amount + item.DiscountAmount
+				leftTotalTaxAmount = 0
+			} else {
+				break
+			}
+		}
 	}
 	if totalDiscountAmount <= 0 {
 		return
@@ -166,11 +184,9 @@ func ProrationDiscountToItem(totalDiscountAmount int64, totalTaxAmount int64, it
 		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
 	}
 	if totalDiscountAmount > totalAmountExcludingTax {
-		fmt.Printf("ProrationDiscountToItem error: totalDiscountAmount > totalAmountExcludingTax")
+		fmt.Printf("CompensateTotalToItems error: totalDiscountAmount > totalAmountExcludingTax")
 		return
 	}
-	var leftDiscountAmount = totalDiscountAmount
-	var leftTotalTaxAmount = totalTaxAmount
 	for _, item := range items {
 		appendDiscountAmount := utility.MinInt64(int64(float64(totalDiscountAmount)*float64(item.AmountExcludingTax)/float64(totalAmountExcludingTax)), item.AmountExcludingTax)
 		leftDiscountAmount = leftDiscountAmount - appendDiscountAmount
@@ -189,22 +205,6 @@ func ProrationDiscountToItem(totalDiscountAmount int64, totalTaxAmount int64, it
 				item.Tax = int64(float64(item.AmountExcludingTax-item.DiscountAmount) * utility.ConvertTaxPercentageToInternalFloat(item.TaxPercentage))
 				item.Amount = item.AmountExcludingTax - item.DiscountAmount + item.Tax
 				item.OriginAmount = item.Amount + item.DiscountAmount
-			} else {
-				break
-			}
-		}
-	}
-	for _, item := range items {
-		leftTotalTaxAmount = leftTotalTaxAmount - item.Tax
-	}
-	//compensate to the first one
-	if leftTotalTaxAmount != 0 {
-		for _, item := range items {
-			if leftTotalTaxAmount != 0 {
-				item.Tax = item.Tax + leftTotalTaxAmount
-				item.Amount = item.AmountExcludingTax + item.Tax
-				item.OriginAmount = item.Amount + item.DiscountAmount
-				leftTotalTaxAmount = 0
 			} else {
 				break
 			}
@@ -272,7 +272,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
+	CompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
 
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
@@ -441,7 +441,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
+	CompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
@@ -553,7 +553,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
+	CompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
