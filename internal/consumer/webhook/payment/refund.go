@@ -2,6 +2,7 @@ package payment
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/internal/consumer/webhook/event"
@@ -31,8 +32,10 @@ func SendRefundWebhookBackground(refundId string, event event.WebhookEvent) {
 		if one != nil {
 			refundDetail := detail.GetRefundDetail(ctx, one.MerchantId, one.RefundId)
 			utility.Assert(refundDetail != nil, "SendRefundWebhookBackground Error")
-
-			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(refundDetail), "", "", nil)
+			key := fmt.Sprintf("webhook_payment_lock_%s_%s", refundDetail.Refund.RefundId, event)
+			if utility.TryLock(ctx, key, 60) {
+				message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(refundDetail), "", "", nil)
+			}
 		}
 	}()
 }

@@ -31,8 +31,8 @@ func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.Webho
 		}()
 		g.Log().Infof(ctx, "SendMerchantInvoiceWebhookBackground_invoiceId:%s， event:%s", one.InvoiceId, event)
 		if one != nil {
-			key := fmt.Sprintf("webhook_lock_%s_%s", one.InvoiceId, event)
-			if utility.TryLock(ctx, key, 10*60) {
+			key := fmt.Sprintf("webhook_invoice_lock_%s_%s", one.InvoiceId, event)
+			if utility.TryLock(ctx, key, 60) {
 				message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)), "", "", nil)
 			}
 		}
