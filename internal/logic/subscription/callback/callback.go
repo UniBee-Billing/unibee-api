@@ -124,7 +124,8 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			//	Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
 			//	Body:  payment.SubscriptionId,
 			//})
-			if invoice != nil && len(invoice.CreateFrom) > 0 && invoice.CreateFrom == "AutoRenew" {
+			if invoice != nil && len(invoice.CreateFrom) > 0 && invoice.CreateFrom == "AutoRenew" &&
+				!utility.TryLock(ctx, fmt.Sprintf("PaymentSuccessCallback_%s", invoice.InvoiceId), 60) {
 				_, _ = redismq.Send(&redismq.Message{
 					Topic:      redismq2.TopicSubscriptionAutoRenewSuccess.Topic,
 					Tag:        redismq2.TopicSubscriptionAutoRenewSuccess.Tag,
