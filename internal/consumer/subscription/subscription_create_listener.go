@@ -37,9 +37,10 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	}
 	_, _ = redismq.SendDelay(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
-		Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
-		Body:  sub.SubscriptionId,
+		Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+		Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
+		Body:       sub.SubscriptionId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	}, 3*60)
 	{
 		sub.Status = consts.SubStatusPending

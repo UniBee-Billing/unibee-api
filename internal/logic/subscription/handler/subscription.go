@@ -94,9 +94,10 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	}
 	if !utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionFirstInvoicePaid_%s", invoice.InvoiceId), 60) {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionActive.Topic,
-			Tag:   redismq2.TopicSubscriptionActive.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionActive.Topic,
+			Tag:        redismq2.TopicSubscriptionActive.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
@@ -199,9 +200,10 @@ func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) erro
 		return err
 	}
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionIncomplete.Topic,
-		Tag:   redismq2.TopicSubscriptionIncomplete.Tag,
-		Body:  subscriptionId,
+		Topic:      redismq2.TopicSubscriptionIncomplete.Topic,
+		Tag:        redismq2.TopicSubscriptionIncomplete.Tag,
+		Body:       subscriptionId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 	return nil
 }

@@ -139,9 +139,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return nil, err
 			} else {
 				_, _ = redismq.Send(&redismq.Message{
-					Topic: redismq2.TopicSubscriptionAutoRenewFailure.Topic,
-					Tag:   redismq2.TopicSubscriptionAutoRenewFailure.Tag,
-					Body:  sub.SubscriptionId,
+					Topic:      redismq2.TopicSubscriptionAutoRenewFailure.Topic,
+					Tag:        redismq2.TopicSubscriptionAutoRenewFailure.Tag,
+					Body:       sub.SubscriptionId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 				})
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionExpire For AutoRenew Failed"}, nil
 			}

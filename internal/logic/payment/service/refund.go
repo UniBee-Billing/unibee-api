@@ -152,9 +152,10 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}
 	// send the payment status checker mq
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismqcmd.TopicRefundChecker.Topic,
-		Tag:   redismqcmd.TopicRefundChecker.Tag,
-		Body:  one.RefundId,
+		Topic:      redismqcmd.TopicRefundChecker.Topic,
+		Tag:        redismqcmd.TopicRefundChecker.Tag,
+		Body:       one.RefundId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 
 	if err != nil {

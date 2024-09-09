@@ -16,6 +16,7 @@ import (
 	service2 "unibee/internal/logic/subscription/pending_update_cancel"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason string) error {
@@ -101,15 +102,17 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 
 	if nextStatus == consts.SubStatusExpired {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionExpire.Topic,
-			Tag:   redismq2.TopicSubscriptionExpire.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionExpire.Topic,
+			Tag:        redismq2.TopicSubscriptionExpire.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
 	} else if nextStatus == consts.SubStatusFailed {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionFailed.Topic,
-			Tag:   redismq2.TopicSubscriptionFailed.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionFailed.Topic,
+			Tag:        redismq2.TopicSubscriptionFailed.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
 	}
 

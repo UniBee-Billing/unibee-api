@@ -831,9 +831,10 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Link = createRes.Link
 
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionCreate.Topic,
-		Tag:   redismq2.TopicSubscriptionCreate.Tag,
-		Body:  one.SubscriptionId,
+		Topic:      redismq2.TopicSubscriptionCreate.Topic,
+		Tag:        redismq2.TopicSubscriptionCreate.Tag,
+		Body:       one.SubscriptionId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
@@ -1625,9 +1626,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionCancel.Topic,
-		Tag:   redismq2.TopicSubscriptionCancel.Tag,
-		Body:  sub.SubscriptionId,
+		Topic:      redismq2.TopicSubscriptionCancel.Topic,
+		Tag:        redismq2.TopicSubscriptionCancel.Tag,
+		Body:       sub.SubscriptionId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
@@ -1788,9 +1790,10 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	}
 	if sub.Status == consts.SubStatusActive {
 		_, _ = redismq.Send(&redismq.Message{
-			Topic: redismq2.TopicSubscriptionActive.Topic,
-			Tag:   redismq2.TopicSubscriptionActive.Tag,
-			Body:  sub.SubscriptionId,
+			Topic:      redismq2.TopicSubscriptionActive.Topic,
+			Tag:        redismq2.TopicSubscriptionActive.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,

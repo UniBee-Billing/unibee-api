@@ -56,9 +56,10 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 		if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
 			err := handler.SendInvoiceEmailToUser(ctx, sub.LatestInvoiceId, false, "")
 			_, _ = redismq.SendDelay(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
-				Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
-				Body:  sub.SubscriptionId,
+				Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+				Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
+				Body:       sub.SubscriptionId,
+				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 			}, 24*60*60) //every day send util expire
 			if err != nil {
 				g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SendDelay TopicSubscriptionCreatePaymentCheck Error:%s", err.Error())

@@ -203,9 +203,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	}
 	// send the payment status checker mq
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismqcmd.TopicPaymentChecker.Topic,
-		Tag:   redismqcmd.TopicPaymentChecker.Tag,
-		Body:  createPayContext.Pay.PaymentId,
+		Topic:      redismqcmd.TopicPaymentChecker.Topic,
+		Tag:        redismqcmd.TopicPaymentChecker.Tag,
+		Body:       createPayContext.Pay.PaymentId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 
 	gatewayInternalPayResult.Link = paymentLink
