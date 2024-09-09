@@ -19,5 +19,5 @@ type FileUpload struct {
 	GmtModify  *gtime.Time `json:"gmtModify"  description:""`                      //
 	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	CreateTime int64       `json:"createTime" description:"create utc time"`       // create utc time
-	Data       []byte      `json:"data"       description:""`                      //
+	Data       []byte      `json:"data"       description:"file data"`             // file data
 }

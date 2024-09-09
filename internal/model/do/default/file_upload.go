@@ -21,5 +21,5 @@ type FileUpload struct {
 	GmtModify  *gtime.Time //
 	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
 	CreateTime interface{} // create utc time
-	Data       []byte      //
+	Data       []byte      // file data
 }

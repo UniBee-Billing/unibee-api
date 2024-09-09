@@ -33,6 +33,7 @@ type MerchantWebhookLogColumns struct {
 	GmtCreate      string // create time
 	GmtModify      string // update time
 	CreateTime     string // create utc time
+	WebhookEventId string // webhook_event_id
 }
 
 // merchantWebhookLogColumns holds the columns for table merchant_webhook_log.
@@ -50,6 +51,7 @@ var merchantWebhookLogColumns = MerchantWebhookLogColumns{
 	GmtCreate:      "gmt_create",
 	GmtModify:      "gmt_modify",
 	CreateTime:     "create_time",
+	WebhookEventId: "webhook_event_id",
 }
 
 // NewMerchantWebhookLogDao creates and returns a new DAO object for table data access.

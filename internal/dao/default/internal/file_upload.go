@@ -29,7 +29,7 @@ type FileUploadColumns struct {
 	GmtModify  string //
 	IsDeleted  string // 0-UnDeleted，1-Deleted
 	CreateTime string // create utc time
-	Data       string //
+	Data       string // file data
 }
 
 // fileUploadColumns holds the columns for table file_upload.

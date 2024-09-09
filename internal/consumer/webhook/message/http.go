@@ -34,7 +34,7 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		"Msg-id":          one.RequestId,
 		"Datetime":        datetime,
 		"EventType":       one.WebhookEvent,
-		"EventId":         one.Mamo,
+		"EventId":         one.WebhookEventId,
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	body := []byte(one.Body)
@@ -108,7 +108,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		Body:           jsonString,
 		ReconsumeCount: reconsumeTimes,
 		Response:       response,
-		Mamo:           webhookMessage.EventId,
+		WebhookEventId: webhookMessage.EventId,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
