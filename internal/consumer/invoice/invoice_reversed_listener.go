@@ -34,7 +34,7 @@ func (t InvoiceReversedListener) Consume(ctx context.Context, message *redismq.M
 		one.Status = consts.InvoiceStatusReversed
 		go func() {
 			time.Sleep(1 * time.Second)
-			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID)
+			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID, message.CustomData)
 		}()
 	}
 	return redismq.CommitMessage

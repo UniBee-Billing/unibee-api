@@ -166,9 +166,10 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		})
 		if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
 			_, _ = redismq.Send(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionActive.Topic,
-				Tag:   redismq2.TopicSubscriptionActive.Tag,
-				Body:  sub.SubscriptionId,
+				Topic:      redismq2.TopicSubscriptionActive.Topic,
+				Tag:        redismq2.TopicSubscriptionActive.Tag,
+				Body:       sub.SubscriptionId,
+				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 			})
 		}
 	}

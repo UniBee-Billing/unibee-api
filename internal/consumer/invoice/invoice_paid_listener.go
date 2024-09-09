@@ -34,7 +34,7 @@ func (t InvoicePaidListener) Consume(ctx context.Context, message *redismq.Messa
 		one.Status = consts.InvoiceStatusPaid
 		go func() {
 			time.Sleep(1 * time.Second)
-			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID)
+			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID, message.CustomData)
 		}()
 	}
 	return redismq.CommitMessage

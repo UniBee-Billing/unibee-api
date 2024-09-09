@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.WebhookEvent) {
+func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.WebhookEvent, metadata map[string]interface{}) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -33,7 +33,7 @@ func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.Webho
 		if one != nil {
 			key := fmt.Sprintf("webhook_invoice_lock_%s_%s", one.InvoiceId, event)
 			if utility.TryLock(ctx, key, 60) {
-				message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)), "", "", nil)
+				message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)), "", "", metadata)
 			}
 		}
 	}()

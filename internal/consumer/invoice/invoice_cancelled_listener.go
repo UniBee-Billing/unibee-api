@@ -31,7 +31,7 @@ func (t InvoiceCancelledListener) Consume(ctx context.Context, message *redismq.
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
 		one.Status = consts.InvoiceStatusCancelled
-		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_CANCELLED)
+		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_CANCELLED, message.CustomData)
 	}
 	return redismq.CommitMessage
 }

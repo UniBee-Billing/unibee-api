@@ -31,7 +31,7 @@ func (t InvoiceFailedListener) Consume(ctx context.Context, message *redismq.Mes
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
 		one.Status = consts.InvoiceStatusFailed
-		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_FAILED)
+		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_FAILED, message.CustomData)
 	}
 	return redismq.CommitMessage
 }

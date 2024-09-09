@@ -31,7 +31,7 @@ func (t InvoiceProcessListener) Consume(ctx context.Context, message *redismq.Me
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
 		one.Status = consts.InvoiceStatusProcessing
-		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PROCESS)
+		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PROCESS, message.CustomData)
 	}
 	return redismq.CommitMessage
 }

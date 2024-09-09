@@ -129,9 +129,10 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicInvoiceCreated.Topic,
-		Tag:   redismq2.TopicInvoiceCreated.Tag,
-		Body:  one.InvoiceId,
+		Topic:      redismq2.TopicInvoiceCreated.Topic,
+		Tag:        redismq2.TopicInvoiceCreated.Tag,
+		Body:       one.InvoiceId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
@@ -298,9 +299,10 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 	one.Status = invoiceStatus
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicInvoiceCancelled.Topic,
-		Tag:   redismq2.TopicInvoiceCancelled.Tag,
-		Body:  one.InvoiceId,
+		Topic:      redismq2.TopicInvoiceCancelled.Topic,
+		Tag:        redismq2.TopicInvoiceCancelled.Tag,
+		Body:       one.InvoiceId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
@@ -352,9 +354,10 @@ func ProcessingInvoiceFailure(ctx context.Context, invoiceId string, reason stri
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicInvoiceFailed.Topic,
-		Tag:   redismq2.TopicInvoiceFailed.Tag,
-		Body:  one.InvoiceId,
+		Topic:      redismq2.TopicInvoiceFailed.Topic,
+		Tag:        redismq2.TopicInvoiceFailed.Tag,
+		Body:       one.InvoiceId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 
 	if len(one.RefundId) > 0 {
@@ -407,9 +410,10 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	one.Link = invoiceLink
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicInvoiceProcessed.Topic,
-		Tag:   redismq2.TopicInvoiceProcessed.Tag,
-		Body:  one.InvoiceId,
+		Topic:      redismq2.TopicInvoiceProcessed.Topic,
+		Tag:        redismq2.TopicInvoiceProcessed.Tag,
+		Body:       one.InvoiceId,
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
