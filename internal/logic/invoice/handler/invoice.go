@@ -113,18 +113,20 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceCreated.Topic,
-		Tag:        redismq2.TopicInvoiceCreated.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceProcessed.Topic,
-		Tag:        redismq2.TopicInvoiceProcessed.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
+	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPayment_%s", one.InvoiceId), 60) {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceCreated.Topic,
+			Tag:        redismq2.TopicInvoiceCreated.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceProcessed.Topic,
+			Tag:        redismq2.TopicInvoiceProcessed.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
 		return nil, err
@@ -155,12 +157,14 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				one.GatewayPaymentId = payment.GatewayPaymentId
 				one.Link = payment.Link
 				g.Log().Infof(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
-				_, _ = redismq.Send(&redismq.Message{
-					Topic:      redismq2.TopicInvoicePaid.Topic,
-					Tag:        redismq2.TopicInvoicePaid.Tag,
-					Body:       one.InvoiceId,
-					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-				})
+				if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+					_, _ = redismq.Send(&redismq.Message{
+						Topic:      redismq2.TopicInvoicePaid.Topic,
+						Tag:        redismq2.TopicInvoicePaid.Tag,
+						Body:       one.InvoiceId,
+						CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+					})
+				}
 				return one, nil
 			}
 		}
@@ -189,29 +193,31 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-		if status == consts.InvoiceStatusPaid {
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoicePaid.Topic,
-				Tag:        redismq2.TopicInvoicePaid.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-		} else if status == consts.InvoiceStatusCancelled {
-			g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoiceCancelled.Topic,
-				Tag:        redismq2.TopicInvoiceCancelled.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-		} else if status == consts.InvoiceStatusFailed {
-			g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoiceFailed.Topic,
-				Tag:        redismq2.TopicInvoiceFailed.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
+		if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+			if status == consts.InvoiceStatusPaid {
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoicePaid.Topic,
+					Tag:        redismq2.TopicInvoicePaid.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			} else if status == consts.InvoiceStatusCancelled {
+				g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoiceCancelled.Topic,
+					Tag:        redismq2.TopicInvoiceCancelled.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			} else if status == consts.InvoiceStatusFailed {
+				g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoiceFailed.Topic,
+					Tag:        redismq2.TopicInvoiceFailed.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			}
 		}
 	}
 	one.Status = status
@@ -283,18 +289,20 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceCreated.Topic,
-		Tag:        redismq2.TopicInvoiceCreated.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceProcessed.Topic,
-		Tag:        redismq2.TopicInvoiceProcessed.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
+	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessInvoiceForNewPaymentRefund_%s", one.InvoiceId), 60) {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceCreated.Topic,
+			Tag:        redismq2.TopicInvoiceCreated.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceProcessed.Topic,
+			Tag:        redismq2.TopicInvoiceProcessed.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
 		return nil, err
@@ -332,29 +340,31 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	}
 	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-		if status == consts.InvoiceStatusPaid {
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoicePaid.Topic,
-				Tag:        redismq2.TopicInvoicePaid.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-		} else if status == consts.InvoiceStatusCancelled {
-			g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPaymentRefund")
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoiceCancelled.Topic,
-				Tag:        redismq2.TopicInvoiceCancelled.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-		} else if status == consts.InvoiceStatusFailed {
-			g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicInvoiceFailed.Topic,
-				Tag:        redismq2.TopicInvoiceFailed.Tag,
-				Body:       one.InvoiceId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
+		if !utility.TryLock(ctx, fmt.Sprintf("UpdateInvoiceFromPayment_%s", one.InvoiceId), 60) {
+			if status == consts.InvoiceStatusPaid {
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoicePaid.Topic,
+					Tag:        redismq2.TopicInvoicePaid.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			} else if status == consts.InvoiceStatusCancelled {
+				g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPaymentRefund")
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoiceCancelled.Topic,
+					Tag:        redismq2.TopicInvoiceCancelled.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			} else if status == consts.InvoiceStatusFailed {
+				g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
+				_, _ = redismq.Send(&redismq.Message{
+					Topic:      redismq2.TopicInvoiceFailed.Topic,
+					Tag:        redismq2.TopicInvoiceFailed.Tag,
+					Body:       one.InvoiceId,
+					CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				})
+			}
 		}
 	}
 	one.Status = status
@@ -380,12 +390,14 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	one.Status = consts.InvoiceStatusPaid
 	go func() {
 		time.Sleep(1 * time.Second)
-		_, _ = redismq.Send(&redismq.Message{
-			Topic:      redismq2.TopicInvoicePaid.Topic,
-			Tag:        redismq2.TopicInvoicePaid.Tag,
-			Body:       one.InvoiceId,
-			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-		})
+		if !utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic:      redismq2.TopicInvoicePaid.Topic,
+				Tag:        redismq2.TopicInvoicePaid.Tag,
+				Body:       one.InvoiceId,
+				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+			})
+		}
 	}()
 
 	return one, nil

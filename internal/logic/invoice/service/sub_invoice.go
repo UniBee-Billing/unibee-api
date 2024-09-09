@@ -116,18 +116,20 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.Invoice, 
 			utility.AssertError(err, "CreateProcessingInvoiceForSub")
 		}
 	}
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceCreated.Topic,
-		Tag:        redismq2.TopicInvoiceCreated.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
-	_, _ = redismq.Send(&redismq.Message{
-		Topic:      redismq2.TopicInvoiceProcessed.Topic,
-		Tag:        redismq2.TopicInvoiceProcessed.Tag,
-		Body:       one.InvoiceId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	})
+	if !utility.TryLock(ctx, fmt.Sprintf("CreateProcessingInvoiceForSub_%s", one.InvoiceId), 60) {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceCreated.Topic,
+			Tag:        redismq2.TopicInvoiceCreated.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicInvoiceProcessed.Topic,
+			Tag:        redismq2.TopicInvoiceProcessed.Tag,
+			Body:       one.InvoiceId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
