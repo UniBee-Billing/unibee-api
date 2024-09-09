@@ -535,7 +535,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 		return gerror.New("pdfFile download or generate error")
 	}
 	if !manualSend && !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
-		fmt.Printf("SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
+		g.Log().Infof(ctx, "SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send\n")
 		return nil
 	}
 	user := query.GetUserAccountById(ctx, one.UserId)
