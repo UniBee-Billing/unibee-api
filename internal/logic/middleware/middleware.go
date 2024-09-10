@@ -185,13 +185,13 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 		g.Log().Debugf(r.Context(), "MerchantHandler Parsed Token: %s, URL: %s", utility.MarshalToJsonString(customCtx.Token), r.GetUrl())
 
 		if customCtx.Token.TokenType == jwt.TOKENTYPEMERCHANTMember {
-			merchantAccount := query.GetMerchantMemberById(r.Context(), customCtx.Token.Id)
-			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
-			if merchantAccount == nil {
+			member := query.GetMerchantMemberById(r.Context(), customCtx.Token.Id)
+			permissionKey := jwt.GetMemberPermissionKey(r.Context(), member)
+			if member == nil {
 				g.Log().Infof(r.Context(), "MerchantHandler merchant member not found token:%s", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 				r.Exit()
-			} else if merchantAccount.Status == 2 {
+			} else if member.Status == 2 {
 				g.Log().Infof(r.Context(), "MerchantHandler merchant member has suspend :%v", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
@@ -206,7 +206,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 				MerchantId: customCtx.Token.MerchantId,
 				Token:      customCtx.TokenString,
 				Email:      customCtx.Token.Email,
-				IsOwner:    strings.Compare(strings.Trim(merchantAccount.Role, " "), "Owner") == 0,
+				IsOwner:    strings.Compare(strings.Trim(member.Role, " "), "Owner") == 0,
 			}
 			customCtx.MerchantId = customCtx.Token.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
