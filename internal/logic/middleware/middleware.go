@@ -48,35 +48,45 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
-func doubleRequestLimit(id string, r *ghttp.Request) {
-	if r.Method == "POST" || r.Method == "PUT" || r.Method == "DELETE" {
-		if strings.HasSuffix(r.GetUrl(), "detail") || strings.HasSuffix(r.GetUrl(), "list") || strings.HasSuffix(r.GetUrl(), "get") {
-			return
-		}
-		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
-		if !utility.TryLock(r.Context(), md5, 2) {
-			utility.Assert(false, i18n.LocalizationFormat(r.Context(), "{#ClickTooFast}"))
-		}
-	}
-}
-
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	customCtx := &model.Context{
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
 	customCtx.RequestId = utility.CreateRequestId()
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] Body:%s", customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString()))
 	_interface.Context().Init(r, customCtx)
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})
 
-	// System Default Language
+	// Setup System Default Language
 	r.SetCtx(gi18n.WithLanguage(r.Context(), "en"))
+	customCtx.Language = "en"
+	lang := ""
+	if r.Get("lang") != nil {
+		lang = r.Get("lang").String()
+	}
+	if len(lang) == 0 {
+		lang = r.GetHeader("lang")
+	}
+	if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+		r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+		customCtx.Language = lang
+	}
+
+	customCtx.UserAgent = r.Header.Get("User-Agent")
+	if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
+		customCtx.IsOpenApiCall = true
+	}
+	customCtx.Authorization = r.Header.Get("Authorization")
+	customCtx.TokenString = customCtx.Authorization
+	if len(customCtx.TokenString) > 0 && strings.HasPrefix(customCtx.TokenString, "Bearer ") && !jwt.IsPortalToken(customCtx.TokenString) {
+		customCtx.IsOpenApiCall = true
+		customCtx.TokenString = strings.Replace(customCtx.TokenString, "Bearer ", "", 1) // remove Bearer
+	}
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s][%s] IsOpenApi:%v Token:%s Body:%s", customCtx.Language, customCtx.RequestId, r.Method, r.GetUrl(), customCtx.IsOpenApiCall, customCtx.TokenString, r.GetBodyString()))
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
-		//json, _ := r.GetJson()
 		g.Log().Errorf(r.Context(), "[Request][%s][%s][%s] Global_Exception Panic Body:%s Error:%v", customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString(), err)
 		return
 	})
@@ -137,41 +147,129 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
-func (s *SMiddleware) OpenApiHandler(r *ghttp.Request) {
+//func (s *SMiddleware) OpenApiHandler(r *ghttp.Request) {
+//	customCtx := _interface.Context().Get(r.Context())
+//	customCtx.UserAgent = r.Header.Get("User-Agent")
+//	if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
+//		customCtx.IsOpenApiCall = true
+//	}
+//	customCtx.TokenString = r.Header.Get("Authorization")
+//	if len(customCtx.TokenString) > 0 && strings.HasPrefix(customCtx.TokenString, "Bearer ") {
+//		customCtx.IsOpenApiCall = true
+//	}
+//	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] OpenApiHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), customCtx.UserAgent, customCtx.TokenString))
+//	r.Middleware.Next()
+//}
+
+func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
-	userAgent := r.Header.Get("User-Agent")
-	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
-		customCtx.IsOpenApiCall = true
+	if len(customCtx.TokenString) == 0 {
+		g.Log().Infof(r.Context(), "MerchantHandler empty token string of auth header")
+		if customCtx.IsOpenApiCall {
+			r.Response.Status = 401
+			_interface.OpenApiJsonExit(r, 61, "invalid token")
+		} else {
+			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		}
+		r.Exit()
 	}
-	tokenString := r.Header.Get("Authorization")
-	if len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ") {
+	if !customCtx.IsOpenApiCall {
+		// Merchant Portal Call
+		if !jwt.IsAuthTokenAvailable(r.Context(), customCtx.TokenString) {
+			g.Log().Infof(r.Context(), "MerchantHandler Invalid Token:%s", customCtx.TokenString)
+			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+			r.Exit()
+		}
+
+		customCtx.Token = jwt.ParsePortalToken(customCtx.TokenString)
+		g.Log().Debugf(r.Context(), "MerchantHandler Parsed Token: %s, URL: %s", utility.MarshalToJsonString(customCtx.Token), r.GetUrl())
+
+		if customCtx.Token.TokenType == jwt.TOKENTYPEMERCHANTMember {
+			merchantAccount := query.GetMerchantMemberById(r.Context(), customCtx.Token.Id)
+			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
+			if merchantAccount == nil {
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member not found token:%s", utility.MarshalToJsonString(customCtx.Token))
+				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
+				r.Exit()
+			} else if merchantAccount.Status == 2 {
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member has suspend :%v", utility.MarshalToJsonString(customCtx.Token))
+				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
+				r.Exit()
+			} else if strings.Compare(permissionKey, customCtx.Token.PermissionKey) != 0 && !strings.Contains(r.GetUrl(), "logout") {
+				g.Log().Infof(r.Context(), "MerchantHandler merchant member permission has change, need reLogin")
+				_interface.JsonRedirectExit(r, 62, "Your permission has changed. Please reLogin.", s.LoginUrl)
+				r.Exit()
+			}
+
+			customCtx.MerchantMember = &model.ContextMerchantMember{
+				Id:         customCtx.Token.Id,
+				MerchantId: customCtx.Token.MerchantId,
+				Token:      customCtx.TokenString,
+				Email:      customCtx.Token.Email,
+				IsOwner:    strings.Compare(strings.Trim(merchantAccount.Role, " "), "Owner") == 0,
+			}
+			customCtx.MerchantId = customCtx.Token.MerchantId
+			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
+			lang := ""
+			if r.Get("lang") != nil {
+				lang = r.Get("lang").String()
+			}
+			if len(lang) == 0 {
+				lang = r.GetHeader("lang")
+			}
+			if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+			}
+		} else {
+			g.Log().Infof(r.Context(), "MerchantHandler invalid token type token:%v", utility.MarshalToJsonString(customCtx.Token))
+			_interface.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
+			r.Exit()
+		}
+		//Reset Expire Time
+		jwt.ResetAuthTokenTTL(r.Context(), customCtx.TokenString)
+	} else {
+		// Api Call
 		customCtx.IsOpenApiCall = true
+		merchantInfo := query.GetMerchantByApiKey(r.Context(), customCtx.TokenString)
+		if merchantInfo == nil {
+			merchantInfo = merchant.GetMerchantFromCache(r.Context(), customCtx.TokenString)
+		}
+		if merchantInfo == nil {
+			r.Response.Status = 401
+			_interface.OpenApiJsonExit(r, 61, "invalid token")
+		} else {
+			customCtx.MerchantId = merchantInfo.Id
+			customCtx.OpenApiKey = customCtx.TokenString
+		}
+		lang := ""
+		if r.Get("lang") != nil {
+			lang = r.Get("lang").String()
+		}
+		if len(lang) == 0 {
+			lang = r.GetHeader("lang")
+		}
+		if len(lang) > 0 && i18n.IsLangAvailable(lang) {
+			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+		}
 	}
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] OpenApiHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
 	r.Middleware.Next()
 }
 
-func (s *SMiddleware) UserPortalHandler(r *ghttp.Request) {
+func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	list := query.GetActiveMerchantList(r.Context())
-	userAgent := r.Header.Get("User-Agent")
-	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
-		customCtx.IsOpenApiCall = true
-	}
-	tokenString := r.Header.Get("Authorization")
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] UserPortalHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
-	if customCtx.IsOpenApiCall == true || (len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ")) {
+	if customCtx.IsOpenApiCall == true {
 		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
 		_interface.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
 		r.Exit()
 	}
 	if len(list) == 0 {
-		g.Log().Infof(r.Context(), "UserPortalHandler Merchant Need Init")
+		g.Log().Infof(r.Context(), "UserPortalMerchantRouterHandler Merchant Need Init")
 		_interface.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
 		r.Exit()
 	} else if len(list) == 1 {
 		//SingleMerchant
-		g.Log().Infof(r.Context(), "UserPortalHandler SingleMerchant")
+		g.Log().Infof(r.Context(), "UserPortalMerchantRouterHandler SingleMerchant")
 		customCtx.MerchantId = list[0].Id
 		r.Middleware.Next()
 		return
@@ -186,7 +284,7 @@ func (s *SMiddleware) UserPortalHandler(r *ghttp.Request) {
 			//try match merchant from Http Origin
 			origin := r.GetHeader("Origin")
 			if len(origin) > 0 {
-				g.Log().Infof(r.Context(), "UserPortalHandler Try Extract Domain From Origin:%s", origin)
+				g.Log().Infof(r.Context(), "UserPortalMerchantRouterHandler Try Extract Domain From Origin:%s", origin)
 				parsedURL, err := url.Parse(origin)
 				if err == nil {
 					// Extract the host (domain) from the parsed URL
@@ -196,11 +294,11 @@ func (s *SMiddleware) UserPortalHandler(r *ghttp.Request) {
 			}
 		}
 		if one == nil {
-			g.Log().Infof(r.Context(), "UserPortalHandler Merchant Not Found For Host:%s", r.GetHost())
+			g.Log().Infof(r.Context(), "UserPortalMerchantRouterHandler Merchant Not Found For Host:%s", r.GetHost())
 			_interface.JsonRedirectExit(r, 61, "Merchant Not Ready", s.LoginUrl)
 			r.Exit()
 		} else {
-			g.Log().Infof(r.Context(), "UserPortalHandler Checked Merchant:%d", one.Id)
+			g.Log().Infof(r.Context(), "UserPortalMerchantRouterHandler Checked Merchant:%d", one.Id)
 			customCtx.MerchantId = one.Id
 			r.Middleware.Next()
 			return
@@ -208,20 +306,9 @@ func (s *SMiddleware) UserPortalHandler(r *ghttp.Request) {
 	}
 }
 
-func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
+func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
-	if config.GetConfigInstance().IsServerDev() {
-		customCtx.MerchantId = consts.CloudModeManagerMerchantId
-		r.Middleware.Next()
-		return
-	}
-	userAgent := r.Header.Get("User-Agent")
-	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
-		customCtx.IsOpenApiCall = true
-	}
-	tokenString := r.Header.Get("Authorization")
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] MerchantHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), userAgent, tokenString))
-	if len(tokenString) == 0 {
+	if len(customCtx.TokenString) == 0 {
 		g.Log().Infof(r.Context(), "MerchantHandler empty token string of auth header")
 		if customCtx.IsOpenApiCall {
 			r.Response.Status = 401
@@ -231,40 +318,35 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 		}
 		r.Exit()
 	}
-	if strings.HasPrefix(tokenString, "Bearer ") {
-		customCtx.IsOpenApiCall = true
-		tokenString = strings.Replace(tokenString, "Bearer ", "", 1) // remove Bearer
-	}
-	if !customCtx.IsOpenApiCall || jwt.IsPortalToken(tokenString) {
-		// Portal Call
-		if !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
-			g.Log().Infof(r.Context(), "MerchantHandler Invalid Token:%s", tokenString)
+	if !customCtx.IsOpenApiCall {
+		// Merchant Portal Call
+		if !jwt.IsAuthTokenAvailable(r.Context(), customCtx.TokenString) {
+			g.Log().Infof(r.Context(), "MerchantHandler Invalid Token:%s", customCtx.TokenString)
 			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 			r.Exit()
 		}
 
-		token := jwt.ParsePortalToken(tokenString)
-		g.Log().Debugf(r.Context(), "MerchantHandler Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
-
-		if token.TokenType == jwt.TOKENTYPEUSER {
-			userAccount := query.GetUserAccountById(r.Context(), token.Id)
+		customCtx.Token = jwt.ParsePortalToken(customCtx.TokenString)
+		g.Log().Debugf(r.Context(), "MerchantHandler Parsed Token: %s, URL: %s", utility.MarshalToJsonString(customCtx.Token), r.GetUrl())
+		if customCtx.Token.TokenType == jwt.TOKENTYPEUSER {
+			userAccount := query.GetUserAccountById(r.Context(), customCtx.Token.Id)
 			if userAccount == nil {
-				g.Log().Infof(r.Context(), "MerchantHandler user not found :%v", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler user not found :%v", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "account not found", s.LoginUrl)
 				r.Exit()
 			} else if userAccount.Status == 2 {
-				g.Log().Infof(r.Context(), "MerchantHandler user has suspend :%v", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "MerchantHandler user has suspend :%v", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
 			}
 			customCtx.User = &model.ContextUser{
-				Id:         token.Id,
-				Token:      tokenString,
-				MerchantId: token.MerchantId,
-				Email:      token.Email,
-				Lang:       token.Lang,
+				Id:         customCtx.Token.Id,
+				Token:      customCtx.TokenString,
+				MerchantId: customCtx.Token.MerchantId,
+				Email:      customCtx.Token.Email,
+				Lang:       customCtx.Token.Lang,
 			}
-			customCtx.MerchantId = userAccount.MerchantId
+			customCtx.MerchantId = customCtx.Token.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 			//UserPortalTrack
 			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.URL.Path, nil)
@@ -280,73 +362,28 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 			} else if customCtx.User != nil && len(customCtx.User.Lang) > 0 && i18n.IsLangAvailable(customCtx.User.Lang) {
 				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(customCtx.User.Lang))))
 			}
-		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
-			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
-			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
-			if merchantAccount == nil {
-				g.Log().Infof(r.Context(), "MerchantHandler merchant member not found token:%s", utility.MarshalToJsonString(token))
-				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
-				r.Exit()
-			} else if merchantAccount.Status == 2 {
-				g.Log().Infof(r.Context(), "MerchantHandler merchant member has suspend :%v", utility.MarshalToJsonString(token))
-				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
-				r.Exit()
-			} else if strings.Compare(permissionKey, token.PermissionKey) != 0 && !strings.Contains(r.GetUrl(), "logout") {
-				g.Log().Infof(r.Context(), "MerchantHandler merchant member permission has change, need reLogin")
-				_interface.JsonRedirectExit(r, 62, "Your permission has changed. Please reLogin.", s.LoginUrl)
-				r.Exit()
-			}
-
-			customCtx.MerchantMember = &model.ContextMerchantMember{
-				Id:         token.Id,
-				MerchantId: token.MerchantId,
-				Token:      tokenString,
-				Email:      token.Email,
-				IsOwner:    strings.Compare(strings.Trim(merchantAccount.Role, " "), "Owner") == 0,
-			}
-			customCtx.MerchantId = merchantAccount.MerchantId
-			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
-			lang := ""
-			if r.Get("lang") != nil {
-				lang = r.Get("lang").String()
-			}
-			if len(lang) == 0 {
-				lang = r.GetHeader("lang")
-			}
-			if len(lang) > 0 && i18n.IsLangAvailable(lang) {
-				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
-			}
 		} else {
-			g.Log().Infof(r.Context(), "MerchantHandler invalid token type token:%v", utility.MarshalToJsonString(token))
+			g.Log().Infof(r.Context(), "MerchantHandler invalid token type token:%v", utility.MarshalToJsonString(customCtx.Token))
 			_interface.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
 			r.Exit()
 		}
 		//Reset Expire Time
-		jwt.ResetAuthTokenTTL(r.Context(), tokenString)
+		jwt.ResetAuthTokenTTL(r.Context(), customCtx.TokenString)
 	} else {
-		// Api Call
-		customCtx.IsOpenApiCall = true
-		merchantInfo := query.GetMerchantByApiKey(r.Context(), tokenString)
-		if merchantInfo == nil {
-			merchantInfo = merchant.GetMerchantFromCache(r.Context(), tokenString)
+		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
+		_interface.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
+		r.Exit()
+	}
+}
+
+func doubleRequestLimit(id string, r *ghttp.Request) {
+	if r.Method == "POST" || r.Method == "PUT" || r.Method == "DELETE" {
+		if strings.HasSuffix(r.GetUrl(), "detail") || strings.HasSuffix(r.GetUrl(), "list") || strings.HasSuffix(r.GetUrl(), "get") {
+			return
 		}
-		if merchantInfo == nil {
-			r.Response.Status = 401
-			_interface.OpenApiJsonExit(r, 61, "invalid token")
-		} else {
-			customCtx.MerchantId = merchantInfo.Id
-			customCtx.OpenApiKey = tokenString
-		}
-		lang := ""
-		if r.Get("lang") != nil {
-			lang = r.Get("lang").String()
-		}
-		if len(lang) == 0 {
-			lang = r.GetHeader("lang")
-		}
-		if len(lang) > 0 && i18n.IsLangAvailable(lang) {
-			r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
+		if !utility.TryLock(r.Context(), md5, 2) {
+			utility.Assert(false, i18n.LocalizationFormat(r.Context(), "{#ClickTooFast}"))
 		}
 	}
-	r.Middleware.Next()
 }

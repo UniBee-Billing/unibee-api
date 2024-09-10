@@ -9,12 +9,11 @@ import (
 	"time"
 	"unibee/api/bean/detail"
 	"unibee/internal/cmd/config"
+	"unibee/internal/model"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-type TokenType string
 
 const (
 	TOKEN_PREFIX            = "UniBee.Portal."
@@ -22,30 +21,20 @@ const (
 	TOKENTYPEMERCHANTMember = "MERCHANT_MEMBER"
 )
 
-type TokenClaims struct {
-	TokenType     TokenType `json:"tokenType"`
-	Id            uint64    `json:"id"`
-	Email         string    `json:"email"`
-	MerchantId    uint64    `json:"merchantId"`
-	PermissionKey string    `json:"permissionKey"`
-	Lang          string    `json:"lang"`
-	jwt.RegisteredClaims
-}
-
 func IsPortalToken(token string) bool {
 	return strings.HasPrefix(token, TOKEN_PREFIX)
 }
 
-func ParsePortalToken(accessToken string) *TokenClaims {
+func ParsePortalToken(accessToken string) *model.TokenClaims {
 	utility.Assert(len(config.GetConfigInstance().Server.JwtKey) > 0, "server error: tokenKey is nil")
 	accessToken = strings.Replace(accessToken, TOKEN_PREFIX, "", 1)
-	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &model.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.GetConfigInstance().Server.JwtKey), nil
 	})
-	return parsedAccessToken.Claims.(*TokenClaims)
+	return parsedAccessToken.Claims.(*model.TokenClaims)
 }
 
-func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email string, lang string) (string, error) {
+func CreatePortalToken(tokenType model.TokenType, merchantId uint64, id uint64, email string, lang string) (string, error) {
 	utility.Assert(len(config.GetConfigInstance().Server.JwtKey) > 0, "server error: tokenKey is nil")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
@@ -65,7 +54,7 @@ func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email 
 	return fmt.Sprintf("%s%s", TOKEN_PREFIX, tokenString), nil
 }
 
-func CreateMemberPortalToken(ctx context.Context, tokenType TokenType, merchantId uint64, memberId uint64, email string) (string, error) {
+func CreateMemberPortalToken(ctx context.Context, tokenType model.TokenType, merchantId uint64, memberId uint64, email string) (string, error) {
 	utility.Assert(len(config.GetConfigInstance().Server.JwtKey) > 0, "server error: tokenKey is nil")
 	one := query.GetMerchantMemberById(ctx, memberId)
 	utility.Assert(one != nil, "member not found")
