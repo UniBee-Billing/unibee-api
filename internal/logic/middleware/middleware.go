@@ -374,6 +374,7 @@ func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
 		_interface.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
 		r.Exit()
 	}
+	r.Middleware.Next()
 }
 
 func doubleRequestLimit(id string, r *ghttp.Request) {
