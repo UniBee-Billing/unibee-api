@@ -10,6 +10,7 @@ import (
 	"time"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -44,7 +45,7 @@ func (p GatewayWebhookProxy) GatewayNewPaymentMethodRedirect(r *ghttp.Request, g
 	err = p.getRemoteGateway().GatewayNewPaymentMethodRedirect(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayNewPaymentMethodRedirect cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
+		err = gerror.NewCode(util.GatewayError, err.Error())
 	}
 	return err
 }
@@ -72,7 +73,7 @@ func (p GatewayWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context, ga
 	err = p.getRemoteGateway().GatewayCheckAndSetupWebhook(ctx, gateway)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
+		err = gerror.NewCode(util.GatewayError, err.Error())
 	}
 	return err
 }
@@ -98,7 +99,7 @@ func (p GatewayWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.M
 	res, err = p.getRemoteGateway().GatewayRedirect(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayRedirect cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
+		err = gerror.NewCode(util.GatewayError, err.Error())
 	}
 	return res, err
 }

@@ -2,7 +2,6 @@ package utility
 
 import (
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
 )
 
 type localCode struct {
@@ -37,7 +36,3 @@ func (c localCode) String() string {
 	}
 	return fmt.Sprintf(`%d`, c.code)
 }
-
-var (
-	GatewayError = gcode.New(70, "Gateway Failed", nil)
-)
