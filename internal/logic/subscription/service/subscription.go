@@ -1713,7 +1713,6 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	if sub.CancelAtPeriodEnd == 0 {
-		//已经设置未周期结束取消
 		return nil
 	}
 
