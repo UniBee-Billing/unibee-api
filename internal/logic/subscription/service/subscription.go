@@ -1483,9 +1483,10 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	}
 	// bing to subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().DiscountCode:    prepare.RecurringDiscountCode,
-		dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
-		dao.Subscription.Columns().GmtModify:       gtime.Now(),
+		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
+		dao.Subscription.Columns().DiscountCode:      prepare.RecurringDiscountCode,
+		dao.Subscription.Columns().PendingUpdateId:   one.PendingUpdateId,
+		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return nil, err
