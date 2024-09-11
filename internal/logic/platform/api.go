@@ -19,10 +19,13 @@ import (
 const ApiHost = "https://api.unibee.dev"
 
 func SentPlatformMerchantOTP(param map[string]string) error {
+	fmt.Printf("SentPlatformMerchantOTP param:%s\n", utility.MarshalToJsonString(param))
 	response, err := utility.SendRequest(fmt.Sprintf("%s/cloud/email/member_otp", ApiHost), "POST", []byte(utility.MarshalToJsonString(param)), map[string]string{"Content-Type": "application/json"})
 	if err != nil {
+		fmt.Printf("SentPlatformMerchantOTP err:%s\n", err.Error())
 		return err
 	}
+	fmt.Printf("SentPlatformMerchantOTP response:%s\n", response)
 	data := gjson.New(response)
 	if data.Contains("code") && data.Get("code").String() == "0" {
 		return nil
