@@ -48,7 +48,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanA
 	var totalAddonIds []uint64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
-			totalAddonIds = append(totalAddonIds, s.AddonPlanId) // 添加到整数列表中
+			totalAddonIds = append(totalAddonIds, s.AddonPlanId)
 		}
 	}
 	var allAddonList []*entity.Plan

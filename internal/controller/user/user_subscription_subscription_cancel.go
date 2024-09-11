@@ -14,7 +14,6 @@ import (
 
 func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error) {
 	if !config.GetConfigInstance().IsLocal() {
-		//User 检查
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
 	}

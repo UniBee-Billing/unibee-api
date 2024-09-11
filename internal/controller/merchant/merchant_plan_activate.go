@@ -26,29 +26,24 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 	}
 
 	if len(plan.BindingAddonIds) > 0 {
-		//addon 检查
 		var addonIds []int64
 		var addonIdsList []int64
 		if len(plan.BindingAddonIds) > 0 {
-			//初始化
 			strList := strings.Split(plan.BindingAddonIds, ",")
 			for _, s := range strList {
-				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+				num, err := strconv.ParseInt(s, 10, 64)
 				if err != nil {
 					return nil, err
 				}
-				addonIdsList = append(addonIdsList, num) // 添加到整数列表中
-				addonIds = append(addonIds, num)         // 添加到整数列表中
+				addonIdsList = append(addonIdsList, num)
+				addonIds = append(addonIds, num)
 			}
 		}
-		//检查 addonIds 类型
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
 				plan2.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)
-
-				//Activate Plan
 				err = plan2.PlanActivate(ctx, addonPlan.Id)
 				if err != nil {
 					return nil, err

@@ -395,8 +395,6 @@ func signForFiat(method string, urlPath string, dateTime string, purePrivateKey 
 		fmt.Println("Error decoding base64:", err)
 		return
 	}
-
-	// 将解码后的字节转换为字符串并打印
 	purePrivateKey = string(decodedBytes)
 
 	//	privateKey := purePrivateKey

@@ -17,7 +17,7 @@ type PaymentEvent struct {
 	MerchantMemberId interface{} // merchant_user_id
 	OpenApiId        interface{} // open api id
 	TerminalIp       interface{} // terminal_ip
-	BizType          interface{} // biz_type=1，Payment表
+	BizType          interface{} // biz_type=1，Payment
 	BizId            interface{} // biz_type=1，pay；
 	Fee              interface{} // amount, cent
 	EventType        interface{} // 0-unknown

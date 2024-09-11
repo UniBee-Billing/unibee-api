@@ -445,7 +445,7 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 	}, nil
 }
 
-// todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
+// todo mark Verify that it is possible to transform to singletons without having to get them every time accessToken
 func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, error) {
 	if clientID == "" || secret == "" || APIBase == "" {
 		return nil, errors.New("ClientID, Secret and APIBase are required to create a Client")

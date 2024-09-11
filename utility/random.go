@@ -89,7 +89,7 @@ func CreateRefundId() string {
 	return fmt.Sprintf("ref%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-// todo mark 高并发情况下生成结果不稳定
+// todo mark Not stable on high concurrency
 //func GenerateNextInt() int64 {
 //	workIdFromIP()
 //	//return NewSnowflake(WorkId).GenerateID()

@@ -17,10 +17,7 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
 	utility.Assert(req.EffectImmediate == 0, "EffectImmediate not support in user_portal")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
-
-	//Update 可以由 Admin 操作，service 层不做用户校验
 	if !config.GetConfigInstance().IsLocal() {
-		//User 检查
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id == sub.UserId, "userId not match")
 	}

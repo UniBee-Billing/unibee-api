@@ -276,7 +276,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 	}
 	callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundReverseCallback(ctx, payment, one)
-	// todo mark 此异常流有争议暂时什么都不做，只记录明细
+	// todo mark This abnormal flow is disputed Do nothing for the time being, just record the details
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     payment.PaymentId,

@@ -44,5 +44,5 @@ func (s *Snowflake) GenerateID() int64 {
 }
 
 const (
-	epoch = 1597536000000 // 起始时间戳，这里设定为2020-08-16 00:00:00 UTC的毫秒数
+	epoch = 1597536000000 // Start timestamp, which is set to milliseconds in 2020-08-16 00:00:00 UTC
 )

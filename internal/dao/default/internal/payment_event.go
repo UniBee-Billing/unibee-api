@@ -25,7 +25,7 @@ type PaymentEventColumns struct {
 	MerchantMemberId string // merchant_user_id
 	OpenApiId        string // open api id
 	TerminalIp       string // terminal_ip
-	BizType          string // biz_type=1，Payment表
+	BizType          string // biz_type=1，Payment
 	BizId            string // biz_type=1，pay；
 	Fee              string // amount, cent
 	EventType        string // 0-unknown

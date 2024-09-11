@@ -144,7 +144,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			err = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 			if err == nil {
 				for _, s := range addonParams {
-					totalPlanIds = append(totalPlanIds, s.AddonPlanId) // 添加到整数列表中
+					totalPlanIds = append(totalPlanIds, s.AddonPlanId)
 				}
 			}
 		}

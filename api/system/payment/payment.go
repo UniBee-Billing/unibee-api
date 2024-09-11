@@ -6,7 +6,7 @@ import (
 
 type PaymentCallbackAgainReq struct {
 	g.Meta    `path:"/payment_callback_again" tags:"System-Admin" method:"post" summary:"Admin Trigger Payment Callback"`
-	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required#请输入paymentId"`
+	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required#Require paymentId"`
 }
 
 type PaymentCallbackAgainRes struct {

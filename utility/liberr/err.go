@@ -1,7 +1,3 @@
-/*
-* @desc:错误处理
- */
-
 package liberr
 
 import (
