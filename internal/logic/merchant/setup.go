@@ -3,10 +3,13 @@ package merchant
 import (
 	"context"
 	"flag"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/service"
 	"unibee/internal/logic/vat_gateway"
@@ -78,4 +81,26 @@ func StandAloneInit(ctx context.Context) {
 			g.Log().Infof(ctx, "StandAloneInit adminAccount email:%s", merchantEmail)
 		}
 	}
+}
+
+func ReloadAllMerchantsCacheForSDKAuthBackground() {
+	go func() {
+		ctx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				log.PrintPanic(ctx, err)
+				return
+			}
+		}()
+		list := query.GetActiveMerchantList(ctx)
+		if len(list) > 0 {
+			_, _ = g.Redis().Set(ctx, "UniBee#AllMerchants", utility.MarshalToJsonString(list))
+		}
+	}()
 }

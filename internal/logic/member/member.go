@@ -92,6 +92,7 @@ func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, r
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	ReloadMemberCacheForSdkAuthBackground(member.Id)
 	return err
 }
 
@@ -115,6 +116,8 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 		Where(dao.MerchantMember.Columns().Id, memberId).
 		Where(dao.MerchantMember.Columns().MerchantId, merchantId).
 		OmitNil().Update()
+	ReloadMemberCacheForSdkAuthBackground(member.Id)
+	ReloadMemberCacheForSdkAuthBackground(memberId)
 	return err
 }
 
@@ -179,6 +182,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		DiscountCode:   "",
 	}, err)
 	utility.AssertError(err, "AddMerchantMember Error")
+	ReloadMemberCacheForSdkAuthBackground(one.Id)
 	return nil
 }
 
@@ -201,6 +205,7 @@ func FrozenMember(ctx context.Context, memberId uint64) {
 		DiscountCode:   "",
 	}, err)
 	utility.AssertError(err, "server error")
+	ReloadMemberCacheForSdkAuthBackground(one.Id)
 }
 
 func ReleaseMember(ctx context.Context, memberId uint64) {
@@ -221,4 +226,5 @@ func ReleaseMember(ctx context.Context, memberId uint64) {
 		DiscountCode:   "",
 	}, err)
 	utility.AssertError(err, "server error")
+	ReloadMemberCacheForSdkAuthBackground(one.Id)
 }

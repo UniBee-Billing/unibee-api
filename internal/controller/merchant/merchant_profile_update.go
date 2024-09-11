@@ -9,6 +9,7 @@ import (
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
+	merchant2 "unibee/internal/logic/merchant"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/time"
@@ -51,6 +52,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
 
 	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.Context().Get(ctx).MerchantMember.MerchantId))}, nil
 }

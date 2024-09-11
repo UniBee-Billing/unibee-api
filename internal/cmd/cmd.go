@@ -25,6 +25,8 @@ import (
 	"unibee/internal/logic"
 	"unibee/internal/logic/dbupgrade"
 	"unibee/internal/logic/gateway/webhook"
+	"unibee/internal/logic/member"
+	merchant2 "unibee/internal/logic/merchant"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/liberr"
@@ -381,6 +383,10 @@ var (
 					Group:    "GID_UniBee_Recurring",
 				})
 				redismq.StartRedisMqConsumer()
+			}
+			{
+				merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
+				member.ReloadAllMembersCacheForSDKAuthBackground()
 			}
 
 			s.Run()

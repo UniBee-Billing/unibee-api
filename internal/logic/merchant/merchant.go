@@ -64,6 +64,7 @@ func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 		DiscountCode:   "",
 	}, err)
 	utility.AssertError(err, "Server Error")
+	ReloadAllMerchantsCacheForSDKAuthBackground()
 	return apiKey
 }
 
@@ -122,6 +123,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
 	err = SetupForCloudMode(ctx, merchant.Id)
+	ReloadAllMerchantsCacheForSDKAuthBackground()
 	return merchant, newOne, err
 }
 
