@@ -995,7 +995,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	//utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
 	if req.Quantity <= 0 {
@@ -1054,6 +1053,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		} else {
 			effectImmediate = false
 		}
+	}
+
+	if !effectImmediate {
+		utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
 	}
 
 	var currentInvoice *bean.Invoice
