@@ -43,7 +43,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	} else {
 		utility.Assert((newTestClock-clockTimeNow) < 60*24*60*60, "TimeCap Should Lower Then 60 Days")
 	}
-	//}
+
 	var result = &TestClockWalkRes{
 		Walks: make([]*cycle.BillingCycleWalkRes, 0),
 		Error: nil,
