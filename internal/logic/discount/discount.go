@@ -144,7 +144,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		err = gerror.Newf(`EditMerchantDiscountCode update failure %s`, err)
 		return nil, err
 	}
-	one = query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
+	one = query.GetDiscountById(ctx, one.Id)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
