@@ -16,3 +16,14 @@ type ChannelSyncReq struct {
 }
 type ChannelSyncRes struct {
 }
+
+type InternalWebhookSyncReq struct {
+	g.Meta    `path:"/invoice_internal_webhook_sync" tags:"System-Admin" method:"post" summary:"Admin Sync Invoice Internal Webhook (Analysis)"`
+	StartId   *string `json:"startId" dc:"The start Id of invoice to sync data" `
+	StartTime *int64  `json:"startTime" dc:"The start time to sync data, ignore if StartId provided" `
+	EndId     *string `json:"endId" dc:"The end Id of invoice to sync data" `
+	EndTime   *int64  `json:"endTime" dc:"The end time to sync data, ignore if EndId provided" `
+}
+
+type InternalWebhookSyncRes struct {
+}

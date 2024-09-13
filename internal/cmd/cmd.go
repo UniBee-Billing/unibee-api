@@ -303,12 +303,12 @@ var (
 						system.NewPayment(),
 					)
 				})
+				group.Group("/invoice", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewInvoice(),
+					)
+				})
 				if !config.GetConfigInstance().IsProd() {
-					group.Group("/invoice", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							system.NewInvoice(),
-						)
-					})
 					group.Group("/refund", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewRefund(),
