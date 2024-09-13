@@ -277,9 +277,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	sub = query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 
 	_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
-		dao.Subscription.Columns().TrialEnd:          sub.CurrentPeriodStart - 1,
-		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+		dao.Subscription.Columns().TrialEnd:  sub.CurrentPeriodStart - 1,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 
 	return &CreateInternalRes{
@@ -996,7 +995,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
+	//utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
 	if req.Quantity <= 0 {
@@ -1483,10 +1482,9 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	}
 	// bing to subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
-		dao.Subscription.Columns().DiscountCode:      prepare.RecurringDiscountCode,
-		dao.Subscription.Columns().PendingUpdateId:   one.PendingUpdateId,
-		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+		dao.Subscription.Columns().DiscountCode:    prepare.RecurringDiscountCode,
+		dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
+		dao.Subscription.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return nil, err

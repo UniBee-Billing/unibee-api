@@ -69,6 +69,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().FirstPaidTime:          gtime.Now().Timestamp(),
 		dao.Subscription.Columns().TrialEnd:               invoice.TrialEnd,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
+		dao.Subscription.Columns().CancelAtPeriodEnd:      0,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		g.Log().Errorf(ctx, "HandleSubscriptionFirstInvoicePaid update sub error:%s", err.Error())
@@ -153,6 +154,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().DiscountCode:           recurringDiscountCode,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 		dao.Subscription.Columns().Data:                   fmt.Sprintf("AutoChargeBy-%v", invoice.InvoiceId),
+		dao.Subscription.Columns().CancelAtPeriodEnd:      0,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err

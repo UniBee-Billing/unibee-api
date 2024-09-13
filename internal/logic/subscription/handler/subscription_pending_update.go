@@ -82,6 +82,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().MetaData:               one.MetaData,
 		dao.Subscription.Columns().TaxPercentage:          one.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           one.DiscountCode,
+		dao.Subscription.Columns().CancelAtPeriodEnd:      0,
 		dao.Subscription.Columns().Data:                   fmt.Sprintf("UpgradedBy-%v", pendingUpdateId),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
