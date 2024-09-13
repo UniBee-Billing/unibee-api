@@ -122,6 +122,23 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub At Create Status NotPayBefore48Hours"}, nil
 			}
 		} else if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) && sub.CancelAtPeriodEnd == 1 && sub.Status != consts.SubStatusCancelled {
+			//if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing &&
+			//	(latestInvoice.InvoiceName == "SubscriptionUpdate" || latestInvoice.InvoiceName == "SubscriptionRenew") &&
+			//	needTryInvoiceAutomaticPayment {
+			//	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "", "SubscriptionBillingCycle", timeNow)
+			//	if err != nil {
+			//		g.Log().Errorf(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
+			//		return nil, err
+			//	}
+			//
+			//	if createRes.Payment != nil && createRes.Status == consts.PaymentSuccess {
+			//		_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+			//		return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Update Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
+			//	} else {
+			//		_ = handler2.ProcessingInvoiceFailure(ctx, latestInvoice.InvoiceId, "TaskForExpireInvoices")
+			//		return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Update Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
+			//	}
+			//}
 			// sub set cancelAtPeriodEnd, need cancel by system
 			needInvoiceGenerate = false
 			err = service2.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelAtPeriodEndBySystem")
@@ -149,7 +166,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		} else {
 			if sub.CancelAtPeriodEnd == 1 {
 				//if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing &&
-				//	latestInvoice.InvoiceName == "SubscriptionUpdate" &&
+				//	(latestInvoice.InvoiceName == "SubscriptionUpdate" || latestInvoice.InvoiceName == "SubscriptionRenew") &&
 				//	needTryInvoiceAutomaticPayment {
 				//	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "", "SubscriptionBillingCycle", timeNow)
 				//	if err != nil {
@@ -159,8 +176,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				//
 				//	if createRes.Payment != nil && createRes.Status == consts.PaymentSuccess {
 				//		_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+				//		return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Update Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				//	} else {
-				//
+				//		_ = handler2.ProcessingInvoiceFailure(ctx, latestInvoice.InvoiceId, "TaskForExpireInvoices")
+				//		return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Update Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				//	}
 				//}
 				return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As CancelPeriodEnd Set"}, nil
