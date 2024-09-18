@@ -53,6 +53,11 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		})
 		utility.AssertError(err, "Server Error")
 		req.UserId = user.Id
+		token, err = jwt.CreatePortalToken(jwt.TOKENTYPEUSER, user.MerchantId, user.Id, req.Email, user.Language)
+		utility.AssertError(err, "Server Error")
+		utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", user.Id)), "Cache Error")
+		g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)
+		jwt.AppendRequestCookieWithToken(ctx, token)
 	}
 	utility.Assert(req.UserId > 0, "Invalid UserId")
 	createRes, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
