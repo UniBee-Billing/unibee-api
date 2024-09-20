@@ -6,8 +6,8 @@
 
 ### Gateway
 - Stripe
-- Paypal (In Process)
-- Bitcoin (In Process)
+- Paypal
+- Changelly
 
 ### VatGateway
 - VatSense
@@ -23,9 +23,6 @@
 #### Redis Integration(Needed)
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
--
-#### Minio Integration(Needed For Invoice Pdf)
-- \_ "github.com/minio/minio-go/v7"
 
 #### Nacos Integration(Optional)
 ###### Program Params
@@ -76,11 +73,11 @@ go run main.go --nacos-enable=false
 ### Develop Tools
 #### Generate Api Controller Shell：
 ```bash
-sh generate_ctrl.sh
+gf gen ctrl
 ```
 #### Generate Dao Code Shell：
 ```bash
-sh generale_dao.sh
+gf gen dao
 ```
 
 ### GoFrame Quick Start:
@@ -153,8 +150,5 @@ Data Access Data access objects, a layer of abstract objects used to interact wi
   Go.mod Dependency Management A dependency description file managed using the Go Module package.
   main.go entry file Program entry file.
 
-  
-go excel help: https://xuri.me/excelize/zh-hans/cell.html#GetCellType
+
 TODO Mark https://github.com/golang-migrate/migrate
-TODO Mark https://medium.com/@udayakumarvdm/create-mysql-database-using-golang-b28c08e54660
-TODO Mark https://docs.cloud.coinbase.com/pay-sdk/docs/rest-api-reference
