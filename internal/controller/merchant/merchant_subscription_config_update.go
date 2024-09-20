@@ -48,5 +48,11 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 			return nil, err
 		}
 	}
+	if req.ShowZeroInvoice != nil {
+		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.ShowZeroInvoice, fmt.Sprintf("%v", *req.ShowZeroInvoice))
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &subscription.ConfigUpdateRes{Config: config.GetMerchantSubscriptionConfig(ctx, _interface.GetMerchantId(ctx))}, nil
 }

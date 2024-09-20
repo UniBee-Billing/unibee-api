@@ -23,6 +23,7 @@ type ConfigUpdateReq struct {
 	InvoiceEmail                       *bool                   `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
 	TryAutomaticPaymentBeforePeriodEnd *int64                  `json:"tryAutomaticPaymentBeforePeriodEnd" dc:"TryAutomaticPaymentBeforePeriodEnd, default 30 min"`
 	GatewayVATRule                     []*bean.MerchantVatRule `json:"gatewayVATRule" dc:""`
+	ShowZeroInvoice                    *bool                   `json:"showZeroInvoice" dc:"ShowZeroInvoice, show zero invoice or not, default no"`
 }
 
 type ConfigUpdateRes struct {

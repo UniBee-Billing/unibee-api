@@ -7,6 +7,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -66,8 +67,11 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	}
 	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
-		WhereNot(dao.Invoice.Columns().TotalAmount, 0).
 		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency))
+	if !config.GetMerchantSubscriptionConfig(ctx, req.MerchantId).ShowZeroInvoice {
+		query = query.WhereNot(dao.Invoice.Columns().TotalAmount, 0)
+	}
+
 	if len(req.SendEmail) > 0 {
 		query = query.WhereLike(dao.Invoice.Columns().SendEmail, "%"+req.SendEmail+"%")
 	}
