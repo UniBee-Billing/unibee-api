@@ -1,9 +1,10 @@
-# UniBee Recurring Billing Project Based On GoFrame Template
+# UniBee Recurring Billing Api
 
-<div align=center>
-<img src="http://unibee.top/files/invoice/SubStatusAndTimeline.png" width="300"/>
-</div>
+# Introduction
 
+The UniBee Api is a necessary Api service for the UniBee Billing system, which helps our customers better manage their subscription plans, access multiple payment channels, manage customer subscription services, invoicing services, etc.
+
+# Infra
 ### Gateway
 - Stripe
 - Paypal
@@ -24,7 +25,7 @@
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-### Env `Local`
+## How to run (env:`Local`)
 
 manual setting `config.yaml` in project dir before run unibee-api, the template `config.yaml` is `manifest/config/config.yaml.template` 
 ```bash
