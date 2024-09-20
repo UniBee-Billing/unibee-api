@@ -16,57 +16,24 @@
 - SendGrid
 
 
-#### Mysql Integration(Needed)
+#### Mysql Integration
 
 - \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-#### Redis Integration(Needed)
+#### Redis Integration
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-#### Nacos Integration(Optional)
-###### Program Params
---nacos-ip={your_nacos_ip}\
---nacos-port={your_nacos_port}\
---nacos-namespace={your_nacos_namespace}\
---nacos-group={your_nacos_group}\
---nacos-data-id={your_nacos_data_id}\
-###### If Add To Env (K8S)
-nacos.ip={your_nacos_ip}\
-nacos.port={your_nacos_port}\
-nacos.namespace={your_nacos_namespace}\
-nacos.group={your_nacos_group}\
-nacos.data.id={your_nacos_data_id}\
-
-#### TimeZone-UTC
-
-### Env `Stage`
-
-#### OpenApi V3 Doc：http://unibee.top/unib/swagger
-
-#### OpenApi V3 Json：http://unibee.top/unib/swagger
-
-#### Stage Information Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
-
 ### Env `Local`
 
-#### Local Run Add Program Arguments Below: 
+manual setting `config.yaml` in project dir before run unibee-api, the template `config.yaml` is `manifest/config/config.yaml.template` 
 ```bash
---nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=api.unibee.top
-```
-##### ex: 
-```bash
-go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=api.unibee.top
-```
-
-If do not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`
-```bash
-go run main.go --nacos-enable=false
+go run main.go
 ```
 
 #### OpenApi V3 Doc：http://127.0.0.1:8088/swagger
 
-#### Swagger Try Api：http://127.0.0.1:8088/swagger-ui.html
+#### Swagger TryOut Api：http://127.0.0.1:8088/swagger-ui.html
 
 #### OpenApi V3 Json：http://127.0.0.1:8088/api.json
 
@@ -89,13 +56,7 @@ gf gen dao
 - Dao Generate Shell: gf gen dao (should have gf install)
   - Generate Dao|Entity|DO After Database Table Change 
   - Doc https://goframe.org/pages/viewpage.action?pageId=3673173 (need delete config.yaml under root dic)
-
-
-Stage Nacos Web Manage
-http://43.207.114.88:30099/nacos
-
-Next Integration
-https://openapi-generator.tech/docs/generators/
+  - 
 
 Basic Directory Structure
 The basic directory structure of the GoFrame business project is as follows (using the Single Repo as an example) :
@@ -149,6 +110,3 @@ Data Access Data access objects, a layer of abstract objects used to interact wi
   resource Static resource Static resource file. These files can often be injected into a release file in the form of resource packaging/image compilation.
   Go.mod Dependency Management A dependency description file managed using the Go Module package.
   main.go entry file Program entry file.
-
-
-TODO Mark https://github.com/golang-migrate/migrate
