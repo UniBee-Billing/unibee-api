@@ -1,65 +1,49 @@
-#deploy
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: default
-  labels:
-    name: default
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: yd-unib-server-daily
+  name: unibee-api
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: yd-unib-server-daily
+      app: unibee-api
   replicas: 1
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: yd-unib-server-daily
+        app: unibee-api
     spec:
       restartPolicy: Always
-      securityContext: {}
       containers:
-        - name: yd-unib-server-daily
-          image: easzlab.io.local:5000/unibee/unibee-api:daily
-          imagePullPolicy: Always
+        - name: unibee-api
+          image: unibee/api:1.2
+          imagePullPolicy: IfNotPresent
           env:
+            - name: UNIBEE_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: unibee-config
+                  key: UNIBEE_API_URL
+            - name: DATABASE_LINK
+              value: mysql:unibee:changeme@tcp(unibee-mysql-svc:3306)/unibee?loc=UTC&parseTime=false
+            - name: REDIS_ADDRESS
+              value: "unibee-redis-svc:6379"
+            - name: ENV
+              value: "prod"
             - name: MODE
-              value: "go"
-            - name: dubbo.consumer.check
-              value: "false"
-            - name: nacos.port
-              value: "8848"
-            - name: nacos.namespace
-              value: "daily"
-            - name: nacos.group
-              value: "config"
-            - name: nacos.data.id
-              value: "unib-settings.yaml"
-            - name: nacos.ip
-              value: "unib-nacos-svc"
+              value: "stand-alone"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: unibee-config
+                  key: UNIBEE_REDIS_PASSWORD
           ports:
-            - containerPort: 8080
+            - containerPort: 8088
               name: http
-            - containerPort: 9999
-              name: debug
-            - containerPort: 8808
-              name: dubbo
-            - containerPort: 8848
-              name: dubbo-nacos
           livenessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: 8088
               scheme: HTTP
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -69,7 +53,7 @@ spec:
             failureThreshold: 600
             httpGet:
               path: /health
-              port: 8080
+              port: 8088
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -77,11 +61,10 @@ spec:
             timeoutSeconds: 10
 
 ---
-#service
 apiVersion: v1
 kind: Service
 metadata:
-  name: yd-unib-server-daily-service
+  name: unibee-api-svc
   namespace: default
 spec:
   type: LoadBalancer
@@ -90,9 +73,5 @@ spec:
       port: 80
       protocol: TCP
       targetPort: http
-    - name: debug
-      port: 9999
-      protocol: TCP
-      targetPort: debug
   selector:
-    app: yd-unib-server-daily
+    app: unibee-api

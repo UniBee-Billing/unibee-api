@@ -28,7 +28,6 @@ var TestGateway *entity.MerchantGateway
 var TestCryptoGateway *entity.MerchantGateway
 var TestWireTransferGateway *entity.MerchantGateway
 var MysqlConfigFileName = "test_mysql_config.yaml"
-var PostgresConfigFileName = "test_postgres_config.yaml"
 var EnableAutomaticTest = false
 
 func init() {

@@ -1,7 +1,7 @@
-env: daily
+env: local
 
 server:
-  domainPath: "http://api.unibee.top"
+  domainPath: "http://127.0.0.1:8088"
 
 database:
   default:
