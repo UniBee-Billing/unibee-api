@@ -18,6 +18,9 @@ import (
 
 func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, productId int64) *metric2.UserMetric {
 	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, user.MerchantId, productId)
+	if sub == nil {
+		sub = query.GetLatestSubscriptionByUserId(ctx, user.Id, user.MerchantId, productId)
+	}
 	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub)
 }
 
