@@ -64,11 +64,11 @@ If do not use nacos, should manual setting `config.yaml` in project dir, the tem
 go run main.go --nacos-enable=false
 ```
 
-#### OpenApi V3 Doc：http://127.0.0.1:8088/unib/swagger
+#### OpenApi V3 Doc：http://127.0.0.1:8088/swagger
 
-#### Swagger Try Api：http://127.0.0.1:8088/unib/swagger-ui.html
+#### Swagger Try Api：http://127.0.0.1:8088/swagger-ui.html
 
-#### OpenApi V3 Json：http://127.0.0.1:8088/unib/api.json
+#### OpenApi V3 Json：http://127.0.0.1:8088/api.json
 
 ### Develop Tools
 #### Generate Api Controller Shell：
