@@ -18,7 +18,6 @@ temp.yaml
 bin
 log
 log/
-manifest/config/config.yaml.template
 **/**/*.log
 cache
 config.yaml
