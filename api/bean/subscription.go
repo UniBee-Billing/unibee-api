@@ -18,6 +18,7 @@ type SubscriptionConfig struct {
 	InvoicePdfGenerate                 bool   `json:"invoicePdfGenerate" dc:"InvoicePdfGenerate, whether to generate invoice pdf to user, default yes"`
 	TryAutomaticPaymentBeforePeriodEnd int64  `json:"tryAutomaticPaymentBeforePeriodEnd" dc:"TryAutomaticPaymentBeforePeriodEnd, default 30 min"`
 	GatewayVATRule                     string `json:"gatewayVATRule" dc:""`
+	ShowZeroInvoice                    bool   `json:"showZeroInvoice" dc:"ShowZeroInvoice, show zero invoice or not, default no"`
 }
 
 type Subscription struct {
