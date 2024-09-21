@@ -25,9 +25,9 @@ The UniBee Api is a necessary Api service for the UniBee Billing system, which h
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-## How to run (env:`Local`)
+## How To Run
 
-manual setting `config.yaml` in project dir before run unibee-api, the template `config.yaml` is `manifest/config/config.yaml.template` 
+Manual setting `config.yaml` in project dir before run unibee-api, the template `config.yaml` is `manifest/config/config.yaml.template` 
 ```bash
 go run main.go
 ```
@@ -38,7 +38,12 @@ go run main.go
 
 #### OpenApi V3 Json：http://127.0.0.1:8088/api.json
 
-### Develop Tools
+## How To build Docker Image
+```bash
+docker build -f manifest/docker/Dockfile . 
+```
+
+## Develop Tools
 #### Generate Api Controller Shell：
 ```bash
 gf gen ctrl

@@ -23,4 +23,5 @@ cache
 config.yaml
 publish_dev.sh
 publish_main.sh
+squash_opensource.sh
 test/out/*.*
