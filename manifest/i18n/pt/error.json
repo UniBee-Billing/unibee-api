@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Você tem outra assinatura ativa ou pendente.",
+  "ClickTooFast": "Você está clicando muito rapidamente. Espere um momento e tente novamente.",
+  "AmountNotMatch": "Você precisa de um cartão ou PayPal para pagar este plano.",
+  "PlanTrialGatewayError": "Você precisa de um cartão ou PayPal para pagar este plano.",
+  "VatValidateError": "Número IVA inválido: %s.",
+  "VatGatewayNeedSetup": "O gateway de IVA precisa ser configurado.",
+  "CountryCodeVatNumberNotMatch": "Código de país inválido. O país do seu número IVA é: %s.",
+  "DiscountCodeInvalid": "Código de desconto inválido.",
+  "DiscountCodeNotStart": "Código de desconto inativo.",
+  "DiscountCodePlanError": "Você não pode aplicar este desconto no plano selecionado.",
+  "DiscountCodeReachLimitation": "Limite do código de desconto foi atingido."
+}

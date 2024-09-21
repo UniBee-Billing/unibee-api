@@ -1,0 +1,25 @@
+
+# CLI tool, only in development environment.
+# https://goframe.org/pages/viewpage.action?pageId=3673173
+gfcli:
+  build:
+    name:     "main"
+    arch:     "amd64"
+    system:   "linux,darwin"
+    mod:      "none"
+    packSrc:  "resource,manifest"
+#    version:  "auth.0.0"
+    output:   "./bin"
+    extra:    ""
+  docker:
+    build: "-a amd64 -s linux -p temp -ew"
+  gen:
+    dao:
+      - link:   "mysql:unibee:changeme@tcp(127.0.0.1:3306)/unibee?loc=Local&parseTime=true"
+        group: "default"
+        daoPath:  "dao/default"
+        doPath:  "model/do/default"
+        entityPath:  "model/entity/default"
+        noModelComment: false
+        descriptionTag: true
+        tables: ""

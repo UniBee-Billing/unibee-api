@@ -1,0 +1,14 @@
+env: local
+
+server:
+  domainPath: "http://127.0.0.1:8088"
+
+database:
+  default:
+    link:    "mysql:unibee:changeme@tcp(127.0.0.1:3306)/unibee?loc=UTC&parseTime=false"
+
+# Redis Stage
+redis:
+  default:
+    address:  127.0.0.1:6379
+    pass: changeme
