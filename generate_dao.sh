@@ -1,1 +1,0 @@
-rm -rf config.yaml && gf gen dao
