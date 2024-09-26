@@ -24,9 +24,6 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	if sub == nil {
 		return gerror.New("sub not found")
 	}
-	//if sub.Status == consts.SubStatusActive {
-	//	return gerror.New("sub is active")
-	//}
 	if sub.Status == consts.SubStatusCancelled {
 		return gerror.New("sub already cancelled")
 	}

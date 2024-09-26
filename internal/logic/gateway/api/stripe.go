@@ -444,98 +444,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			Link:                   detail.URL,
 		}, nil
 	} else {
-		//if createPayContext.PayImmediate {
-		//	// try use payment intent
-		//
-		//	var success = false
-		//	var targetIntent *stripe.PaymentIntent
-		//	var gatewayPaymentId = ""
-		//	var paymentMethod = ""
-		//	var paymentCode = ""
-		//	var link = ""
-		//	var cancelErr error
-		//	paymentMethods := make([]*bean.PaymentMethod, 0)
-		//	if len(createPayContext.GatewayPaymentMethod) > 0 {
-		//		paymentMethods = append(paymentMethods, &bean.PaymentMethod{
-		//			Id: createPayContext.GatewayPaymentMethod,
-		//		})
-		//	} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
-		//		paymentMethods = append(paymentMethods, &bean.PaymentMethod{
-		//			Id: gatewayUser.GatewayDefaultPaymentMethod,
-		//		})
-		//	} else {
-		//		listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &gateway_bean.GatewayUserPaymentMethodReq{
-		//			UserId: gatewayUser.UserId,
-		//		})
-		//		log.SaveChannelHttpLog("GatewayNewPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//		if listQuery != nil && listQuery.PaymentMethods != nil {
-		//			for _, method := range listQuery.PaymentMethods {
-		//				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
-		//					Id: method.Id,
-		//				})
-		//			}
-		//		}
-		//	}
-		//	for _, method := range paymentMethods {
-		//		params := &stripe.PaymentIntentParams{
-		//			Customer: stripe.String(gatewayUser.GatewayUserId),
-		//			Confirm:  stripe.Bool(true),
-		//			Amount:   stripe.Int64(createPayContext.Invoice.TotalAmount),
-		//			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-		//			AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
-		//				Enabled: stripe.Bool(true),
-		//			},
-		//			Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
-		//			ReturnURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
-		//			SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
-		//		}
-		//		params.PaymentMethod = stripe.String(method.Id)
-		//		paymentMethod = method.Id
-		//		targetIntent, err = paymentintent.New(params)
-		//		log.SaveChannelHttpLog("GatewayNewPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.Gateway)
-		//		var status = ""
-		//
-		//		if targetIntent != nil {
-		//			status = string(targetIntent.Status)
-		//			gatewayPaymentId = targetIntent.ID
-		//			if targetIntent.Invoice != nil {
-		//				link = targetIntent.Invoice.HostedInvoiceURL
-		//			}
-		//		}
-		//		if err == nil && strings.Compare(status, "succeeded") == 0 {
-		//			success = true
-		//			break
-		//		} else if targetIntent != nil {
-		//			cancelRes, cancelErr := paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
-		//			log.SaveChannelHttpLog("GatewayNewPayment", "", cancelRes, cancelErr, "PaymentIntentCancel", nil, createPayContext.Gateway)
-		//		} else {
-		//			cancelErr = gerror.Newf("targetIntent is nil")
-		//		}
-		//		g.Log().Printf(ctx, "GatewayNewPayment try PaymentIntent Method::%s gatewayPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, gatewayPaymentId, status, success, link, err, cancelErr)
-		//	}
-		//	if success && targetIntent != nil && len(gatewayPaymentId) > 0 {
-		//		if targetIntent.PaymentMethod != nil {
-		//			paymentMethod = targetIntent.PaymentMethod.ID
-		//			if len(paymentMethod) > 0 {
-		//				query, _ := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &gateway_bean.GatewayUserPaymentMethodReq{GatewayPaymentMethodId: paymentMethod})
-		//				if query != nil {
-		//					paymentCode = utility.MarshalToJsonString(query)
-		//				}
-		//			}
-		//		}
-		//		return &gateway_bean.GatewayNewPaymentResp{
-		//			Status:                 consts.PaymentSuccess,
-		//			GatewayPaymentId:       gatewayPaymentId,
-		//			GatewayPaymentIntentId: targetIntent.ID,
-		//			GatewayPaymentMethod:   paymentMethod,
-		//			PaymentCode:            paymentCode,
-		//			Link:                   link,
-		//		}, nil
-		//	}
-		//}
 		// need payment link
 		params := &stripe.InvoiceParams{
 			Metadata: utility.ConvertToStringMetadata(createPayContext.Metadata),
@@ -576,13 +484,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			return nil, err
 		}
 
-		//var containNegative = false
-		//for _, line := range createPayContext.Invoice.Lines {
-		//	if line.Amount <= 0 {
-		//		containNegative = true
-		//	}
-		//}
-		//if !containNegative {
 		for _, line := range createPayContext.Invoice.Lines {
 			var description = line.Description
 			if len(description) == 0 {
@@ -604,25 +505,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				return nil, err
 			}
 		}
-		//} else {
-		//	var productName = createPayContext.Invoice.ProductName
-		//	if len(productName) == 0 {
-		//		productName = createPayContext.Invoice.InvoiceName
-		//	}
-		//	if len(productName) == 0 {
-		//		productName = "DefaultProduct"
-		//	}
-		//	ItemParams := &stripe.InvoiceItemParams{
-		//		Invoice:     stripe.String(result.ID),
-		//		Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-		//		Amount:      stripe.Int64(createPayContext.Invoice.TotalAmount),
-		//		Description: stripe.String(fmt.Sprintf("%s", productName)),
-		//		Customer:    stripe.String(gatewayUser.GatewayUserId)}
-		//	_, err = invoiceitem.New(ItemParams)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//}
 		finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
 		if createPayContext.PayImmediate {
 			finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
@@ -635,7 +517,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			return nil, err
 		}
 		if createPayContext.PayImmediate && strings.Compare(string(detail.Status), "paid") != 0 {
-			//params = &stripe.InvoicePayParams{}
 			paymentParam := &stripe.InvoicePayParams{}
 			if len(createPayContext.GatewayPaymentMethod) > 0 {
 				paymentParam.PaymentMethod = stripe.String(createPayContext.GatewayPaymentMethod)

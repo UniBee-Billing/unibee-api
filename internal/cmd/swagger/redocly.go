@@ -23,24 +23,3 @@ const (
 </html>
 `
 )
-
-//
-//// swaggerUI is a build-in hook handler for replace default swagger json URL to local openapi json file path.
-//// This handler makes sense only if the openapi specification automatic producing configuration is enabled.
-//func (s *Server) swaggerUI(r *Request) {
-//	if s.config.OpenApiPath == "" {
-//		return
-//	}
-//	var templateContent = swaggerUITemplate
-//	if s.config.SwaggerUITemplate != "" {
-//		templateContent = s.config.SwaggerUITemplate
-//	}
-//
-//	if r.StaticFile != nil && r.StaticFile.File != nil && r.StaticFile.IsDir {
-//		content := gstr.ReplaceByMap(templateContent, map[string]string{
-//			swaggerUIDocURLPlaceHolder: s.config.OpenApiPath,
-//		})
-//		r.Response.Write(content)
-//		r.ExitAll()
-//	}
-//}

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"testing"
+	gateway2 "unibee/api/bean"
 	"unibee/test"
 	"unibee/utility"
 )
@@ -45,12 +46,12 @@ func TestVat(t *testing.T) {
 	})
 
 	t.Run("Test MLX Gateway Vat Config", func(t *testing.T) {
-		var gatewayVATRules = make([]*GatewayVATRule, 0)
-		gatewayVATRules = append(gatewayVATRules, &GatewayVATRule{
+		var gatewayVATRules = make([]*gateway2.MerchantVatRule, 0)
+		gatewayVATRules = append(gatewayVATRules, &gateway2.MerchantVatRule{
 			GatewayNames:      "stripe",
 			ValidCountryCodes: "AT,BE,BG,CY,CZ,DE,DK,EE,ES,FI,FR,GR,HR,HU,IE,IT,LT,LU,LV,MT,NL,PL,PT,RO,SE,SI,SK,GB,AE",
 		})
-		gatewayVATRules = append(gatewayVATRules, &GatewayVATRule{
+		gatewayVATRules = append(gatewayVATRules, &gateway2.MerchantVatRule{
 			GatewayNames:      "*",
 			ValidCountryCodes: "AT,BE,BG,CY,CZ,DE,DK,EE,ES,FI,FR,GR,HR,HU,IE,IT,LT,LU,LV,MT,NL,PL,PT,RO,SE,SI,SK,GB",
 		})

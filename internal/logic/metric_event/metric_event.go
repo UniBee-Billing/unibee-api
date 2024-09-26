@@ -87,12 +87,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		Where(dao.MerchantMetricEvent.Columns().AggregationPropertyUniqueId, aggregationPropertyUniqueId).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
-	//if one != nil && one.AggregationPropertyInt == aggregationPropertyInt {
-	//	// same event
-	//	return one, nil
-	//} else {
 	utility.Assert(one == nil, "same event with externalEventId or uniqueProperty exist")
-	//}
 
 	one = &entity.MerchantMetricEvent{
 		MerchantId:                  req.MerchantId,
@@ -162,7 +157,6 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	// user check
 	user := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 	utility.Assert(user != nil, "user not found")
-	// merchant check
 	// metric check
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")

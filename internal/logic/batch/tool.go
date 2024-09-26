@@ -30,8 +30,6 @@ func RefactorHeaders(obj interface{}, exportColumns []string, readability bool) 
 	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
 
 	t := v.Type()
-	// range properties
-	// get Tag named "json" as key
 	var allKeys = make(map[string]string)
 	for i := 0; i < v.NumField(); i++ {
 		fi := t.Field(i)

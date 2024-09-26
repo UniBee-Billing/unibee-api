@@ -111,8 +111,6 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 }
 
 func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, paymentInvoice *entity.Invoice) error {
-	//utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
-	//utility.Assert(payment.Status == consts.PaymentSuccess, fmt.Sprintf("payment not success:%v", payment.Status))
 	utility.Assert(sub != nil, "sub is nil")
 	utility.Assert(len(paymentInvoice.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
 

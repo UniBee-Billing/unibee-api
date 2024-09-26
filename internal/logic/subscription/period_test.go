@@ -9,19 +9,7 @@ import (
 )
 
 func TestPeriod(t *testing.T) {
-	//ctx := context.Background()
 	t.Run("Test for period", func(t *testing.T) {
-		//time := gtime.NewFromTimeStamp(1717137911)
-		//fmt.Println(time.Month())
-		//fmt.Println(time)
-		//fmt.Println(time.StartOfMonth())
-		//fmt.Println(time.Timestamp() - time.StartOfMonth().Timestamp())
-		//time = time.AddDate(0, 1, 0)
-		//fmt.Println(time.Month())
-		//fmt.Println(time)
-		//fmt.Println(time.StartOfMonth())
-		//fmt.Println(time.Timestamp() - time.StartOfMonth().Timestamp())
-		//today := time.Date
 		{
 			fmt.Println(gtime.Timestamp())
 			fmt.Println(gtime.NewFromTimeStamp(gtime.Timestamp()))
@@ -40,26 +28,5 @@ func TestPeriod(t *testing.T) {
 			day3 = day3.AddDate(0, 0, utility.MinInt(d, day3.EndOfMonth().Day())-1)
 			fmt.Println(day3)
 		}
-		//{
-		//	today := time.Date(2022, 3, 31, 0, 0, 0, 0, time.Local)
-		//	d := today.AddDate(0, -1, 0)
-		//	fmt.Println(d.Format("20060102"))
-		//	// 20220303
-		//
-		//	today = time.Date(2022, 3, 31, 0, 0, 0, 0, time.Local)
-		//	d = today.AddDate(0, 1, 0)
-		//	fmt.Println(d.Format("20060102"))
-		//	// 20220501
-		//
-		//	today = time.Date(2022, 10, 31, 0, 0, 0, 0, time.Local)
-		//	d = today.AddDate(0, -1, 0)
-		//	fmt.Println(d.Format("20060102"))
-		//	// 20221001
-		//
-		//	today = time.Date(2022, 10, 31, 0, 0, 0, 0, time.Local)
-		//	d = today.AddDate(0, 1, 0)
-		//	fmt.Println(d.Format("20060102"))
-		//	// 20221201
-		//}
 	})
 }

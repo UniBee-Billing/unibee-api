@@ -69,12 +69,6 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 		// generate invoice and payment ahead
 		latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
-		// todo mark
-		//if latestInvoice.FinishTime > 0 && latestInvoice.FinishTime+(latestInvoice.DayUtilDue*86400) < timeNow {
-		//	//invoice has expired
-		//	service3.CancelInvoiceForSubscription(ctx, sub)
-		//	return &BillingCycleWalkRes{WalkUnfinished: true, Message: "Subscription LatestInvoice Expired"}, nil
-		//}
 
 		trackForSubscription(ctx, sub, timeNow)
 

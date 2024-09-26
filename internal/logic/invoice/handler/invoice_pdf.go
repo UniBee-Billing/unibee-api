@@ -23,7 +23,6 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
 	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
-	//utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
 
@@ -31,22 +30,6 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	utility.Assert(err == nil, fmt.Sprintf("createInvoicePdf error:%v", err))
 	return savePath
 }
-
-//func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (string, error) {
-//	//if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
-//	//	len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
-//	//	len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
-//	//	len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
-//	//	g.Log().Errorf(ctx, "UploadInvoicePdf error:Oss service not setup")
-//	//	return "", gerror.New("File service need setup")
-//	//}
-//	upload, err := oss.UploadLocalFile(ctx, filePath, invoiceId, filePath, "0")
-//	if err != nil {
-//		g.Log().Errorf(ctx, fmt.Sprintf("UploadInvoicePdf error:%v", err))
-//		return "", err
-//	}
-//	return upload.Url, nil
-//}
 
 func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
 	var metadata = make(map[string]interface{})
@@ -62,7 +45,6 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		AutoPrint:      true,
 		CurrencySymbol: symbol,
 	})
-	//doc.Pdf().AddUTF8Font("SimSun", "", "simsun.ttf")
 	doc.SetFooter(&generator2.HeaderFooter{
 		Text:       fmt.Sprintf("PDF Generated on %s                                                    -%s-", time.Now().Format(time.RFC850), one.CountryCode),
 		Pagination: true,
@@ -72,7 +54,6 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	if gateway != nil {
 		invoiceGateway = gateway.GatewayName
 	}
-	//doc.SetInvoiceId(one.InvoiceId)
 	doc.SetInvoiceNumber(fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId))
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
 
@@ -242,10 +223,6 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		for i, line := range lines {
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
-			//if localized {
-			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
-			//	taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
-			//}
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
@@ -279,12 +256,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		} else {
 			doc.ExchangeRateString = fmt.Sprintf("* %s1 = %s%.6f", symbol, localizedSymbol, localizedExchangeRate)
 		}
-		//doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedExchangeRate), localizedCurrencyStr))
-		//doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedExchangeRate), localizedCurrencyStr))
 		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))
-		//if one.DiscountAmount > 0 {
-		//	doc.DiscountTotalString = fmt.Sprintf("%s -%s  |  %s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency), localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.DiscountAmount)*localizedExchangeRate), localizedCurrencyStr))
-		//}
 	}
 
 	pdf, err := doc.Build()

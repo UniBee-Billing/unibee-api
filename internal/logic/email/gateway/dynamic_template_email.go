@@ -108,10 +108,6 @@ func SendDynamicPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subj
 		fmt.Println(response.Body)
 		fmt.Println(response.Headers)
 	}
-	//if response.StatusCode != 201 {
-	//	fmt.Printf("SendDynamicTemplateEmailToUser errorCode:%d\n", response.StatusCode)
-	//	return "", gerror.Newf("SendDynamicTemplateEmailToUser errorCode:%d\n", response.StatusCode)
-	//}
 	return utility.MarshalToJsonString(response), nil
 }
 

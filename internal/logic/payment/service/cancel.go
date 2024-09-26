@@ -15,7 +15,6 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 	if payment == nil {
 		return gerror.New("payment is nil")
 	}
-	//utility.Assert(payment != nil, "payment not found")
 	g.Log().Infof(ctx, "PaymentGatewayCancel:%s", payment.PaymentId)
 	if payment.Status == consts.PaymentFailed {
 		return gerror.New("payment already failed")
@@ -26,9 +25,6 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 	if payment.AuthorizeStatus >= consts.CaptureRequest {
 		return gerror.New("payment has capture request")
 	}
-	//utility.Assert(payment.Status != consts.PaymentFailed, "payment already failure")
-	//utility.Assert(payment.Status != consts.PaymentCancelled, "payment already cancelled")
-	//utility.Assert(payment.AuthorizeStatus < consts.CaptureRequest, "payment has capture request")
 	if payment.Status != consts.PaymentCreated {
 		return gerror.New("payment not created status or already success")
 	}
@@ -63,9 +59,6 @@ func PaymentRefundGatewayCancel(ctx context.Context, refund *entity.Refund) (err
 	if refund.Status != consts.RefundCreated {
 		return gerror.New("refund not created status")
 	}
-	//utility.Assert(refund.Status != consts.RefundFailed, "refund already failure")
-	//utility.Assert(refund.Status != consts.RefundCancelled, "refund already cancelled")
-	//utility.Assert(refund.Status == consts.RefundCreated, "refund not created status")
 	payment := query.GetPaymentByPaymentId(ctx, refund.PaymentId)
 	if payment == nil {
 		return gerror.New("payment not found")

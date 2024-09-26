@@ -20,7 +20,7 @@ func QueryAndCreateGatewayUser(ctx context.Context, gateway *entity.MerchantGate
 		return gatewayUser
 	} else {
 		if len(gatewayUser.GatewayDefaultPaymentMethod) == 0 {
-			//no default payment method, query it
+			//no default payment method, query
 			detailQuery, err := GetGatewayServiceProvider(ctx, gateway.Id).GatewayUserDetailQuery(ctx, gateway, gatewayUser.UserId)
 			utility.AssertError(err, "GatewayUserDetailQuery")
 			if len(detailQuery.DefaultPaymentMethod) > 0 {

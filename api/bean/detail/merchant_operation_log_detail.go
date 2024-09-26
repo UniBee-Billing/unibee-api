@@ -16,6 +16,4 @@ type MerchantOperationLogDetail struct {
 	PlanId         uint64                `json:"planId"             description:"plan id"`                                              // plan id
 	DiscountCode   string                `json:"discountCode"       description:"discount_code"`                                        // discount_code
 	Member         *MerchantMemberDetail `json:"member"             description:"Member"`
-	//User           *bean.UserAccountSimplify  `json:"user"               description:"User"`
-	//Subscription   *bean.SubscriptionSimplify `json:"subscription"       description:"Subscription"`
 }

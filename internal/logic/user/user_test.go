@@ -14,7 +14,7 @@ func TestUserCreateAndDelete(t *testing.T) {
 	var one *entity.UserAccount
 	var err error
 	t.Run("Test for User Create|Login|ChangePassword|Frozen|Release", func(t *testing.T) {
-		one, err = CreateUser(ctx, &NewReq{
+		one, err = CreateUser(ctx, &NewUserInternalReq{
 			ExternalUserId: "auto_x_2",
 			Email:          "autotestuser@wowow.io",
 			FirstName:      "test",
@@ -24,7 +24,6 @@ func TestUserCreateAndDelete(t *testing.T) {
 			Address:        "test",
 			UserName:       "test",
 			CountryCode:    "CN",
-			CountryName:    "China",
 			MerchantId:     test.TestMerchant.Id,
 		})
 		require.Nil(t, err)
@@ -42,7 +41,7 @@ func TestUserCreateAndDelete(t *testing.T) {
 		one, token = PasswordLogin(ctx, one.MerchantId, one.Email, "test123456")
 		require.NotNil(t, one)
 		require.NotNil(t, token)
-		another, err := QueryOrCreateUser(ctx, &NewReq{
+		another, err := QueryOrCreateUser(ctx, &NewUserInternalReq{
 			ExternalUserId: "auto_x_2",
 			Email:          "autotestuser@wowow.io",
 			FirstName:      "test",
@@ -52,7 +51,6 @@ func TestUserCreateAndDelete(t *testing.T) {
 			Address:        "test",
 			UserName:       "test",
 			CountryCode:    "CN",
-			CountryName:    "China",
 			MerchantId:     test.TestMerchant.Id,
 		})
 		require.Nil(t, err)

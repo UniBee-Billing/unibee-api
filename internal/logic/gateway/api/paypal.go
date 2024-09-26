@@ -23,15 +23,6 @@ import (
 // https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/paypal/
 // link：https://developer.paypal.com/docs/api/payments/v1/#payment_create
 // https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_transactions
-// clientId ATaWQ8G9oJNFyle9YCt59
-// Secret EHUy5GALkYr1Qp0n6MepJY8LnUwYCBIWElG4Iv_DO3mdYcbB2l6zwJxk99OrPhbdNRLk7GkHEqb5RHEA
-
-// Other ClientId AXy9orp-CDaHhBZ9C78QHW2BKZpACgroqo85_NIOa9mIfJ9QnSVKzY-X_rivR_fTUUr6aLjcJsj6sDur
-// Other Secret EBoIiUSkCKeSk49hHSgTem1qnjzzJgRQHDEHvGpzlLEf_nIoJd91xu8rPOBDCdR_UYNKVxJE-UgS2iCw
-
-// Other 2 ClientId AT-HU_WUeHCis_uqkU2Y8-0f54qq_QkoNXJeBj1-4S01__m1OLQn1jXnG9F86bcaH5TbcYiFed7UBRGH
-// Other 2 Secret  EL2TLXWp_6XyZEtYqeRjLLVb9S_uYjwZOrBUiqhHhw96-50VisMsQvBDA09qMVntXrPf6TukiyfRCkG0
-
 //APIBaseSandBox = "https://api-m.sandbox.paypal.com"
 //APIBaseLive = "https://api-m.paypal.com"
 
@@ -53,12 +44,6 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	utility.Assert(userId > 0, "userId is nil")
 	var paymentSource = &paypal.PaymentSource{
 		Paypal: &paypal.PaymentSourcePaypal{
-			//Attributes: &paypal.PaymentSourceAttributes{
-			//	Vault: &paypal.PaymentSourceAttributesVault{
-			//		StoreInVault: "ON_SUCCESS",
-			//		UsageType:    "MERCHANT",
-			//	},
-			//},
 			Description:  "Save Payment Method For Future Use",
 			UsagePattern: "IMMEDIATE",
 			UsageType:    "MERCHANT",
@@ -185,7 +170,6 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		items = append(items, item)
 	}
 
-	//if createPayContext.CheckoutMode || !createPayContext.PayImmediate {
 	var productName = createPayContext.Invoice.ProductName
 	if len(productName) == 0 {
 		productName = createPayContext.Invoice.InvoiceName
@@ -194,18 +178,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		productName = "DefaultProduct"
 	}
 	var paymentSource = &paypal.PaymentSource{
-		Paypal: &paypal.PaymentSourcePaypal{
-			//Attributes: &paypal.PaymentSourceAttributes{
-			//	Vault: &paypal.PaymentSourceAttributesVault{
-			//		StoreInVault: "ON_SUCCESS",
-			//		UsageType:    "MERCHANT",
-			//	},
-			//},
-			//ExperienceContext: &paypal.ExperienceContext{
-			//	ReturnURL: webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
-			//	CancelURL: webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
-			//},
-		},
+		Paypal: &paypal.PaymentSourcePaypal{},
 	}
 	if createPayContext.PayImmediate && !createPayContext.CheckoutMode && len(createPayContext.GatewayPaymentMethod) > 0 {
 		paymentSource.Paypal.VaultId = createPayContext.GatewayPaymentMethod
@@ -225,22 +198,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				Amount: &paypal.PurchaseUnitAmount{
 					Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 					Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-					//	ItemTotal: &paypal.Money{
-					//		Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
-					//		Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					//	},
-					//	Shipping:         nil,
-					//	Handling:         nil,
-					//	TaxTotal:         nil,
-					//	Insurance:        nil,
-					//	ShippingDiscount: nil,
-					//	Discount:         nil,
-					//},
 				},
-
-				//SoftDescriptor: productName,
-				//Items: items,
 			},
 		},
 		&paypal.CreateOrderPayer{},
@@ -272,9 +230,6 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		GatewayPaymentMethod:   payment.GatewayPaymentMethod,
 		Link:                   payment.Link,
 	}, nil
-	//} else {
-	//	return nil, gerror.New("not support")
-	//}
 }
 
 func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
@@ -350,10 +305,6 @@ func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantG
 }
 
 func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Order, payment *entity.Payment) (*gateway_bean.GatewayPaymentRo, error) {
-	//if len(item.PurchaseUnits) == 0 {
-	//	return nil, gerror.New("Invalid Order Data")
-	//}
-
 	var availableCapture *paypal.CaptureAmount
 	var paidTime *gtime.Time
 	if item.PurchaseUnits != nil && len(item.PurchaseUnits) > 0 && item.PurchaseUnits[0].Payments != nil && len(item.PurchaseUnits[0].Payments.Captures) >= 1 {

@@ -15,12 +15,6 @@ import (
 	"unibee/utility"
 )
 
-func mainTask(ctx context.Context) {
-	//3 Min Invoice Out Of Pay Email
-	//Subscription Cycle Email
-	//Invoice 3 Day Out Of Pay Email
-}
-
 func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
 	g.Log().Debugf(ctx, "%s:%s", taskName, "Start......")
 	var timeNow = gtime.Now().Timestamp()

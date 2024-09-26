@@ -15,8 +15,6 @@ func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err er
 	utility.Assert(payment != nil, "entity not found")
 	utility.Assert(payment.Status == consts.PaymentCreated, "payment not waiting for pay")
 	utility.Assert(payment.AuthorizeStatus == consts.Authorized, "payment not authorised")
-	//utility.Assert(payment.PaymentAmount > 0, "capture value should > 0")
-	//utility.Assert(payment.PaymentAmount <= payment.TotalAmount, "capture value should <= authorized value")
 	_, err = api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCapture(ctx, payment)
 	if err != nil {
 		g.Log().Errorf(ctx, "PaymentGatewayCapture paymentId:%d, error:%s", payment.PaymentId, err.Error())

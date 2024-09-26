@@ -254,7 +254,3 @@ func setUpDefaultConfig(config map[string]interface{}, key string, flagValue int
 		}
 	}
 }
-
-func GetSystemConfig() {
-
-}

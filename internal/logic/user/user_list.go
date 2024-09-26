@@ -11,20 +11,15 @@ import (
 )
 
 type UserListInternalReq struct {
-	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId         int64  `json:"userId" dc:"Filter UserId, Default All" `
-	Email          string `json:"email" dc:"Search Email" `
-	FirstName      string `json:"firstName" dc:"Search FirstName" `
-	LastName       string `json:"lastName" dc:"Search LastName" `
-	SubscriptionId string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
-	SubStatus      []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
-	Status         []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
-	PlanIds        []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
-	//UserName   int    `json:"userName" dc:"Filter UserName, Default All" `
-	//SubscriptionName   int    `json:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
-	//SubscriptionStatus int    `json:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
-	//PaymentMethod      int    `json:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
-	//BillingType        int    `json:"billingType" dc:"Filter BillingType, Default All" `
+	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId          int64  `json:"userId" dc:"Filter UserId, Default All" `
+	Email           string `json:"email" dc:"Search Email" `
+	FirstName       string `json:"firstName" dc:"Search FirstName" `
+	LastName        string `json:"lastName" dc:"Search LastName" `
+	SubscriptionId  string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
+	SubStatus       []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
+	Status          []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	PlanIds         []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
 	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
 	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -66,11 +61,6 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 		}
 	}
 	q := dao.UserAccount.Ctx(ctx).
-		//Where(dao.UserAccount.Columns().Email, req.Email).
-		//Where(dao.UserAccount.Columns().UserName, req.UserName).
-		//Where(dao.UserAccount.Columns().SubscriptionName, req.SubscriptionName).
-		//Where(dao.UserAccount.Columns().SubscriptionStatus, req.SubscriptionStatus).
-		//Where(dao.UserAccount.Columns().PaymentMethod, req.PaymentMethod).
 		Where(dao.UserAccount.Columns().MerchantId, req.MerchantId).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes)
 	if req.UserId > 0 {

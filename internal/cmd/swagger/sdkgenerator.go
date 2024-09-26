@@ -36,14 +36,6 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 			}
 		}
 		for key, path := range api.GetJsonMap("paths") {
-			//if path.Contains("post") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("post"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
-			//if path.Contains("get") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("get"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/merchant")) {
 				_ = api.Remove("paths#" + key)
@@ -61,10 +53,6 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 
 		// generator error to format type of map[string]interface {}
 		response := api.String()
-		//response := strings.Replace(api.String(), "map[string]interface {}", "interface {}", -1)
-		//mapTarget := `"additionalProperties":{"$ref":"#/components/schemas/interface"},`
-		//mapReplace := `"additionalProperties":{"format":"string","properties":{},"type":"string"},` // If generate map[string]interface{}, leave blank
-		//response = strings.Replace(response, mapTarget, mapReplace, -1)
 		r.Response.WriteJson(response)
 		r.Exit()
 	}
@@ -96,14 +84,6 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 			}
 		}
 		for key, path := range api.GetJsonMap("paths") {
-			//if path.Contains("post") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("post"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
-			//if path.Contains("get") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("get"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/merchant")) {
 				_ = api.Remove("paths#" + key)
@@ -128,12 +108,6 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 			r.Exit()
 			return
 		}
-		//// generator error to format type of map[string]interface {}
-		//response := strings.Replace(api.String(), "map[string]interface {}", "map[string]string", -1)
-		//mapTarget := `"additionalProperties":{"$ref":"#/components/schemas/interface"},`
-		//mapReplace := `"additionalProperties":{"format":"string","properties":{},"type":"string"},`
-		//response = strings.Replace(response, mapTarget, mapReplace, -1)
-		//r.Response.WriteJson(response)
 		r.Response.WriteJson(apiYaml)
 		r.Exit()
 	}
@@ -157,14 +131,6 @@ func UserPortalGeneratorSpecJson(r *ghttp.Request) {
 			}
 		}
 		for key, path := range api.GetJsonMap("paths") {
-			//if path.Contains("post") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("post"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
-			//if path.Contains("get") {
-			//	_ = api.Set("paths#"+key+"#api", path.GetJson("get"))
-			//	_ = api.Remove("paths#" + key + "#post")
-			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/user")) {
 				_ = api.Remove("paths#" + key)

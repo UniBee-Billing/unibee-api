@@ -33,19 +33,6 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
-	//client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
-	//_, err = client.GetAccessToken(context.Background())
-	//if err != nil {
-	//	r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-	//	return
-	//}
-	//signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
-	//if err != nil {
-	//	g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Webhook signature verification success\n", gateway.GatewayName)
-	//	r.Response.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
-	//if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
 	g.Log().Info(r.Context(), "Receive_Webhook_Channel:", gateway.GatewayName, " hook:", jsonData.String())
 	var responseBack = http.StatusOK
 	if jsonData.Contains("payment_id") {
@@ -62,20 +49,9 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	r.Response.WriteHeader(responseBack)
 	return
-	//} else {
-	//	g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
-	//	r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-	//	return
-	//}
 }
 
 func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	//params, err := r.GetJson()
-	//if err != nil {
-	//	g.Log().Printf(r.Context(), "ChangellyNotify redirect params:%s err:%s", params, err.Error())
-	//	r.Response.Writeln(err)
-	//	return
-	//}
 	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false

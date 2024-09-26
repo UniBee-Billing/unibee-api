@@ -34,9 +34,7 @@ type Changelly struct {
 }
 
 func (c Changelly) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	//if len(from.CountryCode) == 0 {
 	from.CountryCode = "FR" // not all countryCode contain data
-	//}
 	urlPath := "/v1/offers?currencyFrom=" + from.Currency + "&currencyTo=USDT20&amountFrom=100&country=" + from.CountryCode
 	//urlPath := "/v1/offers?currencyFrom=" + from.Currency + "&currencyTo=USD&amountFrom=100&country=" + from.CountryCode
 	param := map[string]interface{}{}
@@ -67,27 +65,6 @@ func (c Changelly) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bea
 		Rate:           invertedRate,
 	}, nil
 }
-
-//
-//func (c Changelly) GatewayGetFiatCurrencyList(ctx context.Context, key string, secret string) (responseJson *gjson.Json, err error) {
-//	urlPath := "/v1/currencies?providerCode=moonpay&type=crypto"
-//	param := map[string]interface{}{}
-//	responseJson, err = SendChangellyFiatRequest(ctx, key, secret, "GET", urlPath, param)
-//	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
-//	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-//
-//	return responseJson, err
-//}
-//
-//func (c Changelly) GatewayGetFiatCurrencyRate(ctx context.Context, key string, secret string, from string, to string) (responseJson *gjson.Json, err error) {
-//	urlPath := "/v1/offers?currencyFrom=" + from + "&currencyTo=" + to + "&amountFrom=100&country=FR"
-//	param := map[string]interface{}{}
-//	responseJson, err = SendChangellyFiatRequest(ctx, key, secret, "GET", urlPath, param)
-//	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
-//	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-//
-//	return responseJson, err
-//}
 
 func (c Changelly) GatewayGetCurrency(ctx context.Context, key string, secret string) (responseJson *gjson.Json, err error) {
 	urlPath := "/api/payment/v1/currencies"

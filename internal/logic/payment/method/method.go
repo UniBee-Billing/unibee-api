@@ -28,7 +28,6 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
-	//utility.Assert(len(req.Currency) > 0, "invalid currency")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.Metadata == nil {
 		req.Metadata = map[string]interface{}{}

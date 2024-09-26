@@ -17,17 +17,15 @@ type OperationLogListInternalReq struct {
 	MemberFirstName string `json:"memberFirstName" dc:"Filter Member's FirstName Default All" `
 	MemberLastName  string `json:"memberLastName" dc:"Filter Member's LastName, Default All" `
 	MemberEmail     string `json:"memberEmail" dc:"Filter Member's Email, Default All" `
-	//MemberId        uint64 `json:"memberId" dc:"Filter MemberId Default All" `
-	//UserId          uint64 `json:"userId" dc:"Filter UserId Default All" `
-	FirstName      string `json:"firstName" dc:"FirstName" `
-	LastName       string `json:"lastName" dc:"LastName" `
-	Email          string `json:"email" dc:"Email" `
-	SubscriptionId string `json:"subscriptionId"     dc:"subscription_id"` // subscription_id
-	InvoiceId      string `json:"invoiceId"          dc:"invoice id"`      // invoice id
-	PlanId         uint64 `json:"planId"             dc:"plan id"`         // plan id
-	DiscountCode   string `json:"discountCode"       dc:"discount_code"`   // discount_code
-	Page           int    `json:"page"  dc:"Page, Start With 0" `
-	Count          int    `json:"count"  dc:"Count Of Page"`
+	FirstName       string `json:"firstName" dc:"FirstName" `
+	LastName        string `json:"lastName" dc:"LastName" `
+	Email           string `json:"email" dc:"Email" `
+	SubscriptionId  string `json:"subscriptionId"     dc:"subscription_id"` // subscription_id
+	InvoiceId       string `json:"invoiceId"          dc:"invoice id"`      // invoice id
+	PlanId          uint64 `json:"planId"             dc:"plan id"`         // plan id
+	DiscountCode    string `json:"discountCode"       dc:"discount_code"`   // discount_code
+	Page            int    `json:"page"  dc:"Page, Start With 0" `
+	Count           int    `json:"count"  dc:"Count Of Page"`
 }
 
 func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternalReq) ([]*detail.MerchantOperationLogDetail, int) {
@@ -157,7 +155,5 @@ func convertOperationLogToDetail(ctx context.Context, one *entity.MerchantOperat
 		PlanId:         one.PlanId,
 		DiscountCode:   one.DiscountCode,
 		Member:         detail.ConvertMemberToDetail(ctx, query.GetMerchantMemberById(ctx, one.MemberId)),
-		//User:           bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
-		//Subscription:   bean.SimplifySubscription(query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)),
 	}
 }

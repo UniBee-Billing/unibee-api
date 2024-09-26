@@ -343,30 +343,6 @@ func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countr
 				_ = utility.UnmarshalFromJsonString(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule, &gatewayVATRules)
 				if len(gatewayVATRules) > 0 {
 					for _, gatewayVatRule := range gatewayVATRules {
-						//if gatewayVatRule.GatewayNames == "" {
-						//	continue
-						//}
-						//if gatewayVatRule.GatewayNames == "*" {
-						//	if ruleContain(gatewayVatRule.ValidCountryCodes, countryCode) {
-						//		if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
-						//			taxPercentage = *gatewayVatRule.TaxPercentage
-						//		} else {
-						//			taxPercentage = vatCountryRate.StandardTaxPercentage
-						//		}
-						//		ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
-						//		break
-						//	}
-						//}
-						//if len(gatewayName) > 0 && ruleContain(gatewayVatRule.GatewayNames, gatewayName) && ruleContain(gatewayVatRule.ValidCountryCodes, countryCode) {
-						//	if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
-						//		taxPercentage = *gatewayVatRule.TaxPercentage
-						//	} else {
-						//		taxPercentage = vatCountryRate.StandardTaxPercentage
-						//	}
-						//	ignoreVatNumber = gatewayVatRule.IgnoreVatNumber
-						//	break
-						//}
-
 						if ruleContain(gatewayVatRule.GatewayNames, gatewayName) && ruleContain(gatewayVatRule.ValidCountryCodes, countryCode) {
 							if gatewayVatRule.TaxPercentage != nil && *gatewayVatRule.TaxPercentage > 0 {
 								taxPercentage = *gatewayVatRule.TaxPercentage

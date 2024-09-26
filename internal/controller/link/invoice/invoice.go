@@ -63,29 +63,13 @@ func LinkPdfEntry(r *ghttp.Request) {
 		return
 	}
 	var pdfFileName string
-	//if len(one.SendPdf) > 0 {
-	//	pdfFileName = utility.DownloadFile(one.SendPdf)
-	//} else {
 	pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
-	//}
 	if len(pdfFileName) == 0 {
 		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
 		r.Response.WriteHeader(http.StatusBadRequest)
 		r.Response.Writeln("Bad request")
 		return
 	}
-	//r.Response.Header().Add("Access-Control-Allow-Origin", "*")
-	//r.Response.Header().Add("Content-Security-Policy", "block-all-mixed-content")
-	//r.Response.Header().Add("Strict-Transport-Security", "includeSubDomains")
-	//r.Response.Header().Add("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
-	//r.Response.Header().Add("Access-Control-Allow-Credentials", "true")
-	//r.Response.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	//r.Response.CORSDefault()
-	//corsOptions := r.Response.DefaultCORSOptions()
-	//corsOptions.AllowDomain = []string{"user.unibee.top", "merchant.unibee.top"}
-	//r.Response.CORS(corsOptions)
-	//merchant := query.GetMerchantById(r.Context(), one.MerchantId)
-	//r.Response.Header().Set("X-Frame-Options", fmt.Sprintf("ALLOW-FROM %s", merchant.Host))
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")

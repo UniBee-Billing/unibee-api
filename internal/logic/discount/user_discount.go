@@ -33,9 +33,6 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if req.MerchantId == 0 {
 		return false, false, "Invalid merchantId"
 	}
-	//if req.UserId == 0 {
-	//	return false, false, "Invalid userId"
-	//}
 	if len(req.DiscountCode) == 0 {
 		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}")
 	}

@@ -9,22 +9,6 @@ import (
 	"time"
 )
 
-//var (
-//	LocalIP       = ""
-//	WorkId  int64 = 1
-//)
-//
-//func workIdFromIP() {
-//	if WorkId == 1 {
-//		LocalIP = DetectLocalIP()
-//		WorkIdStr := strings.Replace(LocalIP, ".", "", -1)
-//		one, err := strconv.Atoi(WorkIdStr)
-//		if err == nil {
-//			WorkId = int64(one)
-//		}
-//	}
-//}
-
 func GetLineSeparator() string {
 	switch runtime.GOOS {
 	case "windows":
@@ -88,18 +72,6 @@ func CreatePaymentId() string {
 func CreateRefundId() string {
 	return fmt.Sprintf("ref%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
-
-// todo mark Not stable on high concurrency
-//func GenerateNextInt() int64 {
-//	workIdFromIP()
-//	//return NewSnowflake(WorkId).GenerateID()
-//	node, err := snowflake.NewNode(WorkId % 1000)
-//	if err != nil {
-//		return NewSnowflake(WorkId).GenerateID()
-//	} else {
-//		return node.Generate().Int64()
-//	}
-//}
 
 const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 

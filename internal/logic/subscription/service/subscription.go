@@ -85,27 +85,8 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.Nu
 	if err != nil {
 		return nil, err
 	}
-	//if vatNumberValidate.Valid {
-	//	vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, _interface.GetMerchantId(ctx), vatNumberValidate.CountryCode)
-	//	utility.Assert(err == nil, fmt.Sprintf("verify error:%s", err))
-	//	utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
-	//}
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
 }
-
-//func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId uint64) *entity.MerchantGateway {
-//	if reqGatewayId > 0 {
-//		gateway := query.GetGatewayById(ctx, reqGatewayId)
-//		utility.Assert(gateway != nil, "gateway not found")
-//		utility.Assert(gateway.MerchantId == merchantId, "gateway not match")
-//		return gateway
-//	} else {
-//		list := query.GetMerchantGatewayList(ctx, merchantId)
-//		utility.Assert(len(list) > 0, "merchant gateway need setup")
-//		utility.Assert(len(list) == 1, "gateway need specify")
-//		return list[0]
-//	}
-//}
 
 type RenewInternalReq struct {
 	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
@@ -154,10 +135,6 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
 	}
-	//var gatewayId = sub.GatewayId
-	//if req.GatewayId != nil {
-	//	gatewayId = *req.GatewayId
-	//}
 	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	var timeNow = gtime.Now().Timestamp()
@@ -497,9 +474,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if req.IsSubmit {
 			utility.Assert(canApply, message)
 		}
-		//if isRecurring {
-		//	recurringDiscountCode = req.DiscountCode
-		//}
 	}
 
 	var currentTimeStart = gtime.Now()
@@ -656,7 +630,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
 	if req.Discount != nil {
-		//utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call") // todo mark enable for test automatic
 		// create external discount
 		utility.Assert(req.PlanId > 0, "PlanId invalid")
 		utility.Assert(req.UserId > 0, "UserId invalid")

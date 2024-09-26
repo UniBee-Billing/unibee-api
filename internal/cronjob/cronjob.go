@@ -17,9 +17,6 @@ func StartCronJobs() {
 		err error
 		ctx = gctx.New()
 	)
-	//if consts.GetConfigInstance().IsServerDev() {
-	//	return
-	//}
 	// every 10 second
 	var name = "JobSubscriptionCycle"
 	g.Log().Infof(ctx, "CronJob Start......")

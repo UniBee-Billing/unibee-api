@@ -54,7 +54,6 @@ func (s StripeWebhook) setUnibeeAppInfo() {
 	})
 }
 
-// GatewayCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks  https://stripe.com/docs/api/events/types
 func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	utility.Assert(gateway != nil, "gateway is nil")
 	stripe.Key = gateway.GatewaySecret
@@ -311,12 +310,6 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 }
 
 func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	//params, err := r.GetJson()
-	//if err != nil {
-	//	//g.Log().Printf(r.Context(), "StripeNotify redirect params:%s err:%s", params, err.Error())
-	//	r.Response.Writeln(err)
-	//	return
-	//}
 	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false
@@ -402,7 +395,6 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 						response = "not complete"
 					}
 				} else {
-					//not found
 					response = "payment not found"
 				}
 			}

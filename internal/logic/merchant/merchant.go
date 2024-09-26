@@ -128,15 +128,6 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 }
 
 func SendMerchantRegisterEmail(ctx context.Context, req *CreateMerchantInternalReq, verificationCode string) {
-	//if config.GetConfigInstance().Mode == "cloud" {
-	//	err := email.SendTemplateEmail(ctx, consts.CloudModeManagerMerchantId, req.Email, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
-	//		CodeExpireMinute: "3",
-	//		Code:             verificationCode,
-	//	})
-	//	utility.AssertError(err, "Server Error")
-	//} else {
-	//	utility.Assert(true, "not support")
-	//}
 	utility.Assert(req != nil, "Server Error,nil")
 	publicIp := utility.GetPublicIP()
 	if len(publicIp) == 0 {

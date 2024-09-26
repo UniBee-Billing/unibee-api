@@ -147,20 +147,6 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
-//func (s *SMiddleware) OpenApiHandler(r *ghttp.Request) {
-//	customCtx := _interface.Context().Get(r.Context())
-//	customCtx.UserAgent = r.Header.Get("User-Agent")
-//	if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
-//		customCtx.IsOpenApiCall = true
-//	}
-//	customCtx.TokenString = r.Header.Get("Authorization")
-//	if len(customCtx.TokenString) > 0 && strings.HasPrefix(customCtx.TokenString, "Bearer ") {
-//		customCtx.IsOpenApiCall = true
-//	}
-//	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] OpenApiHandler UserAgent:%s Token:%s", customCtx.RequestId, r.Method, r.GetUrl(), customCtx.UserAgent, customCtx.TokenString))
-//	r.Middleware.Next()
-//}
-
 func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	if len(customCtx.TokenString) == 0 {

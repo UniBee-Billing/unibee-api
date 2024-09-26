@@ -58,20 +58,8 @@ func TestPaypal_Gateway(t *testing.T) {
 			},
 			&paypal.CreateOrderPayer{},
 			&paypal.PaymentSource{
-				//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-				//	Vault: paypal.PaymentSourceAttributesVault{
-				//		StoreInVault: "ON_SUCCESS",
-				//	},
-				//	Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-				//}},
 				Paypal: &paypal.PaymentSourcePaypal{
 					VaultId: "5a848461yc8729645",
-					//Attributes: &paypal.PaymentSourceAttributes{
-					//	Vault: &paypal.PaymentSourceAttributesVault{
-					//		StoreInVault: "ON_SUCCESS",
-					//		UsageType:    "MERCHANT",
-					//	},
-					//},
 				},
 			},
 			&paypal.ApplicationContext{
@@ -118,31 +106,12 @@ func TestPaypal_Gateway(t *testing.T) {
 					Amount: &paypal.PurchaseUnitAmount{
 						Value:    amountValue,
 						Currency: "EUR",
-						//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-						//	ItemTotal: &paypal.Money{
-						//		Value:    amountValue,
-						//		Currency: "EUR",
-						//	},
-						//	Shipping:         nil,
-						//	Handling:         nil,
-						//	TaxTotal:         nil,
-						//	Insurance:        nil,
-						//	ShippingDiscount: nil,
-						//	Discount:         nil,
-						//},
 					},
 					SoftDescriptor: "Default Product",
-					//Items:          items,
 				},
 			},
 			&paypal.CreateOrderPayer{},
 			&paypal.PaymentSource{
-				//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-				//	Vault: &paypal.PaymentSourceAttributesVault{
-				//		StoreInVault: "ON_SUCCESS",
-				//	},
-				//	Verification: &paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-				//}},
 				Paypal: &paypal.PaymentSourcePaypal{
 					Attributes: &paypal.PaymentSourceAttributes{
 						Vault: &paypal.PaymentSourceAttributesVault{
@@ -210,20 +179,8 @@ func TestPaypal_Gateway(t *testing.T) {
 				},
 				&paypal.CreateOrderPayer{},
 				&paypal.PaymentSource{
-					//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-					//	Vault: paypal.PaymentSourceAttributesVault{
-					//		StoreInVault: "ON_SUCCESS",
-					//	},
-					//	Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-					//}},
 					Paypal: &paypal.PaymentSourcePaypal{
 						VaultId: gatewayPaymentMethod,
-						//Attributes: &paypal.PaymentSourceAttributes{
-						//	Vault: &paypal.PaymentSourceAttributesVault{
-						//		StoreInVault: "ON_SUCCESS",
-						//		UsageType:    "MERCHANT",
-						//	},
-						//},
 					},
 				},
 				&paypal.ApplicationContext{

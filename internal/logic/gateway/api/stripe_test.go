@@ -35,27 +35,6 @@ func TestCheckout(t *testing.T) {
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUnibeeAppInfo()
-		//		//{
-		//		//	params := &stripe.CustomerListPaymentMethodsParams{
-		//		//		Customer: stripe.String("cus_Q53EmPEk3hxJF9"),
-		//		//	}
-		//		//	params.Limit = stripe.Int64(10)
-		//		//	result := customer.ListPaymentMethods(params)
-		//		//	fmt.Println(utility.MarshalToJsonString(result.PaymentMethodList().Data))
-		//		//}
-		//		//
-		//		{
-		//			params := &stripe.PaymentMethodParams{}
-		//			params.AllowRedisplay = stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))
-		//			_, _ = paymentmethod.Update("pm_1PEt9GHhgikz9ijM0lfdhg2Y", params)
-		//		}
-		//
-		//		{
-		//			params := &stripe.PaymentMethodAttachParams{
-		//				Customer: stripe.String("cus_Q53EmPEk3hxJF9"),
-		//			}
-		//			_, _ = paymentmethod.Attach("pm_1PEt9GHhgikz9ijM0lfdhg2Y", params)
-		//		}
 		{
 			var items []*stripe.CheckoutSessionLineItemParams
 			items = append(items, &stripe.CheckoutSessionLineItemParams{
@@ -85,11 +64,7 @@ func TestCheckout(t *testing.T) {
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				},
 			}
-			//if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
-			//	checkoutParams.PaymentMethodConfiguration = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
-			//}
 			checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
-			//checkoutParams.ExpiresAt
 			detail, err := session.New(checkoutParams)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -97,27 +72,6 @@ func TestCheckout(t *testing.T) {
 				fmt.Println(utility.MarshalToJsonString(detail))
 			}
 		}
-		//		//
-		//		//{
-		//		//	params := &stripe.PaymentIntentParams{
-		//		//		Customer: stripe.String("cus_Q53EmPEk3hxJF9"),
-		//		//		Confirm:  stripe.Bool(true),
-		//		//		Amount:   stripe.Int64(100),
-		//		//		Currency: stripe.String(strings.ToLower("EUR")),
-		//		//		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
-		//		//			Enabled: stripe.Bool(true),
-		//		//		},
-		//		//		ReturnURL:        stripe.String("http://merchant.unibee.top"),
-		//		//		SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
-		//		//	}
-		//		//	params.PaymentMethod = stripe.String("pm_1PEt9GHhgikz9ijM0lfdhg2Y")
-		//		//	detail, err := paymentintent.New(params)
-		//		//	if err != nil {
-		//		//		fmt.Println(err.Error())
-		//		//	} else {
-		//		//		fmt.Println(utility.MarshalToJsonString(detail))
-		//		//	}
-		//		//}
 	})
 }
 
@@ -175,13 +129,6 @@ func TestStripe(t *testing.T) {
 			}
 			fmt.Println(utility.MarshalToJsonString(result))
 		}
-		//{
-		//	paymentIntentDetail, err := GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, "pi_3OmpHZHhgikz9ijM0a87ACwq")
-		//	if err != nil {
-		//		fmt.Println(utility.MarshalToJsonString(err))
-		//	}
-		//	fmt.Println(utility.MarshalToJsonString(paymentIntentDetail))
-		//}
 		{
 			params := &stripe.PaymentMethodAttachParams{
 				Customer: stripe.String(gatewayUser.GatewayUserId),
@@ -192,25 +139,5 @@ func TestStripe(t *testing.T) {
 			}
 			fmt.Println(utility.MarshalToJsonString(result))
 		}
-		//{
-		//	params := &stripe.PaymentIntentParams{
-		//		Customer: stripe.String(gatewayUser.GatewayUserId),
-		//		Confirm:  stripe.Bool(true),
-		//		CaptureAmount:   stripe.Int64(101),
-		//		Currency: stripe.String(strings.ToLower("USD")),
-		//		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
-		//			Enabled: stripe.Bool(true),
-		//		},
-		//		//Metadata:  createPayContext.MetaData,
-		//		ReturnURL:        stripe.String("http://user.unibee.top"),
-		//		SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
-		//	}
-		//	params.PaymentMethod = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
-		//	targetIntent, err := paymentintent.New(params)
-		//	if err != nil {
-		//		fmt.Println(utility.MarshalToJsonString(err))
-		//	}
-		//	fmt.Println(utility.MarshalToJsonString(targetIntent))
-		//}
 	})
 }

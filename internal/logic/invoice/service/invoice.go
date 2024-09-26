@@ -46,7 +46,6 @@ func checkInvoice(one *detail.InvoiceDetail) {
 		utility.Assert(line.AmountExcludingTax == amountExcludingTax, "line amountExcludingTax mistake")
 		utility.Assert(strings.Compare(line.Currency, one.Currency) == 0, "line currency not match invoice currency")
 		utility.Assert(line.Amount == amountExcludingTax+tax, "line amount mistake")
-		//utility.Assert(line.TaxPercentage == one.TaxPercentage, "line TaxPercentage mistake")
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
 	}

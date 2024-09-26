@@ -29,11 +29,9 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	if config.GetConfigInstance().IsProd() && sub.TestClock <= 0 {
 		return nil, gerror.New("AdvanceTime Does Not Work For Prod Env")
 	}
-	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
 	utility.Assert(sub.TestClock < newTestClock, "The Subscription Has Walk To The TestClock Exceed The New One")
 	//firstEnd := subscription.GetPeriodEndFromStart(ctx,utility.MaxInt64(sub.CurrentPeriodEnd,sub.TrialEnd), uint64(sub.PlanId))
 	// Verify Farthest Time Which Test Clock Can Set, The Max Number Of Subscription Billing Cycle Which TestClock Can Cover is 2
-	//var maxTimeCap int64 = 60 * 24 * 60 * 60 // Max 7days TestClock Cap
 	clockTimeNow := utility.MaxInt64(gtime.Timestamp(), sub.TestClock)
 	//if sub.TestClock > 0 {
 	plan := query.GetPlanById(ctx, sub.PlanId)

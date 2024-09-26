@@ -36,6 +36,5 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 			CreateTime: gtime.Now().Timestamp(),
 		}
 		_, _ = dao.GatewayHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
-		//g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)
 	}()
 }

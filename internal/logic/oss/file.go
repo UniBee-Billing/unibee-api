@@ -64,25 +64,9 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 	if data == nil || len(data) == 0 {
 		return nil, gerror.Newf("invalid file, size 0 or nil, localFilePath:%s", localFilePath)
 	}
-	// remove minio dependency
-	//minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
-	//	Creds:  credentials.NewStaticV4(config.GetConfigInstance().MinioConfig.AccessKey, config.GetConfigInstance().MinioConfig.SecretKey, ""),
-	//	Secure: false,
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//_, err = minioClient.PutObject(ctx, config.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
-	//	ContentType: http.DetectContentType(data),
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	toSave := entity.FileUpload{
-		UserId: uploadUserId,
-		//Url:        config.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		UserId:     uploadUserId,
 		Url:        config.GetConfigInstance().Server.DomainPath + "/oss/file/" + uploadFileName,
 		FileName:   uploadFileName,
 		Tag:        uploadPath,

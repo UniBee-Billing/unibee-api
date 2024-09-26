@@ -159,12 +159,6 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 }
 
 func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	//params, err := r.GetJson()
-	//if err != nil {
-	//	g.Log().Printf(r.Context(), "Paypal redirect params:%s err:%s", params, err.Error())
-	//	r.Response.Writeln(err)
-	//	return
-	//}
 	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false

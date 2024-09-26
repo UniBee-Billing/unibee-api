@@ -33,7 +33,6 @@ type GatewayNewPaymentResp struct {
 	PaymentCode            string
 }
 
-// GatewayPaymentCaptureResp is the golang structure for table oversea_pay.
 type GatewayPaymentCaptureResp struct {
 	MerchantId       uint64 `json:"merchantId"         `
 	GatewayCaptureId string `json:"gatewayCaptureId"            `
@@ -42,7 +41,6 @@ type GatewayPaymentCaptureResp struct {
 	Status           string `json:"status"`
 }
 
-// GatewayPaymentCancelResp is the golang structure for table oversea_pay.
 type GatewayPaymentCancelResp struct {
 	MerchantId      string                   `json:"merchantId"         `
 	GatewayCancelId string                   `json:"gatewayCancelId"            `
@@ -50,7 +48,6 @@ type GatewayPaymentCancelResp struct {
 	Status          consts.PaymentStatusEnum `json:"status"`
 }
 
-// GatewayPaymentRefundResp is the golang structure for table oversea_pay.
 type GatewayPaymentRefundResp struct {
 	MerchantId       string                  `json:"merchantId"         `
 	GatewayRefundId  string                  `json:"gatewayRefundId"            `
