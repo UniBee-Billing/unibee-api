@@ -344,7 +344,7 @@ func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
 				Token:      customCtx.TokenString,
 				MerchantId: customCtx.Token.MerchantId,
 				Email:      customCtx.Token.Email,
-				Lang:       customCtx.Token.Lang,
+				Lang:       userAccount.Language,
 			}
 			customCtx.MerchantId = customCtx.Token.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)

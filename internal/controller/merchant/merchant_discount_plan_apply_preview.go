@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	discount2 "unibee/internal/logic/discount"
@@ -27,7 +28,7 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 	utility.Assert(plan.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
 	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)
-	utility.Assert(oneDiscount != nil, "Code not found")
+	utility.Assert(oneDiscount != nil, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"))
 	canApply, _, message := discount2.UserDiscountApplyPreview(ctx, &discount2.UserDiscountApplyReq{
 		MerchantId:   _interface.GetMerchantId(ctx),
 		PLanId:       uint64(req.PlanId),

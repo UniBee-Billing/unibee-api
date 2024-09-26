@@ -41,7 +41,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	}
 	discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 	if discountCode == nil {
-		return false, false, "Code not found"
+		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}")
 	}
 	if discountCode.Status != consts.DiscountStatusActive {
 		return false, false, "Code not active"
