@@ -4,9 +4,6 @@ on:
   repository_dispatch:
     types: [release]
 
-on:
-  push
-
 permissions:
   contents: write
 
