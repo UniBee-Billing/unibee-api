@@ -49,8 +49,8 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 		config.InvoiceEmail = false
 	}
 	tryAutomaticPaymentBeforePeriodEnd := merchant_config.GetMerchantConfig(ctx, merchantId, TryAutomaticPaymentBeforePeriodEnd)
-	if tryAutomaticPaymentBeforePeriodEnd != nil && len(incompleteExpireTimeConfig.ConfigValue) > 0 {
-		value, err := strconv.ParseInt(incompleteExpireTimeConfig.ConfigValue, 10, 64)
+	if tryAutomaticPaymentBeforePeriodEnd != nil && len(tryAutomaticPaymentBeforePeriodEnd.ConfigValue) > 0 {
+		value, err := strconv.ParseInt(tryAutomaticPaymentBeforePeriodEnd.ConfigValue, 10, 64)
 		if err == nil {
 			config.TryAutomaticPaymentBeforePeriodEnd = value
 		}

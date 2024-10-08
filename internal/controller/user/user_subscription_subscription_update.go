@@ -20,7 +20,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id == sub.UserId, "userId not match")
 	}
-	return service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
+	resp, err := service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 		SubscriptionId:     req.SubscriptionId,
 		NewPlanId:          req.NewPlanId,
 		Quantity:           req.Quantity,
@@ -33,4 +33,13 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		Metadata:           req.Metadata,
 		DiscountCode:       req.DiscountCode,
 	}, 0)
+	if err != nil {
+		return nil, err
+	}
+	return &subscription.UpdateRes{
+		SubscriptionPendingUpdate: resp.SubscriptionPendingUpdate,
+		Paid:                      resp.Paid,
+		Link:                      resp.Link,
+		Note:                      resp.Note,
+	}, err
 }

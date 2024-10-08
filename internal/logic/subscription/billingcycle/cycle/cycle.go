@@ -234,6 +234,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						InvoiceName:   "SubscriptionDowngrade",
 						FinishTime:    timeNow,
 						CreateFrom:    "AutoRenew",
+						Metadata:      map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
 					})
 				} else {
 					//generate cycle invoice from sub

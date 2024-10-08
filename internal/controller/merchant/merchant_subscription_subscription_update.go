@@ -47,21 +47,20 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 	if err != nil {
 		return nil, err
 	}
-	if err == nil {
-		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-			MerchantId:     update.SubscriptionPendingUpdate.MerchantId,
-			Target:         fmt.Sprintf("Subscription(%v)", update.SubscriptionPendingUpdate.SubscriptionId),
-			Content:        "Update",
-			UserId:         update.SubscriptionPendingUpdate.UserId,
-			SubscriptionId: update.SubscriptionPendingUpdate.SubscriptionId,
-			InvoiceId:      "",
-			PlanId:         0,
-			DiscountCode:   "",
-		}, err)
-	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     update.SubscriptionPendingUpdate.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", update.SubscriptionPendingUpdate.SubscriptionId),
+		Content:        "Update",
+		UserId:         update.SubscriptionPendingUpdate.UserId,
+		SubscriptionId: update.SubscriptionPendingUpdate.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &subscription.UpdateRes{
 		SubscriptionPendingUpdate: update.SubscriptionPendingUpdate,
 		Paid:                      update.Paid,
 		Link:                      update.Link,
+		Note:                      update.Note,
 	}, nil
 }

@@ -23,7 +23,7 @@ func GetOpenApiKeyRedisKey(token string) string {
 	return fmt.Sprintf("openApiKey#%s#%s", config.GetConfigInstance().Env, token)
 }
 
-func GetMerchantFromCache(ctx context.Context, openApiKey string) *entity.Merchant {
+func GetMerchantByOpenApiKeyFromCache(ctx context.Context, openApiKey string) *entity.Merchant {
 	get, err := g.Redis().Get(ctx, GetOpenApiKeyRedisKey(openApiKey))
 	if err != nil {
 		return nil

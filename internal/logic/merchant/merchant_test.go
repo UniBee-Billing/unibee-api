@@ -52,7 +52,7 @@ func TestMerchantCreateAndDelete(t *testing.T) {
 		require.NotNil(t, newKey)
 		require.Equal(t, true, len(newKey) > 0)
 		require.Nil(t, query.GetMerchantByApiKey(ctx, oldKey))
-		require.NotNil(t, GetMerchantFromCache(ctx, oldKey))
+		require.NotNil(t, GetMerchantByOpenApiKeyFromCache(ctx, oldKey))
 		require.NotNil(t, query.GetMerchantByApiKey(ctx, newKey))
 	})
 	t.Run("Test for merchant HardDelete", func(t *testing.T) {

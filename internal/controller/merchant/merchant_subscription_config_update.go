@@ -25,6 +25,7 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 		}
 	}
 	if req.IncompleteExpireTime != nil {
+		utility.Assert(*req.IncompleteExpireTime >= 0, "IncompleteExpireTime should greater then 0")
 		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.IncompleteExpireTime, fmt.Sprintf("%v", *req.IncompleteExpireTime))
 		if err != nil {
 			return nil, err
@@ -37,6 +38,7 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 		}
 	}
 	if req.TryAutomaticPaymentBeforePeriodEnd != nil {
+		utility.Assert(*req.TryAutomaticPaymentBeforePeriodEnd >= 5*60, "TryAutomaticPaymentBeforePeriodEnd should greater then 300")
 		err = update.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.TryAutomaticPaymentBeforePeriodEnd, fmt.Sprintf("%v", *req.TryAutomaticPaymentBeforePeriodEnd))
 		if err != nil {
 			return nil, err

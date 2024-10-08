@@ -101,6 +101,9 @@ func ReloadAllMerchantsCacheForSDKAuthBackground() {
 		list := query.GetActiveMerchantList(ctx)
 		if len(list) > 0 {
 			_, _ = g.Redis().Set(ctx, "UniBee#AllMerchants", utility.MarshalToJsonString(list))
+			for _, one := range list {
+				PutOpenApiKeyToCache(ctx, one.ApiKey, one.Id)
+			}
 		}
 	}()
 }

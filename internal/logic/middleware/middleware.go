@@ -218,7 +218,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 		merchantInfo := query.GetMerchantByApiKey(r.Context(), customCtx.TokenString)
 		if merchantInfo == nil {
-			merchantInfo = merchant.GetMerchantFromCache(r.Context(), customCtx.TokenString)
+			merchantInfo = merchant.GetMerchantByOpenApiKeyFromCache(r.Context(), customCtx.TokenString)
 		}
 		if merchantInfo == nil {
 			r.Response.Status = 401
