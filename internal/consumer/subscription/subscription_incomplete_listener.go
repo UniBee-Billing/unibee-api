@@ -28,7 +28,7 @@ func (t SubscriptionIncompleteListener) GetTag() string {
 func (t SubscriptionIncompleteListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Debugf(ctx, "SubscriptionIncompleteListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionIncompleteListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		sub_update.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)

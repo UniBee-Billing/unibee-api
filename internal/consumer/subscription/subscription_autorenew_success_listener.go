@@ -26,7 +26,7 @@ func (t SubscriptionAutoRenewSuccessListener) GetTag() string {
 func (t SubscriptionAutoRenewSuccessListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Debugf(ctx, "SubscriptionAutoRenewSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionAutoRenewSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)

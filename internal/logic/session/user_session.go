@@ -46,8 +46,6 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 	})
 	merchantInfo := query.GetMerchantById(ctx, merchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
-
 	utility.AssertError(err, "Server Error")
 	utility.Assert(one != nil, "Server Error")
 	utility.Assert(one.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
@@ -68,12 +66,16 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", one.Id)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
-
+	url := ""
+	if len(merchantInfo.Host) > 0 {
+		url = fmt.Sprintf("%s://%s/session-result?session=%s", config.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss)
+	}
+	//utility.Assert(len(merchantInfo.Host) > 0, "user portal host not set")
 	return &session.NewRes{
 		UserId:         strconv.FormatUint(one.Id, 10),
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
-		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", config.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
+		Url:            url,
 		ClientToken:    token,
 		ClientSession:  ss,
 	}, nil

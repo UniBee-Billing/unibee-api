@@ -24,6 +24,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic"
 	"unibee/internal/logic/dbupgrade"
+	"unibee/internal/logic/email/gateway"
 	"unibee/internal/logic/gateway/webhook"
 	"unibee/internal/logic/member"
 	merchant2 "unibee/internal/logic/merchant"
@@ -317,6 +318,7 @@ var (
 			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
+			s.BindHandler("GET:/version", controller.Version)
 
 			// Invoice Link
 			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
@@ -386,6 +388,15 @@ var (
 			{
 				merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
 				member.ReloadAllMembersCacheForSDKAuthBackground()
+			}
+
+			{
+				_, err := gateway.ReadEmailHtmlTemplate()
+				if err != nil {
+					g.Log().Errorf(ctx, "ReadEmailHtmlTemplate error:%s\n", err.Error())
+				} else {
+					g.Log().Infof(ctx, "ReadEmailHtmlTemplate success\n")
+				}
 			}
 
 			s.Run()

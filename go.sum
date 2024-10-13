@@ -75,8 +75,8 @@ github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWm
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/grokify/html-strip-tags-go v0.0.1 h1:0fThFwLbW7P/kOiTBs03FsJSV9RM2M/Q/MOnCQxKMo0=
 github.com/grokify/html-strip-tags-go v0.0.1/go.mod h1:2Su6romC5/1VXOQMaWL2yb618ARB8iVo6/DR99A6d78=
-github.com/jackyang-hk/go-redismq v1.0.7 h1:+3Req6DKNIav/lGNjcG/0zOUXgAuHc0gYjB+8SCKIK8=
-github.com/jackyang-hk/go-redismq v1.0.7/go.mod h1:4VTevgv+4VC4WNp39tM2y3ZLSG+KHT1ERXKrEGnSAvY=
+github.com/jackyang-hk/go-redismq v1.1.4 h1:WiCmAiq66A6RLJJVGwICdrYpaAe5dQaLE1IQBnntxBo=
+github.com/jackyang-hk/go-redismq v1.1.4/go.mod h1:auGBwq2sWp496o8+bohs3/Ne+FjGRxFPriMjs6TbuDE=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/json-iterator/go v1.1.5/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=

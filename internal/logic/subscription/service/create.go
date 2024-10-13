@@ -189,7 +189,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			vatCountryCode = vatNumberValidate.CountryCode
 		}
 		if req.IsSubmit {
-			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VatNumber))
+			utility.Assert(vatNumberValidate != nil && vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", req.VatNumber))
 		}
 	}
 

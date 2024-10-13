@@ -30,7 +30,7 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, 
 				dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, userId).OmitNil().Update()
 			if err != nil {
-				g.Log().Errorf(ctx, "UpdateUserDefaultSubscriptionForPaymentSuccess err:%s", err.Error())
+				g.Log().Errorf(ctx, "UpdateUserDefaultSubscriptionForUpdate err:%s", err.Error())
 			}
 		}
 	}

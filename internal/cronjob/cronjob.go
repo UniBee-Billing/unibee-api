@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
+	"unibee/internal/cmd/config"
 	"unibee/internal/cronjob/batch"
 	"unibee/internal/cronjob/discount"
 	"unibee/internal/cronjob/gateway_log"
@@ -61,9 +62,22 @@ func StartCronJobs() {
 		gateway_log.TaskForDeleteChannelLogs(ctx)
 		gateway_log.TaskForDeleteWebhookMessage(ctx)
 		sub.TaskForUserSubCompensate(ctx, hourTask)
+		if !config.GetConfigInstance().IsProd() {
+			invoice.TaskForCompensateSubUpDownInvoices(ctx)
+		}
 	}, hourTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
 	}
+
+	// every day
+	var dailyTask = "JobDailyTask"
+	_, err = gcron.Add(ctx, "@daily", func(ctx context.Context) {
+		invoice.TaskForCompensateSubUpDownInvoices(ctx)
+	}, dailyTask)
+	if err != nil {
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", dailyTask, err.Error())
+	}
+
 	return
 }

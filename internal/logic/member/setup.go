@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	go_redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	"unibee/api/bean"
 	"unibee/internal/consumer/webhook/log"
@@ -62,6 +63,16 @@ func ReloadAllMembersCacheForSDKAuthBackground() {
 			member.IsOwner = isOwner
 			member.Permissions = permissions
 			_, _ = g.Redis().Set(ctx, fmt.Sprintf("UniBee#Member#%d", member.Id), utility.MarshalToJsonString(member))
+			if isOwner {
+				_, _ = g.Redis().Set(ctx, fmt.Sprintf("UniBee#Merchant#Owner#%d", member.MerchantId), utility.MarshalToJsonString(member))
+				go func() {
+					_ = go_redismq.Invoke(ctx, &go_redismq.InvoiceRequest{
+						Group:   "GID_UniBee_License",
+						Method:  "GetLicenseByMerchantId",
+						Request: member.MerchantId,
+					}, 0)
+				}()
+			}
 		}
 	}()
 }
@@ -90,6 +101,16 @@ func ReloadMemberCacheForSdkAuthBackground(id uint64) {
 			member.IsOwner = isOwner
 			member.Permissions = permissions
 			_, _ = g.Redis().Set(ctx, fmt.Sprintf("UniBee#Member#%d", member.Id), utility.MarshalToJsonString(member))
+			if isOwner {
+				_, _ = g.Redis().Set(ctx, fmt.Sprintf("UniBee#Merchant#Owner#%d", member.MerchantId), utility.MarshalToJsonString(member))
+				go func() {
+					_ = go_redismq.Invoke(ctx, &go_redismq.InvoiceRequest{
+						Group:   "GID_UniBee_License",
+						Method:  "GetLicenseByMerchantId",
+						Request: member.MerchantId,
+					}, 0)
+				}()
+			}
 		}
 	}()
 }

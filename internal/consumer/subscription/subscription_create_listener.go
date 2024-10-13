@@ -35,20 +35,20 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	if sub != nil {
 		sub_update.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
+		_, _ = redismq.SendDelay(&redismq.Message{
+			Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+			Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
+			Body:       sub.SubscriptionId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		}, 3*60)
+		{
+			sub.Status = consts.SubStatusPending
+			subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED, message.CustomData)
+			user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
+			sub_update.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
+		}
+		// 3min PaymentChecker
 	}
-	_, _ = redismq.SendDelay(&redismq.Message{
-		Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
-		Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
-		Body:       sub.SubscriptionId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-	}, 3*60)
-	{
-		sub.Status = consts.SubStatusPending
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED, message.CustomData)
-		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
-		sub_update.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
-	}
-	// 3min PaymentChecker
 	return redismq.CommitMessage
 }
 

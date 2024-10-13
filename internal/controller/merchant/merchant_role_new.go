@@ -2,7 +2,6 @@ package merchant
 
 import (
 	"context"
-	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	role2 "unibee/internal/logic/role"
 	"unibee/utility"
@@ -12,7 +11,6 @@ import (
 
 func (c *ControllerRole) New(ctx context.Context, req *role.NewReq) (res *role.NewRes, err error) {
 	utility.Assert(len(req.Role) > 0, "invalid role")
-	utility.Assert(!config.IsOpenSourceVersion(), "This is a premium feature")
 	//utility.Assert(_interface.Context().Get(ctx).MerchantMember.IsOwner, "only owner can edit permission")
 	err = role2.NewMerchantRole(ctx, &role2.CreateRoleInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),

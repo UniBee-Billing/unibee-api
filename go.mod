@@ -14,7 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.5.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/jackyang-hk/go-redismq v1.0.7
+	github.com/jackyang-hk/go-redismq v1.1.4
 	github.com/leekchan/accounting v1.0.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/segmentio/analytics-go/v3 v3.3.0

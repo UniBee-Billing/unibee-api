@@ -8,16 +8,16 @@ import (
 	"unibee/utility"
 )
 
-func readEmailHtmlTemplate() (string, error) {
-	data, err := os.ReadFile("template.html")
+func ReadEmailHtmlTemplate() (string, error) {
+	data, err := os.ReadFile("./resource/email/template.html")
 	if err != nil {
-		return "", gerror.New(fmt.Sprintf("readEmailHtmlTemplate error:%s", err.Error()))
+		return "", gerror.New(fmt.Sprintf("ReadEmailHtmlTemplate error:%s", err.Error()))
 	}
 	return string(data), nil
 }
 
 func ConvertToHtmlPage(content string) string {
-	template, err := readEmailHtmlTemplate()
+	template, err := ReadEmailHtmlTemplate()
 	utility.AssertError(err, "ReadEmailHtmlTemplate")
 	template = strings.ReplaceAll(template, "{{content}}", content)
 	return template

@@ -264,7 +264,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
 				}
 				gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-				if sub != nil && gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
+				if gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
 						dao.Subscription.Columns().GmtModify:                   gtime.Now(),
 						dao.Subscription.Columns().GatewayId:                   gatewayId,
