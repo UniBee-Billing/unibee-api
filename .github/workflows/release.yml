@@ -35,9 +35,26 @@ jobs:
           WITH_V: false
           CUSTOM_TAG: ${{ github.event.client_payload.version }}
 
+      - name: Build changelog
+        id: change_log
+        uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          mode: HYBRID
+          token: ${{ secrets.GITHUB_TOKEN }}
+          configurationJson: |
+            {
+               "categories": [
+                 {
+                     "title": "## What's Changed:",
+                     "labels": []
+                 }
+               ],
+              "pr_template": "- #{{TITLE}}"
+            }
+
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.client_payload.version }}
           name: Release ${{ github.event.client_payload.version }}
-          generateReleaseNotes: true
+          body: ${{ steps.change_log.outputs.changelog }}
