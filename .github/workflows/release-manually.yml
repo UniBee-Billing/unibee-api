@@ -3,7 +3,7 @@ name: Release the latest version
 on:
   push:
     tags:
-      - 'v[0-9]+\.[0-9]+\.[0-9]+' 
+      - 'v[0-9]+\.[0-9]+\.[0-9]+'
 
 permissions:
   contents: write
@@ -21,3 +21,9 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generateReleaseNotes: true
+
+  update-package-version:
+    needs: release
+    uses: ./.github/workflows/update-version.yml
+    with:
+      version: ${{ github.ref_name }}

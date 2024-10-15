@@ -59,3 +59,9 @@ jobs:
           tag: ${{ github.event.client_payload.version }}
           name: Release ${{ github.event.client_payload.version }}
           body: ${{ steps.change_log.outputs.changelog }}
+
+  update-package-version:
+    needs: release
+    uses: ./.github/workflows/update-version.yml
+    with:
+      version: ${{ github.event.client_payload.version }}
