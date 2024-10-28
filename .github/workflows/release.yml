@@ -21,6 +21,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Update version.txt
+        run: echo "${{ github.event.client_payload.version }}" > version.txt
+
       - name: Build prod image and push
         uses: docker/build-push-action@v6
         with:
@@ -59,9 +62,3 @@ jobs:
           tag: ${{ github.event.client_payload.version }}
           name: Release ${{ github.event.client_payload.version }}
           body: ${{ steps.change_log.outputs.changelog }}
-
-  update-package-version:
-    needs: release
-    uses: ./.github/workflows/update-version.yml
-    with:
-      version: ${{ github.event.client_payload.version }}

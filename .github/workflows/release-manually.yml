@@ -21,9 +21,3 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generateReleaseNotes: true
-
-  update-package-version:
-    needs: release
-    uses: ./.github/workflows/update-version.yml
-    with:
-      version: ${{ github.ref_name }}
