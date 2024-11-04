@@ -106,14 +106,6 @@ func PutAuthTokenToCacheWithExpire(ctx context.Context, token string, value stri
 	return true
 }
 
-func PutAuthTokenToCacheWithExpire(ctx context.Context, token string, value string, expireSeconds int64) bool {
-	err := g.Redis().SetEX(ctx, getAuthTokenRedisKey(token), value, expireSeconds)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func IsAuthTokenAvailable(ctx context.Context, token string) bool {
 	get, err := g.Redis().Get(ctx, getAuthTokenRedisKey(token))
 	if err != nil {
