@@ -15,6 +15,7 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 type CreateDiscountCodeInternalReq struct {
@@ -31,8 +32,9 @@ type CreateDiscountCodeInternalReq struct {
 	UserLimit          int                    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
 	CycleLimit         int                    `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
 	SubscriptionLimit  int                    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
-	StartTime          int64                  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
-	EndTime            int64                  `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
+	StartTime          *int64                 `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
+	EndTime            *int64                 `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
+	Quantity           *uint64                `json:"quantity"           description:"Quantity of code"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
@@ -45,8 +47,9 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
-	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
-	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
+	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater than time now")
+	utility.Assert(req.StartTime != nil && req.EndTime != nil, "startTime and endTime should not be nil")
+	utility.Assert(*req.EndTime >= *req.StartTime, "startTime should lower than endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == consts.DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
@@ -59,6 +62,10 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
 
+	var quantity int64 = 0
+	if req.Quantity != nil {
+		quantity = int64(*req.Quantity)
+	}
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
@@ -73,8 +80,9 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		UserLimit:          req.UserLimit,
 		CycleLimit:         req.CycleLimit,
 		SubscriptionLimit:  req.SubscriptionLimit,
-		StartTime:          req.StartTime,
-		EndTime:            req.EndTime,
+		StartTime:          *req.StartTime,
+		EndTime:            *req.EndTime,
+		Quantity:           quantity,
 		MetaData:           utility.MarshalToJsonString(req.Metadata),
 		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
@@ -104,14 +112,47 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	one := query.GetDiscountById(ctx, req.Id)
 	utility.Assert(one != nil, "Discount not found :"+strconv.FormatUint(req.Id, 10))
 	utility.Assert(one.MerchantId == req.MerchantId, "Discount merchant not match :"+req.Code)
+	//edit after activate
+	if one.Status > consts.DiscountStatusEditable {
+		utility.Assert((req.StartTime != nil && req.EndTime != nil) || req.PlanIds != nil, "startTime&endTime or planIds should not be nil")
+		var planIdsStr *string = nil
+		if req.PlanIds != nil {
+			planIdsStr = unibee.String(utility.IntListToString(req.PlanIds))
+		}
+		_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
+			dao.MerchantDiscountCode.Columns().StartTime: req.StartTime,
+			dao.MerchantDiscountCode.Columns().EndTime:   req.EndTime,
+			dao.MerchantDiscountCode.Columns().PlanIds:   planIdsStr,
+			dao.MerchantDiscountCode.Columns().MetaData:  utility.MarshalToJsonString(utility.MergeMetadata(one.MetaData, req.Metadata)),
+			dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			err = gerror.Newf(`EditMerchantDiscountCode update after activate failure %s`, err)
+			return nil, err
+		}
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+			Content:        "EditAfterActivate",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   one.Code,
+		}, err)
+		one = query.GetDiscountById(ctx, req.Id)
+		return one, nil
+	}
+
 	utility.Assert(one.Type == 0, "Edit not available for external code :"+req.Code)
 	utility.Assert(one.Status == consts.DiscountStatusEditable, "Code not editable :"+req.Code)
 	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
-	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
-	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
+	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater than time now")
+	utility.Assert(req.StartTime != nil && req.EndTime != nil, "startTime and endTime should not be nil")
+	utility.Assert(*req.EndTime >= *req.StartTime, "startTime should lower than endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == consts.DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
@@ -136,6 +177,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().SubscriptionLimit:  req.SubscriptionLimit,
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,
+		dao.MerchantDiscountCode.Columns().Quantity:           req.Quantity,
 		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
 		dao.MerchantDiscountCode.Columns().MetaData:           utility.MarshalToJsonString(req.Metadata),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),
@@ -339,8 +381,8 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		DiscountPercentage: discountPercentage,
 		Currency:           currency,
 		CycleLimit:         cycleLimit,
-		StartTime:          timeNow - 10,
-		EndTime:            endTime,
+		StartTime:          unibee.Int64(timeNow - 10),
+		EndTime:            unibee.Int64(endTime),
 		Metadata:           param.Metadata,
 	})
 	utility.AssertError(err, "Create discount error")

@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee/api/merchant/auth"
+	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/merchant"
+	"unibee/internal/logic/middleware"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -49,6 +51,19 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
+
+	list := query.GetActiveMerchantList(ctx)
+	if len(list) > 2 {
+		utility.Assert(config.GetConfigInstance().Mode == "cloud", "Register multi merchants should contain valid mode")
+		var containPremiumMerchant = false
+		for _, one := range list {
+			if middleware.IsPremiumVersion(ctx, one.Id) {
+				containPremiumMerchant = true
+				break
+			}
+		}
+		utility.Assert(containPremiumMerchant, "Feature register multi merchants need premium license, contact us directly if needed")
+	}
 
 	merchant.SendMerchantRegisterEmail(ctx, internalReq, verificationCode)
 	return &auth.RegisterRes{}, nil

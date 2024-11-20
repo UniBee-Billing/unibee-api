@@ -10,7 +10,7 @@ import (
 )
 
 func (c *ControllerTask) ExportColumnList(ctx context.Context, req *task.ExportColumnListReq) (res *task.ExportColumnListRes, err error) {
-	columns, commentMap := batch.ExportColumnList(ctx, req.Task)
+	columns, commentMap, groupMap := batch.ExportColumnList(ctx, req.Task)
 	lowerColumns := make([]interface{}, 0)
 	var lowerColumnHeaders = make(map[string]string)
 	for _, value := range columns {
@@ -29,5 +29,5 @@ func (c *ControllerTask) ExportColumnList(ctx context.Context, req *task.ExportC
 			lowerColumnCommentMap[key] = value
 		}
 	}
-	return &task.ExportColumnListRes{Columns: lowerColumns, ColumnComments: lowerColumnCommentMap, ColumnHeaders: lowerColumnHeaders}, nil
+	return &task.ExportColumnListRes{Columns: lowerColumns, ColumnComments: lowerColumnCommentMap, ColumnHeaders: lowerColumnHeaders, GroupColumns: groupMap}, nil
 }

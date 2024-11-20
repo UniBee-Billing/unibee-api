@@ -113,7 +113,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		baseQuery = baseQuery.WhereLTE(dao.Subscription.Columns().CreateTime, req.CreateTimeEnd)
 	}
 	if req.AmountStart != nil && req.AmountEnd != nil {
-		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower then amountEnd")
+		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower than amountEnd")
 	}
 	if req.AmountStart != nil {
 		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().Amount, &req.AmountStart)

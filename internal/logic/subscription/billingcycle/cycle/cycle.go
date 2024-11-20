@@ -199,13 +199,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				var invoice *bean.Invoice
 				var discountCode = ""
 				canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-					MerchantId:     sub.MerchantId,
-					UserId:         sub.UserId,
-					DiscountCode:   sub.DiscountCode,
-					Currency:       sub.Currency,
-					SubscriptionId: sub.SubscriptionId,
-					PLanId:         sub.PlanId,
-					TimeNow:        timeNow,
+					MerchantId:       sub.MerchantId,
+					UserId:           sub.UserId,
+					DiscountCode:     sub.DiscountCode,
+					Currency:         sub.Currency,
+					SubscriptionId:   sub.SubscriptionId,
+					PLanId:           sub.PlanId,
+					TimeNow:          timeNow,
+					IsRecurringApply: true,
 				})
 				if canApply && isRecurring {
 					discountCode = sub.DiscountCode
@@ -234,7 +235,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionDowngrade",
 						FinishTime:    timeNow,
-						CreateFrom:    "AutoRenew",
+						CreateFrom:    consts.InvoiceAutoChargeFlag,
 						Metadata:      map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
 					})
 				} else {
@@ -258,7 +259,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionCycle",
 						FinishTime:    timeNow,
-						CreateFrom:    "AutoRenew",
+						CreateFrom:    consts.InvoiceAutoChargeFlag,
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
@@ -274,7 +275,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					sub.GatewayId = gatewayId
 					sub.GatewayDefaultPaymentMethod = paymentMethodId
 				}
-				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true, timeNow)
+				one, err := handler2.CreateProcessingInvoiceForSub(ctx, sub.PlanId, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true, timeNow)
 				if err != nil {
 					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
 					return nil, err
@@ -304,7 +305,11 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					if latestInvoice.TotalAmount == 0 {
 						paidInvoice, err := handler3.MarkInvoiceAsPaidForZeroPayment(ctx, latestInvoice.InvoiceId)
 						if err != nil || paidInvoice.Status != consts.InvoiceStatusPaid {
-							g.Log().Errorf(ctx, "AutomaticPaymentByCycle MarkInvoiceAsPaidForZeroPayment err:", err.Error())
+							if err != nil {
+								g.Log().Errorf(ctx, "AutomaticPaymentByCycle MarkInvoiceAsPaidForZeroPayment invoiceId:%s err:%s", latestInvoice.InvoiceId, err.Error())
+							} else {
+								g.Log().Errorf(ctx, "AutomaticPaymentByCycle MarkInvoiceAsPaidForZeroPayment failed invoiceId:%s ", latestInvoice.InvoiceId)
+							}
 							return nil, err
 						}
 						_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
@@ -313,7 +318,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 						createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "", "SubscriptionBillingCycle", timeNow)
 						if err != nil {
-							g.Log().Errorf(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
+							g.Log().Errorf(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
 							return nil, err
 						}
 

@@ -2,11 +2,9 @@ package merchant
 
 import (
 	"context"
-	"flag"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/log"
@@ -48,39 +46,6 @@ func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 		}
 	}
 	return nil
-}
-
-func StandAloneInit(ctx context.Context) {
-	var merchantEmail string
-	var password string
-	flag.StringVar(&merchantEmail, "admin-email", utility.GetEnvParam("admin.email"), "admin email, default accounts.unibee@unibee.dev")
-	flag.StringVar(&password, "admin-password", utility.GetEnvParam("admin.password"), "admin password, default changeme")
-	if len(merchantEmail) == 0 {
-		merchantEmail = "accounts.unibee@unibee.dev"
-	}
-	if len(password) == 0 {
-		password = "changeme"
-	}
-	list, err := query.GetMerchantList(ctx)
-	if err != nil {
-		glog.Errorf(ctx, "StandAloneInit adminAccount error:%s", err.Error())
-	}
-	if err == nil && len(list) == 0 {
-		_, _, err = CreateMerchant(ctx, &CreateMerchantInternalReq{
-			FirstName: "unibee",
-			LastName:  "unibee",
-			Email:     merchantEmail,
-			Password:  password,
-			Phone:     "",
-			UserName:  "",
-		})
-		if err != nil {
-			g.Log().Errorf(ctx, "StandAloneInit adminAccount error:%s", err.Error())
-			return
-		} else {
-			g.Log().Infof(ctx, "StandAloneInit adminAccount email:%s", merchantEmail)
-		}
-	}
 }
 
 func ReloadAllMerchantsCacheForSDKAuthBackground() {

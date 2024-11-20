@@ -36,6 +36,8 @@ type MerchantUserDiscountCodeColumns struct {
 	CreateTime     string // create utc time
 	ApplyAmount    string // apply_amount
 	Currency       string // currency
+	Recurring      string // is recurring apply, 0-no, 1-yes
+	RecurringId    string // the first purchase id for the code, using for reucrring code
 }
 
 // merchantUserDiscountCodeColumns holds the columns for table merchant_user_discount_code.
@@ -56,6 +58,8 @@ var merchantUserDiscountCodeColumns = MerchantUserDiscountCodeColumns{
 	CreateTime:     "create_time",
 	ApplyAmount:    "apply_amount",
 	Currency:       "currency",
+	Recurring:      "recurring",
+	RecurringId:    "recurring_id",
 }
 
 // NewMerchantUserDiscountCodeDao creates and returns a new DAO object for table data access.

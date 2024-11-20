@@ -548,6 +548,27 @@ func (doc *Document) appendTotal() {
 	)
 
 	// Append Exchange Rate
+	if len(doc.OriginalTaxString) > 0 {
+		doc.pdf.SetY(doc.pdf.GetY() + 5)
+		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
+		doc.pdf.SetX(moneyX)
+		//doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		//doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+		doc.pdf.CellFormat(
+			40,
+			10,
+			doc.encodeString(doc.OriginalTaxString),
+			"0",
+			0,
+			"L",
+			false,
+			0,
+			"",
+		)
+		doc.pdf.SetFont(doc.Options.Font, "", LargeTextFontSize)
+	}
+
+	// Append Exchange Rate
 	if len(doc.ExchangeRateString) > 0 {
 		doc.pdf.SetY(doc.pdf.GetY() + 5)
 		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)

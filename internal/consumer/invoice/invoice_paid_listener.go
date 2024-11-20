@@ -10,6 +10,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/invoice"
+	"unibee/internal/logic/discount"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -31,6 +32,9 @@ func (t InvoicePaidListener) Consume(ctx context.Context, message *redismq.Messa
 	g.Log().Debugf(ctx, "InvoicePaidListener Receive Message:%s", utility.MarshalToJsonString(message))
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
+		if len(one.DiscountCode) > 0 {
+			discount.UpdateUserDiscountPaymentIdWhenInvoicePaid(ctx, one.InvoiceId, one.PaymentId)
+		}
 		one.Status = consts.InvoiceStatusPaid
 		go func() {
 			time.Sleep(300 * time.Millisecond)

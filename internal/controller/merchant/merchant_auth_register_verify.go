@@ -3,7 +3,10 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean/detail"
+	"unibee/internal/cmd/config"
 	"unibee/internal/logic/merchant"
+	"unibee/internal/logic/middleware"
+	"unibee/internal/query"
 	"unibee/utility"
 
 	"encoding/json"
@@ -21,6 +24,19 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	utility.Assert(userStr != nil, "Invalid Code")
 	var createMerchantReq *merchant.CreateMerchantInternalReq
 	err = json.Unmarshal([]byte(userStr.String()), &createMerchantReq)
+
+	list := query.GetActiveMerchantList(ctx)
+	if len(list) > 2 {
+		utility.Assert(config.GetConfigInstance().Mode == "cloud", "Register multi merchants should contain valid mode")
+		var containPremiumMerchant = false
+		for _, one := range list {
+			if middleware.IsPremiumVersion(ctx, one.Id) {
+				containPremiumMerchant = true
+				break
+			}
+		}
+		utility.Assert(containPremiumMerchant, "Feature register multi merchants need premium license, contact us directly if needed")
+	}
 
 	_, member, err := merchant.CreateMerchant(ctx, createMerchantReq)
 

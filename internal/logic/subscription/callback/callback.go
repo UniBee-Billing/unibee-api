@@ -30,7 +30,7 @@ func (s SubscriptionPaymentCallback) PaymentRefundCreateCallback(ctx context.Con
 
 func (s SubscriptionPaymentCallback) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
 	if payment.TotalAmount <= payment.RefundAmount {
-		err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+		err := discount.UserDiscountRollbackFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
 		if err != nil {
 			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
 		}
@@ -118,7 +118,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			} else {
 				g.Log().Infof(ctx, "PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId)
 			}
-			if len(invoice.CreateFrom) > 0 && invoice.CreateFrom == "AutoRenew" &&
+			if len(invoice.CreateFrom) > 0 && invoice.CreateFrom == consts.InvoiceAutoChargeFlag &&
 				utility.TryLock(ctx, fmt.Sprintf("PaymentSuccessCallback_%s", invoice.InvoiceId), 60) {
 				_, _ = redismq.Send(&redismq.Message{
 					Topic:      redismq2.TopicSubscriptionAutoRenewSuccess.Topic,
@@ -146,10 +146,10 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			}
 		}
 	}
-	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
-	if err != nil {
-		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
-	}
+	//err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	//if err != nil {
+	//	fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+	//}
 }
 
 func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
@@ -169,8 +169,8 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 			}
 		}
 	}
-	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
-	if err != nil {
-		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
-	}
+	//err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	//if err != nil {
+	//	fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+	//}
 }

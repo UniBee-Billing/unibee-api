@@ -119,26 +119,31 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 	service3.TryCancelSubscriptionLatestInvoice(ctx, sub)
 
-	user := query.GetUserAccountById(ctx, sub.UserId)
-	if user != nil {
-		merchant := query.GetMerchantById(ctx, sub.MerchantId)
-		if merchant != nil {
-			var template = email.TemplateSubscriptionImmediateCancel
-			if (sub.Status == consts.SubStatusIncomplete || sub.Status == consts.SubStatusActive) && sub.TrialEnd >= sub.CurrentPeriodEnd {
-				//first trial period without payment
-				template = email.TemplateSubscriptionCancelledByTrialEnd
-			}
-			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, template, "", &email.TemplateVariable{
-				UserName:              user.FirstName + " " + user.LastName,
-				MerchantProductName:   plan.PlanName,
-				MerchantCustomerEmail: merchant.Email,
-				MerchantName:          query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
-				PeriodEnd:             gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
-			})
-			if err != nil {
-				g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancel:%s", err.Error())
+	{
+		user := query.GetUserAccountById(ctx, sub.UserId)
+		if user != nil {
+			merchant := query.GetMerchantById(ctx, sub.MerchantId)
+			if merchant != nil {
+				var template = email.TemplateSubscriptionImmediateCancel
+				if (sub.Status == consts.SubStatusIncomplete || sub.Status == consts.SubStatusActive) && sub.TrialEnd >= sub.CurrentPeriodEnd {
+					//first trial period without payment
+					template = email.TemplateSubscriptionCancelledByTrialEnd
+				}
+				if strings.Compare(reason, "CancelledByAnotherCreation") != 0 {
+					err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, template, "", &email.TemplateVariable{
+						UserName:              user.FirstName + " " + user.LastName,
+						MerchantProductName:   plan.PlanName,
+						MerchantCustomerEmail: merchant.Email,
+						MerchantName:          query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
+						PeriodEnd:             gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+					})
+					if err != nil {
+						g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancel:%s", err.Error())
+					}
+				}
 			}
 		}
+
 	}
 
 	_, _ = redismq.Send(&redismq.Message{
@@ -150,7 +155,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        "Cancel",
+		Content:        fmt.Sprintf("Cancel(%s)", reason),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -365,8 +370,8 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing, "subscription not in pending or processing status")
-	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
-	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
+	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater than subscription's period start time")
+	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower than subscription's period end time")
 	utility.Assert(len(sub.LatestInvoiceId) > 0, "sub latest invoice not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 	utility.Assert(invoice != nil, "sub latest invoice not found")
@@ -478,7 +483,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 		})
 		gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
-		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId, true, gtime.Now().Timestamp())
+		one, err := service3.CreateProcessingInvoiceForSub(ctx, sub.PlanId, invoice, sub, gatewayId, paymentMethodId, true, gtime.Now().Timestamp())
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err

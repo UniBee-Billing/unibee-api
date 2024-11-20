@@ -92,15 +92,16 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().AddonData:              one.UpdateAddonData,
 		dao.Subscription.Columns().Amount:                 one.UpdateAmount,
 		dao.Subscription.Columns().Currency:               one.UpdateCurrency,
-		dao.Subscription.Columns().GatewayId:              one.GatewayId,
+		dao.Subscription.Columns().GatewayId:              invoice.GatewayId,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId:        "", //clear PendingUpdateId
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
-		dao.Subscription.Columns().MetaData:               one.MetaData,
-		dao.Subscription.Columns().TaxPercentage:          one.TaxPercentage,
-		dao.Subscription.Columns().DiscountCode:           one.DiscountCode,
+		dao.Subscription.Columns().MetaData:               invoice.MetaData,
+		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
+		dao.Subscription.Columns().DiscountCode:           invoice.DiscountCode,
 		dao.Subscription.Columns().CancelAtPeriodEnd:      0,
+		dao.Subscription.Columns().LatestInvoiceId:        invoice.InvoiceId,
 		dao.Subscription.Columns().Data:                   fmt.Sprintf("UpgradedBy-%v", pendingUpdateId),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {

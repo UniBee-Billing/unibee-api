@@ -25,6 +25,7 @@ func StandAloneInit(ctx context.Context) {
 			historyIds = append(historyIds, history.Id)
 		}
 		database, err := gdb.Instance()
+		utility.AssertError(err, "StandAloneInit DBUpgrade Get Database Instance failure,%v")
 		tables, err := database.Tables(ctx, database.GetSchema())
 		liberr.ErrIsNil(ctx, err, "DB Not Ready For Upgrade")
 		utility.AssertError(err, "StandAloneInit DBUpgrade Get Database Instance failure,%v")
@@ -32,7 +33,7 @@ func StandAloneInit(ctx context.Context) {
 			if utility.IsUint64InArray(historyIds, one.Id) {
 				continue
 			}
-			if database != nil && len(one.UpgradeSql) > 0 {
+			if len(one.UpgradeSql) > 0 {
 				if len(one.Action) == 0 || len(one.TableName) == 0 {
 					glog.Infof(ctx, "StandAloneInit DBUpgrade upgradeId:%v skip by empty action or tableName", one.Id)
 					continue

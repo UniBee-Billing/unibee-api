@@ -62,3 +62,5 @@ func InvoiceStatusToEnum(status int) InvoiceStatusEnum {
 		return InvoiceStatusInit
 	}
 }
+
+const InvoiceAutoChargeFlag = "AutoRenew"

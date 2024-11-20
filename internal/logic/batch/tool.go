@@ -16,6 +16,10 @@ import (
 
 const GeneralExportImportSheetName = "Sheet1"
 
+func ConvertTimestampWithTimezone(utcTimestamp int64, timezone int) int64 {
+	return utcTimestamp + int64(timezone*3600)
+}
+
 func RefactorHeaders(obj interface{}, exportColumns []string, readability bool) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {

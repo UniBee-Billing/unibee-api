@@ -17,7 +17,7 @@ func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err er
 	utility.Assert(payment.AuthorizeStatus == consts.Authorized, "payment not authorised")
 	_, err = api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCapture(ctx, payment)
 	if err != nil {
-		g.Log().Errorf(ctx, "PaymentGatewayCapture paymentId:%d, error:%s", payment.PaymentId, err.Error())
+		g.Log().Errorf(ctx, "PaymentGatewayCapture paymentId:%s, error:%s", payment.PaymentId, err.Error())
 		return err
 	}
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {

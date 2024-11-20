@@ -176,8 +176,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}
 	}
 	var uniqueId = fmt.Sprintf("%d_%s", merchantInfo.Id, req.ExternalPaymentId)
-	exsitPayment := query.GetPaymentByUniqueId(ctx, uniqueId)
-	utility.Assert(exsitPayment == nil, "same ExternalPaymentId exist:"+req.ExternalPaymentId)
+	existPayment := query.GetPaymentByUniqueId(ctx, uniqueId)
+	utility.Assert(existPayment == nil, "same ExternalPaymentId exist:"+req.ExternalPaymentId)
 
 	resp, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		CheckoutMode: true,

@@ -80,11 +80,11 @@ func (t TaskHistorySubscriptionImport) ImportRow(ctx context.Context, task *enti
 	}
 	amountFloat, err := strconv.ParseFloat(target.Amount, 64)
 	if err != nil {
-		return target, gerror.Newf("Invalid Amount,error:", err.Error())
+		return target, gerror.Newf("Invalid Amount,error:%s", err.Error())
 	}
 	amount := int64(amountFloat * 100)
 	if amount <= 0 {
-		return target, gerror.New("Invalid Amount, should greater then 0")
+		return target, gerror.New("Invalid Amount, should greater than 0")
 	}
 	if len(target.Currency) == 0 {
 		return target, gerror.New("Error, Currency is blank")

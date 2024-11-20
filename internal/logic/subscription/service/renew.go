@@ -94,19 +94,19 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		utility.Assert(canApply, message)
-	} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
-		canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     sub.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   sub.DiscountCode,
-			Currency:       sub.Currency,
-			SubscriptionId: sub.SubscriptionId,
-			PLanId:         sub.PlanId,
-			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
-		})
-		if canApply && isRecurring {
-			req.DiscountCode = sub.DiscountCode
-		}
+		//} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
+		//	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+		//		MerchantId:     sub.MerchantId,
+		//		UserId:         sub.UserId,
+		//		DiscountCode:   sub.DiscountCode,
+		//		Currency:       sub.Currency,
+		//		SubscriptionId: sub.SubscriptionId,
+		//		PLanId:         sub.PlanId,
+		//		TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+		//	})
+		//	if canApply && isRecurring {
+		//		req.DiscountCode = sub.DiscountCode
+		//	}
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
@@ -134,7 +134,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// utility.Assert(user != nil, "user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId, true, timeNow)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, sub.PlanId, currentInvoice, sub, gateway.Id, paymentMethodId, true, timeNow)
 	utility.AssertError(err, "System Error")
 	var createRes *gateway_bean.GatewayNewPaymentResp
 	if invoice.TotalAmount > 0 {

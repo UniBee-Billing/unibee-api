@@ -9,7 +9,7 @@ import (
 	"unibee/internal/query"
 )
 
-const CacheKeyPrefixDiscountUsageCount = "CacheKeyPrefixDiscountUsageCount"
+const CacheKeyPrefixDiscountUsageCount = "CacheKeyPrefixDiscountUsageCountV2"
 
 func GetDiscountQuantityUsedCountCacheKey(code string) string {
 	key := fmt.Sprintf("%s_%s", CacheKeyPrefixDiscountUsageCount, code)
@@ -23,7 +23,7 @@ func GetDiscountQuantityUsedCount(ctx context.Context, id uint64) (count int) {
 	}
 	key := GetDiscountQuantityUsedCountCacheKey(one.Code)
 	get, _ := g.Redis().Get(ctx, key)
-	if get != nil {
+	if get != nil && !get.IsNil() {
 		return get.Int()
 	}
 	count = getDiscountQuantityUsedCountFromDatabase(ctx, one)
@@ -38,6 +38,7 @@ func getDiscountQuantityUsedCountFromDatabase(ctx context.Context, one *entity.M
 	count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 		Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
 		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+		Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
 		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 		Count()
 	if err != nil {

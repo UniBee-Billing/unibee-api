@@ -462,10 +462,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch preview again")
 	}
 
-	//if prepare.Gateway.GatewayType == consts.GatewayTypeWireTransfer {
-	//	utility.Assert(prepare.Invoice.TotalAmount >= prepare.Gateway.MinimumAmount, "Total Amount not reach the wire transfer's minimum amount")
-	//}
-
 	if prepare.Invoice.TotalAmount == 0 && strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
 		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeCard || prepare.Gateway.GatewayType == consts.GatewayTypePaypal, i18n.LocalizationFormat(ctx, "{#PlanTrialGatewayError}"))
 	}
@@ -517,7 +513,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Id = uint64(uint(id))
 
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true, gtime.Now().Timestamp())
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.PlanId, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true, gtime.Now().Timestamp())
 	utility.AssertError(err, "System Error")
 	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {

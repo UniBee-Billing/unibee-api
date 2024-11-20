@@ -7,11 +7,13 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
+	"strings"
 	"unibee/api/bean"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/discount"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
@@ -19,7 +21,7 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.Invoice, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool, timeNow int64) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify *bean.Invoice, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool, timeNow int64) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, sub.UserId)
@@ -55,8 +57,26 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.Invoice, 
 		currentTime = timeNow
 	}
 
-	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
+	if len(simplify.DiscountCode) > 0 {
+		_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:       sub.MerchantId,
+			UserId:           sub.UserId,
+			DiscountCode:     simplify.DiscountCode,
+			SubscriptionId:   sub.SubscriptionId,
+			PLanId:           planId,
+			PaymentId:        "",
+			InvoiceId:        invoiceId,
+			ApplyAmount:      simplify.DiscountAmount,
+			Currency:         simplify.Currency,
+			IsRecurringApply: strings.Compare(simplify.CreateFrom, consts.InvoiceAutoChargeFlag) == 0,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	status := consts.InvoiceStatusProcessing
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		SubscriptionId:                 sub.SubscriptionId,
@@ -103,7 +123,13 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.Invoice, 
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
+		g.Log().Infof(ctx, "CreateProcessingInvoiceForSub Create Invoice failed subId:%s err:%s", sub.SubscriptionId, err.Error())
 		err = gerror.Newf(`CreateProcessingInvoiceForSub record insert failure %s`, err.Error())
+		// should roll back discount usage
+		rollbackErr := discount.UserDiscountRollbackFromInvoice(ctx, invoiceId)
+		if rollbackErr != nil {
+			g.Log().Infof(ctx, "CreateProcessingInvoiceForSub UserDiscountRollbackFromInvoice rollback failed subId:%s err:%s", sub.SubscriptionId, rollbackErr.Error())
+		}
 		return nil, err
 	}
 	id, _ := result.LastInsertId()

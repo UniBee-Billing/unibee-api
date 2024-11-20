@@ -27,7 +27,7 @@ func (t TaskDiscountExport) Header() interface{} {
 
 func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
-	if task == nil && task.MerchantId <= 0 {
+	if task == nil || task.MerchantId <= 0 {
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
@@ -42,7 +42,17 @@ func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, t
 		Page:       page,
 		Count:      count,
 	}
+	timeZone := 0
+	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
+		if value, ok := payload["timeZone"].(float64); ok {
+			timeZone = int(value)
+			if timeZone > 0 {
+				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
+			} else if timeZone < 0 {
+				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+			}
+		}
 		if value, ok := payload["discountType"].([]interface{}); ok {
 			req.DiscountType = export.JsonArrayTypeConvert(ctx, value)
 		}
@@ -109,11 +119,12 @@ func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, t
 				DiscountPercentage: utility.ConvertTaxPercentageToPercentageString(one.DiscountPercentage),
 				Currency:           one.Currency,
 				CycleLimit:         fmt.Sprintf("%v", one.CycleLimit),
-				StartTime:          gtime.NewFromTimeStamp(one.StartTime),
-				EndTime:            gtime.NewFromTimeStamp(one.EndTime),
-				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime),
+				StartTime:          gtime.NewFromTimeStamp(one.StartTime + int64(timeZone*3600)),
+				EndTime:            gtime.NewFromTimeStamp(one.EndTime + int64(timeZone*3600)),
+				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
 				CreateBy:           createBy,
 				TotalUsed:          fmt.Sprintf("%v", totalUsed),
+				TimeZone:           timeZoneStr,
 			})
 		}
 	}
@@ -137,4 +148,5 @@ type ExportDiscountEntity struct {
 	CreateTime         *gtime.Time `json:"CreateTime"        layout:"2006-01-02 15:04:05"  comment:""`
 	CreateBy           string      `json:"CreateBy"         comment:""`
 	TotalUsed          string      `json:"TotalUsed"         comment:""`
+	TimeZone           string      `json:"TimeZone"         comment:""`
 }

@@ -22,8 +22,8 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Discounts []*bean.MerchantDiscountCode `json:"discounts" dc:"Discount Object List"`
-	Total     int                          `json:"total" dc:"Total"`
+	Discounts []*detail.MerchantDiscountCodeDetail `json:"discounts" dc:"Discount Object List"`
+	Total     int                                  `json:"total" dc:"Total"`
 }
 
 type DetailReq struct {
@@ -46,9 +46,10 @@ type NewReq struct {
 	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                   // currency of discount, available when discount_type is fixed_amount
 	//UserLimit          int    `json:"userLimit"         dc:"The limit of every customer can effect, 0-unlimited"`                                                                                                                                                                                                                                    // the limit of every user apply, 0-unlimited
 	CycleLimit int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"` // the count limitation of subscription cycle , 0-no limit
-	StartTime  int64                  `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                              // start of discount available utc time
-	EndTime    int64                  `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	StartTime  *int64                 `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                              // start of discount available utc time
+	EndTime    *int64                 `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
 	PlanIds    []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Quantity   *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Metadata   map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
@@ -66,10 +67,11 @@ type EditReq struct {
 	DiscountPercentage int64  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                            // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                     // currency of discount, available when discount_type is fixed_amount
 	//UserLimit          int    `json:"userLimit"         dc:"The limit of every user effect, 0-unlimited"`                                                                                                                                                                                                                              // the limit of every user apply, 0-unlimited
-	CycleLimit int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"` // the count limitation of subscription cycle , 0-no limit
-	StartTime  int64                  `json:"startTime"         dc:"The start time of discount code can effect, utc time"`                                          // start of discount available utc time
-	EndTime    int64                  `json:"endTime"           dc:"The end time of discount code can effect, utc time"`
+	CycleLimit int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"`
+	StartTime  *int64                 `json:"startTime"         dc:"The start time of discount code can effect, editable after activate, utc time"`
+	EndTime    *int64                 `json:"endTime"           dc:"The end time of discount code can effect, editable after activate, utc time"`
 	PlanIds    []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Quantity   *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Metadata   map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 

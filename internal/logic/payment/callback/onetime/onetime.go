@@ -26,7 +26,7 @@ func (i Onetime) PaymentRefundCreateCallback(ctx context.Context, payment *entit
 
 func (i Onetime) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
 	if payment.TotalAmount <= payment.RefundAmount {
-		err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+		err := discount.UserDiscountRollbackFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
 		if err != nil {
 			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
 		}
@@ -69,10 +69,10 @@ func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Paym
 			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CANCELLED)
 		}
 	}
-	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
-	if err != nil {
-		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
-	}
+	//err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	//if err != nil {
+	//	fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+	//}
 }
 
 func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
@@ -156,8 +156,8 @@ func (i Onetime) PaymentFailureCallback(ctx context.Context, payment *entity.Pay
 			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_EXPIRED)
 		}
 	}
-	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
-	if err != nil {
-		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
-	}
+	//err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	//if err != nil {
+	//	fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+	//}
 }

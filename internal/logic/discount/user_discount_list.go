@@ -61,7 +61,6 @@ func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInte
 	q = q.
 		Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
 		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 		Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count)

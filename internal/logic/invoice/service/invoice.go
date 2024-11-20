@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/google/uuid"
 	redismq "github.com/jackyang-hk/go-redismq"
+	"math"
 	"strconv"
 	"strings"
 	"unibee/api/bean"
@@ -91,6 +92,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
 	}
+	totalTax = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 	var totalAmount = totalTax + totalAmountExcludingTax
 
 	invoiceId := utility.CreateInvoiceId()
@@ -197,6 +199,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
 	}
+	totalTax = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 	var totalAmount = totalTax + totalAmountExcludingTax
 
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{

@@ -63,6 +63,29 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	if len(name) == 0 {
 		name = payment.BillingReason
 	}
+
+	if len(invoice.DiscountCode) > 0 {
+		var planId uint64 = 0
+		sub := query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)
+		if sub != nil {
+			planId = sub.PlanId
+		}
+		_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:     payment.MerchantId,
+			UserId:         payment.UserId,
+			DiscountCode:   invoice.DiscountCode,
+			PLanId:         planId,
+			SubscriptionId: invoice.SubscriptionId,
+			PaymentId:      payment.PaymentId,
+			InvoiceId:      payment.InvoiceId,
+			ApplyAmount:    invoice.DiscountAmount,
+			Currency:       invoice.Currency,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	one := &entity.Invoice{
 		SubscriptionId:                 payment.SubscriptionId,
 		BizType:                        payment.BizType,
@@ -110,7 +133,12 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
+		g.Log().Infof(ctx, "CreateProcessInvoiceForNewPayment create invoice failed paymentId:%s err:%s", payment.PaymentId, err.Error())
 		err = gerror.Newf(`CreateProcessInvoiceForNewPayment record insert failure %s`, err.Error())
+		rollbackErr := discount.UserDiscountRollbackFromInvoice(ctx, payment.InvoiceId)
+		if rollbackErr != nil {
+			g.Log().Infof(ctx, "CreateProcessInvoiceForNewPayment UserDiscountRollbackFromInvoice rollback failed invoiceId:%s err:%s", payment.InvoiceId, rollbackErr.Error())
+		}
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
@@ -130,9 +158,6 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		})
 	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-	if err != nil {
-		return nil, err
-	}
 	return one, nil
 }
 
@@ -205,6 +230,14 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return one, err
 	}
 	if one.Status != status {
+		if len(one.DiscountCode) > 0 {
+			if status == consts.InvoiceStatusCancelled || status == consts.InvoiceStatusFailed {
+				err = discount.UserDiscountRollbackFromInvoice(ctx, one.InvoiceId)
+				if err != nil {
+					g.Log().Errorf(ctx, "UpdateInvoiceFromPayment UserDiscountRollbackFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
+				}
+			}
+		}
 		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
@@ -321,9 +354,6 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		})
 	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
-	if err != nil {
-		return nil, err
-	}
 	return one, nil
 }
 
@@ -397,21 +427,21 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	if one.TotalAmount != 0 {
 		return nil, gerror.New("invoice totalAmount not zero, InvoiceId:" + invoiceId)
 	}
-	if len(one.DiscountCode) > 0 {
-		_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     one.MerchantId,
-			UserId:         one.UserId,
-			DiscountCode:   one.DiscountCode,
-			SubscriptionId: one.SubscriptionId,
-			PaymentId:      "",
-			InvoiceId:      one.InvoiceId,
-			ApplyAmount:    one.DiscountAmount,
-			Currency:       one.Currency,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
+	//if len(one.DiscountCode) > 0 {
+	//	_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+	//		MerchantId:     one.MerchantId,
+	//		UserId:         one.UserId,
+	//		DiscountCode:   one.DiscountCode,
+	//		SubscriptionId: one.SubscriptionId,
+	//		PaymentId:      "",
+	//		InvoiceId:      one.InvoiceId,
+	//		ApplyAmount:    one.DiscountAmount,
+	//		Currency:       one.Currency,
+	//	})
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
 
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:    consts.InvoiceStatusPaid,
@@ -536,7 +566,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	if len(one.RefundId) == 0 && one.TotalAmount <= 0 {
-		g.Log().Infof(ctx, "SendInvoiceEmailToUser invoice totalAmount lower then zero, email not send")
+		g.Log().Infof(ctx, "SendInvoiceEmailToUser invoice totalAmount lower than zero, email not send")
 		return nil
 	}
 	utility.Assert(one.UserId > 0, "invoice userId not found")

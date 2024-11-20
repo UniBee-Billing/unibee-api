@@ -18,9 +18,12 @@ temp.yaml
 bin
 log
 log/
+manifest/config/config.yaml.template
+manifest/config/config.yaml
 **/**/*.log
 cache
 config.yaml
+config.yaml.backup
 publish_dev.sh
 publish_main.sh
 squash_opensource.sh

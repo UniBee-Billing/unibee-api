@@ -28,12 +28,13 @@ import (
 )
 
 var exportTaskMap = map[string]_interface.BatchExportTask{
-	"InvoiceExport":      &invoice.TaskInvoiceExport{},
-	"UserExport":         &user.TaskUserExport{},
-	"SubscriptionExport": &subscription.TaskSubscriptionExport{},
-	"TransactionExport":  &transaction.TaskTransactionExport{},
-	"DiscountExport":     &discount.TaskDiscountExport{},
-	"UserDiscountExport": &discount.TaskUserDiscountExport{},
+	"InvoiceExport":           &invoice.TaskInvoiceExport{},
+	"UserExport":              &user.TaskUserExport{},
+	"SubscriptionExport":      &subscription.TaskSubscriptionExport{},
+	"TransactionExport":       &transaction.TaskTransactionExport{},
+	"DiscountExport":          &discount.TaskDiscountExport{},
+	"UserDiscountExport":      &discount.TaskUserDiscountExport{},
+	"MultiUserDiscountExport": &discount.TaskMultiUserDiscountExport{},
 }
 
 func GetExportTaskImpl(task string) _interface.BatchExportTask {
@@ -76,10 +77,48 @@ func refactorHeaderCommentMap(obj interface{}) map[string]string {
 	return out
 }
 
-func ExportColumnList(ctx context.Context, task string) ([]interface{}, map[string]string) {
+func refactorHeaderGroupMap(obj interface{}) map[string][]interface{} {
+	out := make(map[string][]interface{})
+	if obj == nil {
+		return out
+	}
+
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
+
+	t := v.Type()
+	// range properties
+	// get Tag named "json" as key
+	//var allKeys = make(map[string]string)
+	for i := 0; i < v.NumField(); i++ {
+		fi := t.Field(i)
+		if key := fi.Tag.Get("json"); key != "" {
+			group := fi.Tag.Get("group")
+			if len(group) == 0 {
+				group = "Other"
+			}
+			if list, ok := out[group]; ok {
+				list = append(list, key)
+				out[group] = list
+			} else {
+				list = make([]interface{}, 0)
+				list = append(list, key)
+				out[group] = list
+			}
+		}
+	}
+
+	return out
+}
+
+func ExportColumnList(ctx context.Context, task string) ([]interface{}, map[string]string, map[string][]interface{}) {
 	one := GetExportTaskImpl(task)
 	utility.Assert(one != nil, "Task not found")
-	return RefactorHeaders(one.Header(), nil, false), refactorHeaderCommentMap(one.Header())
+	return RefactorHeaders(one.Header(), nil, false), refactorHeaderCommentMap(one.Header()), refactorHeaderGroupMap(one.Header())
 }
 
 func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskInternalRequest) error {

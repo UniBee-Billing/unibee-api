@@ -34,6 +34,7 @@ type Payment struct {
 	Link              string                 `json:"link"                   description:""`
 	Metadata          map[string]interface{} `json:"metadata"               description:""`
 	GasPayer          string                 `json:"gasPayer"               description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
+	AutoCharge        bool                   `json:"autoCharge"                      description:""`
 }
 
 func SimplifyPayment(one *entity.Payment) *Payment {
@@ -50,6 +51,10 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 	var lastErr = one.LastError
 	if len(lastErr) == 0 {
 		lastErr = one.AuthorizeReason
+	}
+	autoCharge := false
+	if len(one.GatewayPaymentMethod) > 0 {
+		autoCharge = true
 	}
 	return &Payment{
 		PaymentId:         one.PaymentId,
@@ -79,6 +84,7 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 		Link:              one.Link,
 		Metadata:          metadata,
 		GasPayer:          one.GasPayer,
+		AutoCharge:        autoCharge,
 	}
 }
 

@@ -134,13 +134,13 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		// sub cycle never go back time
 		return nil
 	}
-	var recurringDiscountCode *string
-	if len(invoice.DiscountCode) > 0 {
-		discount := query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)
-		if discount.BillingType == consts.DiscountBillingTypeRecurring {
-			recurringDiscountCode = &invoice.DiscountCode
-		}
-	}
+	//var recurringDiscountCode *string
+	//if len(invoice.DiscountCode) > 0 {
+	//	discount := query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)
+	//	if discount.BillingType == consts.DiscountBillingTypeRecurring {
+	//		recurringDiscountCode = &invoice.DiscountCode
+	//	}
+	//}
 	var billingCycleAnchor = invoice.BillingCycleAnchor
 	if billingCycleAnchor <= 0 {
 		billingCycleAnchor = sub.BillingCycleAnchor
@@ -160,7 +160,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
-		dao.Subscription.Columns().DiscountCode:           recurringDiscountCode,
+		dao.Subscription.Columns().DiscountCode:           invoice.DiscountCode,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 		dao.Subscription.Columns().Data:                   fmt.Sprintf("AutoChargeBy-%v", invoice.InvoiceId),
 		dao.Subscription.Columns().CancelAtPeriodEnd:      0,

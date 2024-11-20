@@ -2,14 +2,17 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stretchr/testify/require"
+	"math"
 	"testing"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/consts"
 	detail2 "unibee/internal/logic/invoice/detail"
 	"unibee/test"
+	"unibee/utility"
 )
 
 func TestInvoice(t *testing.T) {
@@ -140,4 +143,11 @@ func TestInvoice(t *testing.T) {
 		err = HardDeleteInvoice(ctx, one.MerchantId, one.InvoiceId)
 		require.Nil(t, err)
 	})
+}
+
+func TestFloatToInt(t *testing.T) {
+	var a float64 = 7980
+	var b float64 = 12033
+	fmt.Printf(fmt.Sprintf("%d\n", int64(math.Round(float64(int64(a)+int64(b))*utility.ConvertTaxPercentageToInternalFloat(2900)))))
+	fmt.Printf(fmt.Sprintf("%d\n", int64(math.Round(58.33))))
 }

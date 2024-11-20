@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"testing"
+	"unibee/internal/logic/batch/export/invoice"
 	"unibee/utility"
 )
 
@@ -148,6 +149,9 @@ func TestExcelStreamWrite(t *testing.T) {
 		fmt.Println(utility.IsEmailValid("jack.fu@126.com"))
 		extension, _ := getFileExtensionFromURL("http://unibee.top/files/invoice/batch_export/Batch_export_task_15656_42_10507.csv")
 		fmt.Println(extension)
+	})
+	t.Run("Test Group Export", func(t *testing.T) {
+		refactorHeaderGroupMap(&invoice.ExportInvoiceEntity{})
 	})
 }
 

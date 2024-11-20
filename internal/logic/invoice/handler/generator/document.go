@@ -30,6 +30,7 @@ type Document struct {
 	Company             *Contact      `json:"company,omitempty" validate:"required"`
 	Customer            *Contact      `json:"customer,omitempty" validate:"required"`
 	Items               []*Item       `json:"items,omitempty"`
+	OriginalTaxString   string        `json:"original_tax_string,omitempty"`
 	ExchangeRateString  string        `json:"exchange_rate_string,omitempty"`
 	SubTotalString      string        `json:"sub_total_string,omitempty"`
 	DiscountTitle       string        `json:"discount_title,omitempty"`

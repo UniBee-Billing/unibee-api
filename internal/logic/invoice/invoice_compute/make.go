@@ -61,7 +61,7 @@ func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, req.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-	CompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
+	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
 
 	return &bean.Invoice{
 		InvoiceName:                    req.InvoiceName,

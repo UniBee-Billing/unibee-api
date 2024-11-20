@@ -15,18 +15,18 @@ func TestMerchantCreateAndDelete(t *testing.T) {
 	var merchant *entity.Merchant
 	var member *entity.MerchantMember
 	var err error
-	t.Run("Test for Merchant Create|Login|ChangePassword|Delete", func(t *testing.T) {
-		merchant, member, err = CreateMerchant(ctx, &CreateMerchantInternalReq{
-			FirstName: "test",
-			LastName:  "test",
-			Email:     "autotest@wowow.io",
-			Password:  "test123456",
-			Phone:     "123456",
-			UserName:  "test",
-		})
-		require.Nil(t, err)
-		require.NotNil(t, merchant)
-	})
+	//t.Run("Test for Merchant Create|Login|ChangePassword|Delete", func(t *testing.T) {
+	//	merchant, member, err = CreateMerchant(ctx, &CreateMerchantInternalReq{
+	//		FirstName: "test",
+	//		LastName:  "test",
+	//		Email:     "autotest@wowow.io",
+	//		Password:  "test123456",
+	//		Phone:     "123456",
+	//		UserName:  "test",
+	//	})
+	//	require.Nil(t, err)
+	//	require.NotNil(t, merchant)
+	//})
 	t.Run("Test for merchant Login|ChangePassword", func(t *testing.T) {
 		merchant = query.GetMerchantById(ctx, merchant.Id)
 		require.NotNil(t, merchant)

@@ -74,6 +74,18 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		taxPercentage = *req.TaxPercentage
 	}
 
+	if len(req.DiscountCode) > 0 {
+		canApply, _, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:   sub.MerchantId,
+			UserId:       sub.UserId,
+			DiscountCode: req.DiscountCode,
+			Currency:     sub.Currency,
+			PLanId:       req.AddonId,
+			TimeNow:      gtime.Now().Timestamp(),
+		})
+		utility.Assert(canApply, message)
+	}
+
 	one := &entity.SubscriptionOnetimeAddon{
 		UserId:         sub.UserId,
 		SubscriptionId: req.SubscriptionId,
@@ -182,22 +194,22 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		return nil, err
 	}
 
-	if len(req.DiscountCode) > 0 {
-		_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     req.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   invoice.DiscountCode,
-			SubscriptionId: one.SubscriptionId,
-			PaymentId:      createRes.Payment.PaymentId,
-			InvoiceId:      invoice.InvoiceId,
-			ApplyAmount:    invoice.DiscountAmount,
-			Currency:       invoice.Currency,
-		})
-		if err != nil {
-			// todo mark success payment
-			fmt.Printf("UserDiscountApply onetimeAddon Purchase createRes:%s err:%s", utility.MarshalToJsonString(createRes), err.Error())
-		}
-	}
+	//if len(req.DiscountCode) > 0 {
+	//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+	//		MerchantId:     req.MerchantId,
+	//		UserId:         sub.UserId,
+	//		DiscountCode:   invoice.DiscountCode,
+	//		SubscriptionId: one.SubscriptionId,
+	//		PaymentId:      createRes.Payment.PaymentId,
+	//		InvoiceId:      invoice.InvoiceId,
+	//		ApplyAmount:    invoice.DiscountAmount,
+	//		Currency:       invoice.Currency,
+	//	})
+	//	if err != nil {
+	//		// todo mark success payment
+	//		fmt.Printf("UserDiscountApply onetimeAddon Purchase createRes:%s err:%s", utility.MarshalToJsonString(createRes), err.Error())
+	//	}
+	//}
 
 	return &SubscriptionCreateOnetimeAddonInternalRes{
 		SubscriptionOnetimeAddon: bean.SimplifySubscriptionOnetimeAddon(one),

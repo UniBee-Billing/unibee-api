@@ -3,14 +3,13 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/number"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
@@ -19,26 +18,26 @@ import (
 	"unibee/utility"
 )
 
-func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
-	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
-	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
-	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
-	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
-	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
+func GenerateInvoicePdf(ctx context.Context, one *entity.Invoice) string {
+	utility.Assert(one.MerchantId > 0, "invalid merchantId")
+	utility.Assert(one.UserId > 0, "invalid UserId")
+	merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
+	user := query.GetUserAccountById(ctx, one.UserId)
+	var savePath = fmt.Sprintf("%s.pdf", one.InvoiceId)
 
-	err := createInvoicePdf(unibInvoice, merchantInfo, user, query.GetGatewayById(ctx, unibInvoice.GatewayId), savePath)
+	err := createInvoicePdf(detail.ConvertInvoiceToDetail(ctx, one), merchantInfo, user, query.GetGatewayById(ctx, one.GatewayId), savePath)
 	utility.Assert(err == nil, fmt.Sprintf("createInvoicePdf error:%v", err))
 	return savePath
 }
 
-func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
-	var metadata = make(map[string]interface{})
-	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
-		if err != nil {
-			fmt.Printf("createInvoicePdf Unmarshal Metadata error:%s", err.Error())
-		}
-	}
+func createInvoicePdf(one *detail.InvoiceDetail, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
+	//var metadata = make(map[string]interface{})
+	//if len(one.MetaData) > 0 {
+	//	err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+	//	if err != nil {
+	//		fmt.Printf("createInvoicePdf Unmarshal Metadata error:%s", err.Error())
+	//	}
+	//}
 
 	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
 	doc, _ := generator2.New(generator2.Invoice, "/usr/share/fonts", &generator2.Options{
@@ -57,7 +56,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.SetInvoiceNumber(fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId))
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
 
-	hideDetailStatus := metadata["hideDetailStatus"]
+	hideDetailStatus := one.Metadata["hideDetailStatus"]
 	if one.Status == consts.InvoiceStatusProcessing {
 		doc.SetStatus("Process")
 		if hideDetailStatus != nil {
@@ -115,11 +114,11 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	}
 
 	//Localized currency
-	localizedCurrency := metadata["LocalizedCurrency"]
-	localizedCurrencyRate := metadata["LocalizedExchangeRate"]
+	localizedCurrency := one.Metadata["LocalizedCurrency"]
+	localizedCurrencyRate := one.Metadata["LocalizedExchangeRate"]
 	localizedSymbol := ""
 	localizedCurrencyStr := ""
-	localizedExchangeRateDescription := metadata["LocalizedExchangeRateDescription"]
+	localizedExchangeRateDescription := one.Metadata["LocalizedExchangeRateDescription"]
 	var localizedExchangeRate float64
 	localized := false
 	if localizedCurrencyRate != nil && localizedCurrency != nil {
@@ -137,7 +136,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	}
 
 	doc.ShowDetailItem = true
-	showDetailItem := metadata["ShowDetailItem"]
+	showDetailItem := one.Metadata["ShowDetailItem"]
 	if showDetailItem != nil {
 		if _showDetailItem, ok := showDetailItem.(bool); ok {
 			if _showDetailItem {
@@ -146,10 +145,10 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 	}
 
-	var vatNumber = metadata["IssueVatNumber"]
-	var regNumber = metadata["IssueRegNumber"]
-	var companyName = metadata["IssueCompanyName"]
-	var address = metadata["IssueAddress"]
+	var vatNumber = one.Metadata["IssueVatNumber"]
+	var regNumber = one.Metadata["IssueRegNumber"]
+	var companyName = one.Metadata["IssueCompanyName"]
+	var address = one.Metadata["IssueAddress"]
 	if vatNumber == nil {
 		vatNumber = ""
 	}
@@ -209,9 +208,9 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		},
 	})
 
-	var lines []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
-	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
+	//var lines []*bean.InvoiceItemSimplify
+	//err := utility.UnmarshalFromJsonString(one.Lines, &lines)
+	//utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 	if len(one.RefundId) > 0 {
@@ -224,7 +223,8 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
 		doc.SetIsRefund(true)
-		for i, line := range lines {
+		for i, line := range one.Lines {
+
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			//if localized {
@@ -235,10 +235,14 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
 			}
+			originalUnitAmountString := ""
+			if line.OriginUnitAmountExcludeTax != 0 {
+				originalUnitAmountString = fmt.Sprintf("(%s %s)", symbol, utility.ConvertCentToDollarStr(line.OriginUnitAmountExcludeTax, one.Currency))
+			}
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", description, i),
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
-				UnitCostStr:  fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
+				UnitCostStr:  fmt.Sprintf("%s%s%s", originalUnitAmountString, symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax, one.Currency)),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
 				TaxString:    taxString,
 				AmountString: amountString,
@@ -249,7 +253,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		if len(one.VatNumber) > 0 {
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
-		for i, line := range lines {
+		for i, line := range one.Lines {
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			description := line.Description
@@ -270,14 +274,21 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		Percent: utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
 	})
 	doc.SubTotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.SubscriptionAmountExcludingTax, one.Currency))
-	if one.DiscountAmount > 0 {
+	if one.DiscountAmount != 0 {
 		if len(one.DiscountCode) > 0 {
 			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(code: %s)", one.DiscountCode)
 		}
-		doc.DiscountTotalString = fmt.Sprintf("%s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency))
+		originalDiscountString := ""
+		if len(one.RefundId) > 0 {
+			originalDiscountString = fmt.Sprintf("(%s %s)", symbol, utility.ConvertCentToDollarStr(-one.OriginalPaymentInvoice.DiscountAmount, one.Currency))
+		}
+		doc.DiscountTotalString = fmt.Sprintf("%s %s%s", symbol, utility.ConvertCentToDollarStr(-one.DiscountAmount, one.Currency), originalDiscountString)
 	}
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency))
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TaxAmount, one.Currency))
+	if len(one.RefundId) > 0 {
+		doc.OriginalTaxString = fmt.Sprintf("(%s %s)", symbol, utility.ConvertCentToDollarStr(one.OriginalPaymentInvoice.TaxAmount, one.Currency))
+	}
 
 	if localized {
 		if localizedExchangeRateDescription != nil {
@@ -286,6 +297,9 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			doc.ExchangeRateString = fmt.Sprintf("* %s1 = %s%.6f", symbol, localizedSymbol, localizedExchangeRate)
 		}
 		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))
+		if len(one.RefundId) > 0 {
+			doc.OriginalTaxString = fmt.Sprintf("(%s %s | %s%s)", symbol, utility.ConvertCentToDollarStr(one.OriginalPaymentInvoice.TaxAmount, one.Currency), localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.OriginalPaymentInvoice.TaxAmount)*localizedExchangeRate), localizedCurrencyStr))
+		}
 	}
 
 	pdf, err := doc.Build()

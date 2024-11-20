@@ -45,7 +45,17 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 		Page:       page,
 		Count:      count,
 	}
+	timeZone := 0
+	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
+		if value, ok := payload["timeZone"].(float64); ok {
+			timeZone = int(value)
+			if timeZone > 0 {
+				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
+			} else if timeZone < 0 {
+				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+			}
+		}
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = uint64(value)
 		}
@@ -136,7 +146,11 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				if one.Subscription != nil && one.Subscription.PlanId > 0 {
 					plan := query.GetPlanById(ctx, one.Subscription.PlanId)
 					if plan != nil {
-						billingPeriod = plan.IntervalUnit
+						if plan.IntervalCount <= 1 {
+							billingPeriod = plan.IntervalUnit
+						} else {
+							billingPeriod = fmt.Sprintf("%d x %s", plan.IntervalCount, plan.IntervalUnit)
+						}
 					}
 				}
 			} else {
@@ -162,6 +176,14 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 					productId = onePlan.ProductId
 				}
 			}
+			var transactionType = "payment"
+			var transactionId = one.PaymentId
+			var externalTransactionId = one.Payment.GatewayPaymentId
+			if one.Refund != nil {
+				transactionType = "refund"
+				transactionId = one.RefundId
+				externalTransactionId = one.Refund.GatewayRefundId
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
@@ -178,14 +200,16 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				ProductName:                    one.ProductName,
 				TaxCode:                        one.CountryCode,
 				CountryCode:                    one.CountryCode,
+				PostCode:                       one.UserSnapshot.ZipCode,
 				VatNumber:                      one.VatNumber,
 				CountryName:                    countryName,
 				IsEU:                           IsEu,
 				InvoiceType:                    invoiceType,
 				Gateway:                        invoiceGateway,
+				CompanyName:                    one.UserSnapshot.CompanyName,
 				MerchantName:                   merchant.CompanyName,
 				DiscountCode:                   one.DiscountCode,
-				OriginAmount:                   utility.ConvertCentToDollarStr(one.OriginAmount, one.Currency),
+				OriginalAmount:                 utility.ConvertCentToDollarStr(one.OriginAmount, one.Currency),
 				TotalAmount:                    utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency),
 				DiscountAmount:                 utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency),
 				TotalAmountExcludingTax:        utility.ConvertCentToDollarStr(one.TotalAmountExcludingTax, one.Currency),
@@ -194,22 +218,26 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				TaxPercentage:                  utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
 				SubscriptionAmount:             utility.ConvertCentToDollarStr(one.SubscriptionAmount, one.Currency),
 				SubscriptionAmountExcludingTax: utility.ConvertCentToDollarStr(one.SubscriptionAmountExcludingTax, one.Currency),
-				PeriodEnd:                      gtime.NewFromTimeStamp(one.PeriodEnd),
-				PeriodStart:                    gtime.NewFromTimeStamp(one.PeriodStart),
-				FinishTime:                     gtime.NewFromTimeStamp(one.FinishTime),
-				DueDate:                        gtime.NewFromTimeStamp(dueTime),
-				CreateTime:                     gtime.NewFromTimeStamp(one.CreateTime),
-				PaidTime:                       gtime.NewFromTimeStamp(one.Payment.PaidTime),
+				PeriodEnd:                      gtime.NewFromTimeStamp(one.PeriodEnd + int64(timeZone*3600)),
+				PeriodStart:                    gtime.NewFromTimeStamp(one.PeriodStart + int64(timeZone*3600)),
+				FinishTime:                     gtime.NewFromTimeStamp(one.FinishTime + int64(timeZone*3600)),
+				DueDate:                        gtime.NewFromTimeStamp(dueTime + int64(timeZone*3600)),
+				CreateTime:                     gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+				PaidTime:                       gtime.NewFromTimeStamp(one.Payment.PaidTime + int64(timeZone*3600)),
 				Status:                         consts.InvoiceStatusToEnum(one.Status).Description(),
 				PaymentId:                      one.PaymentId,
 				RefundId:                       one.RefundId,
 				SubscriptionId:                 one.SubscriptionId,
 				PlanId:                         fmt.Sprintf("%v", one.Subscription.PlanId),
 				ProductId:                      fmt.Sprintf("%v", productId),
-				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd),
-				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor),
-				OriginInvoiceId:                OriginInvoiceId,
+				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd + int64(timeZone*3600)),
+				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor + int64(timeZone*3600)),
+				OriginalInvoiceId:              OriginInvoiceId,
 				BillingPeriod:                  billingPeriod,
+				TransactionType:                transactionType,
+				TransactionId:                  transactionId,
+				ExternalTransactionId:          externalTransactionId,
+				TimeZone:                       timeZoneStr,
 			})
 		}
 	}
@@ -217,52 +245,58 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 }
 
 type ExportInvoiceEntity struct {
-	InvoiceId                      string      `json:"InvoiceId"  comment:"The unique id of invoice, pure digital"`
-	InvoiceNumber                  string      `json:"InvoiceNumber" comment:"The unique number of invoice, format: Gateway+InvoiceId"`
-	UserId                         string      `json:"UserId"              comment:"The unique id of user"`
-	ExternalUserId                 string      `json:"ExternalUserId"      comment:"The external unique id of user"`
-	FirstName                      string      `json:"FirstName"           comment:"The first name of user"`
-	LastName                       string      `json:"LastName"            comment:"The last name of user"`
-	FullName                       string      `json:"FullName"            comment:"The full name of user, format: FirstName LastName"`
-	UserType                       string      `json:"UserType"            comment:"The type of user, Individual or Business"`
-	Email                          string      `json:"Email"               comment:"The email of user"`
-	InvoiceName                    string      `json:"InvoiceName" comment:"The name of invoice"`
-	ProductName                    string      `json:"ProductName" comment:"The product name of invoice"`
-	InvoiceType                    string      `json:"InvoiceType" comment:"The type of invoice, Tax Invoice or Credit note"`
-	Address                        string      `json:"Address" comment:"The address of user"`
-	City                           string      `json:"City" comment:"The city of user"`
-	State                          string      `json:"State" comment:"The state of user"`
-	CountryCode                    string      `json:"CountryCode"                    comment:"The country code of invoice"`
-	VatNumber                      string      `json:"VatNumber"                    comment:"The vat number of invoice"`
-	TaxCode                        string      `json:"TaxCode"                    comment:"The tax code of invoice"`
-	CountryName                    string      `json:"CountryName" comment:"The country name of invoice"`
-	IsEU                           string      `json:"EU/Non-EU" comment:"Is eu country or not"`
-	Gateway                        string      `json:"Gateway"             comment:"The gateway name of invoice, stripe|paypal|changelly|wire_transfer"`
-	MerchantName                   string      `json:"MerchantName"        comment:"The name of merchant"`
-	DiscountCode                   string      `json:"DiscountCode" comment:"The code of discount which apply to invoice"`
-	OriginAmount                   string      `json:"OriginAmount"                 comment:"The original amount of invoice"`
-	TotalAmount                    string      `json:"TotalAmount" comment:"The total amount of invoice"`
-	DiscountAmount                 string      `json:"DiscountAmount" comment:"The discount amount of invoice"`
-	TotalAmountExcludingTax        string      `json:"TotalAmountExcludingTax" comment:"The total amount of invoice with tax excluded"`
-	Currency                       string      `json:"Currency" comment:"The currency of invoice"`
-	TaxAmount                      string      `json:"TaxAmount" comment:"The tax amount of invoice"`
-	TaxPercentage                  string      `json:"TaxPercentage"            comment:"The tax percentage of invoice applied"`
-	SubscriptionAmount             string      `json:"SubscriptionAmount" comment:"The amount of subscription if invoice is generated by subscription"`
-	SubscriptionAmountExcludingTax string      `json:"SubscriptionAmountExcludingTax" comment:"The amount of subscription which excluded tax amount if invoice is generated by subscription"`
-	PeriodEnd                      *gtime.Time `json:"PeriodEnd"  layout:"2006-01-02 15:04:05"   comment:"The end time of period, will apply to subscription if invoice paid"`
-	PeriodStart                    *gtime.Time `json:"PeriodStart"  layout:"2006-01-02 15:04:05"   comment:"The start time of period, will apply to subscription if invoice paid"`
-	FinishTime                     *gtime.Time `json:"FinishTime"  layout:"2006-01-02 15:04:05"   comment:"The time when invoice finished, invoice will not be editable after finished"`
-	CreateTime                     *gtime.Time `json:"CreateTime"  layout:"2006-01-02 15:04:05"   comment:"The create time of invoice"`
-	DueDate                        *gtime.Time `json:"DueDate"  layout:"2006-01-02 15:04:05"   comment:"The due date of invoice, invoice will expired after due date"`
-	PaidTime                       *gtime.Time `json:"PaidTime"  layout:"2006-01-02 15:04:05"   comment:"The paid time of invoice"`
-	Status                         string      `json:"Status"                         comment:"The status of invoice，will be Pending｜Processing｜Paid | Failed | Cancelled | Reversed" `
-	PaymentId                      string      `json:"PaymentId"                      comment:"paymentId" comment:"The id of payment connected to invoice"`
-	RefundId                       string      `json:"RefundId"                       comment:"refundId" comment:"The id of refund connected to invoice, invoice will be credit not who contains refundId"`
-	SubscriptionId                 string      `json:"SubscriptionId"                 comment:"subscription_id" comment:"the id of subscription connected to invoice"`
-	ProductId                      string      `json:"ProductId"             comment:""`
-	PlanId                         string      `json:"PlanId"              comment:"The id of plan connected to invoice"`
-	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"   comment:"The time of trial end, will apply to subscription when invoice paid "`
-	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"   comment:"The subscription anchor time of billing cycle connected to invoice "`
-	OriginInvoiceId                string      `json:"OriginInvoiceId"                description:"" comment:"The origin invoiceId if invoice type is credit note"`
-	BillingPeriod                  string      `json:"BillingPeriod"      comment:"The billing period type of invoice, will be day|month|year or one-time purchase"`
+	InvoiceId                      string      `json:"InvoiceId"  comment:"The unique id of invoice, pure digital" group:"Invoice"`
+	InvoiceNumber                  string      `json:"InvoiceNumber" comment:"The unique number of invoice, format: Gateway+InvoiceId" group:"Invoice"`
+	UserId                         string      `json:"UserId"              comment:"The unique id of user" group:"User Information"`
+	ExternalUserId                 string      `json:"ExternalUserId"      comment:"The external unique id of user" group:"User Information"`
+	FirstName                      string      `json:"FirstName"           comment:"The first name of user" group:"User Information"`
+	LastName                       string      `json:"LastName"            comment:"The last name of user" group:"User Information"`
+	FullName                       string      `json:"FullName"            comment:"The full name of user, format: FirstName LastName" group:"User Information"`
+	UserType                       string      `json:"UserType"            comment:"The type of user, Individual or Business" group:"User Information"`
+	Email                          string      `json:"Email"               comment:"The email of user" group:"User Information"`
+	InvoiceName                    string      `json:"InvoiceName" comment:"The name of invoice" group:"Invoice"`
+	ProductName                    string      `json:"ProductName" comment:"The product name of invoice" group:"Product and Subscription"`
+	InvoiceType                    string      `json:"InvoiceType" comment:"The type of invoice, Tax Invoice or Credit note" group:"Invoice"`
+	CompanyName                    string      `json:"CompanyName"        comment:"The CompanyName of user" group:"Transaction"`
+	Address                        string      `json:"Address" comment:"The address of user" group:"User Information"`
+	City                           string      `json:"City" comment:"The city of user" group:"User Information"`
+	State                          string      `json:"State" comment:"The state of user" group:"User Information"`
+	CountryCode                    string      `json:"CountryCode"                    comment:"The country code of invoice" group:"User Information"`
+	PostCode                       string      `json:"PostCode"                    comment:"The post code of invoice" group:"User Information"`
+	VatNumber                      string      `json:"VatNumber"                    comment:"The vat number of invoice" group:"User Information"`
+	TaxCode                        string      `json:"TaxCode"                    comment:"The tax code of invoice" group:"Transaction"`
+	CountryName                    string      `json:"CountryName" comment:"The country name of invoice" group:"User Information"`
+	IsEU                           string      `json:"EU/Non-EU" comment:"Is eu country or not" group:"User Information"`
+	Gateway                        string      `json:"Gateway"             comment:"The gateway name of invoice, stripe|paypal|changelly|wire_transfer" group:"Transaction"`
+	MerchantName                   string      `json:"MerchantName"        comment:"The name of merchant" group:"Transaction"`
+	DiscountCode                   string      `json:"DiscountCode" comment:"The code of discount which apply to invoice" group:"Transaction"`
+	OriginalAmount                 string      `json:"OriginalAmount"                 comment:"The original amount of invoice" group:"Transaction"`
+	TotalAmount                    string      `json:"TotalAmount" comment:"The total amount of invoice" group:"Transaction"`
+	DiscountAmount                 string      `json:"DiscountAmount" comment:"The discount amount of invoice" group:"Transaction"`
+	TotalAmountExcludingTax        string      `json:"TotalAmountExcludingTax" comment:"The total amount of invoice with tax excluded" group:"Transaction"`
+	Currency                       string      `json:"Currency" comment:"The currency of invoice" group:"Transaction"`
+	TaxAmount                      string      `json:"TaxAmount" comment:"The tax amount of invoice" group:"Transaction"`
+	TaxPercentage                  string      `json:"TaxPercentage"            comment:"The tax percentage of invoice applied" group:"Transaction"`
+	SubscriptionAmount             string      `json:"SubscriptionAmount" comment:"The amount of subscription if invoice is generated by subscription" group:"Product and Subscription"`
+	SubscriptionAmountExcludingTax string      `json:"SubscriptionAmountExcludingTax" comment:"The amount of subscription which excluded tax amount if invoice is generated by subscription" group:"Product and Subscription"`
+	PeriodEnd                      *gtime.Time `json:"PeriodEnd"  layout:"2006-01-02 15:04:05"   comment:"The end time of period, will apply to subscription if invoice paid" group:"Product and Subscription"`
+	PeriodStart                    *gtime.Time `json:"PeriodStart"  layout:"2006-01-02 15:04:05"   comment:"The start time of period, will apply to subscription if invoice paid" group:"Product and Subscription"`
+	FinishTime                     *gtime.Time `json:"FinishTime"  layout:"2006-01-02 15:04:05"   comment:"The time when invoice finished, invoice will not be editable after finished" group:"Invoice"`
+	CreateTime                     *gtime.Time `json:"CreateTime"  layout:"2006-01-02 15:04:05"   comment:"The create time of invoice" group:"Invoice"`
+	DueDate                        *gtime.Time `json:"DueDate"  layout:"2006-01-02 15:04:05"   comment:"The due date of invoice, invoice will expired after due date" group:"Invoice"`
+	PaidTime                       *gtime.Time `json:"PaidTime"  layout:"2006-01-02 15:04:05"   comment:"The paid time of invoice" group:"Invoice"`
+	Status                         string      `json:"InvoiceStatus"                         comment:"The status of invoice，will be Pending｜Processing｜Paid | Failed | Cancelled | Reversed"  group:"Invoice"`
+	PaymentId                      string      `json:"PaymentId"                      comment:"paymentId" comment:"The id of payment connected to invoice" group:"Transaction"`
+	RefundId                       string      `json:"RefundId"                       comment:"refundId" comment:"The id of refund connected to invoice, invoice will be credit not who contains refundId" group:"Transaction"`
+	SubscriptionId                 string      `json:"SubscriptionId"                 comment:"subscription_id" comment:"the id of subscription connected to invoice" group:"Product and Subscription"`
+	ProductId                      string      `json:"ProductId"             comment:"" group:"Product and Subscription"`
+	PlanId                         string      `json:"PlanId"              comment:"The id of plan connected to invoice" group:"Product and Subscription"`
+	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"   comment:"The time of trial end, will apply to subscription when invoice paid " group:"Product and Subscription"`
+	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"   comment:"The subscription anchor time of billing cycle connected to invoice " group:"Product and Subscription"`
+	OriginalInvoiceId              string      `json:"OriginalInvoiceId"                description:"" comment:"The origin invoiceId if invoice type is credit note" group:"Transaction"`
+	BillingPeriod                  string      `json:"BillingPeriod"      comment:"The billing period type of invoice, will be day|month|year or one-time purchase" group:"Product and Subscription"`
+	TransactionType                string      `json:"TransactionType"    comment:"" group:"Transaction"`
+	TransactionId                  string      `json:"TransactionId"       comment:"" group:"Transaction"`
+	ExternalTransactionId          string      `json:"ExternalTransactionId"   comment:"" group:"Transaction"`
+	TimeZone                       string      `json:"TimeZone"         comment:"" group:"Transaction"`
 }

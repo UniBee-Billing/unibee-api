@@ -51,7 +51,17 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		Page:  page,
 		Count: count,
 	}
+	timeZone := 0
+	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
+		if value, ok := payload["timeZone"].(float64); ok {
+			timeZone = int(value)
+			if timeZone > 0 {
+				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
+			} else if timeZone < 0 {
+				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+			}
+		}
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = int64(value)
 		}
@@ -111,7 +121,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 				SubscriptionName:   one.SubscriptionName,
 				SubscriptionId:     one.SubscriptionId,
 				SubscriptionStatus: consts.SubStatusToEnum(one.SubscriptionStatus).Description(),
-				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime),
+				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
 				ExternalUserId:     one.ExternalUserId,
 				Status:             consts.UserStatusToEnum(one.Status).Description(),
 				TaxPercentage:      utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
@@ -119,6 +129,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 				Gateway:            userGateway,
 				City:               one.City,
 				ZipCode:            one.ZipCode,
+				TimeZone:           timeZoneStr,
 			})
 		}
 	}
@@ -147,4 +158,5 @@ type ExportUserEntity struct {
 	Gateway            string      `json:"Gateway"             comment:""`
 	City               string      `json:"City"                comment:""`
 	ZipCode            string      `json:"ZipCode"             comment:""`
+	TimeZone           string      `json:"TimeZone"         comment:""`
 }

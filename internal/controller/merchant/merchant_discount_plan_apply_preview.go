@@ -28,7 +28,15 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 	utility.Assert(plan.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
 	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)
-	utility.Assert(oneDiscount != nil, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"))
+	if oneDiscount == nil {
+		return &discount.PlanApplyPreviewRes{
+			Valid:          false,
+			DiscountAmount: 0,
+			DiscountCode:   nil,
+			FailureReason:  i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"),
+		}, nil
+	}
+	//utility.Assert(oneDiscount != nil, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"))
 	canApply, _, message := discount2.UserDiscountApplyPreview(ctx, &discount2.UserDiscountApplyReq{
 		MerchantId:   _interface.GetMerchantId(ctx),
 		PLanId:       uint64(req.PlanId),

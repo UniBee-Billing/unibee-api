@@ -82,7 +82,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		query = query.WhereIn(dao.Invoice.Columns().Status, req.Status)
 	}
 	if req.AmountStart != nil && req.AmountEnd != nil {
-		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower then amountEnd")
+		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower than amountEnd")
 	}
 	if req.AmountStart != nil {
 		query = query.WhereGTE(dao.Invoice.Columns().TotalAmount, &req.AmountStart)

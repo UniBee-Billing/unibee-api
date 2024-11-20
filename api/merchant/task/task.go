@@ -23,15 +23,16 @@ type ExportColumnListReq struct {
 }
 
 type ExportColumnListRes struct {
-	Columns        []interface{}     `json:"columns" dc:"Export Column List"`
-	ColumnHeaders  map[string]string `json:"columnHeaders" dc:"Export Column Headers"`
-	ColumnComments map[string]string `json:"columnComments" dc:"Export Column Comments"`
+	Columns        []interface{}            `json:"columns" dc:"Export Column List"`
+	GroupColumns   map[string][]interface{} `json:"groupColumns" dc:"Group Column List"`
+	ColumnHeaders  map[string]string        `json:"columnHeaders" dc:"Export Column Headers"`
+	ColumnComments map[string]string        `json:"columnComments" dc:"Export Column Comments"`
 }
 
 type NewReq struct {
 	g.Meta        `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
 	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
-	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
+	Payload       map[string]interface{} `json:"payload" dc:"Payload, Task query parameters, positive or negative 'timeZone' available for all task"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
 }

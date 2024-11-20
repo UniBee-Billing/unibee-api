@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"strings"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
@@ -26,8 +26,8 @@ type ListInternalReq struct {
 	SkipTotal       bool
 }
 
-func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bean.MerchantDiscountCode, int) {
-	var mainList = make([]*bean.MerchantDiscountCode, 0)
+func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*detail.MerchantDiscountCodeDetail, int) {
+	var mainList = make([]*detail.MerchantDiscountCodeDetail, 0)
 	var list []*entity.MerchantDiscountCode
 	if req.Count <= 0 {
 		req.Count = 20
@@ -86,7 +86,7 @@ func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bea
 		return mainList, total
 	}
 	for _, one := range list {
-		mainList = append(mainList, bean.SimplifyMerchantDiscountCode(one))
+		mainList = append(mainList, detail.ConvertMerchantDiscountCodeDetail(ctx, one))
 	}
 
 	return mainList, total

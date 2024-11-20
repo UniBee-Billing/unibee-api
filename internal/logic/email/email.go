@@ -147,6 +147,7 @@ type TemplateVariable struct {
 }
 
 func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, variableMap map[string]interface{}) (err error) {
+	mailTo = strings.ToLower(mailTo)
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(ctx, merchantId)
 	if len(emailGatewayKey) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
@@ -241,6 +242,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+	mailTo = strings.ToLower(mailTo)
 	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)
 	if len(emailGatewayKey) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
@@ -270,6 +272,7 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 }
 
 func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
+	mailTo = strings.ToLower(mailTo)
 	var template *bean.MerchantEmailTemplate
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)

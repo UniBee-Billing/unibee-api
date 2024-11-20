@@ -26,6 +26,7 @@ func (c *ControllerDiscount) New(ctx context.Context, req *discount.NewReq) (res
 		EndTime:   req.EndTime,
 		PlanIds:   req.PlanIds,
 		Metadata:  req.Metadata,
+		Quantity:  req.Quantity,
 	})
 	if err != nil {
 		return nil, err

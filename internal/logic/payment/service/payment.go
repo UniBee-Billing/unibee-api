@@ -19,7 +19,6 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/currency"
-	"unibee/internal/logic/discount"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/fiat_exchange"
 	"unibee/internal/logic/gateway/api"
@@ -191,7 +190,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId}).
 		Where(dao.Payment.Columns().Id, createPayContext.Pay.Id).Update()
 	if err != nil {
-		g.Log().Errorf(ctx, `GatewayPaymentCreate paymentId: error:%s`, createPayContext.Pay.PaymentId, err.Error())
+		g.Log().Errorf(ctx, `GatewayPaymentCreate paymentId:%s error:%s`, createPayContext.Pay.PaymentId, err.Error())
 		return nil, err
 	}
 	// send the payment status checker mq
@@ -263,7 +262,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
 	lastPayment, err := clearInvoicePayment(ctx, invoice)
 	if err != nil {
-		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%d err:%s", invoice.InvoiceId, err.Error())
+		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%s err:%s", invoice.InvoiceId, err.Error())
 	}
 	if lastPayment != nil {
 		err = PaymentGatewayCancel(ctx, lastPayment)
@@ -326,21 +325,22 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 			//need send invoice for authorised
 			SendAuthorizedEmailBackground(invoice)
 		}
-		if len(invoice.DiscountCode) > 0 {
-			_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-				MerchantId:     invoice.MerchantId,
-				UserId:         invoice.UserId,
-				DiscountCode:   invoice.DiscountCode,
-				SubscriptionId: invoice.SubscriptionId,
-				PaymentId:      res.Payment.PaymentId,
-				InvoiceId:      invoice.InvoiceId,
-				ApplyAmount:    invoice.DiscountAmount,
-				Currency:       invoice.Currency,
-			})
-			if err != nil {
-				return nil, err
-			}
-		}
+		//if len(invoice.DiscountCode) > 0 {
+		//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+		//		MerchantId:       invoice.MerchantId,
+		//		UserId:           invoice.UserId,
+		//		DiscountCode:     invoice.DiscountCode,
+		//		SubscriptionId:   invoice.SubscriptionId,
+		//		PaymentId:        res.Payment.PaymentId,
+		//		InvoiceId:        invoice.InvoiceId,
+		//		ApplyAmount:      invoice.DiscountAmount,
+		//		Currency:         invoice.Currency,
+		//		IsRecurringApply: strings.Compare(source, "SubscriptionBillingCycle") == 0,
+		//	})
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//}
 	}
 
 	return res, err

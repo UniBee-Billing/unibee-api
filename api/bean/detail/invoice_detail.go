@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -71,6 +72,8 @@ type InvoiceDetail struct {
 	BizType                        int                         `json:"bizType"`
 	ProrationDate                  int64                       `json:"prorationDate"`
 	TrialEnd                       int64                       `json:"trialEnd"                       description:"trial_end, utc time"` // trial_end, utc time
+	AutoCharge                     bool                        `json:"autoCharge"                      description:""`
+	OriginalPaymentInvoice         *bean.Invoice               `json:"originalPaymentInvoice"                      description:""`
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -97,6 +100,17 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 			fmt.Printf("UserSnapshot Unmarshal Metadata error:%s", err.Error())
 		}
 	}
+	autoCharge := false
+	if invoice.CreateFrom == consts.InvoiceAutoChargeFlag {
+		autoCharge = true
+	}
+	payment := bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId))
+	refund := bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId))
+	var originalPaymentInvoice *bean.Invoice
+	if refund != nil {
+		originalPaymentInvoice = bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId))
+	}
+
 	return &InvoiceDetail{
 		Id:                             invoice.Id,
 		MerchantId:                     invoice.MerchantId,
@@ -136,8 +150,8 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, invoice.UserId)),
 		UserSnapshot:                   bean.SimplifyUserAccount(userSnapShot),
 		Subscription:                   bean.SimplifySubscription(ctx, query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
-		Payment:                        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId)),
-		Refund:                         bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId)),
+		Payment:                        payment,
+		Refund:                         refund,
 		Discount:                       bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)),
 		CryptoCurrency:                 invoice.CryptoCurrency,
 		CryptoAmount:                   invoice.CryptoAmount,
@@ -153,5 +167,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		BizType:                        invoice.BizType,
 		PaymentId:                      invoice.PaymentId,
 		RefundId:                       invoice.RefundId,
+		AutoCharge:                     autoCharge,
+		OriginalPaymentInvoice:         originalPaymentInvoice,
 	}
 }

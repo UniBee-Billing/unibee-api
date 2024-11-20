@@ -28,7 +28,7 @@ func (t TaskSubscriptionExport) Header() interface{} {
 
 func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
-	if task == nil && task.MerchantId <= 0 {
+	if task == nil || task.MerchantId <= 0 {
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
@@ -45,7 +45,17 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 		Page:  page,
 		Count: count,
 	}
+	timeZone := 0
+	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
+		if value, ok := payload["timeZone"].(float64); ok {
+			timeZone = int(value)
+			if timeZone > 0 {
+				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
+			} else if timeZone < 0 {
+				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+			}
+		}
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = int64(value)
 		}
@@ -142,19 +152,20 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				Gateway:                subGateway,
 				Status:                 consts.SubStatusToEnum(one.Subscription.Status).Description(),
 				CancelAtPeriodEnd:      canAtPeriodEnd,
-				CurrentPeriodStart:     gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodStart),
-				CurrentPeriodEnd:       gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodEnd),
-				BillingCycleAnchor:     gtime.NewFromTimeStamp(one.Subscription.BillingCycleAnchor),
-				DunningTime:            gtime.NewFromTimeStamp(one.Subscription.DunningTime),
-				TrialEnd:               gtime.NewFromTimeStamp(one.Subscription.TrialEnd),
-				FirstPaidTime:          gtime.NewFromTimeStamp(one.Subscription.FirstPaidTime),
+				CurrentPeriodStart:     gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodStart + int64(timeZone*3600)),
+				CurrentPeriodEnd:       gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodEnd + int64(timeZone*3600)),
+				BillingCycleAnchor:     gtime.NewFromTimeStamp(one.Subscription.BillingCycleAnchor + int64(timeZone*3600)),
+				DunningTime:            gtime.NewFromTimeStamp(one.Subscription.DunningTime + int64(timeZone*3600)),
+				TrialEnd:               gtime.NewFromTimeStamp(one.Subscription.TrialEnd + int64(timeZone*3600)),
+				FirstPaidTime:          gtime.NewFromTimeStamp(one.Subscription.FirstPaidTime + int64(timeZone*3600)),
 				CancelReason:           one.Subscription.CancelReason,
 				CountryCode:            one.Subscription.CountryCode,
 				TaxPercentage:          utility.ConvertTaxPercentageToPercentageString(one.Subscription.TaxPercentage),
-				CreateTime:             gtime.NewFromTimeStamp(one.Subscription.CreateTime),
+				CreateTime:             gtime.NewFromTimeStamp(one.Subscription.CreateTime + int64(timeZone*3600)),
 				StripeUserId:           stripeUserId,
 				StripePaymentMethod:    stripePaymentMethod,
 				PaypalVaultId:          paypalVaultId,
+				TimeZone:               timeZoneStr,
 			})
 		}
 	}
@@ -194,4 +205,5 @@ type ExportSubscriptionEntity struct {
 	StripeUserId           string      `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
 	StripePaymentMethod    string      `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
 	PaypalVaultId          string      `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
+	TimeZone               string      `json:"TimeZone"         comment:""`
 }

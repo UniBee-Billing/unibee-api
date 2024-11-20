@@ -242,7 +242,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 
 	var currentInvoice *bean.Invoice
 	var nextPeriodInvoice *bean.Invoice
-	var RecurringDiscountCode string
+	var recurringDiscountCode string
 	if prorationDate == 0 {
 		prorationDate = time.Now().Unix()
 		if sub.TestClock > prorationDate && !config2.GetConfigInstance().IsProd() {
@@ -262,22 +262,22 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		})
 		utility.Assert(canApply, message)
 		if isRecurring {
-			RecurringDiscountCode = req.DiscountCode
+			recurringDiscountCode = req.DiscountCode
 		}
-	} else if len(sub.DiscountCode) > 0 {
-		canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     sub.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   sub.DiscountCode,
-			Currency:       sub.Currency,
-			SubscriptionId: sub.SubscriptionId,
-			PLanId:         req.NewPlanId,
-			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
-		})
-		if canApply && isRecurring {
-			req.DiscountCode = sub.DiscountCode
-			RecurringDiscountCode = sub.DiscountCode
-		}
+		//} else if len(sub.DiscountCode) > 0 {
+		//	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+		//		MerchantId:     sub.MerchantId,
+		//		UserId:         sub.UserId,
+		//		DiscountCode:   sub.DiscountCode,
+		//		Currency:       sub.Currency,
+		//		SubscriptionId: sub.SubscriptionId,
+		//		PLanId:         req.NewPlanId,
+		//		TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+		//	})
+		//	if canApply && isRecurring {
+		//		req.DiscountCode = sub.DiscountCode
+		//		recurringDiscountCode = sub.DiscountCode
+		//	}
 	}
 
 	if effectImmediate {
@@ -371,6 +371,16 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					Quantity: addonParam.Quantity,
 				})
 			}
+			oldCode := ""
+			latestPaidInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+			if latestPaidInvoice.Status == consts.InvoiceStatusPaid {
+				oldCode = latestPaidInvoice.DiscountCode
+			} else {
+				latestPaidInvoice = query.GetSubLatestPaidInvoice(ctx, sub.SubscriptionId)
+				if latestPaidInvoice != nil {
+					oldCode = latestPaidInvoice.DiscountCode
+				}
+			}
 			if !hasIntervalChange {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 					InvoiceName:       "SubscriptionUpdate",
@@ -387,6 +397,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodStart:       sub.CurrentPeriodStart,
 					PeriodEnd:         sub.CurrentPeriodEnd,
 					Metadata:          req.Metadata,
+					OldDiscountCode:   oldCode,
+					OldTaxPercentage:  sub.TaxPercentage,
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
@@ -405,6 +417,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodEnd:          sub.CurrentPeriodEnd,
 					BillingCycleAnchor: prorationDate,
 					Metadata:           req.Metadata,
+					OldDiscountCode:    oldCode,
+					OldTaxPercentage:   sub.TaxPercentage,
 				})
 			}
 		}
@@ -434,10 +448,17 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		}
 	}
 
+	nextCode := ""
+	if len(recurringDiscountCode) > 0 {
+		code := query.GetDiscountByCode(ctx, sub.MerchantId, recurringDiscountCode)
+		if code.CycleLimit > 1 || code.CycleLimit == 0 {
+			nextCode = recurringDiscountCode
+		}
+	}
 	nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 		InvoiceName:        "SubscriptionCycle",
 		Currency:           sub.Currency,
-		DiscountCode:       req.DiscountCode,
+		DiscountCode:       nextCode,
 		TimeNow:            prorationDate,
 		PlanId:             req.NewPlanId,
 		Quantity:           req.Quantity,
@@ -479,7 +500,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		Changed:               changed,
 		IsUpgrade:             isUpgrade,
 		TaxPercentage:         subscriptionTaxPercentage,
-		RecurringDiscountCode: RecurringDiscountCode,
+		RecurringDiscountCode: recurringDiscountCode,
 		Discount:              bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, currentInvoice.DiscountCode)),
 		PaymentMethodId:       paymentMethodId,
 	}, nil
@@ -613,7 +634,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.NewPlanId, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
 		utility.AssertError(err, "System Error")
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, req.CancelUrl, "SubscriptionUpdate", 0)
 		if err != nil {
@@ -630,7 +651,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else if prepare.EffectImmediate && prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.NewPlanId, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
 		utility.AssertError(err, "System Error")
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")
@@ -665,7 +686,6 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	}
 	// bing to subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().DiscountCode:    prepare.RecurringDiscountCode,
 		dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
 		dao.Subscription.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()

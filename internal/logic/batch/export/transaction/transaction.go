@@ -26,7 +26,7 @@ func (t TaskTransactionExport) Header() interface{} {
 
 func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
-	if task == nil && task.MerchantId <= 0 {
+	if task == nil || task.MerchantId <= 0 {
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
@@ -46,7 +46,17 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 		Page:  page,
 		Count: count,
 	}
+	timeZone := 0
+	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
+		if value, ok := payload["timeZone"].(float64); ok {
+			timeZone = int(value)
+			if timeZone > 0 {
+				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
+			} else if timeZone < 0 {
+				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+			}
+		}
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = uint64(value)
 		}
@@ -107,6 +117,8 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				status = "Success"
 			} else if one.Status == 2 {
 				status = "Failure"
+			} else if one.Status == 3 {
+				status = "Cancel"
 			}
 			var firstName = ""
 			var lastName = ""
@@ -135,10 +147,11 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				PaymentId:             one.PaymentId,
 				Status:                status,
 				Type:                  transactionType,
-				CreateTime:            gtime.NewFromTimeStamp(one.CreateTime),
+				CreateTime:            gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
 				RefundId:              one.RefundId,
 				FullRefund:            fullRefund,
 				ExternalTransactionId: one.ExternalTransactionId,
+				TimeZone:              timeZoneStr,
 			})
 		}
 	}
@@ -165,4 +178,5 @@ type ExportTransactionEntity struct {
 	CreateTime            *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05" comment:""`
 	RefundId              string      `json:"RefundId"       comment:""`
 	FullRefund            string      `json:"FullRefund"      comment:""`
+	TimeZone              string      `json:"TimeZone"         comment:""`
 }

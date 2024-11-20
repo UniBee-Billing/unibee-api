@@ -56,7 +56,10 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		//		}, nil
 		//	}
 		//}
-		one := query.GetLatestSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
+		one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
+		if one == nil {
+			one = query.GetLatestSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
+		}
 		if one != nil {
 			detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 			if err == nil {

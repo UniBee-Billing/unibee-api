@@ -28,4 +28,6 @@ type MerchantUserDiscountCode struct {
 	CreateTime     interface{} // create utc time
 	ApplyAmount    interface{} // apply_amount
 	Currency       interface{} // currency
+	Recurring      interface{} // is recurring apply, 0-no, 1-yes
+	RecurringId    interface{} // the first purchase id for the code, using for reucrring code
 }

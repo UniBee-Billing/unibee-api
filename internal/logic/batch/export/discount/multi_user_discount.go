@@ -6,24 +6,25 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/discount"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
-type TaskUserDiscountExport struct {
+type TaskMultiUserDiscountExport struct {
 }
 
-func (t TaskUserDiscountExport) TaskName() string {
-	return "UserDiscountExport"
+func (t TaskMultiUserDiscountExport) TaskName() string {
+	return "MultiUserDiscountExport"
 }
 
-func (t TaskUserDiscountExport) Header() interface{} {
+func (t TaskMultiUserDiscountExport) Header() interface{} {
 	return ExportUserDiscountEntity{}
 }
 
-func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
+func (t TaskMultiUserDiscountExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
 	if task == nil || task.MerchantId <= 0 {
 		return mainList, nil
@@ -35,18 +36,18 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
 		return mainList, nil
 	}
-	var id int64
-	if value, ok := payload["id"].(float64); ok {
-		id = int64(value)
+	var ids []uint64
+	if value, ok := payload["ids"].([]interface{}); ok {
+		ids = export.JsonArrayTypeConvertUint64(ctx, value)
 	}
-	if id <= 0 {
+	if len(ids) <= 0 {
 		return mainList, nil
 	}
 	req := &discount.UserDiscountListInternalReq{
 		MerchantId: task.MerchantId,
-		Id:         uint64(id),
-		Page:       page,
-		Count:      count,
+		//Id:         uint64(id),
+		Page:  page,
+		Count: count,
 	}
 	timeZone := 0
 	timeZoneStr := fmt.Sprintf("UTC")
@@ -73,58 +74,61 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 		}
 	}
 	req.SkipTotal = true
-	result, _ := discount.MerchantUserDiscountCodeList(ctx, req)
-	if result != nil {
-		for _, one := range result {
-			var firstName = ""
-			var lastName = ""
-			var email = ""
-			if one.User != nil {
-				firstName = one.User.FirstName
-				lastName = one.User.LastName
-				email = one.User.Email
-			} else {
-				one.User = &bean.UserAccount{}
+	for _, id := range ids {
+		req.Id = id
+		result, _ := discount.MerchantUserDiscountCodeList(ctx, req)
+		if result != nil {
+			for _, one := range result {
+				var firstName = ""
+				var lastName = ""
+				var email = ""
+				if one.User != nil {
+					firstName = one.User.FirstName
+					lastName = one.User.LastName
+					email = one.User.Email
+				} else {
+					one.User = &bean.UserAccount{}
+				}
+				if one.Plan == nil {
+					one.Plan = &bean.Plan{}
+				}
+				recurring := "No"
+				if one.Recurring == 1 {
+					recurring = "Yes"
+				}
+				statusStr := "Finished"
+				if one.Status == 2 {
+					statusStr = "Rollback"
+				}
+				mainList = append(mainList, &ExportMultiUserDiscountEntity{
+					Id:             fmt.Sprintf("%v", one.Id),
+					UserId:         fmt.Sprintf("%v", one.User.Id),
+					ExternalUserId: fmt.Sprintf("%v", one.User.ExternalUserId),
+					MerchantName:   merchant.Name,
+					FirstName:      firstName,
+					LastName:       lastName,
+					Email:          email,
+					PlanId:         fmt.Sprintf("%v", one.Plan.Id),
+					ExternalPlanId: fmt.Sprintf("%v", one.Plan.ExternalPlanId),
+					PlanName:       one.Plan.PlanName,
+					Code:           one.Code,
+					Status:         statusStr,
+					SubscriptionId: one.SubscriptionId,
+					PaymentId:      one.PaymentId,
+					InvoiceId:      one.InvoiceId,
+					CreateTime:     gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+					ApplyAmount:    utility.ConvertCentToDollarStr(one.ApplyAmount, one.Currency),
+					Currency:       one.Currency,
+					Recurring:      recurring,
+					TimeZone:       timeZoneStr,
+				})
 			}
-			if one.Plan == nil {
-				one.Plan = &bean.Plan{}
-			}
-			recurring := "No"
-			if one.Recurring == 1 {
-				recurring = "Yes"
-			}
-			statusStr := "Finished"
-			if one.Status == 2 {
-				statusStr = "Rollback"
-			}
-			mainList = append(mainList, &ExportUserDiscountEntity{
-				Id:             fmt.Sprintf("%v", one.Id),
-				UserId:         fmt.Sprintf("%v", one.User.Id),
-				ExternalUserId: fmt.Sprintf("%v", one.User.ExternalUserId),
-				MerchantName:   merchant.Name,
-				FirstName:      firstName,
-				LastName:       lastName,
-				Email:          email,
-				PlanId:         fmt.Sprintf("%v", one.Plan.Id),
-				ExternalPlanId: fmt.Sprintf("%v", one.Plan.ExternalPlanId),
-				PlanName:       one.Plan.PlanName,
-				Code:           one.Code,
-				Status:         statusStr,
-				SubscriptionId: one.SubscriptionId,
-				PaymentId:      one.PaymentId,
-				InvoiceId:      one.InvoiceId,
-				CreateTime:     gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
-				ApplyAmount:    utility.ConvertCentToDollarStr(one.ApplyAmount, one.Currency),
-				Currency:       one.Currency,
-				Recurring:      recurring,
-				TimeZone:       timeZoneStr,
-			})
 		}
 	}
 	return mainList, nil
 }
 
-type ExportUserDiscountEntity struct {
+type ExportMultiUserDiscountEntity struct {
 	Id             string      `json:"Id"                  comment:""`
 	UserId         string      `json:"UserId"              comment:""`
 	ExternalUserId string      `json:"ExternalUserId"      comment:""`

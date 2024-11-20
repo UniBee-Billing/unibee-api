@@ -53,10 +53,10 @@ func (p PaypalWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway
 			sub_update.UpdateUserDefaultGatewayPaymentMethod(r.Context(), sub.UserId, gateway.Id, result.ID)
 			_, err = handler.ChangeSubscriptionGateway(r.Context(), sub.SubscriptionId, gateway.Id, result.ID)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Paypal Redirect GatewayNewPaymentMethodRedirect Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+				g.Log().Errorf(r.Context(), "Paypal Redirect GatewayNewPaymentMethodRedirect Error ChangeSubscriptionGateway:%s errpr:%s\n", gateway.GatewayName, err.Error())
 			}
 			utility.AssertError(err, "Error ChangeSubscriptionGateway")
-			if sub != nil && err == nil && len(sub.LatestInvoiceId) > 0 {
+			if err == nil && len(sub.LatestInvoiceId) > 0 {
 				invoice := query.GetInvoiceByInvoiceId(r.Context(), sub.LatestInvoiceId)
 				if invoice != nil {
 					if invoice.TotalAmount == 0 {

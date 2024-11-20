@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/default"
 )
@@ -49,25 +50,27 @@ type Invoice struct {
 	CountryCode                    string                 `json:"countryCode"                    description:""`
 	VatNumber                      string                 `json:"vatNumber"                      description:""`
 	Data                           string                 `json:"data"                      description:""`
+	AutoCharge                     bool                   `json:"autoCharge"                      description:""`
 }
 
 type InvoiceItemSimplify struct {
-	Currency               string `json:"currency"`
-	OriginAmount           int64  `json:"originAmount"`
-	DiscountAmount         int64  `json:"discountAmount"`
-	Amount                 int64  `json:"amount"`
-	Tax                    int64  `json:"tax"`
-	AmountExcludingTax     int64  `json:"amountExcludingTax"`
-	TaxPercentage          int64  `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
-	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
-	Name                   string `json:"name"`
-	Description            string `json:"description"`
-	PdfDescription         string `json:"pdfDescription"`
-	Proration              bool   `json:"proration"`
-	Quantity               int64  `json:"quantity"`
-	PeriodEnd              int64  `json:"periodEnd"`
-	PeriodStart            int64  `json:"periodStart"`
-	Plan                   *Plan  `json:"plan"`
+	Currency                   string `json:"currency"`
+	OriginAmount               int64  `json:"originAmount"`
+	OriginUnitAmountExcludeTax int64  `json:"originUnitAmountExcludeTax"`
+	DiscountAmount             int64  `json:"discountAmount"`
+	Amount                     int64  `json:"amount"`
+	Tax                        int64  `json:"tax"`
+	AmountExcludingTax         int64  `json:"amountExcludingTax"`
+	TaxPercentage              int64  `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
+	UnitAmountExcludingTax     int64  `json:"unitAmountExcludingTax"`
+	Name                       string `json:"name"`
+	Description                string `json:"description"`
+	PdfDescription             string `json:"pdfDescription"`
+	Proration                  bool   `json:"proration"`
+	Quantity                   int64  `json:"quantity"`
+	PeriodEnd                  int64  `json:"periodEnd"`
+	PeriodStart                int64  `json:"periodStart"`
+	Plan                       *Plan  `json:"plan"`
 }
 
 func UnmarshalFromJsonString(target string, one interface{}) error {
@@ -93,6 +96,10 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 		if err != nil {
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
 		}
+	}
+	autoCharge := false
+	if one.CreateFrom == consts.InvoiceAutoChargeFlag {
+		autoCharge = true
 	}
 	return &Invoice{
 		Id:                             one.Id,
@@ -132,5 +139,6 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 		Metadata:                       metadata,
 		VatNumber:                      one.VatNumber,
 		Data:                           one.Data,
+		AutoCharge:                     autoCharge,
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"unibee/internal/logic/discount/quantity"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type MerchantDiscountCodeDetail struct {
@@ -30,7 +31,8 @@ type MerchantDiscountCodeDetail struct {
 	PlanIds            []int64                `json:"planIds"  description:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Plans              []*bean.Plan           `json:"plans"         description:"plans which discount code can effect, default effect all plans if not set"` // create utc time
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
-	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit"`
+	LiveQuantity       int64                  `json:"liveQuantity"           description:"the live quantity of code"`
+	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit, will not change"`
 	QuantityUsed       int64                  `json:"quantityUsed"           description:"quantity used count of code"`
 }
 
@@ -77,6 +79,7 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 		PlanIds:            planIds,
 		Plans:              bean.SimplifyPlanList(query.GetPlansByIds(ctx, planIds)),
 		Metadata:           metadata,
+		LiveQuantity:       utility.MaxInt64(one.Quantity-int64(quantity.GetDiscountQuantityUsedCount(ctx, one.Id)), 0),
 		Quantity:           one.Quantity,
 		QuantityUsed:       int64(quantity.GetDiscountQuantityUsedCount(ctx, one.Id)),
 	}
@@ -88,12 +91,14 @@ type MerchantUserDiscountCodeDetail struct {
 	User           *bean.UserAccount `json:"user"     description:"User"`
 	Code           string            `json:"code"           description:"code"` // code
 	Plan           *bean.Plan        `json:"plan"     description:"Plan"`
-	SubscriptionId string            `json:"subscriptionId" description:"subscription_id"` // subscription_id
-	PaymentId      string            `json:"paymentId"      description:"payment_id"`      // payment_id
-	InvoiceId      string            `json:"invoiceId"      description:"invoice_id"`      // invoice_id
-	CreateTime     int64             `json:"createTime"     description:"create utc time"` // create utc time
-	ApplyAmount    int64             `json:"applyAmount"    description:"apply_amount"`    // apply_amount
-	Currency       string            `json:"currency"       description:"currency"`        // currency
+	Status         int               `json:"status"         description:"status, 1-finished, 2-rollback"`  // status, 1-finished, 2-rollback
+	SubscriptionId string            `json:"subscriptionId" description:"subscription_id"`                 // subscription_id
+	PaymentId      string            `json:"paymentId"      description:"payment_id"`                      // payment_id
+	InvoiceId      string            `json:"invoiceId"      description:"invoice_id"`                      // invoice_id
+	CreateTime     int64             `json:"createTime"     description:"create utc time"`                 // create utc time
+	ApplyAmount    int64             `json:"applyAmount"    description:"apply_amount"`                    // apply_amount
+	Currency       string            `json:"currency"       description:"currency"`                        // currency
+	Recurring      int               `json:"recurring"      description:"is recurring apply, 0-no, 1-yes"` // is recurring apply, 0-no, 1-yes
 }
 
 func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.MerchantUserDiscountCode) *MerchantUserDiscountCodeDetail {
@@ -117,11 +122,13 @@ func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.Merc
 		User:           bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
 		Code:           one.Code,
 		Plan:           plan,
+		Status:         one.Status,
 		SubscriptionId: one.SubscriptionId,
 		PaymentId:      one.PaymentId,
 		InvoiceId:      one.InvoiceId,
 		CreateTime:     one.CreateTime,
 		ApplyAmount:    one.ApplyAmount,
 		Currency:       one.Currency,
+		Recurring:      one.Recurring,
 	}
 }
