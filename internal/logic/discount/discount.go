@@ -308,7 +308,7 @@ func QuantityDecrement(ctx context.Context, merchantId uint64, id uint64, amount
 	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.Type == 0, "Delete not available for external code :"+strconv.FormatUint(id, 10))
-	utility.Assert(uint64(one.Quantity) >= amount, "decrease value should not greater than code's quantity")
+	utility.Assert(uint64(one.Quantity) >= amount, "decrease value should not greater than code quantity")
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Where(dao.MerchantDiscountCode.Columns().Id, id).Decrement(dao.MerchantDiscountCode.Columns().Quantity, amount)
 	if err != nil {
 		return err

@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package user
 
 import (
 	"context"
-	
+
 	"unibee/api/user/auth"
 	"unibee/api/user/gateway"
 	"unibee/api/user/invoice"
@@ -56,6 +56,7 @@ type IUserPayment interface {
 
 type IUserPlan interface {
 	List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error)
+	CodeApplyPreview(ctx context.Context, req *plan.CodeApplyPreviewReq) (res *plan.CodeApplyPreviewRes, err error)
 }
 
 type IUserProduct interface {
@@ -96,5 +97,3 @@ type IUserVat interface {
 	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
 	NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error)
 }
-
-

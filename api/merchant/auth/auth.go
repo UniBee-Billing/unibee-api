@@ -6,9 +6,9 @@ import (
 )
 
 type LoginReq struct {
-	g.Meta   `path:"/sso/login" tags:"Auth" method:"post" summary:"Login" dc:"Password login for merchant member'"`
-	Email    string `json:"email" dc:"The merchant member's email address'" v:"required"`
-	Password string `json:"password" dc:"The merchant member's password'" v:"required"`
+	g.Meta   `path:"/sso/login" tags:"Auth" method:"post" summary:"Login" dc:"Password login for merchant member"`
+	Email    string `json:"email" dc:"The merchant member email address" v:"required"`
+	Password string `json:"password" dc:"The merchant member password" v:"required"`
 }
 
 type LoginRes struct {
@@ -17,8 +17,8 @@ type LoginRes struct {
 }
 
 type LoginOtpReq struct {
-	g.Meta `path:"/sso/loginOTP" tags:"Auth" method:"post" summary:"LoginOTP" dc:"OTP login for merchant member, send email to member's email address with OTP code'"`
-	Email  string `json:"email" dc:"The merchant member's email address" v:"required"`
+	g.Meta `path:"/sso/loginOTP" tags:"Auth" method:"post" summary:"LoginOTP" dc:"OTP login for merchant member, send email to member email address with OTP code"`
+	Email  string `json:"email" dc:"The merchant member email address" v:"required"`
 }
 
 type LoginOtpRes struct {
@@ -26,7 +26,7 @@ type LoginOtpRes struct {
 
 type LoginOtpVerifyReq struct {
 	g.Meta           `path:"/sso/loginOTPVerify" tags:"Auth" method:"post" summary:"LoginOTPVerify" dc:"OTP login for merchant member, verify OTP code"`
-	Email            string `json:"email" dc:"The merchant member's email address" v:"required"`
+	Email            string `json:"email" dc:"The merchant member email address" v:"required"`
 	VerificationCode string `json:"verificationCode" dc:"OTP Code, received from email" v:"required"`
 }
 
@@ -36,16 +36,16 @@ type LoginOtpVerifyRes struct {
 }
 
 type PasswordForgetOtpReq struct {
-	g.Meta `path:"/sso/passwordForgetOTP" tags:"Auth" method:"post" summary:"PasswordForgetOTP" dc:"Merchant member's password forget OTP process,, send email to member's email address with OTP code'"`
-	Email  string `json:"email" dc:"The merchant member's email address" v:"required"`
+	g.Meta `path:"/sso/passwordForgetOTP" tags:"Auth" method:"post" summary:"PasswordForgetOTP" dc:"Merchant member password forget OTP process, send email to member's email address with OTP code"`
+	Email  string `json:"email" dc:"The merchant member email address" v:"required"`
 }
 
 type PasswordForgetOtpRes struct {
 }
 
 type PasswordForgetOtpVerifyReq struct {
-	g.Meta           `path:"/sso/passwordForgetOTPVerify" tags:"Auth" method:"post" summary:"PasswordForgetOTPVerify" dc:"Merchant member's password forget OTP process, verify OTP code"`
-	Email            string `json:"email" dc:"The merchant member's email address" v:"required"`
+	g.Meta           `path:"/sso/passwordForgetOTPVerify" tags:"Auth" method:"post" summary:"PasswordForgetOTPVerify" dc:"Merchant member password forget OTP process, verify OTP code"`
+	Email            string `json:"email" dc:"The merchant member email address" v:"required"`
 	VerificationCode string `json:"verificationCode" dc:"OTP Code, received from email" v:"required"`
 	NewPassword      string `json:"newPassword" dc:"The new password" v:"required"`
 }
@@ -67,7 +67,7 @@ type RegisterRes struct {
 
 type RegisterVerifyReq struct {
 	g.Meta           `path:"/sso/registerVerify" tags:"Auth" method:"post" summary:"RegisterVerify" dc:"Merchant Register, verify OTP code "`
-	Email            string `json:"email" dc:"The merchant member's email address" v:"required"`
+	Email            string `json:"email" dc:"The merchant member email address" v:"required"`
 	VerificationCode string `json:"verificationCode" dc:"OTP Code, received from email" v:"required"`
 }
 

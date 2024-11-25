@@ -30,6 +30,9 @@ func (t TaskMultiUserDiscountExport) PageData(ctx context.Context, page int, cou
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
+	if merchant == nil {
+		return mainList, nil
+	}
 	var payload map[string]interface{}
 	err := utility.UnmarshalFromJsonString(task.Payload, &payload)
 	if err != nil {
@@ -37,7 +40,9 @@ func (t TaskMultiUserDiscountExport) PageData(ctx context.Context, page int, cou
 		return mainList, nil
 	}
 	var ids []uint64
-	if value, ok := payload["ids"].([]interface{}); ok {
+	if _, ok := payload["exportAll"].(interface{}); ok {
+		ids = query.GetAllMerchantDiscountIds(ctx, merchant.Id)
+	} else if value, ok := payload["ids"].([]interface{}); ok {
 		ids = export.JsonArrayTypeConvertUint64(ctx, value)
 	}
 	if len(ids) <= 0 {
@@ -45,9 +50,8 @@ func (t TaskMultiUserDiscountExport) PageData(ctx context.Context, page int, cou
 	}
 	req := &discount.UserDiscountListInternalReq{
 		MerchantId: task.MerchantId,
-		//Id:         uint64(id),
-		Page:  page,
-		Count: count,
+		Page:       page,
+		Count:      count,
 	}
 	timeZone := 0
 	timeZoneStr := fmt.Sprintf("UTC")

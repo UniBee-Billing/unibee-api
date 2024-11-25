@@ -19,7 +19,7 @@ type MerchantMemberDetail struct {
 	Mobile      string               `json:"mobile"     description:"mobile"`          // mobile
 	IsOwner     bool                 `json:"isOwner" description:"Check Member is Owner" `
 	Status      int                  `json:"status"             description:"0-Active, 2-Suspend"`
-	MemberRoles []*bean.MerchantRole `json:"MemberRoles" description:"The member's role list'" `
+	MemberRoles []*bean.MerchantRole `json:"MemberRoles" description:"The member role list'" `
 }
 
 func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *MerchantMemberDetail {

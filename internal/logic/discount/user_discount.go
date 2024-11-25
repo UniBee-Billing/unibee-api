@@ -120,37 +120,39 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
 		}
 	}
-	if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
-		one := getLastNonRecurringPurchase(ctx, req)
-		if one != nil && one.Status == 2 {
-			return false, false, "First code purchase already rolled back"
-		}
-		var recurringId int64 = 0
-		if one != nil {
-			recurringId = one.RecurringId
-		}
-		//check user subscription limit
-		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
-			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
-			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
-			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-			Where(dao.MerchantUserDiscountCode.Columns().RecurringId, recurringId).
-			Count()
-		if err != nil {
-			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
+	if req.IsRecurringApply {
+		if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
+			one := getLastNonRecurringPurchase(ctx, req)
+			if one != nil && one.Status == 2 {
+				return false, false, "First code purchase already rolled back"
+			}
+			var recurringId int64 = 0
+			if one != nil {
+				recurringId = one.RecurringId
+			}
+			//check user subscription limit
+			count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
+				Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+				Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+				Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
+				Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
+				Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+				Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+				Where(dao.MerchantUserDiscountCode.Columns().RecurringId, recurringId).
+				Count()
+			if err != nil {
+				g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
 
-			return false, false, "Server Error"
-		}
-		if discountCode.CycleLimit < count+1 {
-			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
-		}
-	} else if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit == 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
-		one := getLastNonRecurringPurchase(ctx, req)
-		if one != nil && one.Status == 2 {
-			return false, false, "First code purchase already rolled back"
+				return false, false, "Server Error"
+			}
+			if discountCode.CycleLimit < count+1 {
+				return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
+			}
+		} else if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit == 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
+			one := getLastNonRecurringPurchase(ctx, req)
+			if one != nil && one.Status == 2 {
+				return false, false, "First code purchase already rolled back"
+			}
 		}
 	}
 

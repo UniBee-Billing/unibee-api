@@ -266,7 +266,11 @@ func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
 			r.Middleware.Next()
 			return
 		}
-		one := query.GetMerchantByHost(r.Context(), r.GetHost())
+		host := r.GetHost()
+		if !config.GetConfigInstance().IsProd() && (host == "127.0.0.1" || host == "localhost") {
+			host = "user.unibee.top"
+		}
+		one := query.GetMerchantByHost(r.Context(), host)
 		if one == nil {
 			//try match merchant from Http Origin
 			origin := r.GetHeader("Origin")
@@ -276,6 +280,9 @@ func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
 				if err == nil {
 					// Extract the host (domain) from the parsed URL
 					domain := parsedURL.Hostname()
+					if !config.GetConfigInstance().IsProd() && (domain == "127.0.0.1" || domain == "localhost") {
+						domain = "user.unibee.top"
+					}
 					one = query.GetMerchantByHost(r.Context(), domain)
 				}
 			}

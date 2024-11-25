@@ -31,7 +31,7 @@ type PasswordResetRes struct {
 
 type ListReq struct {
 	g.Meta  `path:"/list" tags:"Member" method:"get,post" summary:"GetMemberList"`
-	RoleIds []uint64 `json:"roleIds" description:"The member's roleId if specified'"`
+	RoleIds []uint64 `json:"roleIds" description:"The member roleId if specified'"`
 	Page    int      `json:"page"  description:"Page, Start With 0" `
 	Count   int      `json:"count"  description:"Count Of Page"`
 }

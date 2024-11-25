@@ -26,7 +26,7 @@ type GetRes struct {
 	SegmentServerSideKey string                       `json:"segmentServerSideKey" description:"SegmentServerSideKey" `
 	SegmentUserPortalKey string                       `json:"segmentUserPortalKey" description:"SegmentUserPortalKey" `
 	IsOwner              bool                         `json:"isOwner" description:"Check Member is Owner" `
-	MemberRoles          []*bean.MerchantRole         `json:"MemberRoles" description:"The member's role list'" `
+	MemberRoles          []*bean.MerchantRole         `json:"MemberRoles" description:"The member role list'" `
 }
 
 type UpdateReq struct {
