@@ -8,19 +8,20 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 
-	"unibee/api/merchant/subscription"
+	"unibee/api/merchant/user"
 )
 
-func (c *ControllerSubscription) NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error) {
+func (c *ControllerUser) NewAdminNote(ctx context.Context, req *user.NewAdminNoteReq) (res *user.NewAdminNoteRes, err error) {
 	utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "invalid token")
-	note := &entity.SubscriptionAdminNote{
-		SubscriptionId:   req.SubscriptionId,
+	utility.Assert(len(req.Note) < 20000, "note too long")
+	note := &entity.UserAdminNote{
+		UserId:           req.UserId,
 		MerchantMemberId: int64(_interface.Context().Get(ctx).MerchantMember.Id),
 		Note:             req.Note,
 		CreateTime:       gtime.Now().Timestamp(),
 	}
 
-	_, err = dao.SubscriptionAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)
+	_, err = dao.UserAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)
 	utility.AssertError(err, "Save Error")
-	return &subscription.NewAdminNoteRes{}, nil
+	return &user.NewAdminNoteRes{}, nil
 }

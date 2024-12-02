@@ -131,3 +131,28 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		Metadata:           metadata,
 	}
 }
+
+type UserAdminNoteDetail struct {
+	Id               uint64                `json:"id"               description:"Id"`
+	CreateTime       int64                 `json:"createTime"       description:"CreateTime, UTC Time"`
+	UserId           uint64                `json:"userId"           description:"user_id"`
+	MerchantMemberId int64                 `json:"merchantMemberId" description:"merchant_user_id"`
+	Note             string                `json:"note"             description:"note"`
+	UserAccount      *bean.UserAccount     `json:"userAccount"     description:"User Account"`
+	MerchantMember   *MerchantMemberDetail `json:"merchantMember"     description:"Merchant Member"`
+}
+
+func ConvertUserAdminNoteDetail(ctx context.Context, one *entity.UserAdminNote) *UserAdminNoteDetail {
+	if one == nil {
+		return nil
+	}
+	return &UserAdminNoteDetail{
+		Id:               one.Id,
+		Note:             one.Note,
+		CreateTime:       one.CreateTime,
+		UserId:           one.UserId,
+		MerchantMemberId: one.MerchantMemberId,
+		UserAccount:      bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
+		MerchantMember:   ConvertMemberToDetail(ctx, query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+	}
+}

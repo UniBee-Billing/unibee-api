@@ -132,3 +132,31 @@ type ChangeEmailReq struct {
 
 type ChangeEmailRes struct {
 }
+
+type ClearAutoChargeMethodReq struct {
+	g.Meta `path:"/clear_auto_charge_method" tags:"User" method:"post" summary:"ClearAutoChargeMethod"`
+	UserId uint64 `json:"userId" dc:"The id of user" v:"required"`
+}
+
+type ClearAutoChargeMethodRes struct {
+}
+
+type NewAdminNoteReq struct {
+	g.Meta `path:"/new_admin_note" tags:"User" method:"post" summary:"NewAdminNote"`
+	UserId uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" v:"required"`
+	Note   string `json:"note" dc:"Note" v:"required"`
+}
+
+type NewAdminNoteRes struct {
+}
+
+type AdminNoteListReq struct {
+	g.Meta `path:"/admin_note_list" tags:"User" method:"get,post" summary:"UserAdminNoteList"`
+	UserId uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" v:"required"`
+	Page   int    `json:"page"  dc:"Page, Start With 0" `
+	Count  int    `json:"count" dc:"Count Of Page" `
+}
+
+type AdminNoteListRes struct {
+	NoteLists []*detail.UserAdminNoteDetail `json:"noteLists"   description:""`
+}

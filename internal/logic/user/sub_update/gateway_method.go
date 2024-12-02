@@ -18,6 +18,25 @@ import (
 	"unibee/utility"
 )
 
+func ClearUserDefaultGatewayMethodForAutoCharge(ctx context.Context, userId uint64) {
+	if userId > 0 {
+		user := query.GetUserAccountById(ctx, userId)
+		if user != nil && len(user.GatewayId) > 0 && len(user.PaymentMethod) > 0 {
+			_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
+				dao.UserAccount.Columns().PaymentMethod: "",
+				dao.UserAccount.Columns().GmtModify:     gtime.Now(),
+			}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+			subs := query.GetUserAllActiveOrIncompleteSubscriptions(ctx, user.Id, user.MerchantId)
+			for _, sub := range subs {
+				_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
+					dao.Subscription.Columns().GatewayDefaultPaymentMethod: "",
+					dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+				}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+			}
+		}
+	}
+}
+
 func UpdateUserDefaultGatewayForCheckout(ctx context.Context, userId uint64, gatewayId uint64) {
 	if userId > 0 && gatewayId > 0 {
 		user := query.GetUserAccountById(ctx, userId)

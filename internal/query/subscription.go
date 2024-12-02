@@ -7,6 +7,22 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+func GetUserAllActiveOrIncompleteSubscriptions(ctx context.Context, userId uint64, merchantId uint64) (list []*entity.Subscription) {
+	if userId <= 0 || merchantId <= 0 {
+		return nil
+	}
+	err := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().UserId, userId).
+		Where(dao.Subscription.Columns().MerchantId, merchantId).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusIncomplete, consts.SubStatusActive}).
+		Scan(&list)
+	if err != nil {
+		list = make([]*entity.Subscription, 0)
+	}
+	return
+}
+
 func GetLatestSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64, productId int64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil

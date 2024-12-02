@@ -22,4 +22,4 @@ gfcli:
         entityPath:  "model/entity/default"
         noModelComment: false
         descriptionTag: true
-        tables: "merchant_user_discount_code"
+        tables: ""

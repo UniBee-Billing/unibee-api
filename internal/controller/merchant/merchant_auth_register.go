@@ -53,7 +53,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	utility.AssertError(err, "Server Error")
 
 	list := query.GetActiveMerchantList(ctx)
-	if len(list) > 2 {
+	if len(list) >= 2 {
 		utility.Assert(config.GetConfigInstance().Mode == "cloud", "Register multi merchants should contain valid mode")
 		var containPremiumMerchant = false
 		for _, one := range list {

@@ -223,9 +223,6 @@ func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mer
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	if err != nil {
-		return nil, err
-	}
 
 	return parseChangellyPayment(responseJson), nil
 }

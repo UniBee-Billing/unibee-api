@@ -252,6 +252,9 @@ type IMerchantUser interface {
 	Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error)
 	ChangeGateway(ctx context.Context, req *user.ChangeGatewayReq) (res *user.ChangeGatewayRes, err error)
 	ChangeEmail(ctx context.Context, req *user.ChangeEmailReq) (res *user.ChangeEmailRes, err error)
+	ClearAutoChargeMethod(ctx context.Context, req *user.ClearAutoChargeMethodReq) (res *user.ClearAutoChargeMethodRes, err error)
+	NewAdminNote(ctx context.Context, req *user.NewAdminNoteReq) (res *user.NewAdminNoteRes, err error)
+	AdminNoteList(ctx context.Context, req *user.AdminNoteListReq) (res *user.AdminNoteListRes, err error)
 }
 
 type IMerchantVat interface {
