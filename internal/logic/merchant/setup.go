@@ -20,22 +20,15 @@ func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 		//if cloud version setup default sendgrid, vat, stripe gateway
 		{
 			name, data := email.GetDefaultMerchantEmailConfig(ctx, consts.CloudModeManagerMerchantId)
-			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
-			err := email.SetupMerchantEmailConfig(ctx, merchantId, name, data, true)
-			if err != nil {
-				return err
+			if len(name) > 0 && len(data) > 0 {
+				_ = email.SetupMerchantEmailConfig(ctx, merchantId, name, data, true)
 			}
 		}
 		{
 			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, consts.CloudModeManagerMerchantId)
-			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
-			err := vat_gateway.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
-			if err != nil {
-				return err
-			}
-			err = vat_gateway.InitMerchantDefaultVatGateway(ctx, merchantId)
-			if err != nil {
-				return err
+			if len(name) > 0 && len(data) > 0 {
+				_ = vat_gateway.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
+				_ = vat_gateway.InitMerchantDefaultVatGateway(ctx, merchantId)
 			}
 		}
 		{
