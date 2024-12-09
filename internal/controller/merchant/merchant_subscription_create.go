@@ -96,6 +96,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		TrialEnd:           req.TrialEnd,
 		StartIncomplete:    req.StartIncomplete,
 		ProductData:        req.ProductData,
+		ApplyPromoCredit:   req.ApplyPromoCredit,
 	})
 	utility.AssertError(err, "Server Error")
 	if err == nil && _interface.Context().Get(ctx).IsAdminPortalCall {

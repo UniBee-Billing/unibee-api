@@ -213,3 +213,17 @@ func GetSubscriptionTimeLineByUniqueId(ctx context.Context, uniqueId string) (on
 	}
 	return
 }
+
+func GetLatestSubscriptionTimeLine(ctx context.Context, subscriptionId string) (one *entity.SubscriptionTimeline) {
+	if len(subscriptionId) == 0 {
+		return nil
+	}
+	err := dao.SubscriptionTimeline.Ctx(ctx).
+		Where(dao.SubscriptionTimeline.Columns().SubscriptionId, subscriptionId).
+		OrderDesc(dao.SubscriptionTimeline.Columns().Id).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}

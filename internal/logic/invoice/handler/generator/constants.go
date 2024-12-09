@@ -10,11 +10,15 @@ const (
 	// DeliveryNote define the "delievry note" document type
 	DeliveryNote string = "DELIVERY_NOTE"
 
+	scale = 0.35
+
 	// BaseMargin define base margin used in documents
-	BaseMargin float64 = 10
+	BaseMargin float64 = 30 * scale
+	//BASEMargin         = 10
 
 	// BaseMarginTop define base margin top used in documents
-	BaseMarginTop float64 = 20
+	BaseMarginTop float64 = 40 * scale
+	//BaseMarginTop = 20
 
 	// HeaderMarginTop define base header margin top used in documents
 	HeaderMarginTop float64 = 5
@@ -58,9 +62,6 @@ var (
 
 	// SmallTextFontSize define the small font size for text in document
 	SmallTextFontSize float64 = 7
-
-	// ExtraSmallTextFontSize define the extra small font size for text in document
-	ExtraSmallTextFontSize float64 = 6
 
 	// LargeTextFontSize define the large font size for text in document
 	LargeTextFontSize float64 = 12

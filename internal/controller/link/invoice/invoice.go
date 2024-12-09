@@ -25,6 +25,12 @@ func VerifyInvoiceLinkSecurityToken(ctx context.Context, invoiceId string, token
 }
 
 func LinkEntry(r *ghttp.Request) {
+	r.Response.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+	r.Response.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT,DELETE,OPTIONS,PATCH")
+	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
+	if r.Method == "OPTIONS" {
+		return
+	}
 	invoiceId := r.Get("invoiceId").String()
 	if len(invoiceId) == 0 {
 		r.Response.Writeln("InvoiceId not found")
@@ -46,11 +52,15 @@ func LinkEntry(r *ghttp.Request) {
 }
 
 func LinkPdfEntry(r *ghttp.Request) {
+	r.Response.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+	r.Response.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT,DELETE,OPTIONS,PATCH")
+	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 	invoiceId := r.Get("invoiceId").String()
 	if len(invoiceId) == 0 {
 		r.Response.Writeln("InvoiceId not found")
 		return
 	}
+
 	st := r.Get("st").String()
 	download := r.Get("download").Bool()
 	if !VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {

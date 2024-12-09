@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/subscription_onetimeaddon"
-	"unibee/internal/logic/discount"
+	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/default"
 )
@@ -26,9 +26,9 @@ func (i Onetime) PaymentRefundCreateCallback(ctx context.Context, payment *entit
 
 func (i Onetime) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
 	if payment.TotalAmount <= payment.RefundAmount {
-		err := discount.UserDiscountRollbackFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
+		err := discount2.InvoiceRollbackAllDiscountsFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
 		if err != nil {
-			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+			fmt.Printf("InvoiceRollbackAllDiscountsFromPayment error:%s", err.Error())
 		}
 	}
 }

@@ -469,6 +469,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 		var nextPeriodStart = gtime.Now().Timestamp()
 		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, nextPeriodStart, plan.Id)
 		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			UserId:             sub.UserId,
 			Currency:           sub.Currency,
 			PlanId:             sub.PlanId,
 			Quantity:           sub.Quantity,
@@ -480,6 +481,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 			FinishTime:         nextPeriodStart,
 			BillingCycleAnchor: nextPeriodStart,
 			VatNumber:          sub.VatNumber,
+			ApplyPromoCredit:   false,
 		})
 		gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")

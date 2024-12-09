@@ -134,7 +134,11 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 			return redismq.RollbackTransaction, err
 		}
 	})
-	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
+	if err != nil {
+		g.Log().Errorf(ctx, "HandlePayAuthorized sendResult err=%s", err.Error())
+	} else {
+		g.Log().Infof(ctx, "HandlePayAuthorized send success")
+	}
 	if err == nil {
 		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
@@ -185,7 +189,11 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 			return redismq.RollbackTransaction, err
 		}
 	})
-	g.Log().Infof(ctx, "HandlePayNeedAuthorized sendResult err=%s", err)
+	if err != nil {
+		g.Log().Errorf(ctx, "HandlePayNeedAuthorized sendResult err=%s", err.Error())
+	} else {
+		g.Log().Infof(ctx, "HandlePayNeedAuthorized send success")
+	}
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
@@ -252,10 +260,10 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 	})
 	if err != nil {
-		return err
+		g.Log().Errorf(ctx, "HandlePayCancel sendResult err=%s", err.Error())
+	} else {
+		g.Log().Infof(ctx, "HandlePayCancel send success")
 	}
-
-	g.Log().Infof(ctx, "HandlePayCancel sendResult err=%s", err)
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
@@ -325,10 +333,10 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 	})
 	if err != nil {
-		return err
+		g.Log().Errorf(ctx, "HandlePayFailure sendResult err=%s", err.Error())
+	} else {
+		g.Log().Infof(ctx, "HandlePayFailure send success")
 	}
-
-	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
@@ -417,10 +425,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 	})
 	if err != nil {
-		return err
+		g.Log().Errorf(ctx, "HandlePaySuccess sendResult err=%s", err.Error())
+	} else {
+		g.Log().Infof(ctx, "HandlePaySuccess send success")
 	}
-
-	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)

@@ -9,8 +9,8 @@ import (
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
-	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
+	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -30,9 +30,9 @@ func (s SubscriptionPaymentCallback) PaymentRefundCreateCallback(ctx context.Con
 
 func (s SubscriptionPaymentCallback) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
 	if payment.TotalAmount <= payment.RefundAmount {
-		err := discount.UserDiscountRollbackFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
+		err := discount2.InvoiceRollbackAllDiscountsFromPayment(ctx, payment.InvoiceId, payment.PaymentId)
 		if err != nil {
-			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+			fmt.Printf("InvoiceRollbackAllDiscountsFromPayment error:%s", err.Error())
 		}
 	}
 }

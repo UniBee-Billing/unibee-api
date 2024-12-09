@@ -36,12 +36,13 @@ type Options struct {
 	TextTotalTax        string `default:"VAT" json:"text_total_tax,omitempty"`
 	TextTotalWithTax    string `default:"TOTAL" json:"text_total_with_tax,omitempty"`
 
-	BaseTextColor []int `default:"[111,111,111]" json:"base_text_color,omitempty"`
+	BaseTextColor []int `default:"[51,51,51]" json:"base_text_color,omitempty"`
 	PaidTextColor []int `default:"[73,167,101]" json:"paid_text_color,omitempty"`
-	GreyTextColor []int `default:"[82,82,82]" json:"grey_text_color,omitempty"`
+	GreyTextColor []int `default:"[153,153,153]" json:"grey_text_color,omitempty"`
 	WhiteBgColor  []int `default:"[255,255,255]" json:"grey_bg_color,omitempty"`
 	//WhiteBgColor  []int `default:"[255,255,255]" json:"white_bg_color,omitempty"`
-	DarkBgColor []int `default:"[247,247,247]" json:"dark_bg_color,omitempty"`
+	//DarkBgColor []int `default:"[247,247,247]" json:"dark_bg_color,omitempty"`
+	DarkBgColor []int `default:"[242,242,242]" json:"dark_bg_color,omitempty"`
 	DeepBgColor []int `default:"[200,200,200]" json:"deep_bg_color,omitempty"`
 
 	Font     string `default:"Helvetica"`

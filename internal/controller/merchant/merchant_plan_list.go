@@ -15,6 +15,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.Lis
 		Status:        req.Status,
 		PublishStatus: req.PublishStatus,
 		Currency:      req.Currency,
+		SearchKey:     req.SearchKey,
 		SortField:     req.SortField,
 		SortType:      req.SortType,
 		Page:          req.Page,

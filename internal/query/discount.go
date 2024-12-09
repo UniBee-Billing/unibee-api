@@ -24,7 +24,6 @@ func GetDiscountByCode(ctx context.Context, merchantId uint64, code string) (one
 	err := dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
 		Where(dao.MerchantDiscountCode.Columns().Code, code).
-		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -40,7 +39,6 @@ func GetAllMerchantDiscountIds(ctx context.Context, merchantId uint64) (ids []ui
 	}
 	_ = dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
-		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		OmitEmpty().Scan(&list)
 	for _, v := range list {
 		ids = append(ids, v.Id)

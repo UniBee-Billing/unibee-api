@@ -17,6 +17,16 @@ import (
 	"unibee/utility"
 )
 
+// select mudc.id,mudc.user_id,invoice.send_email as 'email',mudc.code,mudc.invoice_id,mudc.subscription_id, plan.id as 'plan_id', plan.plan_name from merchant_user_discount_code as mudc, invoice, payment, subscription as sub, plan
+// where mudc.code in ("BF2024_ANNUAL","BF2024_QUARTERLY","BF2024_BIANNUAL")
+// and mudc.status = 1
+// and invoice.invoice_id = mudc.invoice_id
+// and invoice.status = 3
+// and payment.payment_id COLLATE utf8mb4_general_ci = mudc.payment_id COLLATE utf8mb4_general_ci
+// and payment.status = 20
+// and payment.total_amount > payment.refund_amount
+// and sub.subscription_id = mudc.subscription_id
+// and plan.id = sub.plan_id
 type UserDiscountApplyReq struct {
 	MerchantId       uint64 `json:"merchantId"        description:"MerchantId"`
 	UserId           uint64 `json:"userId"        description:"UserId"`
@@ -39,7 +49,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}")
 	}
 	discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
-	if discountCode == nil {
+	if discountCode == nil || discountCode.IsDeleted > 0 {
 		return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}")
 	}
 	quantity2.GetDiscountQuantityUsedCount(ctx, discountCode.Id)
@@ -121,6 +131,9 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 		}
 	}
 	if req.IsRecurringApply {
+		//if discountCode.BillingType != consts.DiscountBillingTypeRecurring {
+		//	return false, false, "Code not Recurring Type"
+		//}
 		if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
 			one := getLastNonRecurringPurchase(ctx, req)
 			if one != nil && one.Status == 2 {
@@ -294,37 +307,37 @@ func userDiscountRollback(ctx context.Context, one *entity.MerchantUserDiscountC
 	return err
 }
 
-// UserDiscountRollbackFromPayment payment total refund, partial refund is not involved
-func UserDiscountRollbackFromPayment(ctx context.Context, invoiceId string, paymentId string) error {
-	if len(paymentId) == 0 {
-		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invalid paymentId:%s", paymentId)
-		return nil
-	}
-	invoice := query.GetInvoiceByPaymentId(ctx, paymentId)
-	if invoice == nil {
-		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invoice not found, paymentId:%s", paymentId)
-		return nil
-	}
-	if len(invoiceId) == 0 {
-		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invalid invoiceId:%s", invoiceId)
-		return nil
-	}
-	var one *entity.MerchantUserDiscountCode
-	err := dao.MerchantUserDiscountCode.Ctx(ctx).
-		Where(dao.MerchantUserDiscountCode.Columns().InvoiceId, invoiceId).
-		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
-		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-		Scan(&one)
-	if one != nil {
-		return userDiscountRollback(ctx, one)
-	}
-	return err
-}
+//// UserDiscountRollbackFromPayment payment total refund, partial refund is not involved
+//func UserDiscountRollbackFromPayment(ctx context.Context, invoiceId string, paymentId string) error {
+//	if len(paymentId) == 0 {
+//		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invalid paymentId:%s", paymentId)
+//		return nil
+//	}
+//	invoice := query.GetInvoiceByPaymentId(ctx, paymentId)
+//	if invoice == nil {
+//		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invoice not found, paymentId:%s", paymentId)
+//		return nil
+//	}
+//	if len(invoiceId) == 0 {
+//		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invalid invoiceId:%s", invoiceId)
+//		return nil
+//	}
+//	var one *entity.MerchantUserDiscountCode
+//	err := dao.MerchantUserDiscountCode.Ctx(ctx).
+//		Where(dao.MerchantUserDiscountCode.Columns().InvoiceId, invoiceId).
+//		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+//		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+//		Scan(&one)
+//	if one != nil {
+//		return userDiscountRollback(ctx, one)
+//	}
+//	return err
+//}
 
-// UserDiscountRollbackFromInvoice invoice create failed|cancel|failed, partial refund is not involved
+// invoice create failed|cancel|failed, partial refund is not involved
 func UserDiscountRollbackFromInvoice(ctx context.Context, invoiceId string) error {
 	if len(invoiceId) == 0 {
-		g.Log().Error(ctx, "UserDiscountRollbackFromPayment invalid invoiceId:%s", invoiceId)
+		g.Log().Error(ctx, "UserDiscountRollbackFromInvoice invalid invoiceId:%s", invoiceId)
 		return nil
 	}
 	var one *entity.MerchantUserDiscountCode

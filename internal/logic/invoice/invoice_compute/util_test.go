@@ -13,6 +13,7 @@ func TestInvoiceSimplifyCreation(t *testing.T) {
 	t.Run("Test Creation", func(t *testing.T) {
 		ctx := context.Background()
 		invoice := ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &CalculateInvoiceReq{
+			UserId:       0,
 			InvoiceName:  "SubscriptionCreate",
 			DiscountCode: "",
 			TimeNow:      gtime.Now().Timestamp(),

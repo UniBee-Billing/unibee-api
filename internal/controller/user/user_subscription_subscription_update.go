@@ -32,6 +32,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		EffectImmediate:    req.EffectImmediate,
 		Metadata:           req.Metadata,
 		DiscountCode:       req.DiscountCode,
+		ApplyPromoCredit:   req.ApplyPromoCredit,
 	}, 0)
 	if err != nil {
 		return nil, err

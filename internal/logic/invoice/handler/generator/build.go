@@ -17,7 +17,7 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 
 	// Build base doc
 	doc.pdf.SetMargins(BaseMargin, BaseMarginTop, BaseMargin)
-	doc.pdf.SetXY(10, 10)
+	doc.pdf.SetXY(0, 0)
 	doc.pdf.SetTextColor(
 		doc.Options.BaseTextColor[0],
 		doc.Options.BaseTextColor[1],
@@ -44,30 +44,25 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	// Load font
 	doc.pdf.SetFont(doc.Options.Font, "", 12)
 
-	//// Append document title
+	doc.appendLogo()
+
 	x := doc.pdf.GetX()
 	y := doc.pdf.GetY()
 
 	doc.appendTitle()
+	doc.appendInvoiceHeader()
 
 	doc.pdf.SetXY(x, y)
 
-	doc.appendLogo()
-
-	// Append document metas (ref & version)
-	doc.appendMetas()
-
-	y = doc.pdf.GetY()
-	// Append company contact to doc
-	companyBottom := doc.Company.appendCompanyContactToDoc(doc, y)
-
-	// Append customer contact to doc
+	y = doc.pdf.GetY() + BaseMargin
+	merchantBottom := doc.Company.appendMerchantContactToDoc(doc, y)
+	y = doc.appendInvoiceStatus(y)
 	customerBottom := doc.Customer.appendCustomerContactToDoc(doc, y)
 
-	if customerBottom > companyBottom {
-		doc.pdf.SetXY(10, customerBottom)
+	if customerBottom > merchantBottom {
+		doc.pdf.SetXY(10, customerBottom+BaseMargin)
 	} else {
-		doc.pdf.SetXY(10, companyBottom)
+		doc.pdf.SetXY(10, merchantBottom+BaseMargin)
 	}
 
 	// Append description
@@ -105,27 +100,6 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	return doc.pdf, nil
 }
 
-// appendTitle to document
-func (doc *Document) appendTitle() {
-	title := doc.Title
-
-	doc.pdf.SetTextColor(
-		doc.Options.BaseTextColor[0],
-		doc.Options.BaseTextColor[1],
-		doc.Options.BaseTextColor[2],
-	)
-	// Set x y
-	doc.pdf.SetXY(120, BaseMarginTop)
-
-	// Draw rect
-	doc.pdf.SetFillColor(doc.Options.DarkBgColor[0], doc.Options.DarkBgColor[1], doc.Options.DarkBgColor[2])
-	doc.pdf.Rect(120, BaseMarginTop, 80, 10, "F")
-
-	// Draw text
-	doc.pdf.SetFont(doc.Options.BoldFont, "B", 14)
-	doc.pdf.CellFormat(80, 10, doc.encodeString(title), "0", 0, "C", false, 0, "")
-}
-
 func (doc *Document) appendLogo() float64 {
 	if doc.Logo != nil {
 		// Create filename
@@ -154,43 +128,127 @@ func (doc *Document) appendLogo() float64 {
 	return y
 }
 
-func (doc *Document) appendMetas() {
-	x, _, _, _ := doc.pdf.GetMargins()
-	startY := doc.pdf.GetY() + 8
+// appendTitle to document
+func (doc *Document) appendTitle() {
+	title := doc.Title
+
+	doc.pdf.SetTextColor(
+		doc.Options.BaseTextColor[0],
+		doc.Options.BaseTextColor[1],
+		doc.Options.BaseTextColor[2],
+	)
+	// Set x y
+	doc.pdf.SetXY(120, BaseMarginTop)
+
+	//// Draw rect
+	//doc.pdf.SetFillColor(doc.Options.DarkBgColor[0], doc.Options.DarkBgColor[1], doc.Options.DarkBgColor[2])
+	//doc.pdf.Rect(120, BaseMarginTop, 80, 10, "F")
+
+	// Draw text
+	doc.pdf.SetFont(doc.Options.BoldFont, "B", 16)
+	doc.pdf.CellFormat(80, 0, doc.encodeString(title), "0", 0, "R", false, 0, "")
+}
+
+func (doc *Document) appendInvoiceHeader() {
+	var x float64 = 120
+	y := BaseMarginTop + 16*2
+	var lineBreakHeight float64 = 5
+
 	// Append InvoiceId
 	if len(doc.InvoiceId) > 0 {
-		doc.pdf.SetXY(x, startY)
-		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.CellFormat(80, 12, doc.encodeString(fmt.Sprintf("%s: %s", doc.Options.TextInvoiceIdTitle, doc.InvoiceId)), "0", 0, "L", false, 0, "")
+		doc.pdf.SetXY(x, y)
+		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetTextColor(
+			doc.Options.GreyTextColor[0],
+			doc.Options.GreyTextColor[1],
+			doc.Options.GreyTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.Options.TextInvoiceIdTitle)), "0", 0, "L", false, 0, "")
+		doc.pdf.SetXY(x+40, y)
+		doc.pdf.SetTextColor(
+			doc.Options.BaseTextColor[0],
+			doc.Options.BaseTextColor[1],
+			doc.Options.BaseTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.InvoiceId)), "0", 0, "R", false, 0, "")
 	}
 
 	// Append InvoiceNumber
-	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-	doc.pdf.SetFont(doc.Options.BoldFont, "", 10)
-	doc.pdf.CellFormat(80, 12, doc.encodeString(fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceNumberTitle), doc.InvoiceNumber)), "0", 0, "L", false, 0, "")
+	y = doc.pdf.GetY() + lineBreakHeight
+	doc.pdf.SetXY(x, y)
+	doc.pdf.SetFont(doc.Options.Font, "", 12)
+	doc.pdf.SetTextColor(
+		doc.Options.GreyTextColor[0],
+		doc.Options.GreyTextColor[1],
+		doc.Options.GreyTextColor[2],
+	)
+	doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.FitRefundString(doc.Options.TextInvoiceNumberTitle))), "0", 0, "L", false, 0, "")
+	doc.pdf.SetTextColor(
+		doc.Options.BaseTextColor[0],
+		doc.Options.BaseTextColor[1],
+		doc.Options.BaseTextColor[2],
+	)
+	doc.pdf.SetXY(x+40, y)
+	doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.InvoiceNumber)), "0", 0, "R", false, 0, "")
 
 	// Append InvoiceOriginNumber
 	if len(doc.InvoiceOriginNumber) > 0 {
-		dataString := fmt.Sprintf("%s: %s", doc.Options.TextOriginInvoiceNumberTitle, doc.InvoiceOriginNumber)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
+		y = doc.pdf.GetY() + lineBreakHeight
+		doc.pdf.SetXY(x, y)
+		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetTextColor(
+			doc.Options.GreyTextColor[0],
+			doc.Options.GreyTextColor[1],
+			doc.Options.GreyTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.Options.TextOriginInvoiceNumberTitle)), "0", 0, "L", false, 0, "")
+		doc.pdf.SetXY(x+40, y)
+		doc.pdf.SetTextColor(
+			doc.Options.BaseTextColor[0],
+			doc.Options.BaseTextColor[1],
+			doc.Options.BaseTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.InvoiceOriginNumber)), "0", 0, "R", false, 0, "")
 	}
 
 	// Append InvoiceType
 	if len(doc.InvoiceType) > 0 {
-		dataString := fmt.Sprintf("Invoice Type: %s", doc.InvoiceType)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
+		y = doc.pdf.GetY() + lineBreakHeight
+		doc.pdf.SetXY(x, y)
+		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetTextColor(
+			doc.Options.GreyTextColor[0],
+			doc.Options.GreyTextColor[1],
+			doc.Options.GreyTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("Invoice Type")), "0", 0, "L", false, 0, "")
+		doc.pdf.SetXY(x+40, y)
+		doc.pdf.SetTextColor(
+			doc.Options.BaseTextColor[0],
+			doc.Options.BaseTextColor[1],
+			doc.Options.BaseTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.InvoiceType)), "0", 0, "R", false, 0, "")
 	}
 
 	// Append InvoiceDate
 	if len(doc.InvoiceDate) > 0 {
-		dataString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceDateTitle), doc.InvoiceDate)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
+		y = doc.pdf.GetY() + lineBreakHeight
+		doc.pdf.SetXY(x, y)
+		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetTextColor(
+			doc.Options.GreyTextColor[0],
+			doc.Options.GreyTextColor[1],
+			doc.Options.GreyTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.FitRefundString(doc.Options.TextInvoiceDateTitle))), "0", 0, "L", false, 0, "")
+		doc.pdf.SetXY(x+40, y)
+		doc.pdf.SetTextColor(
+			doc.Options.BaseTextColor[0],
+			doc.Options.BaseTextColor[1],
+			doc.Options.BaseTextColor[2],
+		)
+		doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.InvoiceDate)), "0", 0, "R", false, 0, "")
 	}
 
 	// Append paidDate
@@ -198,18 +256,33 @@ func (doc *Document) appendMetas() {
 	if len(doc.PaidDate) > 0 {
 		paidDate = doc.PaidDate
 	}
-	dateString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoicePaidDateTitle), paidDate)
-	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-	doc.pdf.SetFont(doc.Options.Font, "", 10)
-	doc.pdf.CellFormat(80, 12, doc.encodeString(dateString), "0", 0, "L", false, 0, "")
+	//dateString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoicePaidDateTitle), paidDate)
+	y = doc.pdf.GetY() + lineBreakHeight
+	doc.pdf.SetXY(x, y)
+	doc.pdf.SetFont(doc.Options.Font, "", 12)
+	doc.pdf.SetTextColor(
+		doc.Options.GreyTextColor[0],
+		doc.Options.GreyTextColor[1],
+		doc.Options.GreyTextColor[2],
+	)
+	doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", doc.FitRefundString(doc.Options.TextInvoicePaidDateTitle))), "0", 0, "L", false, 0, "")
+	doc.pdf.SetXY(x+40, y)
+	doc.pdf.SetTextColor(
+		doc.Options.BaseTextColor[0],
+		doc.Options.BaseTextColor[1],
+		doc.Options.BaseTextColor[2],
+	)
+	doc.pdf.CellFormat(40, 12, doc.encodeString(fmt.Sprintf("%s", paidDate)), "0", 0, "R", false, 0, "")
+}
 
-	returnY := doc.pdf.GetY() + 15
-
-	doc.pdf.SetXY(130, startY)
+func (doc *Document) appendInvoiceStatus(y float64) float64 {
+	startY := y
+	SetBaseTextColor(doc)
+	doc.pdf.SetXY(110, startY)
 	doc.pdf.SetFont(doc.Options.BoldFont, "B", 10)
-	doc.pdf.CellFormat(80, 12, doc.encodeFitRefundString("Invoice status:"), "0", 0, "L", false, 0, "")
+	doc.pdf.CellFormat(80, 8, doc.encodeFitRefundString("Invoice status:"), "0", 0, "L", false, 0, "")
 
-	doc.pdf.SetXY(130, startY+10)
+	doc.pdf.SetXY(110, startY+4)
 	doc.pdf.SetFont(doc.Options.BoldFont, "B", 18)
 	if doc.Status == "Paid" {
 		doc.pdf.SetTextColor(
@@ -217,20 +290,26 @@ func (doc *Document) appendMetas() {
 			doc.Options.PaidTextColor[1],
 			doc.Options.PaidTextColor[2],
 		)
-	} else {
-		doc.pdf.SetTextColor(
-			doc.Options.BaseTextColor[0],
-			doc.Options.BaseTextColor[1],
-			doc.Options.BaseTextColor[2],
-		)
 	}
-	doc.pdf.CellFormat(80, 12, doc.encodeString(doc.Status), "0", 0, "L", false, 0, "")
+	doc.pdf.CellFormat(80, 18, doc.encodeString(doc.Status), "0", 0, "L", false, 0, "")
+	SetBaseTextColor(doc)
+	return doc.pdf.GetY() + 20
+}
+
+func SetGrayTextColor(doc *Document) {
+	doc.pdf.SetTextColor(
+		doc.Options.GreyTextColor[0],
+		doc.Options.GreyTextColor[1],
+		doc.Options.GreyTextColor[2],
+	)
+}
+
+func SetBaseTextColor(doc *Document) {
 	doc.pdf.SetTextColor(
 		doc.Options.BaseTextColor[0],
 		doc.Options.BaseTextColor[1],
 		doc.Options.BaseTextColor[2],
 	)
-	doc.pdf.SetXY(x, returnY)
 }
 
 func (doc *Document) appendDescription() {
@@ -245,11 +324,16 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	// Draw table titles
 	doc.pdf.SetX(10)
 	doc.pdf.SetY(doc.pdf.GetY() + 5)
-	doc.pdf.SetFont(doc.Options.BoldFont, "B", fontSize)
+	doc.pdf.SetFont(doc.Options.BoldFont, "", fontSize)
 
 	// Draw rec
+	doc.pdf.SetTextColor(
+		doc.Options.GreyTextColor[0],
+		doc.Options.GreyTextColor[1],
+		doc.Options.GreyTextColor[2],
+	)
 	doc.pdf.SetFillColor(doc.Options.DarkBgColor[0], doc.Options.DarkBgColor[1], doc.Options.DarkBgColor[2])
-	doc.pdf.Rect(10, doc.pdf.GetY(), 190, 12, "F")
+	doc.pdf.Rect(BaseMargin, doc.pdf.GetY(), 210-2*BaseMargin, 12, "F")
 
 	// Name
 	doc.pdf.SetX(ItemColNameOffset)
@@ -362,10 +446,11 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 
 // appendItems to document
 func (doc *Document) appendItems() {
-	doc.drawsTableTitles(11.0)
+	doc.drawsTableTitles(10.0)
+	SetBaseTextColor(doc)
 
 	doc.pdf.SetX(10)
-	doc.pdf.SetY(doc.pdf.GetY() + 18)
+	doc.pdf.SetY(doc.pdf.GetY() + 15)
 	doc.pdf.SetFont(doc.Options.Font, "", 10.0)
 
 	for i := 0; i < len(doc.Items); i++ {
@@ -382,12 +467,12 @@ func (doc *Document) appendItems() {
 		if doc.pdf.GetY() > MaxPageHeight {
 			// Add page
 			doc.pdf.AddPage()
-			doc.drawsTableTitles(12.0)
-			doc.pdf.SetFont(doc.Options.Font, "", 12)
+			doc.drawsTableTitles(11.0)
+			doc.pdf.SetFont(doc.Options.Font, "", 10)
 		}
 
 		doc.pdf.SetX(10)
-		doc.pdf.SetY(doc.pdf.GetY() + 8)
+		doc.pdf.SetY(doc.pdf.GetY() + 5)
 	}
 }
 
@@ -438,47 +523,22 @@ var moneyX = 165.0
 
 // appendTotal to document
 func (doc *Document) appendTotal() {
-	doc.pdf.SetY(doc.pdf.GetY() + 10)
+	doc.pdf.SetY(doc.pdf.GetY() + 16)
 	doc.pdf.SetFont(doc.Options.Font, "", LargeTextFontSize)
-	doc.pdf.SetTextColor(
-		doc.Options.BaseTextColor[0],
-		doc.Options.BaseTextColor[1],
-		doc.Options.BaseTextColor[2],
-	)
-	//
-	//if len(doc.ExchangeRateString) > 0 {
-	//	doc.pdf.SetX(120)
-	//	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-	//	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
-	//	doc.pdf.CellFormat(38, 10, doc.encodeString("Exchange Rate"), "0", 0, "R", false, 0, "")
-	//
-	//	doc.pdf.SetX(moneyX)
-	//	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-	//	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
-	//	doc.pdf.CellFormat(
-	//		40,
-	//		10,
-	//		doc.encodeString(doc.ExchangeRateString),
-	//		"0",
-	//		0,
-	//		"L",
-	//		false,
-	//		0,
-	//		"",
-	//	)
-	//	doc.pdf.SetY(doc.pdf.GetY() + 10)
-	//}
-
-	// Draw SUB TOTAL HT title
+	SetBaseTextColor(doc)
+	var lineBreakHeight float64 = 8
+	// Draw SUB TOTAL title
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+	SetGrayTextColor(doc)
 	doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextSubTotal), "0", 0, "R", false, 0, "")
 
-	// Draw SUB TOTAL HT amount
+	// Draw SUB TOTAL amount
 	doc.pdf.SetX(moneyX)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+	SetBaseTextColor(doc)
 	doc.pdf.CellFormat(
 		40,
 		10,
@@ -493,10 +553,11 @@ func (doc *Document) appendTotal() {
 
 	// Draw DISCOUNT TOTAL HT title
 	if len(doc.DiscountTotalString) > 0 {
-		doc.pdf.SetY(doc.pdf.GetY() + 10)
+		doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight)
 		doc.pdf.SetX(120)
 		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+		SetGrayTextColor(doc)
 		if len(doc.DiscountTitle) > 0 {
 			doc.pdf.CellFormat(38, 10, doc.encodeString(doc.DiscountTitle), "0", 0, "R", false, 0, "")
 		} else {
@@ -507,6 +568,7 @@ func (doc *Document) appendTotal() {
 		doc.pdf.SetX(moneyX)
 		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+		SetBaseTextColor(doc)
 		doc.pdf.CellFormat(
 			40,
 			10,
@@ -521,10 +583,11 @@ func (doc *Document) appendTotal() {
 	}
 
 	// Draw tax title
-	doc.pdf.SetY(doc.pdf.GetY() + 10)
+	doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight)
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+	SetGrayTextColor(doc)
 	if doc.IsRefund {
 		doc.pdf.CellFormat(38, 10, doc.encodeString(fmt.Sprintf("VAT Reverse Charge(%s)", doc.TaxPercentageString)), "0", 0, "R", false, 0, "")
 	} else {
@@ -535,6 +598,7 @@ func (doc *Document) appendTotal() {
 	doc.pdf.SetX(moneyX)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+	SetBaseTextColor(doc)
 	doc.pdf.CellFormat(
 		40,
 		10,
@@ -549,7 +613,7 @@ func (doc *Document) appendTotal() {
 
 	// Append Exchange Rate
 	if len(doc.OriginalTaxString) > 0 {
-		doc.pdf.SetY(doc.pdf.GetY() + 5)
+		doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight/2)
 		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
 		doc.pdf.SetX(moneyX)
 		//doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
@@ -570,7 +634,7 @@ func (doc *Document) appendTotal() {
 
 	// Append Exchange Rate
 	if len(doc.ExchangeRateString) > 0 {
-		doc.pdf.SetY(doc.pdf.GetY() + 5)
+		doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight/2)
 		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
 		doc.pdf.SetX(moneyX)
 		//doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
@@ -590,16 +654,18 @@ func (doc *Document) appendTotal() {
 	}
 
 	// Draw total with tax title
-	doc.pdf.SetY(doc.pdf.GetY() + 10)
+	doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight)
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+	SetGrayTextColor(doc)
 	doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextTotalWithTax), "0", 0, "R", false, 0, "")
 
 	// Draw total with tax amount
 	doc.pdf.SetX(moneyX)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+	SetBaseTextColor(doc)
 	doc.pdf.CellFormat(
 		40,
 		10,

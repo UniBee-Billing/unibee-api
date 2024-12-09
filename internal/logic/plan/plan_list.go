@@ -23,6 +23,7 @@ type ListInternalReq struct {
 	Status        []int   `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int     `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
 	Currency      string  `json:"currency" dc:"Currency"  `
+	SearchKey     string  `json:"searchKey" dc:"Search Key, plan name or description"  `
 	SortField     string  `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int     `json:"page" dc:"Page, Start With 0" `
@@ -104,6 +105,10 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 	}
 	if len(req.Status) > 0 {
 		q = q.WhereIn(dao.Plan.Columns().Status, req.Status)
+	}
+	if len(req.SearchKey) > 0 {
+		q = q.Where(q.Builder().WhereOrLike(dao.Plan.Columns().PlanName, "%"+req.SearchKey+"%").
+			WhereOrLike(dao.Plan.Columns().Description, "%"+req.SearchKey+"%"))
 	}
 	err := q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.Plan.Columns().Currency, strings.ToUpper(req.Currency)).

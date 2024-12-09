@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strconv"
 	"strings"
+	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -13,7 +14,7 @@ type MerchantDiscountCode struct {
 	MerchantId         uint64                 `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string                 `json:"name"               description:"name"`                                                                       // name
 	Code               string                 `json:"code"               description:"code"`                                                                       // code
-	Status             int                    `json:"status"             description:"status, 1-editable, 2-active, 3-deactive, 4-expire"`                         // status, 1-editable, 2-active, 3-deactive, 4-expire
+	Status             int                    `json:"status"             description:"status, 1-editable, 2-active, 3-deactivate, 4-expire, 10-archive"`           // status, 1-editable, 2-active, 3-deactive, 4-expire, 10-archive
 	BillingType        int                    `json:"billingType"        description:"billing_type, 1-one-time, 2-recurring"`                                      // billing_type, 1-one-time, 2-recurring
 	DiscountType       int                    `json:"discountType"       description:"discount_type, 1-percentage, 2-fixed_amount"`                                // discount_type, 1-percentage, 2-fixed_amount
 	DiscountAmount     int64                  `json:"discountAmount"     description:"amount of discount, available when discount_type is fixed_amount"`           // amount of discount, available when discount_type is fixed_amount
@@ -26,6 +27,7 @@ type MerchantDiscountCode struct {
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit"`
+	IsDeleted          int                    `json:"isDeleted"          description:"0-UnDeleted，> 0, Deleted, the deleted utc time"`
 }
 
 func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCode {
@@ -52,6 +54,9 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 			}
 		}
 	}
+	if one.IsDeleted > 0 {
+		one.Status = consts.DiscountStatusArchived
+	}
 	return &MerchantDiscountCode{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
@@ -70,5 +75,6 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 		PlanIds:            planIds,
 		Metadata:           metadata,
 		Quantity:           one.Quantity,
+		IsDeleted:          one.IsDeleted,
 	}
 }

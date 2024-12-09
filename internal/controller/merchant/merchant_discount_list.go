@@ -14,6 +14,7 @@ func (c *ControllerDiscount) List(ctx context.Context, req *discount.ListReq) (r
 		BillingType:     req.BillingType,
 		Status:          req.Status,
 		Code:            req.Code,
+		SearchKey:       req.SearchKey,
 		Currency:        req.Currency,
 		SortField:       req.SortField,
 		SortType:        req.SortType,

@@ -21,30 +21,6 @@ func (c *Contact) appendContactTODoc(
 ) float64 {
 	doc.pdf.SetXY(x, y)
 
-	//// Logo
-	//if c.Logo != nil {
-	//	// Create filename
-	//	fileName := b64.StdEncoding.EncodeToString([]byte(c.Name))
-	//
-	//	// Create reader from logo bytes
-	//	ioReader := bytes.NewReader(c.Logo)
-	//
-	//	// Get image format
-	//	_, format, _ := image.DecodeConfig(bytes.NewReader(c.Logo))
-	//
-	//	// Register image in pdf
-	//	imageInfo := doc.pdf.RegisterImageOptionsReader(fileName, fpdf.ImageOptions{
-	//		ImageType: format,
-	//	}, ioReader)
-	//
-	//	if imageInfo != nil {
-	//		var imageOpt fpdf.ImageOptions
-	//		imageOpt.ImageType = format
-	//		doc.pdf.ImageOptions(fileName, doc.pdf.GetX(), y, 0, 30, false, imageOpt, 0, "")
-	//		doc.pdf.SetY(y + 30)
-	//	}
-	//}
-
 	// Name
 	if fill {
 		doc.pdf.SetFillColor(
@@ -65,6 +41,7 @@ func (c *Contact) appendContactTODoc(
 	// Set name
 	doc.pdf.SetFont(doc.Options.BoldFont, "B", 10)
 	doc.pdf.Cell(40, 8, doc.encodeString(title))
+
 	doc.pdf.SetFont(doc.Options.Font, "", 10)
 	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
 	doc.pdf.Cell(40, 8, doc.encodeString(c.Name))
@@ -81,12 +58,12 @@ func (c *Contact) appendContactTODoc(
 			addrRectHeight = addrRectHeight - 5
 		}
 
-		doc.pdf.Rect(x, doc.pdf.GetY()+9, 70, addrRectHeight, "F")
+		doc.pdf.Rect(x, doc.pdf.GetY()+9, 90, addrRectHeight, "F")
 
 		// Set address
 		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
-		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
+		doc.pdf.SetXY(x, doc.pdf.GetY()+7)
+		doc.pdf.MultiCell(90, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
 	}
 
 	// Additional info
@@ -101,13 +78,12 @@ func (c *Contact) appendContactTODoc(
 		}
 
 		doc.pdf.SetXY(x, doc.pdf.GetY())
-		doc.pdf.SetFontSize(BaseTextFontSize)
 	}
 
 	return doc.pdf.GetY()
 }
 
-func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
+func (c *Contact) appendMerchantContactToDoc(doc *Document, y float64) float64 {
 	x, _, _, _ := doc.pdf.GetMargins()
 	if doc.IsRefund {
 		return c.appendContactTODoc(x, y, true, doc, "From:")
@@ -119,8 +95,8 @@ func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
 
 func (c *Contact) appendCustomerContactToDoc(doc *Document, y float64) float64 {
 	if doc.IsRefund {
-		return c.appendContactTODoc(130, y, true, doc, "To:")
+		return c.appendContactTODoc(110, y, true, doc, "To:")
 	} else {
-		return c.appendContactTODoc(130, y, true, doc, "Invoice to:")
+		return c.appendContactTODoc(110, y, true, doc, "Invoice to:")
 	}
 }

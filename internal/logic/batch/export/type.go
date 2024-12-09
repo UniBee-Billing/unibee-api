@@ -3,6 +3,7 @@ package export
 import (
 	"context"
 	"fmt"
+	"time"
 	"unibee/utility"
 )
 
@@ -28,4 +29,16 @@ func JsonArrayTypeConvertUint64(ctx context.Context, source []interface{}) []uin
 		}
 	}
 	return intSlice
+}
+
+func GetUTCOffsetFromTimeZone(timeZone string) (int64, error) {
+	if len(timeZone) == 0 {
+		return 0, fmt.Errorf("time zone is empty")
+	}
+	location, err := time.LoadLocation(timeZone)
+	if err != nil {
+		return 0, fmt.Errorf("invalid time zone: %v", err)
+	}
+	_, offset := time.Now().In(location).Zone()
+	return int64(offset), nil
 }

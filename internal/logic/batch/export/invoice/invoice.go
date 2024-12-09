@@ -45,15 +45,14 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 		Page:       page,
 		Count:      count,
 	}
-	timeZone := 0
+	var timeZone int64 = 0
 	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
-		if value, ok := payload["timeZone"].(float64); ok {
-			timeZone = int(value)
-			if timeZone > 0 {
-				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
-			} else if timeZone < 0 {
-				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+		if value, ok := payload["timeZone"].(string); ok {
+			zone, err := export.GetUTCOffsetFromTimeZone(value)
+			if err == nil && zone > 0 {
+				timeZoneStr = value
+				timeZone = zone
 			}
 		}
 		if value, ok := payload["userId"].(float64); ok {
@@ -93,16 +92,16 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			req.AmountEnd = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
-			req.CreateTimeStart = int64(value)
+			req.CreateTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["createTimeEnd"].(float64); ok {
-			req.CreateTimeEnd = int64(value)
+			req.CreateTimeEnd = int64(value) - timeZone
 		}
 		if value, ok := payload["reportTimeStart"].(float64); ok {
-			req.ReportTimeStart = int64(value)
+			req.ReportTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["reportTimeEnd"].(float64); ok {
-			req.ReportTimeEnd = int64(value)
+			req.ReportTimeEnd = int64(value) - timeZone
 		}
 	}
 	req.SkipTotal = true
@@ -218,20 +217,20 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				TaxPercentage:                  utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
 				SubscriptionAmount:             utility.ConvertCentToDollarStr(one.SubscriptionAmount, one.Currency),
 				SubscriptionAmountExcludingTax: utility.ConvertCentToDollarStr(one.SubscriptionAmountExcludingTax, one.Currency),
-				PeriodEnd:                      gtime.NewFromTimeStamp(one.PeriodEnd + int64(timeZone*3600)),
-				PeriodStart:                    gtime.NewFromTimeStamp(one.PeriodStart + int64(timeZone*3600)),
-				FinishTime:                     gtime.NewFromTimeStamp(one.FinishTime + int64(timeZone*3600)),
-				DueDate:                        gtime.NewFromTimeStamp(dueTime + int64(timeZone*3600)),
-				CreateTime:                     gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
-				PaidTime:                       gtime.NewFromTimeStamp(one.Payment.PaidTime + int64(timeZone*3600)),
+				PeriodEnd:                      gtime.NewFromTimeStamp(one.PeriodEnd + timeZone),
+				PeriodStart:                    gtime.NewFromTimeStamp(one.PeriodStart + timeZone),
+				FinishTime:                     gtime.NewFromTimeStamp(one.FinishTime + timeZone),
+				DueDate:                        gtime.NewFromTimeStamp(dueTime + timeZone),
+				CreateTime:                     gtime.NewFromTimeStamp(one.CreateTime + timeZone),
+				PaidTime:                       gtime.NewFromTimeStamp(one.Payment.PaidTime + timeZone),
 				Status:                         consts.InvoiceStatusToEnum(one.Status).Description(),
 				PaymentId:                      one.PaymentId,
 				RefundId:                       one.RefundId,
 				SubscriptionId:                 one.SubscriptionId,
 				PlanId:                         fmt.Sprintf("%v", one.Subscription.PlanId),
 				ProductId:                      fmt.Sprintf("%v", productId),
-				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd + int64(timeZone*3600)),
-				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor + int64(timeZone*3600)),
+				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd + timeZone),
+				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor + timeZone),
 				OriginalInvoiceId:              OriginInvoiceId,
 				BillingPeriod:                  billingPeriod,
 				TransactionType:                transactionType,

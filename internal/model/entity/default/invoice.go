@@ -66,4 +66,6 @@ type Invoice struct {
 	BillingCycleAnchor             int64       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`                                                   // billing_cycle_anchor
 	CreateFrom                     string      `json:"createFrom"                     description:"create from"`                                                            // create from
 	VatNumber                      string      `json:"vatNumber"                      description:""`                                                                       //
+	PromoCreditDiscountAmount      int64       `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`                                           // promo credit discount amount
+	PartialCreditPaidAmount        int64       `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`                                             // partial credit paid amount
 }

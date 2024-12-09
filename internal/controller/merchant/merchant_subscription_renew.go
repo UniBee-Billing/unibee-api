@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/merchant/subscription"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
-
-	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error) {
@@ -27,33 +26,33 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 		}
 	}
 	renewRes, err := service.SubscriptionRenew(ctx, &service.RenewInternalReq{
-		MerchantId:     _interface.GetMerchantId(ctx),
-		SubscriptionId: req.SubscriptionId,
-		GatewayId:      req.GatewayId,
-		TaxPercentage:  req.TaxPercentage,
-		DiscountCode:   req.DiscountCode,
-		Discount:       req.Discount,
-		ManualPayment:  req.ManualPayment,
-		ReturnUrl:      req.ReturnUrl,
-		CancelUrl:      req.CancelUrl,
-		ProductData:    req.ProductData,
-		Metadata:       req.Metadata,
+		MerchantId:       _interface.GetMerchantId(ctx),
+		SubscriptionId:   req.SubscriptionId,
+		GatewayId:        req.GatewayId,
+		TaxPercentage:    req.TaxPercentage,
+		DiscountCode:     req.DiscountCode,
+		Discount:         req.Discount,
+		ManualPayment:    req.ManualPayment,
+		ReturnUrl:        req.ReturnUrl,
+		CancelUrl:        req.CancelUrl,
+		ProductData:      req.ProductData,
+		Metadata:         req.Metadata,
+		ApplyPromoCredit: req.ApplyPromoCredit,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err == nil {
-		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-			MerchantId:     renewRes.Subscription.MerchantId,
-			Target:         fmt.Sprintf("Subscription(%v)", renewRes.Subscription.SubscriptionId),
-			Content:        "RenewUserSubscription",
-			UserId:         renewRes.Subscription.UserId,
-			SubscriptionId: renewRes.Subscription.SubscriptionId,
-			InvoiceId:      "",
-			PlanId:         0,
-			DiscountCode:   "",
-		}, err)
-	}
+
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     renewRes.Subscription.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", renewRes.Subscription.SubscriptionId),
+		Content:        "RenewUserSubscription",
+		UserId:         renewRes.Subscription.UserId,
+		SubscriptionId: renewRes.Subscription.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &subscription.RenewRes{
 		Subscription: renewRes.Subscription,
 		Paid:         renewRes.Paid,

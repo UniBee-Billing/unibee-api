@@ -28,7 +28,7 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 	utility.Assert(plan.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
 	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)
-	if oneDiscount == nil {
+	if oneDiscount == nil || oneDiscount.IsDeleted > 0 {
 		return &discount.PlanApplyPreviewRes{
 			Valid:          false,
 			DiscountAmount: 0,

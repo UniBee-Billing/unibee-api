@@ -269,12 +269,10 @@ func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalR
 			one.CreateTime = gtime.Now().Timestamp()
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			id, err := insert.LastInsertId()
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			one.Id = id

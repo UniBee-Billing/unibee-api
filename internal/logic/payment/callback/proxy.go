@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	payment2 "unibee/internal/consumer/webhook/payment"
 	_interface "unibee/internal/interface"
+	callback2 "unibee/internal/logic/credit/callback"
 	"unibee/internal/logic/payment/callback/onetime"
 	"unibee/internal/logic/subscription/callback"
 	entity "unibee/internal/model/entity/default"
@@ -275,6 +276,8 @@ func (p proxy) GetCallbackImpl() (one _interface.PaymentBizCallbackInterface) {
 		return &onetime.Onetime{}
 	} else if p.BizType == consts.BizTypeSubscription {
 		return &callback.SubscriptionPaymentCallback{}
+	} else if p.BizType == consts.BizTypeCreditRecharge {
+		return &callback2.CreditRechargeCallback{}
 	} else {
 		return &Invalid{}
 	}

@@ -13,6 +13,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	dao "unibee/internal/dao/default"
+	config3 "unibee/internal/logic/credit/config"
 	"unibee/internal/logic/discount"
 	handler3 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
@@ -222,21 +223,23 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						Currency:      pendingUpdate.UpdateCurrency,
-						DiscountCode:  discountCode,
-						TimeNow:       timeNow,
-						PlanId:        pendingUpdate.UpdatePlanId,
-						Quantity:      pendingUpdate.UpdateQuantity,
-						AddonJsonData: pendingUpdate.UpdateAddonData,
-						VatNumber:     vatNumber,
-						CountryCode:   countryCode,
-						TaxPercentage: taxPercentage,
-						PeriodStart:   nextPeriodStart,
-						PeriodEnd:     nextPeriodEnd,
-						InvoiceName:   "SubscriptionDowngrade",
-						FinishTime:    timeNow,
-						CreateFrom:    consts.InvoiceAutoChargeFlag,
-						Metadata:      map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
+						UserId:           sub.UserId,
+						Currency:         pendingUpdate.UpdateCurrency,
+						DiscountCode:     discountCode,
+						TimeNow:          timeNow,
+						PlanId:           pendingUpdate.UpdatePlanId,
+						Quantity:         pendingUpdate.UpdateQuantity,
+						AddonJsonData:    pendingUpdate.UpdateAddonData,
+						VatNumber:        vatNumber,
+						CountryCode:      countryCode,
+						TaxPercentage:    taxPercentage,
+						PeriodStart:      nextPeriodStart,
+						PeriodEnd:        nextPeriodEnd,
+						InvoiceName:      "SubscriptionDowngrade",
+						FinishTime:       timeNow,
+						CreateFrom:       consts.InvoiceAutoChargeFlag,
+						Metadata:         map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
+						ApplyPromoCredit: config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
 					})
 				} else {
 					//generate cycle invoice from sub
@@ -246,20 +249,22 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						Currency:      sub.Currency,
-						DiscountCode:  discountCode,
-						TimeNow:       timeNow,
-						PlanId:        sub.PlanId,
-						Quantity:      sub.Quantity,
-						AddonJsonData: sub.AddonData,
-						VatNumber:     vatNumber,
-						CountryCode:   countryCode,
-						TaxPercentage: taxPercentage,
-						PeriodStart:   nextPeriodStart,
-						PeriodEnd:     nextPeriodEnd,
-						InvoiceName:   "SubscriptionCycle",
-						FinishTime:    timeNow,
-						CreateFrom:    consts.InvoiceAutoChargeFlag,
+						UserId:           sub.UserId,
+						Currency:         sub.Currency,
+						DiscountCode:     discountCode,
+						TimeNow:          timeNow,
+						PlanId:           sub.PlanId,
+						Quantity:         sub.Quantity,
+						AddonJsonData:    sub.AddonData,
+						VatNumber:        vatNumber,
+						CountryCode:      countryCode,
+						TaxPercentage:    taxPercentage,
+						PeriodStart:      nextPeriodStart,
+						PeriodEnd:        nextPeriodEnd,
+						InvoiceName:      "SubscriptionCycle",
+						FinishTime:       timeNow,
+						CreateFrom:       consts.InvoiceAutoChargeFlag,
+						ApplyPromoCredit: config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {

@@ -3,23 +3,23 @@ package user
 import (
 	"context"
 	"unibee/api/bean"
+	"unibee/api/user/subscription"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
-
-	"unibee/api/user/subscription"
 )
 
 func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
-		MerchantId:     _interface.GetMerchantId(ctx),
-		PlanId:         req.PlanId,
-		UserId:         _interface.Context().Get(ctx).User.Id,
-		Quantity:       req.Quantity,
-		GatewayId:      req.GatewayId,
-		AddonParams:    req.AddonParams,
-		VatCountryCode: req.VatCountryCode,
-		VatNumber:      req.VatNumber,
-		DiscountCode:   req.DiscountCode,
+		MerchantId:       _interface.GetMerchantId(ctx),
+		PlanId:           req.PlanId,
+		UserId:           _interface.Context().Get(ctx).User.Id,
+		Quantity:         req.Quantity,
+		GatewayId:        req.GatewayId,
+		AddonParams:      req.AddonParams,
+		VatCountryCode:   req.VatCountryCode,
+		VatNumber:        req.VatNumber,
+		DiscountCode:     req.DiscountCode,
+		ApplyPromoCredit: req.ApplyPromoCredit,
 	})
 	if err != nil {
 		return nil, err
@@ -47,5 +47,6 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatNumberValidateMessage:  prepare.VatNumberValidateMessage,
 		DiscountMessage:           prepare.DiscountMessage,
 		OtherActiveSubscriptionId: prepare.OtherActiveSubscriptionId,
+		ApplyPromoCredit:          prepare.ApplyPromoCredit,
 	}, nil
 }

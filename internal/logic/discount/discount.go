@@ -207,8 +207,6 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uin
 	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
 	if one.Status == consts.DiscountStatusActive {
 		return nil
-	} else if one.Status == consts.DiscountStatusExpired {
-		return gerror.New("Code is expired")
 	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().Status:    consts.DiscountStatusActive,

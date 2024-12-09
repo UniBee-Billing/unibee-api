@@ -148,7 +148,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			Amount:                 addon.Amount*req.Quantity + taxAmount - discountAmount,
 			DiscountAmount:         discountAmount,
 			Tax:                    taxAmount,
-			AmountExcludingTax:     addon.Amount*req.Quantity - discountAmount,
+			AmountExcludingTax:     addon.Amount * req.Quantity,
 			UnitAmountExcludingTax: addon.Amount,
 			Name:                   addon.PlanName,
 			Description:            addon.Description,

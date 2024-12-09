@@ -54,6 +54,17 @@ var (
 			openapi.Info.Version = utility.ReadBuildVersionInfo(ctx)
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
+			//https://github.com/gogf/gf/issues/3747
+			openapi.Security = &goai.SecurityRequirements{{"Authorization": []string{}}}
+			openapi.Components.SecuritySchemes = goai.SecuritySchemes{
+				"Authorization": goai.SecuritySchemeRef{
+					Value: &goai.SecurityScheme{
+						Type:         "http",
+						Scheme:       "bearer",
+						BearerFormat: "JWT",
+					},
+				},
+			}
 			openapi.Servers = &goai.Servers{
 				{URL: config.GetConfigInstance().Server.DomainPath},
 				{URL: fmt.Sprintf("http://127.0.0.1%s", config.GetConfigInstance().Server.Address)},
@@ -176,6 +187,11 @@ var (
 				group.Group("/discount", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewDiscount(),
+					)
+				})
+				group.Group("/credit", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewCredit(),
 					)
 				})
 				group.Group("/task", func(group *ghttp.RouterGroup) {

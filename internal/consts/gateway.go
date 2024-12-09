@@ -7,6 +7,7 @@ const (
 	GatewayTypeCrypto       = 2 //
 	GatewayTypeWireTransfer = 3 //
 	GatewayTypePaypal       = 4 //
+	GatewayTypeCredit       = 5 //
 )
 
 func (status GatewayTypeEnum) Description() string {

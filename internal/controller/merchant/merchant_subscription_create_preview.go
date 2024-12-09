@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+	"unibee/api/merchant/subscription"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
@@ -13,8 +14,6 @@ import (
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"
-
-	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
@@ -73,17 +72,18 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		req.UserId = user.Id
 	}
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
-		MerchantId:     _interface.GetMerchantId(ctx),
-		PlanId:         req.PlanId,
-		UserId:         req.UserId,
-		Quantity:       req.Quantity,
-		GatewayId:      req.GatewayId,
-		AddonParams:    req.AddonParams,
-		VatCountryCode: req.VatCountryCode,
-		VatNumber:      req.VatNumber,
-		TaxPercentage:  req.TaxPercentage,
-		DiscountCode:   req.DiscountCode,
-		TrialEnd:       req.TrialEnd,
+		MerchantId:       _interface.GetMerchantId(ctx),
+		PlanId:           req.PlanId,
+		UserId:           req.UserId,
+		Quantity:         req.Quantity,
+		GatewayId:        req.GatewayId,
+		AddonParams:      req.AddonParams,
+		VatCountryCode:   req.VatCountryCode,
+		VatNumber:        req.VatNumber,
+		TaxPercentage:    req.TaxPercentage,
+		DiscountCode:     req.DiscountCode,
+		TrialEnd:         req.TrialEnd,
+		ApplyPromoCredit: req.ApplyPromoCredit,
 	})
 	if err != nil {
 		return nil, err
@@ -116,20 +116,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatNumberValidate:              prepare.VatNumberValidate,
 		VatCountryCode:                 prepare.VatCountryCode,
 		VatCountryName:                 prepare.VatCountryName,
-		Invoice: &bean.Invoice{
-			InvoiceName:                    prepare.Invoice.InvoiceName,
-			OriginAmount:                   prepare.Invoice.OriginAmount,
-			TotalAmount:                    prepare.Invoice.TotalAmount,
-			TotalAmountExcludingTax:        prepare.Invoice.TotalAmountExcludingTax,
-			DiscountAmount:                 prepare.Invoice.DiscountAmount,
-			DiscountCode:                   prepare.Invoice.DiscountCode,
-			Currency:                       prepare.Invoice.Currency,
-			TaxAmount:                      prepare.Invoice.TaxAmount,
-			TaxPercentage:                  prepare.Invoice.TaxPercentage,
-			SubscriptionAmount:             prepare.Invoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: prepare.Invoice.SubscriptionAmountExcludingTax,
-			Lines:                          prepare.Invoice.Lines,
-		},
+		Invoice:                        prepare.Invoice,
 		UserId:                         prepare.UserId,
 		Email:                          prepare.Email,
 		Discount:                       prepare.Discount,
@@ -137,5 +124,6 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		DiscountMessage:                prepare.DiscountMessage,
 		OtherPendingCryptoSubscription: pendingCryptoSub,
 		OtherActiveSubscriptionId:      prepare.OtherActiveSubscriptionId,
+		ApplyPromoCredit:               prepare.ApplyPromoCredit,
 	}, nil
 }

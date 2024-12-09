@@ -9,6 +9,7 @@ const (
 	DiscountStatusActive         = 2
 	DiscountStatusDeactivate     = 3
 	DiscountStatusExpired        = 4
+	DiscountStatusArchived       = 10
 	DiscountBillingTypeOnetime   = 1
 	DiscountBillingTypeRecurring = 2
 	DiscountTypePercentage       = 1
@@ -25,6 +26,8 @@ func (status DiscountStatusEnum) Description() string {
 		return "Deactivate"
 	case DiscountStatusExpired:
 		return "Expired"
+	case DiscountStatusArchived:
+		return "Archived"
 	default:
 		return "Active"
 	}
@@ -40,6 +43,8 @@ func DiscountStatusToEnum(status int) DiscountStatusEnum {
 		return DiscountStatusDeactivate
 	case DiscountStatusExpired:
 		return DiscountStatusExpired
+	case DiscountStatusArchived:
+		return DiscountStatusArchived
 	default:
 		return DiscountStatusActive
 	}

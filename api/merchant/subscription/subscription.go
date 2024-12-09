@@ -149,19 +149,20 @@ type AddNewTrialStartRes struct {
 }
 
 type RenewReq struct {
-	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
-	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription or latest subscription will renew if userId provide instead of subscriptionId"`
-	UserId         uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription or latest cancel|expire subscription will renew if userId provide instead of subscriptionId"`
-	ProductId      int64                       `json:"productId" dc:"Id of product" dc:"default product will use if not specified"`
-	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
-	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
-	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
-	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
-	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
-	ReturnUrl      string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	CancelUrl      string                      `json:"cancelUrl" dc:"CancelUrl"`
-	ProductData    *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
-	Metadata       map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	g.Meta           `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
+	SubscriptionId   string                      `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription or latest subscription will renew if userId provide instead of subscriptionId"`
+	UserId           uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription or latest cancel|expire subscription will renew if userId provide instead of subscriptionId"`
+	ProductId        int64                       `json:"productId" dc:"Id of product" dc:"default product will use if not specified"`
+	GatewayId        *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	TaxPercentage    *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	DiscountCode     string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount         *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment    bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl        string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl        string                      `json:"cancelUrl" dc:"CancelUrl"`
+	ProductData      *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	Metadata         map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	ApplyPromoCredit *bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 type RenewRes struct {
@@ -171,20 +172,21 @@ type RenewRes struct {
 }
 
 type CreatePreviewReq struct {
-	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"CreateSubscriptionPreview"`
-	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	Email          string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
-	UserId         uint64                 `json:"userId" dc:"UserId"`
-	ExternalUserId string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
-	User           *bean.NewUser          `json:"user" dc:"User Object"`
-	Quantity       int64                  `json:"quantity" dc:"Quantity" `
-	GatewayId      *uint64                `json:"gatewayId" dc:"GatewayId" `
-	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	DiscountCode   string                 `json:"discountCode" dc:"DiscountCode"`
-	TrialEnd       int64                  `json:"trialEnd" dc:"trial_end, utc time"` // trial_end, utc time
+	g.Meta           `path:"/create_preview" tags:"Subscription" method:"post" summary:"CreateSubscriptionPreview"`
+	PlanId           uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Email            string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId           uint64                 `json:"userId" dc:"UserId"`
+	ExternalUserId   string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	User             *bean.NewUser          `json:"user" dc:"User Object"`
+	Quantity         int64                  `json:"quantity" dc:"Quantity" `
+	GatewayId        *uint64                `json:"gatewayId" dc:"GatewayId" `
+	AddonParams      []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	VatCountryCode   string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber        string                 `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage    *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	DiscountCode     string                 `json:"discountCode" dc:"DiscountCode"`
+	TrialEnd         int64                  `json:"trialEnd" dc:"trial_end, utc time"` // trial_end, utc time
+	ApplyPromoCredit *bool                  `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 }
 
 type CreatePreviewRes struct {
@@ -213,6 +215,7 @@ type CreatePreviewRes struct {
 	DiscountMessage                string                     `json:"discountMessage" `
 	OtherPendingCryptoSubscription *detail.SubscriptionDetail `json:"otherPendingCryptoSubscription" `
 	OtherActiveSubscriptionId      string                     `json:"otherActiveSubscriptionId" description:"other active or incomplete subscription id "`
+	ApplyPromoCredit               bool                       `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 }
 
 type CreateReq struct {
@@ -239,6 +242,7 @@ type CreateReq struct {
 	TrialEnd           int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
 	StartIncomplete    bool                        `json:"startIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
 	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	ApplyPromoCredit   bool                        `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 type CreateRes struct {
@@ -251,14 +255,15 @@ type CreateRes struct {
 }
 
 type UpdatePreviewReq struct {
-	g.Meta          `path:"/update_preview" tags:"Subscription" method:"post" summary:"UpdateSubscriptionPreview"`
-	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId       uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
-	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
+	g.Meta           `path:"/update_preview" tags:"Subscription" method:"post" summary:"UpdateSubscriptionPreview"`
+	SubscriptionId   string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId        uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity         int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId        uint64                 `json:"gatewayId" dc:"Id" `
+	EffectImmediate  int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams      []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	DiscountCode     string                 `json:"discountCode"        dc:"DiscountCode"`
+	ApplyPromoCredit *bool                  `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 type UpdatePreviewRes struct {
@@ -270,6 +275,8 @@ type UpdatePreviewRes struct {
 	NextPeriodInvoice *bean.Invoice              `json:"nextPeriodInvoice"`
 	ProrationDate     int64                      `json:"prorationDate"`
 	Discount          *bean.MerchantDiscountCode `json:"discount" `
+	DiscountMessage   string                     `json:"discountMessage" `
+	ApplyPromoCredit  bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 type UpdateReq struct {
@@ -292,6 +299,7 @@ type UpdateReq struct {
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 	CancelUrl          string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	ApplyPromoCredit   bool                        `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 type UpdateRes struct {

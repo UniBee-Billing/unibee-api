@@ -16,7 +16,6 @@ func TaskForExpireDiscounts(ctx context.Context) {
 	err := dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().Status, consts.DiscountStatusActive).
 		WhereLT(dao.MerchantDiscountCode.Columns().EndTime, gtime.Now().Timestamp()).
-		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "TaskForExpireDiscounts error:%s", err.Error())

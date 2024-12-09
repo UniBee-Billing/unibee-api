@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
 	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
@@ -17,6 +18,7 @@ import (
 )
 
 type CalculateInvoiceReq struct {
+	UserId             uint64                 `json:"userId"`
 	Currency           string                 `json:"currency"`
 	DiscountCode       string                 `json:"discountCode"`
 	TimeNow            int64                  `json:"TimeNow"`
@@ -34,6 +36,7 @@ type CalculateInvoiceReq struct {
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom         string                 `json:"createFrom"                     description:"create from"`          // create from
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	ApplyPromoCredit   bool                   `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 func VerifyInvoiceSimplify(one *bean.Invoice) {
@@ -282,8 +285,22 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		})
 	}
 
+	//Promo Credit
+	var promoCreditDiscountAmount int64 = 0
+	var promoCreditAccount *bean.CreditAccount
+	var promoCreditPayout *bean.CreditPayout
+	var creditPayoutErr error
+	if req.ApplyPromoCredit {
+		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, plan.MerchantId, req.UserId, consts.CreditAccountTypePromo, plan.Currency, totalAmountExcludingTax)
+		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
+			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
+			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+		}
+	}
+
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
 
@@ -291,18 +308,21 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    plan.PlanName,
-		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount + promoCreditDiscountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		DiscountAmount:                 discountAmount,
 		DiscountCode:                   req.DiscountCode,
+		PromoCreditDiscountAmount:      promoCreditDiscountAmount,
+		PromoCreditAccount:             promoCreditAccount,
+		PromoCreditPayout:              promoCreditPayout,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
 		CountryCode:                    req.CountryCode,
 		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
-		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
+		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount,
 		Lines:                          invoiceItems,
 		PeriodStart:                    req.PeriodStart,
 		PeriodEnd:                      req.PeriodEnd,
@@ -321,6 +341,8 @@ type ProrationPlanParam struct {
 }
 
 type CalculateProrationInvoiceReq struct {
+	UserId             uint64                 `json:"userId"`
+	MerchantId         uint64                 `json:"merchantId"`
 	Currency           string                 `json:"currency"`
 	DiscountCode       string                 `json:"discountCode"`
 	TimeNow            int64                  `json:"TimeNow"`
@@ -339,6 +361,7 @@ type CalculateProrationInvoiceReq struct {
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	OldTaxPercentage   int64                  `json:"oldTaxPercentage"`
 	OldDiscountCode    string                 `json:"oldDiscountCode"`
+	ApplyPromoCredit   bool                   `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.Invoice {
@@ -458,6 +481,19 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
 	}
 
+	//Promo Credit
+	var promoCreditDiscountAmount int64 = 0
+	var promoCreditAccount *bean.CreditAccount
+	var promoCreditPayout *bean.CreditPayout
+	var creditPayoutErr error
+	if req.ApplyPromoCredit {
+		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, req.Currency, totalAmountExcludingTax)
+		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
+			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
+			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+		}
+	}
+
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
@@ -466,18 +502,21 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    req.ProductName,
-		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount + promoCreditDiscountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		DiscountAmount:                 discountAmount,
 		DiscountCode:                   req.DiscountCode,
+		PromoCreditDiscountAmount:      promoCreditDiscountAmount,
+		PromoCreditAccount:             promoCreditAccount,
+		PromoCreditPayout:              promoCreditPayout,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
 		CountryCode:                    req.CountryCode,
 		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
-		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
+		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount,
 		Lines:                          invoiceItems,
 		ProrationDate:                  req.ProrationDate,
 		ProrationScale:                 timeScale,
@@ -576,6 +615,18 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 	if totalAmountExcludingTax < 0 {
 		totalAmountExcludingTax = 0
 	}
+	//Promo Credit
+	var promoCreditDiscountAmount int64 = 0
+	var promoCreditAccount *bean.CreditAccount
+	var promoCreditPayout *bean.CreditPayout
+	var creditPayoutErr error
+	if req.ApplyPromoCredit {
+		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, req.Currency, totalAmountExcludingTax)
+		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
+			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
+			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+		}
+	}
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
@@ -584,18 +635,21 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		ProductName:                    req.ProductName,
-		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount + promoCreditDiscountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		DiscountAmount:                 discountAmount,
 		DiscountCode:                   req.DiscountCode,
+		PromoCreditDiscountAmount:      promoCreditDiscountAmount,
+		PromoCreditAccount:             promoCreditAccount,
+		PromoCreditPayout:              promoCreditPayout,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
 		CountryCode:                    req.CountryCode,
 		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
-		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
+		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount,
 		Lines:                          invoiceItems,
 		ProrationDate:                  req.ProrationDate,
 		ProrationScale:                 timeScale,

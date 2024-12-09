@@ -76,6 +76,8 @@ type InvoiceColumns struct {
 	BillingCycleAnchor             string // billing_cycle_anchor
 	CreateFrom                     string // create from
 	VatNumber                      string //
+	PromoCreditDiscountAmount      string // promo credit discount amount
+	PartialCreditPaidAmount        string // partial credit paid amount
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -136,6 +138,8 @@ var invoiceColumns = InvoiceColumns{
 	BillingCycleAnchor:             "billing_cycle_anchor",
 	CreateFrom:                     "create_from",
 	VatNumber:                      "vat_number",
+	PromoCreditDiscountAmount:      "promo_credit_discount_amount",
+	PartialCreditPaidAmount:        "partial_credit_paid_amount",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

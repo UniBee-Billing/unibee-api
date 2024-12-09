@@ -27,6 +27,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
 		Currency:      req.Currency,
+		SearchKey:     req.SearchKey,
 		Page:          req.Page,
 		Count:         req.Count,
 	})

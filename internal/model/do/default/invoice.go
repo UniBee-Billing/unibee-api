@@ -68,4 +68,6 @@ type Invoice struct {
 	BillingCycleAnchor             interface{} // billing_cycle_anchor
 	CreateFrom                     interface{} // create from
 	VatNumber                      interface{} //
+	PromoCreditDiscountAmount      interface{} // promo credit discount amount
+	PartialCreditPaidAmount        interface{} // partial credit paid amount
 }

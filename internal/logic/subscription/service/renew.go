@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/invoice/handler"
@@ -24,21 +25,23 @@ import (
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 type RenewInternalReq struct {
 	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	//UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
-	GatewayId     *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
-	TaxPercentage *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	DiscountCode  string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
-	Discount      *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
-	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
-	ReturnUrl     string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	CancelUrl     string                      `json:"cancelUrl" dc:"CancelUrl"`
-	ProductData   *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
-	Metadata      map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	GatewayId        *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	TaxPercentage    *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	DiscountCode     string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount         *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment    bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl        string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl        string                      `json:"cancelUrl" dc:"CancelUrl"`
+	ProductData      *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	Metadata         map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	ApplyPromoCredit *bool                       `json:"applyPromoCredit" `
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
@@ -94,22 +97,18 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		utility.Assert(canApply, message)
-		//} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
-		//	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-		//		MerchantId:     sub.MerchantId,
-		//		UserId:         sub.UserId,
-		//		DiscountCode:   sub.DiscountCode,
-		//		Currency:       sub.Currency,
-		//		SubscriptionId: sub.SubscriptionId,
-		//		PLanId:         sub.PlanId,
-		//		TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
-		//	})
-		//	if canApply && isRecurring {
-		//		req.DiscountCode = sub.DiscountCode
-		//	}
+		promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency)
+		if promoCreditDiscountCodeExclusive {
+			//conflict, disable promo credit
+			req.ApplyPromoCredit = unibee.Bool(false)
+		}
+	}
+	if req.ApplyPromoCredit == nil {
+		req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency))
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+		UserId:             sub.UserId,
 		InvoiceName:        "SubscriptionRenew",
 		Currency:           sub.Currency,
 		DiscountCode:       req.DiscountCode,
@@ -126,6 +125,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: timeNow,
 		Metadata:           req.Metadata,
+		ApplyPromoCredit:   *req.ApplyPromoCredit,
 	})
 
 	// createAndPayNewProrationInvoice

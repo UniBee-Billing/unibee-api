@@ -18,6 +18,9 @@ func MergeMetadata(source string, target map[string]interface{}) map[string]inte
 	if len(source) > 0 {
 		_ = gjson.Unmarshal([]byte(source), &metadata)
 	}
+	if metadata == nil {
+		metadata = make(map[string]interface{})
+	}
 	for k, v := range target {
 		metadata[k] = v
 	}

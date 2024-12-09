@@ -45,15 +45,14 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 		Page:  page,
 		Count: count,
 	}
-	timeZone := 0
+	var timeZone int64 = 0
 	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
-		if value, ok := payload["timeZone"].(float64); ok {
-			timeZone = int(value)
-			if timeZone > 0 {
-				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
-			} else if timeZone < 0 {
-				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+		if value, ok := payload["timeZone"].(string); ok {
+			zone, err := export.GetUTCOffsetFromTimeZone(value)
+			if err == nil && zone > 0 {
+				timeZoneStr = value
+				timeZone = zone
 			}
 		}
 		if value, ok := payload["userId"].(float64); ok {
@@ -81,10 +80,10 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 			req.AmountEnd = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
-			req.CreateTimeStart = int64(value)
+			req.CreateTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["createTimeEnd"].(float64); ok {
-			req.CreateTimeEnd = int64(value)
+			req.CreateTimeEnd = int64(value) - timeZone
 		}
 	}
 	req.SkipTotal = true
@@ -152,16 +151,16 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				Gateway:                subGateway,
 				Status:                 consts.SubStatusToEnum(one.Subscription.Status).Description(),
 				CancelAtPeriodEnd:      canAtPeriodEnd,
-				CurrentPeriodStart:     gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodStart + int64(timeZone*3600)),
-				CurrentPeriodEnd:       gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodEnd + int64(timeZone*3600)),
-				BillingCycleAnchor:     gtime.NewFromTimeStamp(one.Subscription.BillingCycleAnchor + int64(timeZone*3600)),
-				DunningTime:            gtime.NewFromTimeStamp(one.Subscription.DunningTime + int64(timeZone*3600)),
-				TrialEnd:               gtime.NewFromTimeStamp(one.Subscription.TrialEnd + int64(timeZone*3600)),
-				FirstPaidTime:          gtime.NewFromTimeStamp(one.Subscription.FirstPaidTime + int64(timeZone*3600)),
+				CurrentPeriodStart:     gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodStart + timeZone),
+				CurrentPeriodEnd:       gtime.NewFromTimeStamp(one.Subscription.CurrentPeriodEnd + timeZone),
+				BillingCycleAnchor:     gtime.NewFromTimeStamp(one.Subscription.BillingCycleAnchor + timeZone),
+				DunningTime:            gtime.NewFromTimeStamp(one.Subscription.DunningTime + timeZone),
+				TrialEnd:               gtime.NewFromTimeStamp(one.Subscription.TrialEnd + timeZone),
+				FirstPaidTime:          gtime.NewFromTimeStamp(one.Subscription.FirstPaidTime + timeZone),
 				CancelReason:           one.Subscription.CancelReason,
 				CountryCode:            one.Subscription.CountryCode,
 				TaxPercentage:          utility.ConvertTaxPercentageToPercentageString(one.Subscription.TaxPercentage),
-				CreateTime:             gtime.NewFromTimeStamp(one.Subscription.CreateTime + int64(timeZone*3600)),
+				CreateTime:             gtime.NewFromTimeStamp(one.Subscription.CreateTime + timeZone),
 				StripeUserId:           stripeUserId,
 				StripePaymentMethod:    stripePaymentMethod,
 				PaypalVaultId:          paypalVaultId,

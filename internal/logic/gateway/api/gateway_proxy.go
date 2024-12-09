@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway/api/credit"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
@@ -23,6 +24,7 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"autotest":        &AutoTest{},
 	"coinbase":        &Coinbase{},
 	"wire_transfer":   &Wire{},
+	"credit":          &credit.Credit{},
 }
 
 var GatewayShortNameMapping = map[string]string{
@@ -34,6 +36,7 @@ var GatewayShortNameMapping = map[string]string{
 	"autotest":        "AP",
 	"coinbase":        "CP",
 	"wire_transfer":   "WT",
+	"credit":          "CR",
 }
 
 type GatewayProxy struct {

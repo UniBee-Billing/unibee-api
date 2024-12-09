@@ -10,8 +10,9 @@ type ListReq struct {
 	g.Meta          `path:"/list" tags:"Discount" method:"get" summary:"DiscountCodeList" dc:"Get discountCode list"`
 	DiscountType    []int  `json:"discountType"  dc:"discount_type, 1-percentage, 2-fixed_amount" `
 	BillingType     []int  `json:"billingType"  dc:"billing_type, 1-one-time, 2-recurring" `
-	Status          []int  `json:"status" dc:"status, 1-editable, 2-active, 3-deactive, 4-expire" `
+	Status          []int  `json:"status" dc:"status, 1-editable, 2-active, 3-deactive, 4-expire, 10-archive" `
 	Code            string `json:"code" dc:"Filter Code"  `
+	SearchKey       string `json:"searchKey" dc:"Search Key, code or name"  `
 	Currency        string `json:"currency" dc:"Filter Currency"  `
 	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -105,13 +106,16 @@ type DeactivateRes struct {
 
 type UserDiscountListReq struct {
 	g.Meta          `path:"/user_discount_list" tags:"Discount" method:"get" summary:"UserDiscountCodeList" dc:"Get user discountCode list"`
-	Id              uint64 `json:"id"                 description:"The discount's Id" v:"required"`
-	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page"  dc:"Page, Start 0" `
-	Count           int    `json:"count"  dc:"Count Of Per Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	Id              uint64   `json:"id"                 description:"The discount's Id" v:"required"`
+	UserIds         []uint64 `json:"userIds" dc:"Filter UserIds Default All" `
+	Email           string   `json:"email" dc:"Filter Email Default All" `
+	PlanIds         []uint64 `json:"planIds" dc:"Filter PlanIds Default All" `
+	SortField       string   `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int      `json:"page"  dc:"Page, Start 0" `
+	Count           int      `json:"count"  dc:"Count Of Per Page" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type UserDiscountListRes struct {

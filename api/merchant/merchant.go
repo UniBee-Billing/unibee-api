@@ -9,6 +9,7 @@ import (
 
 	"unibee/api/merchant/auth"
 	"unibee/api/merchant/balance"
+	"unibee/api/merchant/credit"
 	"unibee/api/merchant/discount"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
@@ -44,6 +45,19 @@ type IMerchantAuth interface {
 type IMerchantBalance interface {
 	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
 	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
+}
+
+type IMerchantCredit interface {
+	ConfigList(ctx context.Context, req *credit.ConfigListReq) (res *credit.ConfigListRes, err error)
+	NewConfig(ctx context.Context, req *credit.NewConfigReq) (res *credit.NewConfigRes, err error)
+	EditConfig(ctx context.Context, req *credit.EditConfigReq) (res *credit.EditConfigRes, err error)
+	Detail(ctx context.Context, req *credit.DetailReq) (res *credit.DetailRes, err error)
+	NewCreditRecharge(ctx context.Context, req *credit.NewCreditRechargeReq) (res *credit.NewCreditRechargeRes, err error)
+	CreditAccountList(ctx context.Context, req *credit.CreditAccountListReq) (res *credit.CreditAccountListRes, err error)
+	CreditTransactionList(ctx context.Context, req *credit.CreditTransactionListReq) (res *credit.CreditTransactionListRes, err error)
+	PromoCreditIncrement(ctx context.Context, req *credit.PromoCreditIncrementReq) (res *credit.PromoCreditIncrementRes, err error)
+	PromoCreditDecrement(ctx context.Context, req *credit.PromoCreditDecrementReq) (res *credit.PromoCreditDecrementRes, err error)
+	EditCreditAccount(ctx context.Context, req *credit.EditCreditAccountReq) (res *credit.EditCreditAccountRes, err error)
 }
 
 type IMerchantDiscount interface {

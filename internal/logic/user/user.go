@@ -36,6 +36,16 @@ func ChangeUserEmail(ctx context.Context, userId uint64, newEmail string) {
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "update user email err")
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("User(%v)", one.Id),
+		Content:        fmt.Sprintf("ChangeToNewEmail(%s)", newEmail),
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if len(one.SubscriptionId) > 0 {
 		// change user's sub gateway immediately
 		_, _ = redismq.Send(&redismq.Message{
@@ -303,7 +313,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				MerchantId:     one.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", one.Id),
-				Content:        fmt.Sprintf("UpdateEmail(%s)", req.Email),
+				Content:        fmt.Sprintf("ChangeToNewEmail(%s)", req.Email),
 				UserId:         one.Id,
 				SubscriptionId: "",
 				InvoiceId:      "",

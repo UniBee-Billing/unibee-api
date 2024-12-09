@@ -12,6 +12,9 @@ func (c *ControllerDiscount) UserDiscountList(ctx context.Context, req *discount
 	list, total := discount2.MerchantUserDiscountCodeList(ctx, &discount2.UserDiscountListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
 		Id:              req.Id,
+		UserIds:         req.UserIds,
+		Email:           req.Email,
+		PlanIds:         req.PlanIds,
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		Page:            req.Page,

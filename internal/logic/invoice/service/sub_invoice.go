@@ -13,7 +13,9 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
+	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
@@ -58,6 +60,25 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 	}
 
 	invoiceId := utility.CreateInvoiceId()
+	{
+		//promo credit
+		if simplify.PromoCreditDiscountAmount > 0 && simplify.PromoCreditPayout != nil && simplify.PromoCreditAccount != nil {
+			_, err := payment.NewCreditPayment(ctx, &payment.CreditPaymentInternalReq{
+				UserId:                  sub.UserId,
+				MerchantId:              sub.MerchantId,
+				ExternalCreditPaymentId: invoiceId,
+				InvoiceId:               invoiceId,
+				CurrencyAmount:          simplify.PromoCreditDiscountAmount,
+				Currency:                simplify.Currency,
+				CreditType:              simplify.PromoCreditAccount.Type,
+				Name:                    "InvoicePromoCreditDiscount",
+				Description:             "Subscription Invoice Promo Credit Discount",
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 	if len(simplify.DiscountCode) > 0 {
 		_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
 			MerchantId:       sub.MerchantId,
@@ -72,6 +93,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 			IsRecurringApply: strings.Compare(simplify.CreateFrom, consts.InvoiceAutoChargeFlag) == 0,
 		})
 		if err != nil {
+			_ = payment.RollbackCreditPayment(ctx, sub.MerchantId, invoiceId)
 			return nil, err
 		}
 	}
@@ -119,6 +141,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 		Data:                           utility.MarshalToJsonString(userSnapshot),
 		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
 		CreateFrom:                     simplify.CreateFrom,
+		PromoCreditDiscountAmount:      simplify.PromoCreditDiscountAmount,
+		PartialCreditPaidAmount:        simplify.PartialCreditPaidAmount,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -126,9 +150,9 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 		g.Log().Infof(ctx, "CreateProcessingInvoiceForSub Create Invoice failed subId:%s err:%s", sub.SubscriptionId, err.Error())
 		err = gerror.Newf(`CreateProcessingInvoiceForSub record insert failure %s`, err.Error())
 		// should roll back discount usage
-		rollbackErr := discount.UserDiscountRollbackFromInvoice(ctx, invoiceId)
+		rollbackErr := discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, invoiceId)
 		if rollbackErr != nil {
-			g.Log().Infof(ctx, "CreateProcessingInvoiceForSub UserDiscountRollbackFromInvoice rollback failed subId:%s err:%s", sub.SubscriptionId, rollbackErr.Error())
+			g.Log().Infof(ctx, "CreateProcessingInvoiceForSub InvoiceRollbackAllDiscountsFromInvoice rollback failed subId:%s err:%s", sub.SubscriptionId, rollbackErr.Error())
 		}
 		return nil, err
 	}

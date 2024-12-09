@@ -13,6 +13,12 @@ import (
 )
 
 func FileEntry(r *ghttp.Request) {
+	r.Response.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+	r.Response.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT,DELETE,OPTIONS,PATCH")
+	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
+	if r.Method == "OPTIONS" {
+		return
+	}
 	filename := r.Get("filename").String()
 	if len(filename) == 0 {
 		r.Response.Writeln("filename not found")

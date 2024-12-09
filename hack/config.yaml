@@ -22,4 +22,4 @@ gfcli:
         entityPath:  "model/entity/default"
         noModelComment: false
         descriptionTag: true
-        tables: "user_admin_note"
+        tables: ""

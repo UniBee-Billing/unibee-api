@@ -50,7 +50,6 @@ func NewBalance() merchant.IMerchantBalance {
 	return &ControllerBalance{}
 }
 
-
 type ControllerMember struct{}
 
 func NewMember() merchant.IMerchantMember {
@@ -80,6 +79,7 @@ type ControllerGateway struct{}
 func NewGateway() merchant.IMerchantGateway {
 	return &ControllerGateway{}
 }
+
 type ControllerEmail struct{}
 
 func NewEmail() merchant.IMerchantEmail {
@@ -140,3 +140,8 @@ func NewProduct() merchant.IMerchantProduct {
 	return &ControllerProduct{}
 }
 
+type ControllerCredit struct{}
+
+func NewCredit() merchant.IMerchantCredit {
+	return &ControllerCredit{}
+}

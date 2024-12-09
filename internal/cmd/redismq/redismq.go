@@ -41,4 +41,7 @@ var (
 	TopicSubscriptionPendingUpdateCancel  = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_pending_update_cancelled", Description: "subscription pending update cancelled"}
 	TopicSubscriptionPendingUpdateSuccess = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_pending_update_success", Description: "subscription pending update success"}
 	TopicSubscriptionPendingUpdateCreate  = redismq.MQTopicEnum{Topic: "unibee_subscription", Tag: "subscription_pending_update_created", Description: "subscription pending update created"}
+	TopicCreditRechargeSuccess            = redismq.MQTopicEnum{Topic: "unibee_credit", Tag: "recharge_success", Description: "recharge success"}
+	TopicCreditPaymentSuccess             = redismq.MQTopicEnum{Topic: "unibee_credit", Tag: "payment_success", Description: "payment success"}
+	TopicCreditRefundSuccess              = redismq.MQTopicEnum{Topic: "unibee_credit", Tag: "refund_success", Description: "refund success"}
 )

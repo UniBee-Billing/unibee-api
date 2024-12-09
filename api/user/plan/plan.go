@@ -11,6 +11,7 @@ type ListReq struct {
 	ProductIds []int64 `json:"productIds"  dc:"filter id list of product, will use default product if not specified " `
 	Type       []int   `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
 	Currency   string  `json:"currency" dc:"Currency"  `
+	SearchKey  string  `json:"searchKey" dc:"Search Key, plan name or description"  `
 	Page       int     `json:"page"  dc:"Page, Start 0" `
 	Count      int     `json:"count"  dc:"Count Of Per Page" `
 }

@@ -43,6 +43,7 @@ func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
 	exampleFunction()
 }
 
+// 210 300
 func TestGenerate(t *testing.T) {
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	var lines []*bean.InvoiceItemSimplify

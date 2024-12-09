@@ -12,14 +12,17 @@ import (
 )
 
 type UserDiscountListInternalReq struct {
-	MerchantId      uint64 `json:"merchantId" dc:"The discount's merchant" v:"required"`
-	Id              uint64 `json:"id" dc:"The discount's Id" v:"required"`
-	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page"  dc:"Page, Start 0" `
-	Count           int    `json:"count"  dc:"Count Of Per Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	MerchantId      uint64   `json:"merchantId" dc:"The discount's merchant" v:"required"`
+	Id              uint64   `json:"id" dc:"The discount's Id" v:"required"`
+	UserIds         []uint64 `json:"userIds" dc:"Filter UserIds Default All" `
+	Email           string   `json:"email" dc:"Filter Email Default All" `
+	PlanIds         []uint64 `json:"planIds" dc:"Filter PlanIds Default All" `
+	SortField       string   `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int      `json:"page"  dc:"Page, Start 0" `
+	Count           int      `json:"count"  dc:"Count Of Per Page" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
 }
 
@@ -56,6 +59,25 @@ func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInte
 	}
 	if req.CreateTimeEnd > 0 {
 		q = q.WhereLTE(dao.MerchantUserDiscountCode.Columns().CreateTime, req.CreateTimeEnd)
+	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		q = q.WhereIn(dao.MerchantUserDiscountCode.Columns().PlanId, req.PlanIds)
+	}
+	if req.UserIds != nil && len(req.UserIds) > 0 {
+		q = q.WhereIn(dao.MerchantUserDiscountCode.Columns().UserId, req.UserIds)
+	} else if len(req.Email) > 0 {
+		var userIdList = make([]uint64, 0)
+		var userList []*entity.UserAccount
+		userQuery := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().MerchantId, req.MerchantId)
+		userQuery = userQuery.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
+		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&userList)
+		for _, user := range userList {
+			userIdList = append(userIdList, user.Id)
+		}
+		if len(userIdList) == 0 {
+			return mainList, total
+		}
+		q = q.WhereIn(dao.MerchantUserDiscountCode.Columns().UserId, userIdList)
 	}
 	var err error
 	q = q.

@@ -82,6 +82,7 @@ type ListReq struct {
 	Status        []int   `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
 	PublishStatus int     `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
 	Currency      string  `json:"currency" dc:"Filter Currency"  `
+	SearchKey     string  `json:"searchKey" dc:"Search Key, plan name or description"  `
 	SortField     string  `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int     `json:"page"  dc:"Page, Start 0" `

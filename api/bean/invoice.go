@@ -51,6 +51,12 @@ type Invoice struct {
 	VatNumber                      string                 `json:"vatNumber"                      description:""`
 	Data                           string                 `json:"data"                      description:""`
 	AutoCharge                     bool                   `json:"autoCharge"                      description:""`
+	PromoCreditAccount             *CreditAccount         `json:"promoCreditAccount"                      description:""`
+	PromoCreditPayout              *CreditPayout          `json:"promoCreditPayout"                      description:""`
+	PromoCreditDiscountAmount      int64                  `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`
+	CreditAccount                  *CreditAccount         `json:"creditAccount"                      description:""`
+	CreditPayout                   *CreditPayout          `json:"creditPayout"                      description:""`
+	PartialCreditPaidAmount        int64                  `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
 }
 
 type InvoiceItemSimplify struct {
@@ -140,5 +146,7 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 		VatNumber:                      one.VatNumber,
 		Data:                           one.Data,
 		AutoCharge:                     autoCharge,
+		PromoCreditDiscountAmount:      one.PromoCreditDiscountAmount,
+		PartialCreditPaidAmount:        one.PartialCreditPaidAmount,
 	}
 }

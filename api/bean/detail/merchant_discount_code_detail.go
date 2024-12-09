@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	"unibee/internal/consts"
 	"unibee/internal/logic/discount/quantity"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -18,7 +19,7 @@ type MerchantDiscountCodeDetail struct {
 	MerchantId         uint64                 `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string                 `json:"name"               description:"name"`                                                                       // name
 	Code               string                 `json:"code"               description:"code"`                                                                       // code
-	Status             int                    `json:"status"             description:"status, 1-editable, 2-active, 3-deactive, 4-expire"`                         // status, 1-editable, 2-active, 3-deactive, 4-expire
+	Status             int                    `json:"status"             description:"status, 1-editable, 2-active, 3-deactive, 4-expire, 10-archive"`             // status, 1-editable, 2-active, 3-deactive, 4-expire
 	BillingType        int                    `json:"billingType"        description:"billing_type, 1-one-time, 2-recurring"`                                      // billing_type, 1-one-time, 2-recurring
 	DiscountType       int                    `json:"discountType"       description:"discount_type, 1-percentage, 2-fixed_amount"`                                // discount_type, 1-percentage, 2-fixed_amount
 	DiscountAmount     int64                  `json:"discountAmount"     description:"amount of discount, available when discount_type is fixed_amount"`           // amount of discount, available when discount_type is fixed_amount
@@ -34,6 +35,7 @@ type MerchantDiscountCodeDetail struct {
 	LiveQuantity       int64                  `json:"liveQuantity"           description:"the live quantity of code"`
 	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit, will not change"`
 	QuantityUsed       int64                  `json:"quantityUsed"           description:"quantity used count of code"`
+	IsDeleted          int                    `json:"isDeleted"          description:"0-UnDeleted，> 0, Deleted, the deleted utc time"`
 }
 
 func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.MerchantDiscountCode) *MerchantDiscountCodeDetail {
@@ -60,7 +62,9 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 			}
 		}
 	}
-
+	if one.IsDeleted > 0 {
+		one.Status = consts.DiscountStatusArchived
+	}
 	return &MerchantDiscountCodeDetail{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
@@ -82,6 +86,7 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 		LiveQuantity:       utility.MaxInt64(one.Quantity-int64(quantity.GetDiscountQuantityUsedCount(ctx, one.Id)), 0),
 		Quantity:           one.Quantity,
 		QuantityUsed:       int64(quantity.GetDiscountQuantityUsedCount(ctx, one.Id)),
+		IsDeleted:          one.IsDeleted,
 	}
 }
 

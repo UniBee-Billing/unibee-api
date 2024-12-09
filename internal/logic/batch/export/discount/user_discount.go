@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/discount"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -48,16 +49,24 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 		Page:       page,
 		Count:      count,
 	}
-	timeZone := 0
+	var timeZone int64 = 0
 	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
-		if value, ok := payload["timeZone"].(float64); ok {
-			timeZone = int(value)
-			if timeZone > 0 {
-				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
-			} else if timeZone < 0 {
-				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+		if value, ok := payload["timeZone"].(string); ok {
+			zone, err := export.GetUTCOffsetFromTimeZone(value)
+			if err == nil && zone > 0 {
+				timeZoneStr = value
+				timeZone = zone
 			}
+		}
+		if value, ok := payload["userIds"].([]interface{}); ok {
+			req.UserIds = export.JsonArrayTypeConvertUint64(ctx, value)
+		}
+		if value, ok := payload["planIds"].([]interface{}); ok {
+			req.PlanIds = export.JsonArrayTypeConvertUint64(ctx, value)
+		}
+		if value, ok := payload["email"].(string); ok {
+			req.Email = value
 		}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value
@@ -66,10 +75,10 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 			req.SortType = value
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
-			req.CreateTimeStart = int64(value)
+			req.CreateTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["createTimeEnd"].(float64); ok {
-			req.CreateTimeEnd = int64(value)
+			req.CreateTimeEnd = int64(value) - timeZone
 		}
 	}
 	req.SkipTotal = true
@@ -111,9 +120,9 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 				Code:           one.Code,
 				Status:         statusStr,
 				SubscriptionId: one.SubscriptionId,
-				PaymentId:      one.PaymentId,
+				TransactionId:  one.PaymentId,
 				InvoiceId:      one.InvoiceId,
-				CreateTime:     gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+				CreateTime:     gtime.NewFromTimeStamp(one.CreateTime + timeZone),
 				ApplyAmount:    utility.ConvertCentToDollarStr(one.ApplyAmount, one.Currency),
 				Currency:       one.Currency,
 				Recurring:      recurring,
@@ -138,7 +147,7 @@ type ExportUserDiscountEntity struct {
 	Status         string      `json:"Status"            comment:""`
 	Code           string      `json:"Code"            comment:""`
 	SubscriptionId string      `json:"SubscriptionId"  comment:""`
-	PaymentId      string      `json:"PaymentId"       comment:""`
+	TransactionId  string      `json:"TransactionId"       comment:""`
 	InvoiceId      string      `json:"InvoiceId"       comment:""`
 	CreateTime     *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05" comment:""`
 	ApplyAmount    string      `json:"ApplyAmount"     comment:""`

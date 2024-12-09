@@ -48,6 +48,21 @@ func CreateRequestId() string {
 	return fmt.Sprintf("req%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
+func CreateCreditRechargeId() string {
+	//return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	return fmt.Sprintf("crrecharge%d%03v", gtime.Now().Timestamp(), rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000))
+}
+
+func CreateCreditPaymentId() string {
+	//return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	return fmt.Sprintf("crpayment%d%03v", gtime.Now().Timestamp(), rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000))
+}
+
+func CreateCreditRefundId() string {
+	//return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	return fmt.Sprintf("crrefund%d%03v", gtime.Now().Timestamp(), rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000))
+}
+
 func CreateSubscriptionId() string {
 	return fmt.Sprintf("sub%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }

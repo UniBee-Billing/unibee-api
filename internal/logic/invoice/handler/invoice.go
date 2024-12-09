@@ -16,12 +16,14 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
+	payment2 "unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/fiat_exchange"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/default"
@@ -64,6 +66,26 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		name = payment.BillingReason
 	}
 
+	{
+		//promo credit
+		if invoice.PromoCreditDiscountAmount > 0 && invoice.PromoCreditPayout != nil && invoice.PromoCreditAccount != nil {
+			_, err := payment2.NewCreditPayment(ctx, &payment2.CreditPaymentInternalReq{
+				UserId:                  payment.UserId,
+				MerchantId:              payment.MerchantId,
+				ExternalCreditPaymentId: payment.InvoiceId,
+				InvoiceId:               payment.InvoiceId,
+				CurrencyAmount:          invoice.PromoCreditDiscountAmount,
+				Currency:                invoice.Currency,
+				CreditType:              invoice.PromoCreditAccount.Type,
+				Name:                    "InvoicePromoCreditDiscount",
+				Description:             "Subscription Invoice Promo Credit Discount",
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	if len(invoice.DiscountCode) > 0 {
 		var planId uint64 = 0
 		sub := query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)
@@ -82,6 +104,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 			Currency:       invoice.Currency,
 		})
 		if err != nil {
+			_ = payment2.RollbackCreditPayment(ctx, payment.MerchantId, payment.InvoiceId)
 			return nil, err
 		}
 	}
@@ -129,15 +152,17 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		Data:                           utility.MarshalToJsonString(userSnapshot),
 		MetaData:                       utility.MarshalToJsonString(invoice.Metadata),
 		CreateFrom:                     invoice.CreateFrom,
+		PromoCreditDiscountAmount:      invoice.PromoCreditDiscountAmount,
+		PartialCreditPaidAmount:        invoice.PartialCreditPaidAmount,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		g.Log().Infof(ctx, "CreateProcessInvoiceForNewPayment create invoice failed paymentId:%s err:%s", payment.PaymentId, err.Error())
 		err = gerror.Newf(`CreateProcessInvoiceForNewPayment record insert failure %s`, err.Error())
-		rollbackErr := discount.UserDiscountRollbackFromInvoice(ctx, payment.InvoiceId)
+		rollbackErr := discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, payment.InvoiceId)
 		if rollbackErr != nil {
-			g.Log().Infof(ctx, "CreateProcessInvoiceForNewPayment UserDiscountRollbackFromInvoice rollback failed invoiceId:%s err:%s", payment.InvoiceId, rollbackErr.Error())
+			g.Log().Infof(ctx, "CreateProcessInvoiceForNewPayment InvoiceRollbackAllDiscountsFromInvoice rollback failed invoiceId:%s err:%s", payment.InvoiceId, rollbackErr.Error())
 		}
 		return nil, err
 	}
@@ -232,9 +257,9 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if one.Status != status {
 		if len(one.DiscountCode) > 0 {
 			if status == consts.InvoiceStatusCancelled || status == consts.InvoiceStatusFailed {
-				err = discount.UserDiscountRollbackFromInvoice(ctx, one.InvoiceId)
+				err = discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, one.InvoiceId)
 				if err != nil {
-					g.Log().Errorf(ctx, "UpdateInvoiceFromPayment UserDiscountRollbackFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
+					g.Log().Errorf(ctx, "UpdateInvoiceFromPayment InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
 				}
 			}
 		}

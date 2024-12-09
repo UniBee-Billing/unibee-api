@@ -2,13 +2,12 @@ package user
 
 import (
 	"context"
+	"unibee/api/user/subscription"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
-
-	"unibee/api/user/subscription"
 )
 
 func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error) {
@@ -22,13 +21,14 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 		utility.Assert(_interface.Context().Get(ctx).User.Id == sub.UserId, "userId not match")
 	}
 	prepare, err := service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
-		SubscriptionId:  req.SubscriptionId,
-		NewPlanId:       req.NewPlanId,
-		Quantity:        req.Quantity,
-		GatewayId:       req.GatewayId,
-		EffectImmediate: req.EffectImmediate,
-		AddonParams:     req.AddonParams,
-		DiscountCode:    req.DiscountCode,
+		SubscriptionId:   req.SubscriptionId,
+		NewPlanId:        req.NewPlanId,
+		Quantity:         req.Quantity,
+		GatewayId:        req.GatewayId,
+		EffectImmediate:  req.EffectImmediate,
+		AddonParams:      req.AddonParams,
+		DiscountCode:     req.DiscountCode,
+		ApplyPromoCredit: req.ApplyPromoCredit,
 	}, 0, 0)
 	if err != nil {
 		return nil, err
@@ -42,5 +42,7 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 		NextPeriodInvoice: prepare.NextPeriodInvoice,
 		ProrationDate:     prepare.ProrationDate,
 		Discount:          prepare.Discount,
+		DiscountMessage:   prepare.DiscountMessage,
+		ApplyPromoCredit:  prepare.ApplyPromoCredit,
 	}, nil
 }

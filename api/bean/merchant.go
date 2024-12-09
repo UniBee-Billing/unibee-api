@@ -1,6 +1,9 @@
 package bean
 
-import entity "unibee/internal/model/entity/default"
+import (
+	"strings"
+	entity "unibee/internal/model/entity/default"
+)
 
 type Merchant struct {
 	Id          uint64 `json:"id"          description:"merchant_id"`                // merchant_id
@@ -42,5 +45,36 @@ func SimplifyMerchant(one *entity.Merchant) *Merchant {
 		TimeZone:    one.TimeZone,
 		Host:        one.Host,
 		CompanyName: one.CompanyName,
+	}
+}
+
+type MerchantMember struct {
+	Id         uint64 `json:"id"         description:"userId"`          // userId
+	MerchantId uint64 `json:"merchantId" description:"merchant id"`     // merchant id
+	Email      string `json:"email"      description:"email"`           // email
+	FirstName  string `json:"firstName"  description:"first name"`      // first name
+	LastName   string `json:"lastName"   description:"last name"`       // last name
+	CreateTime int64  `json:"createTime" description:"create utc time"` // create utc time
+	Mobile     string `json:"mobile"     description:"mobile"`          // mobile
+	IsOwner    bool   `json:"isOwner" description:"Check Member is Owner" `
+}
+
+func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMember {
+	if one == nil {
+		return nil
+	}
+	isOwner := false
+	if strings.Contains(one.Role, "Owner") {
+		isOwner = true
+	}
+	return &MerchantMember{
+		Id:         one.Id,
+		MerchantId: one.MerchantId,
+		Email:      one.Email,
+		FirstName:  one.FirstName,
+		LastName:   one.LastName,
+		CreateTime: one.CreateTime,
+		Mobile:     one.Mobile,
+		IsOwner:    isOwner,
 	}
 }

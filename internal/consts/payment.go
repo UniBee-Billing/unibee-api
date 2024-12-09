@@ -1,9 +1,10 @@
 package consts
 
 const (
-	BizTypeOneTime      = 1
-	BizTypeInvoice      = 2
-	BizTypeSubscription = 3
+	BizTypeOneTime        = 1
+	BizTypeInvoice        = 2
+	BizTypeSubscription   = 3
+	BizTypeCreditRecharge = 4
 
 	WaitingAuthorized = 0
 	Authorized        = 1

@@ -46,15 +46,14 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 		Page:  page,
 		Count: count,
 	}
-	timeZone := 0
+	var timeZone int64 = 0
 	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
-		if value, ok := payload["timeZone"].(float64); ok {
-			timeZone = int(value)
-			if timeZone > 0 {
-				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
-			} else if timeZone < 0 {
-				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+		if value, ok := payload["timeZone"].(string); ok {
+			zone, err := export.GetUTCOffsetFromTimeZone(value)
+			if err == nil && zone > 0 {
+				timeZoneStr = value
+				timeZone = zone
 			}
 		}
 		if value, ok := payload["userId"].(float64); ok {
@@ -70,10 +69,10 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 			req.Currency = value
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
-			req.CreateTimeStart = int64(value)
+			req.CreateTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["createTimeEnd"].(float64); ok {
-			req.CreateTimeEnd = int64(value)
+			req.CreateTimeEnd = int64(value) - timeZone
 		}
 		if value, ok := payload["amountStart"].(float64); ok {
 			req.AmountStart = unibee.Int64(int64(value))
@@ -147,7 +146,7 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				PaymentId:             one.PaymentId,
 				Status:                status,
 				Type:                  transactionType,
-				CreateTime:            gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+				CreateTime:            gtime.NewFromTimeStamp(one.CreateTime + timeZone),
 				RefundId:              one.RefundId,
 				FullRefund:            fullRefund,
 				ExternalTransactionId: one.ExternalTransactionId,

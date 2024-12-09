@@ -51,15 +51,14 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		Page:  page,
 		Count: count,
 	}
-	timeZone := 0
+	var timeZone int64 = 0
 	timeZoneStr := fmt.Sprintf("UTC")
 	if payload != nil {
-		if value, ok := payload["timeZone"].(float64); ok {
-			timeZone = int(value)
-			if timeZone > 0 {
-				timeZoneStr = fmt.Sprintf("UTC+%d", timeZone)
-			} else if timeZone < 0 {
-				timeZoneStr = fmt.Sprintf("UTC%d", timeZone)
+		if value, ok := payload["timeZone"].(string); ok {
+			zone, err := export.GetUTCOffsetFromTimeZone(value)
+			if err == nil && zone > 0 {
+				timeZoneStr = value
+				timeZone = zone
 			}
 		}
 		if value, ok := payload["userId"].(float64); ok {
@@ -93,10 +92,10 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 			req.SortType = value
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
-			req.CreateTimeStart = int64(value)
+			req.CreateTimeStart = int64(value) - timeZone
 		}
 		if value, ok := payload["createTimeEnd"].(float64); ok {
-			req.CreateTimeEnd = int64(value)
+			req.CreateTimeEnd = int64(value) - timeZone
 		}
 	}
 	req.SkipTotal = true
@@ -121,7 +120,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 				SubscriptionName:   one.SubscriptionName,
 				SubscriptionId:     one.SubscriptionId,
 				SubscriptionStatus: consts.SubStatusToEnum(one.SubscriptionStatus).Description(),
-				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime + timeZone),
 				ExternalUserId:     one.ExternalUserId,
 				Status:             consts.UserStatusToEnum(one.Status).Description(),
 				TaxPercentage:      utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),

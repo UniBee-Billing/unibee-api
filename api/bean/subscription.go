@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
@@ -56,6 +57,7 @@ type Subscription struct {
 	TaxPercentage          int64                  `json:"taxPercentage"               description:"TaxPercentage，1000 = 10%"`                                                                                                                                       // Tax Percentage，1000 = 10%
 	PendingUpdateId        string                 `json:"pendingUpdateId"             description:""`                                                                                                                                                               //
 	CreateTime             int64                  `json:"createTime"                  description:"create utc time"`                                                                                                                                                // create utc time
+	CancelOrExpireTime     int64                  `json:"cancelOrExpireTime"          description:"the cancel or expire time, utc time, 0 if subscription not in cancelled or expired status"`                                                                      // create utc time
 	TestClock              int64                  `json:"testClock"                   description:"test_clock, simulator clock for subscription, if set , sub will out of cronjob controll"`                                                                        // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	Metadata               map[string]interface{} `json:"metadata" description:""`
 	GasPayer               string                 `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
@@ -80,6 +82,22 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, one.PlanId).OmitEmpty().Scan(&plan)
 		if err == nil && plan != nil {
 			productId = plan.ProductId
+		}
+	}
+	var cancelOrExpireTime int64 = 0
+	if one.Status == consts.SubStatusCancelled || one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusFailed {
+		var latestTimeLine *entity.SubscriptionTimeline
+		err := dao.SubscriptionTimeline.Ctx(ctx).
+			Where(dao.SubscriptionTimeline.Columns().SubscriptionId, one.SubscriptionId).
+			OrderDesc(dao.SubscriptionTimeline.Columns().Id).
+			Scan(&latestTimeLine)
+		if err != nil {
+			latestTimeLine = nil
+		}
+		if latestTimeLine != nil {
+			cancelOrExpireTime = latestTimeLine.PeriodEnd
+		} else {
+			cancelOrExpireTime = one.GmtModify.Timestamp()
 		}
 	}
 	return &Subscription{
@@ -121,6 +139,7 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		GasPayer:               one.GasPayer,
 		DefaultPaymentMethodId: one.GatewayDefaultPaymentMethod,
 		ProductId:              productId,
+		CancelOrExpireTime:     cancelOrExpireTime,
 	}
 }
 
