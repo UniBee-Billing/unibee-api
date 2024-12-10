@@ -80,7 +80,6 @@ func NewGateway() merchant.IMerchantGateway {
 	return &ControllerGateway{}
 }
 
-type ControllerEmail struct{
 type ControllerEmail struct{}
 
 func NewEmail() merchant.IMerchantEmail {
