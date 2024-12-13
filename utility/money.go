@@ -36,6 +36,22 @@ func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 	return cents
 }
 
+func ConvertCentToDollarFloat(cents int64, currency string) float64 {
+	if IsNoCentCurrency(strings.ToUpper(currency)) {
+		return float64(cents)
+	}
+	dollars := float64(cents) / 100.0
+	return dollars
+}
+
+func ConvertDollarFloatToInt64Cent(dollar float64, currency string) int64 {
+	if IsNoCentCurrency(currency) {
+		return int64(dollar)
+	}
+	cents := int64(dollar * 100)
+	return cents
+}
+
 func ConvertTaxPercentageToPercentageString(taxPercentage int64) string {
 	return fmt.Sprintf("%.1f", float64(taxPercentage)/100)
 }

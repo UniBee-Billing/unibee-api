@@ -7,6 +7,7 @@ package system
 import (
 	"context"
 
+	"unibee/api/system/auth"
 	"unibee/api/system/information"
 	"unibee/api/system/invoice"
 	"unibee/api/system/payment"
@@ -14,6 +15,10 @@ import (
 	"unibee/api/system/refund"
 	"unibee/api/system/subscription"
 )
+
+type ISystemAuth interface {
+	TokenGenerator(ctx context.Context, req *auth.TokenGeneratorReq) (res *auth.TokenGeneratorRes, err error)
+}
 
 type ISystemInformation interface {
 	Get(ctx context.Context, req *information.GetReq) (res *information.GetRes, err error)

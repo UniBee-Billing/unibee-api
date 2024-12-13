@@ -38,7 +38,7 @@ func CheckCreditUserPayout(ctx context.Context, merchantId uint64, userId uint64
 	if one == nil {
 		return nil, nil, gerror.New("credit config need setup")
 	}
-	if one.PayoutEnable > 0 {
+	if one.PayoutEnable == 0 {
 		return nil, nil, gerror.New("credit account payout disable")
 	}
 	account := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)

@@ -3,8 +3,10 @@ package config
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/internal/consts"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func CheckCreditConfig(ctx context.Context, merchantId uint64, creditType int, currency string) error {
@@ -98,7 +100,7 @@ func CheckCreditConfigRecharge(ctx context.Context, merchantId uint64, creditTyp
 	if one == nil {
 		return gerror.New("credit config need setup")
 	}
-	if one.RechargeEnable > 0 {
+	if one.RechargeEnable == 0 {
 		return gerror.New("credit account recharge disable")
 	}
 	return nil
@@ -118,7 +120,7 @@ func CheckCreditConfigPayout(ctx context.Context, merchantId uint64, creditType 
 	if one == nil {
 		return gerror.New("credit config need setup")
 	}
-	if one.PayoutEnable > 0 {
+	if one.PayoutEnable == 0 {
 		return gerror.New("credit account payout disable")
 	}
 	return nil
@@ -129,7 +131,11 @@ func ConvertCreditAmountToCurrency(ctx context.Context, merchantId uint64, credi
 	if one == nil {
 		return 0, 0
 	}
-	return int64(float64(creditAmount) * (float64(one.ExchangeRate) / 100)), one.ExchangeRate
+	if one.Type == consts.CreditAccountTypePromo {
+		return utility.ConvertDollarFloatToInt64Cent(float64(creditAmount)*(float64(one.ExchangeRate)/100), currency), one.ExchangeRate
+	} else {
+		return creditAmount, one.ExchangeRate
+	}
 }
 
 func ConvertCurrencyAmountToCreditAmount(ctx context.Context, merchantId uint64, creditType int, currency string, currencyAmount int64) (creditAmount int64, exchangeRate int64) {
@@ -137,5 +143,9 @@ func ConvertCurrencyAmountToCreditAmount(ctx context.Context, merchantId uint64,
 	if one == nil {
 		return 0, 0
 	}
-	return int64(float64(currencyAmount) / (float64(one.ExchangeRate) / 100)), one.ExchangeRate
+	if one.Type == consts.CreditAccountTypePromo {
+		return int64(utility.ConvertCentToDollarFloat(currencyAmount, currency) / (float64(one.ExchangeRate) / 100)), one.ExchangeRate
+	} else {
+		return currencyAmount, one.ExchangeRate
+	}
 }

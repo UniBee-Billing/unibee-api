@@ -82,6 +82,7 @@ var (
 				group.GET("/api.sdk.generator.json", swagger.MerchantPortalAndSDKGeneratorSpecJson)
 				group.GET("/api.sdk.generator.yaml", swagger.MerchantPortalAndSDKGeneratorSpecYaml)
 				group.GET("/api.user.portal.generator.json", swagger.UserPortalGeneratorSpecJson)
+				group.GET("/api.system.generator.json", swagger.SystemGeneratorSpecJson)
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -297,7 +298,6 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					//_interface.Middleware().OpenApiHandler,
 				)
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
 					group.Bind(
@@ -328,6 +328,11 @@ var (
 					group.Group("/refund", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewRefund(),
+						)
+					})
+					group.Group("/auth", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							system.NewAuth(),
 						)
 					})
 				}

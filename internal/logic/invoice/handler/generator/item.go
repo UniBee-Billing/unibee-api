@@ -3,6 +3,7 @@ package generator
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"strings"
 )
 
 // Item represent a 'product' or a 'service'
@@ -109,8 +110,7 @@ func (i *Item) TaxWithTotalDiscounted() decimal.Decimal {
 	return result
 }
 
-// appendColTo document doc
-func (i *Item) appendColTo(options *Options, doc *Document) {
+func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 	// Get base Y (top of line)
 	baseY := doc.pdf.GetY()
 
@@ -120,7 +120,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	doc.pdf.MultiCell(
 		ItemColUnitPriceOffset-ItemColNameOffset,
 		5,
-		doc.encodeString(i.Name),
+		doc.encodeString(strings.ReplaceAll(i.Name, fmt.Sprintf("#%d", index-1), "")),
 		"",
 		"L",
 		false,
@@ -159,6 +159,20 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Compute line height
 	colHeight := doc.pdf.GetY() - baseY
 
+	doc.pdf.SetY(baseY)
+	doc.pdf.SetX(ItemColIdOffset)
+	doc.pdf.CellFormat(
+		ItemColNameOffset-ItemColIdOffset,
+		colHeight,
+		doc.encodeString(fmt.Sprintf("%d", index)),
+		"0",
+		0,
+		"L",
+		false,
+		0,
+		"",
+	)
+
 	// Unit price
 	if ItemColQuantityOffset-ItemColUnitPriceOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
@@ -179,7 +193,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	// Quantity
 	if ItemColTaxOffset-ItemColQuantityOffset > 0 && doc.ShowDetailItem {
 		doc.pdf.SetY(baseY)
-		doc.pdf.SetX(ItemColQuantityOffset - 4)
+		doc.pdf.SetX(ItemColQuantityOffset)
 		doc.pdf.CellFormat(
 			ItemColTaxOffset-ItemColQuantityOffset,
 			colHeight,

@@ -27,7 +27,7 @@ type CreditConfig struct {
 	Description           interface{} // description
 	LogoUrl               interface{} // logo url, show when user purchase
 	MetaData              interface{} // meta_data(json)
-	RechargeEnable        interface{} // 0-yes, 1-no
-	PayoutEnable          interface{} // 0-yes, 1-no
+	RechargeEnable        interface{} // 0-no,1-yes
+	PayoutEnable          interface{} // 0-no,1-yes
 	PreviewDefaultUsed    interface{} // is default used when in purchase preview,0-no, 1-yes
 }

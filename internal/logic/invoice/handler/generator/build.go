@@ -143,7 +143,7 @@ func (doc *Document) appendTitle() {
 		doc.Options.BaseTextColor[2],
 	)
 	// Set x y
-	doc.pdf.SetXY(120, BaseMarginTop)
+	doc.pdf.SetXY(120, BaseMarginTop+3)
 
 	//// Draw rect
 	//doc.pdf.SetFillColor(doc.Options.DarkBgColor[0], doc.Options.DarkBgColor[1], doc.Options.DarkBgColor[2])
@@ -156,13 +156,13 @@ func (doc *Document) appendTitle() {
 
 func (doc *Document) appendInvoiceHeader() {
 	var x float64 = 120
-	y := BaseMarginTop + 16*2
 	var lineBreakHeight float64 = 5
+	y := doc.pdf.GetY()
+	doc.pdf.SetXY(x, y)
 
 	// Append InvoiceId
 	if len(doc.InvoiceId) > 0 {
-		doc.pdf.SetXY(x, y)
-		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetFont(doc.Options.Font, "", 11)
 		doc.pdf.SetTextColor(
 			doc.Options.GreyTextColor[0],
 			doc.Options.GreyTextColor[1],
@@ -181,7 +181,7 @@ func (doc *Document) appendInvoiceHeader() {
 	// Append InvoiceNumber
 	y = doc.pdf.GetY() + lineBreakHeight
 	doc.pdf.SetXY(x, y)
-	doc.pdf.SetFont(doc.Options.Font, "", 12)
+	doc.pdf.SetFont(doc.Options.Font, "", 11)
 	doc.pdf.SetTextColor(
 		doc.Options.GreyTextColor[0],
 		doc.Options.GreyTextColor[1],
@@ -200,7 +200,7 @@ func (doc *Document) appendInvoiceHeader() {
 	if len(doc.InvoiceOriginNumber) > 0 {
 		y = doc.pdf.GetY() + lineBreakHeight
 		doc.pdf.SetXY(x, y)
-		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetFont(doc.Options.Font, "", 11)
 		doc.pdf.SetTextColor(
 			doc.Options.GreyTextColor[0],
 			doc.Options.GreyTextColor[1],
@@ -220,7 +220,7 @@ func (doc *Document) appendInvoiceHeader() {
 	if len(doc.InvoiceType) > 0 {
 		y = doc.pdf.GetY() + lineBreakHeight
 		doc.pdf.SetXY(x, y)
-		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetFont(doc.Options.Font, "", 11)
 		doc.pdf.SetTextColor(
 			doc.Options.GreyTextColor[0],
 			doc.Options.GreyTextColor[1],
@@ -240,7 +240,7 @@ func (doc *Document) appendInvoiceHeader() {
 	if len(doc.InvoiceDate) > 0 {
 		y = doc.pdf.GetY() + lineBreakHeight
 		doc.pdf.SetXY(x, y)
-		doc.pdf.SetFont(doc.Options.Font, "", 12)
+		doc.pdf.SetFont(doc.Options.Font, "", 11)
 		doc.pdf.SetTextColor(
 			doc.Options.GreyTextColor[0],
 			doc.Options.GreyTextColor[1],
@@ -264,7 +264,7 @@ func (doc *Document) appendInvoiceHeader() {
 	//dateString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoicePaidDateTitle), paidDate)
 	y = doc.pdf.GetY() + lineBreakHeight
 	doc.pdf.SetXY(x, y)
-	doc.pdf.SetFont(doc.Options.Font, "", 12)
+	doc.pdf.SetFont(doc.Options.Font, "", 11)
 	doc.pdf.SetTextColor(
 		doc.Options.GreyTextColor[0],
 		doc.Options.GreyTextColor[1],
@@ -340,6 +340,20 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 	doc.pdf.SetFillColor(doc.Options.DarkBgColor[0], doc.Options.DarkBgColor[1], doc.Options.DarkBgColor[2])
 	doc.pdf.Rect(BaseMargin, doc.pdf.GetY(), 210-2*BaseMargin, 12, "F")
 
+	// Id
+	doc.pdf.SetX(ItemColIdOffset)
+	doc.pdf.CellFormat(
+		ItemColNameOffset-ItemColIdOffset,
+		12,
+		doc.encodeString("#"),
+		"0",
+		0,
+		"L",
+		false,
+		0,
+		"",
+	)
+
 	// Name
 	doc.pdf.SetX(ItemColNameOffset)
 	doc.pdf.CellFormat(
@@ -348,7 +362,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 		doc.encodeString(doc.Options.TextItemsNameTitle),
 		"0",
 		0,
-		"",
+		"L",
 		false,
 		0,
 		"",
@@ -363,7 +377,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 			doc.encodeString(doc.Options.TextItemsUnitCostTitle),
 			"0",
 			0,
-			"",
+			"C",
 			false,
 			0,
 			"",
@@ -379,7 +393,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 			doc.encodeString(doc.Options.TextItemsQuantityTitle),
 			"0",
 			0,
-			"",
+			"C",
 			false,
 			0,
 			"",
@@ -427,7 +441,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 			doc.encodeString(doc.Options.TextItemsTaxTitle),
 			"0",
 			0,
-			"",
+			"C",
 			false,
 			0,
 			"",
@@ -442,7 +456,7 @@ func (doc *Document) drawsTableTitles(fontSize float64) {
 		doc.encodeString(doc.Options.TextItemsTotalTTCTitle),
 		"0",
 		0,
-		"",
+		"L",
 		false,
 		0,
 		"",
@@ -467,7 +481,7 @@ func (doc *Document) appendItems() {
 		}
 
 		// Append to pdf
-		item.appendColTo(doc.Options, doc)
+		item.appendColTo(doc.Options, i+1, doc)
 
 		if doc.pdf.GetY() > MaxPageHeight {
 			// Add page
@@ -503,24 +517,27 @@ func (doc *Document) appendExchangeRate() {
 	doc.pdf.SetY(currentY)
 }
 
-// appendNotes to document
 func (doc *Document) appendNotes() {
 	if len(doc.Notes) == 0 {
 		return
 	}
 
 	currentY := doc.pdf.GetY()
+	doc.pdf.SetY(currentY + 20)
+	doc.pdf.SetFont(doc.Options.Font, "", 11)
+	SetGrayTextColor(doc)
+	doc.pdf.MultiCell(70, 5, doc.encodeString("Other details"), "0", "L", false)
+	doc.pdf.SetY(doc.pdf.GetY() + 3)
+	SetBaseTextColor(doc)
+	//doc.pdf.SetX(BaseMargin)
+	//doc.pdf.SetRightMargin(130)
+	//doc.pdf.SetY(currentY + 10)
+	//_, lineHt := doc.pdf.GetFontSize()
+	//html := doc.pdf.HTMLBasicNew()
+	//html.Write(lineHt, doc.encodeString(doc.Notes))
+	//doc.pdf.SetRightMargin(BaseMargin)
+	doc.pdf.MultiCell(70, 5, doc.encodeString(doc.Notes), "0", "L", false)
 
-	doc.pdf.SetFont(doc.Options.Font, "", 12)
-	doc.pdf.SetX(BaseMargin)
-	doc.pdf.SetRightMargin(100)
-	doc.pdf.SetY(currentY + 10)
-
-	_, lineHt := doc.pdf.GetFontSize()
-	html := doc.pdf.HTMLBasicNew()
-	html.Write(lineHt, doc.encodeString(doc.Notes))
-
-	doc.pdf.SetRightMargin(BaseMargin)
 	doc.pdf.SetY(currentY)
 }
 
@@ -578,6 +595,33 @@ func (doc *Document) appendTotal() {
 			40,
 			10,
 			doc.encodeString(doc.DiscountTotalString),
+			"0",
+			0,
+			"L",
+			false,
+			0,
+			"",
+		)
+	}
+
+	// Draw Promo Credit title
+	if len(doc.PromoCreditString) > 0 {
+		doc.pdf.SetY(doc.pdf.GetY() + lineBreakHeight)
+		doc.pdf.SetX(120)
+		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+		SetGrayTextColor(doc)
+		doc.pdf.CellFormat(38, 10, doc.encodeString(doc.PromoCreditTitle), "0", 0, "R", false, 0, "")
+
+		// Draw Promo Credit amount
+		doc.pdf.SetX(moneyX)
+		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
+		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
+		SetBaseTextColor(doc)
+		doc.pdf.CellFormat(
+			40,
+			10,
+			doc.encodeString(doc.PromoCreditString),
 			"0",
 			0,
 			"L",

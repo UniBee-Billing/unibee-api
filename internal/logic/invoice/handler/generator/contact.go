@@ -50,9 +50,9 @@ func (c *Contact) appendContactTODoc(
 		// Address rect
 		var addrRectHeight float64 = 17
 
-		if len(c.Address.Address2) > 0 {
-			addrRectHeight = addrRectHeight + 5
-		}
+		//if len(c.Address.Address2) > 0 {
+		//	addrRectHeight = addrRectHeight + 5
+		//}
 
 		if len(c.Address.Country) == 0 {
 			addrRectHeight = addrRectHeight - 5

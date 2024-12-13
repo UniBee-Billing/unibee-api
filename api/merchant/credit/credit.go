@@ -6,6 +6,35 @@ import (
 	"unibee/api/bean/detail"
 )
 
+type PromoConfigReq struct {
+	g.Meta   `path:"/get_promo_config" tags:"Credit" method:"get,post" summary:"Get Promo Credit Config"`
+	Currency string `json:"currency"              description:"currency"`
+}
+
+type PromoConfigRes struct {
+	CreditConfig *bean.CreditConfig `json:"creditConfig" dc:"CreditConfig Object"`
+}
+
+type EditPromoConfigReq struct {
+	g.Meta                `path:"/edit_promo_config" tags:"Credit" method:"post" summary:"Edit Promo Credit Config"`
+	Currency              string                  `json:"currency"              description:"currency" v:"required"`
+	ExchangeRate          *int64                  `json:"exchangeRate"          description:"keep two decimal places，scale = 100, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100"` // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
+	Name                  *string                 `json:"name"                  description:"name"`                                                                                                             // name
+	Description           *string                 `json:"description"           description:"description"`                                                                                                      // description
+	Recurring             *int                    `json:"recurring"             description:"apply to recurring, default no, 0-no,1-yes"`
+	DiscountCodeExclusive *int                    `json:"discountCodeExclusive" description:"discount code exclusive when purchase, default no, 0-no, 1-yes"`
+	Logo                  *string                 `json:"logo"                  description:"logo image base64, show when user purchase"` // logo image base64, show when user purchase
+	LogoUrl               *string                 `json:"logoUrl"               description:"logo url, show when user purchase"`          // logo url, show when user purchase
+	RechargeEnable        *int                    `json:"rechargeEnable"        description:"credit account can be recharged or not, 0-no, 1-yes"`
+	PayoutEnable          *int                    `json:"payoutEnable"          description:"credit account can payout or not, default no, 0-no, 1-yes"`
+	PreviewDefaultUsed    *int                    `json:"previewDefaultUsed"    description:"is default used when in purchase preview, default no, 0-no, 1-yes"`
+	MetaData              *map[string]interface{} `json:"metaData"              description:"meta_data(json)"`
+}
+
+type EditPromoConfigRes struct {
+	CreditConfig *bean.CreditConfig `json:"creditConfig" dc:"CreditConfig Object"`
+}
+
 type ConfigListReq struct {
 	g.Meta   `path:"/config_list" tags:"Credit" method:"get,post" summary:"Get Credit Config list"`
 	Types    []int  `json:"types"                  description:"type list of credit account, 1-main account, 2-promo credit account"`
@@ -22,13 +51,13 @@ type NewConfigReq struct {
 	Description           string                 `json:"description"           description:"description"`                                                                                                      // description
 	Type                  int                    `json:"type"                  description:"type of credit account, 1-main account, 2-promo credit account" v:"required"`                                      // type of credit account, 1-main account, 2-promo credit account
 	Currency              string                 `json:"currency"              description:"currency" v:"required"`                                                                                            // currency
-	ExchangeRate          int64                  `json:"exchangeRate"          description:"keep two decimal places，scale = 100, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100"` // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
-	Recurring             int                    `json:"recurring"             description:"apply to recurring, default no, 0-no,1-yes"`                                                                       // apply to reucrring, default yes, 0-yes,1-no
-	DiscountCodeExclusive int                    `json:"discountCodeExclusive" description:"discount code exclusive when purchase, default no, 0-no, 1-yes"`                                                   // discount code exclusive when purchase, default yes, 0-yes, 1-no
+	ExchangeRate          int64                  `json:"exchangeRate"          description:"keep two decimal places，scale = 100, 1 currency = 1 credit * (exchange_rate/100), no effect on main account type"` // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
+	Recurring             int                    `json:"recurring"             description:"apply to recurring, default no, 0-no,1-yes"`                                                                       // apply to reucrring, default no, 0-no,1-yes
+	DiscountCodeExclusive int                    `json:"discountCodeExclusive" description:"discount code exclusive when purchase, default no, 0-no, 1-yes"`                                                   // discount code exclusive when purchase, default no, 0-no, 1-yes
 	Logo                  string                 `json:"logo"                  description:"logo image base64, show when user purchase"`                                                                       // logo image base64, show when user purchase
 	LogoUrl               string                 `json:"logoUrl"               description:"logo url, show when user purchase"`                                                                                // logo url, show when user purchase
-	RechargeEnable        *int                   `json:"rechargeEnable"        description:"credit account can be recharged or not, 0-yes, 1-no"`
-	PayoutEnable          *int                   `json:"payoutEnable"          description:"credit account can used or payout in purchase or not, 0-yes, 1-no"`
+	RechargeEnable        *int                   `json:"rechargeEnable"        description:"credit account can be recharged or not, 0-no, 1-yes"`
+	PayoutEnable          *int                   `json:"payoutEnable"          description:"credit account can used or payout in purchase or not, 0-no, 1-yes"`
 	PreviewDefaultUsed    *int                   `json:"previewDefaultUsed"    description:"is default used when in purchase preview, default no, 0-no, 1-yes"`
 	MetaData              map[string]interface{} `json:"metaData"              description:"meta_data(json)"`
 }
@@ -38,16 +67,18 @@ type NewConfigRes struct {
 }
 
 type EditConfigReq struct {
-	g.Meta                `path:"/edit_config" tags:"Credit" method:"post" summary:"Setup Credit Config"`
-	Id                    uint64                  `json:"id"                    description:"The credit config Id" v:"required"`
-	Name                  *string                 `json:"name"                  description:"name"`        // name
-	Description           *string                 `json:"description"           description:"description"` // description
+	g.Meta                `path:"/edit_config" tags:"Credit" method:"post" summary:"Edit Credit Config"`
+	Type                  int                     `json:"type"                  description:"type of credit account, 1-main account, 2-promo credit account" v:"required"` // type of credit account, 1-main account, 2-promo credit account
+	Currency              string                  `json:"currency"              description:"currency" v:"required"`
+	ExchangeRate          *int64                  `json:"exchangeRate"          description:"keep two decimal places，scale = 100, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100"` // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
+	Name                  *string                 `json:"name"                  description:"name"`                                                                                                             // name
+	Description           *string                 `json:"description"           description:"description"`                                                                                                      // description
 	Recurring             *int                    `json:"recurring"             description:"apply to recurring, default no, 0-no,1-yes"`
 	DiscountCodeExclusive *int                    `json:"discountCodeExclusive" description:"discount code exclusive when purchase, default no, 0-no, 1-yes"`
 	Logo                  *string                 `json:"logo"                  description:"logo image base64, show when user purchase"` // logo image base64, show when user purchase
 	LogoUrl               *string                 `json:"logoUrl"               description:"logo url, show when user purchase"`          // logo url, show when user purchase
-	RechargeEnable        *int                    `json:"rechargeEnable"        description:"credit account can recharge or not, default yes, 0-yes, 1-no"`
-	PayoutEnable          *int                    `json:"payoutEnable"          description:"credit account can payout or not, default yes, 0-yes, 1-no"`
+	RechargeEnable        *int                    `json:"rechargeEnable"        description:"credit account can recharge or not, default no, 0-no, 1-yes"`
+	PayoutEnable          *int                    `json:"payoutEnable"          description:"credit account can payout or not, default no, 0-no, 1-yes"`
 	PreviewDefaultUsed    *int                    `json:"previewDefaultUsed"    description:"is default used when in purchase preview, default no, 0-no, 1-yes"`
 	MetaData              *map[string]interface{} `json:"metaData"              description:"meta_data(json)"`
 }
@@ -157,8 +188,8 @@ type PromoCreditDecrementRes struct {
 type EditCreditAccountReq struct {
 	g.Meta         `path:"/edit_credit_account" tags:"Credit" method:"post" summary:"EditSingleUserCreditAccountConfig" dc:"Edit Single User Credit Account Config"`
 	Id             uint64 `json:"id"  description:"id of credit account" v:"required"`
-	RechargeEnable *int   `json:"rechargeEnable"        description:"credit account can be recharged|increment or not, 0-yes, 1-no"`
-	PayoutEnable   *int   `json:"payoutEnable"          description:"credit account can used or payout|apply in purchase or not, 0-yes, 1-no"`
+	RechargeEnable *int   `json:"rechargeEnable"        description:"credit account can be recharged|increment or not, 0-no, 1-yes"`
+	PayoutEnable   *int   `json:"payoutEnable"          description:"credit account can used or payout|apply in purchase or not, 0-no, 1-yes"`
 }
 
 type EditCreditAccountRes struct {

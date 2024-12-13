@@ -113,6 +113,39 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 	}
 }
 
+func SystemGeneratorSpecJson(r *ghttp.Request) {
+	url := fmt.Sprintf("http://127.0.0.1%s/%s", config.GetConfigInstance().Server.Address, config.GetConfigInstance().Server.OpenApiPath)
+	request, err := utility.SendRequest(url, "GET", nil, nil)
+	if err != nil {
+		r.Exit()
+		return
+	} else {
+		json := strings.Replace(string(request), "uint64", "int64", -1)
+		api := gjson.New(json)
+		api.SetSplitChar('#')
+		for key, path := range api.GetJsonMap("components#schemas") {
+			utility.Assert(len(path.Array()) == 1, "error:"+key)
+			if strings.HasPrefix(key, "unibee.api.merchant") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+			if strings.HasPrefix(key, "unibee.api.user") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+		}
+		for key, path := range api.GetJsonMap("paths") {
+			utility.Assert(len(path.Array()) == 1, "error:"+key)
+			if !strings.HasPrefix(key, fmt.Sprintf("/system")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
+		}
+		r.Response.WriteJson(api.String())
+		r.Exit()
+	}
+}
+
 func UserPortalGeneratorSpecJson(r *ghttp.Request) {
 	url := fmt.Sprintf("http://127.0.0.1%s/%s", config.GetConfigInstance().Server.Address, config.GetConfigInstance().Server.OpenApiPath)
 	request, err := utility.SendRequest(url, "GET", nil, nil)

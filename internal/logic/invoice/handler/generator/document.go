@@ -35,6 +35,8 @@ type Document struct {
 	SubTotalString      string        `json:"sub_total_string,omitempty"`
 	DiscountTitle       string        `json:"discount_title,omitempty"`
 	DiscountTotalString string        `json:"discount_total_string,omitempty"`
+	PromoCreditTitle    string        `json:"promo_credit_title,omitempty"`
+	PromoCreditString   string        `json:"promo_credit_string,omitempty"`
 	TaxString           string        `json:"tax_string,omitempty"`
 	TotalString         string        `json:"total_string,omitempty"`
 	TaxPercentageString string        `json:"tax_percentage_string,omitempty"`

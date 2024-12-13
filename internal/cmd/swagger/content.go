@@ -52,6 +52,10 @@ padding: 0;
 				 name: "UniBee User Portal Api Spec (Web Component) ",
 				 url: "api.user.portal.generator.json",
 				},
+                {
+				 name: "UniBee System Tool Api Spec",
+				 url: "api.system.generator.json",
+				},
 			],
 			dom_id: '#swagger-ui',
 			deepLinking: true,

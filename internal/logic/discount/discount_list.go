@@ -60,10 +60,12 @@ func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*det
 	if len(req.Status) > 0 {
 		if len(req.Status) == 1 && utility.IsIntInArray(req.Status, consts.DiscountStatusArchived) {
 			q = q.WhereGT(dao.MerchantDiscountCode.Columns().IsDeleted, 0)
-		} else {
+		} else if utility.IsIntInArray(req.Status, consts.DiscountStatusArchived) {
 			//q = q.WhereIn(dao.MerchantDiscountCode.Columns().Status, req.Status)
 			q = q.Where(q.Builder().WhereOrIn(dao.MerchantDiscountCode.Columns().Status, req.Status).
 				WhereOrGT(dao.MerchantDiscountCode.Columns().IsDeleted, 0))
+		} else {
+			q = q.WhereIn(dao.MerchantDiscountCode.Columns().Status, req.Status).Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0)
 		}
 	}
 	if len(req.Currency) > 0 {

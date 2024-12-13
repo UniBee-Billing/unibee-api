@@ -74,6 +74,8 @@ type InvoiceDetail struct {
 	TrialEnd                       int64                       `json:"trialEnd"                       description:"trial_end, utc time"` // trial_end, utc time
 	AutoCharge                     bool                        `json:"autoCharge"                      description:""`
 	OriginalPaymentInvoice         *bean.Invoice               `json:"originalPaymentInvoice"                      description:""`
+	PromoCreditDiscountAmount      int64                       `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`
+	PartialCreditPaidAmount        int64                       `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -169,5 +171,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		RefundId:                       invoice.RefundId,
 		AutoCharge:                     autoCharge,
 		OriginalPaymentInvoice:         originalPaymentInvoice,
+		PromoCreditDiscountAmount:      invoice.PromoCreditDiscountAmount,
+		PartialCreditPaidAmount:        invoice.PartialCreditPaidAmount,
 	}
 }

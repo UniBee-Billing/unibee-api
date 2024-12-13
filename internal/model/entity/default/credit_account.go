@@ -19,6 +19,6 @@ type CreditAccount struct {
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                                                             // update time
 	CreateTime     int64       `json:"createTime"     description:"create utc time"`                                                         // create utc time
 	MerchantId     uint64      `json:"merchantId"     description:"merchant id"`                                                             // merchant id
-	RechargeEnable int         `json:"rechargeEnable" description:"0-yes, 1-no"`                                                             // 0-yes, 1-no
-	PayoutEnable   int         `json:"payoutEnable"   description:"0-yes, 1-no"`                                                             // 0-yes, 1-no
+	RechargeEnable int         `json:"rechargeEnable" description:"0-no, 1-yes"`                                                             // 0-no, 1-yes
+	PayoutEnable   int         `json:"payoutEnable"   description:"0-no, 1-yes"`                                                             // 0-no, 1-yes
 }

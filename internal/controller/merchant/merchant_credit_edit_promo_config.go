@@ -15,12 +15,12 @@ import (
 	"unibee/utility"
 )
 
-func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfigReq) (res *credit.EditConfigRes, err error) {
-	one := query.GetCreditConfig(ctx, _interface.GetMerchantId(ctx), req.Type, req.Currency)
+func (c *ControllerCredit) EditPromoConfig(ctx context.Context, req *credit.EditPromoConfigReq) (res *credit.EditPromoConfigRes, err error) {
+	one := query.GetCreditConfig(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, req.Currency)
 	utility.Assert(one != nil, "Config not found, please setup")
 	//if one == nil {
 	//	one = &entity.CreditConfig{
-	//		Type:                  req.Type,
+	//		Type:                  consts.CreditAccountTypePromo,
 	//		Currency:              strings.ToUpper(req.Currency),
 	//		ExchangeRate:          *req.ExchangeRate,
 	//		CreateTime:            gtime.Now().Timestamp(),
@@ -32,7 +32,7 @@ func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfi
 	//		Description:           *req.Description,
 	//		LogoUrl:               *req.LogoUrl,
 	//		MetaData:              unibee.StringValue(utility.MarshalMetadataToJsonString(req.MetaData)),
-	//		RechargeEnable:        *req.RechargeEnable,
+	//		RechargeEnable:        0,
 	//		PayoutEnable:          *req.PayoutEnable,
 	//		PreviewDefaultUsed:    *req.PreviewDefaultUsed,
 	//	}
@@ -45,7 +45,7 @@ func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfi
 	//	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 	//		MerchantId:     one.MerchantId,
 	//		Target:         fmt.Sprintf("CreditConfig(%d)", one.Id),
-	//		Content:        "AutoSetupViaEdit",
+	//		Content:        "New",
 	//		UserId:         0,
 	//		SubscriptionId: "",
 	//		InvoiceId:      "",
@@ -53,15 +53,14 @@ func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfi
 	//		DiscountCode:   "",
 	//	}, err)
 	//}
-	if req.ExchangeRate != nil && req.Type == consts.CreditAccountTypeMain {
-		utility.Assert(*req.ExchangeRate == one.ExchangeRate, "ExchangeRate can't change after setup")
-	}
+	//if req.ExchangeRate != nil {
+	//	utility.Assert(*req.ExchangeRate == one.ExchangeRate, "ExchangeRate can't change after setup")
+	//}
 	_, err = dao.CreditConfig.Ctx(ctx).Data(g.Map{
 		dao.CreditConfig.Columns().Name:                  req.Name,
 		dao.CreditConfig.Columns().Description:           req.Description,
 		dao.CreditConfig.Columns().Logo:                  req.Logo,
 		dao.CreditConfig.Columns().LogoUrl:               req.LogoUrl,
-		dao.CreditConfig.Columns().ExchangeRate:          req.ExchangeRate,
 		dao.CreditConfig.Columns().Recurring:             req.Recurring,
 		dao.CreditConfig.Columns().DiscountCodeExclusive: req.DiscountCodeExclusive,
 		dao.CreditConfig.Columns().RechargeEnable:        req.RechargeEnable,
@@ -74,7 +73,7 @@ func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfi
 		g.Log().Errorf(ctx, "Update Credit Config Error:%s\n", err.Error())
 		return nil, err
 	}
-	one = query.GetCreditConfig(ctx, _interface.GetMerchantId(ctx), req.Type, req.Currency)
+	one = query.GetCreditConfig(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, req.Currency)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("CreditConfig(%d)", one.Id),
@@ -85,5 +84,5 @@ func (c *ControllerCredit) EditConfig(ctx context.Context, req *credit.EditConfi
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	return &credit.EditConfigRes{CreditConfig: bean.SimplifyCreditConfig(one)}, nil
+	return &credit.EditPromoConfigRes{CreditConfig: bean.SimplifyCreditConfig(one)}, nil
 }

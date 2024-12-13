@@ -48,6 +48,8 @@ type IMerchantBalance interface {
 }
 
 type IMerchantCredit interface {
+	PromoConfig(ctx context.Context, req *credit.PromoConfigReq) (res *credit.PromoConfigRes, err error)
+	EditPromoConfig(ctx context.Context, req *credit.EditPromoConfigReq) (res *credit.EditPromoConfigRes, err error)
 	ConfigList(ctx context.Context, req *credit.ConfigListReq) (res *credit.ConfigListRes, err error)
 	NewConfig(ctx context.Context, req *credit.NewConfigReq) (res *credit.NewConfigRes, err error)
 	EditConfig(ctx context.Context, req *credit.EditConfigReq) (res *credit.EditConfigRes, err error)

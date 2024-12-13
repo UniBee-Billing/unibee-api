@@ -12,7 +12,7 @@ type CreditAccountDetail struct {
 	User       *bean.UserAccount `json:"user"`
 	Type       int               `json:"type"       description:"type of credit account, 1-main account, 2-gift account"` // type of credit account, 1-main account, 2-gift account
 	Currency   string            `json:"currency"   description:"currency"`                                               // currency
-	Amount     int64             `json:"amount"     description:"credit amount,cent"`                                     // credit amount,cent
+	Amount     int64             `json:"amount"     description:"credit amount, in cent if type is main"`                 // credit amount,cent
 	CreateTime int64             `json:"createTime" description:"create utc time"`                                        // create utc time
 }
 

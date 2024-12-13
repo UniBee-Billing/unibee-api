@@ -35,8 +35,8 @@ type CreditConfigColumns struct {
 	Description           string // description
 	LogoUrl               string // logo url, show when user purchase
 	MetaData              string // meta_data(json)
-	RechargeEnable        string // 0-yes, 1-no
-	PayoutEnable          string // 0-yes, 1-no
+	RechargeEnable        string // 0-no,1-yes
+	PayoutEnable          string // 0-no,1-yes
 	PreviewDefaultUsed    string // is default used when in purchase preview,0-no, 1-yes
 }
 

@@ -33,9 +33,9 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
-		if len(sub.VatNumber) > 0 {
-			sub_update.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
-		}
+		//if len(sub.VatNumber) > 0 {
+		//	sub_update.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
+		//}
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED, message.CustomData)
 		//user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED, fmt.Sprintf("SubscriptionPaymentSuccess#%s", sub.SubscriptionId))

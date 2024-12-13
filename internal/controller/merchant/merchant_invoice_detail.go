@@ -20,11 +20,13 @@ func (c *ControllerInvoice) Detail(ctx context.Context, req *invoice.DetailReq) 
 
 	var creditNoteEntities []*entity.Invoice
 	var creditNotes = make([]*detail.InvoiceDetail, 0)
-	if len(in.RefundId) == 0 {
+	if len(in.RefundId) == 0 && len(in.PaymentId) > 0 {
 		_ = dao.Invoice.Ctx(ctx).
 			Where(dao.Invoice.Columns().MerchantId, in.MerchantId).
 			Where(dao.Invoice.Columns().PaymentId, in.PaymentId).
-			WhereNotNull(dao.Invoice.Columns().RefundId).Scan(&creditNoteEntities)
+			WhereNotNull(dao.Invoice.Columns().RefundId).
+			Limit(10).
+			Scan(&creditNoteEntities)
 		for _, one := range creditNoteEntities {
 			if one.Id != in.Id {
 				creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))

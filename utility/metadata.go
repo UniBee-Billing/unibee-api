@@ -13,15 +13,18 @@ func ConvertToStringMetadata(metadata map[string]interface{}) map[string]string 
 	return convertMap
 }
 
-func MergeMetadata(source string, target map[string]interface{}) map[string]interface{} {
+func MergeMetadata(sourceString string, target *map[string]interface{}) map[string]interface{} {
 	var metadata = make(map[string]interface{})
-	if len(source) > 0 {
-		_ = gjson.Unmarshal([]byte(source), &metadata)
+	if len(sourceString) > 0 {
+		_ = gjson.Unmarshal([]byte(sourceString), &metadata)
 	}
 	if metadata == nil {
 		metadata = make(map[string]interface{})
 	}
-	for k, v := range target {
+	if target == nil {
+		return metadata
+	}
+	for k, v := range *target {
 		metadata[k] = v
 	}
 	return metadata

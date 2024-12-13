@@ -25,7 +25,7 @@ type CreditConfig struct {
 	Description           string      `json:"description"           description:"description"`                                                                                                                // description
 	LogoUrl               string      `json:"logoUrl"               description:"logo url, show when user purchase"`                                                                                          // logo url, show when user purchase
 	MetaData              string      `json:"metaData"              description:"meta_data(json)"`                                                                                                            // meta_data(json)
-	RechargeEnable        int         `json:"rechargeEnable"        description:"0-yes, 1-no"`                                                                                                                // 0-yes, 1-no
-	PayoutEnable          int         `json:"payoutEnable"          description:"0-yes, 1-no"`                                                                                                                // 0-yes, 1-no
+	RechargeEnable        int         `json:"rechargeEnable"        description:"0-no,1-yes"`                                                                                                                 // 0-no,1-yes
+	PayoutEnable          int         `json:"payoutEnable"          description:"0-no,1-yes"`                                                                                                                 // 0-no,1-yes
 	PreviewDefaultUsed    int         `json:"previewDefaultUsed"    description:"is default used when in purchase preview,0-no, 1-yes"`                                                                       // is default used when in purchase preview,0-no, 1-yes
 }

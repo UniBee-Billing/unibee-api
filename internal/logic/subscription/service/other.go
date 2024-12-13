@@ -355,7 +355,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        "AddNewTrialEnd",
+		Content:        fmt.Sprintf("AddNewTrialEnd(%d)", newTrialEnd),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",

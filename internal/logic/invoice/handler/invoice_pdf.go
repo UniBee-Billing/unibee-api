@@ -25,12 +25,12 @@ func GenerateInvoicePdf(ctx context.Context, one *entity.Invoice) string {
 	user := query.GetUserAccountById(ctx, one.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", one.InvoiceId)
 
-	err := createInvoicePdf(detail.ConvertInvoiceToDetail(ctx, one), merchantInfo, user, query.GetGatewayById(ctx, one.GatewayId), savePath)
+	err := createInvoicePdf(ctx, detail.ConvertInvoiceToDetail(ctx, one), merchantInfo, user, query.GetGatewayById(ctx, one.GatewayId), savePath)
 	utility.Assert(err == nil, fmt.Sprintf("createInvoicePdf error:%v", err))
 	return savePath
 }
 
-func createInvoicePdf(one *detail.InvoiceDetail, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
+func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
 	//var metadata = make(map[string]interface{})
 	//if len(one.MetaData) > 0 {
 	//	err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
@@ -215,9 +215,16 @@ func createInvoicePdf(one *detail.InvoiceDetail, merchantInfo *entity.Merchant, 
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 	if len(one.RefundId) > 0 {
 		doc.IsRefund = true
-		doc.SetOriginInvoiceNumber(one.SendNote)
+		//doc.SetOriginInvoiceNumber(one.SendNote)
+		doc.SetOriginInvoiceNumber(one.OriginalPaymentInvoice.InvoiceId)
 		doc.Title = "TAX CREDIT NOTE"
-		doc.Notes = one.CreateFrom
+		refundDesc := ""
+		if strings.Contains(one.SendNote, "Partial Refund") {
+			refundDesc = "Partial Refund"
+		} else if strings.Contains(one.SendNote, "Full Refund") {
+			refundDesc = "Full Refund"
+		}
+		doc.Notes = fmt.Sprintf("%s\n%s", one.CreateFrom, refundDesc)
 		if len(one.VatNumber) > 0 {
 			//doc.Customer.AdditionalInfo = []string{"VAT reverse charge"}
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
@@ -283,6 +290,19 @@ func createInvoicePdf(one *detail.InvoiceDetail, merchantInfo *entity.Merchant, 
 			originalDiscountString = fmt.Sprintf("(%s %s)", symbol, utility.ConvertCentToDollarStr(-one.OriginalPaymentInvoice.DiscountAmount, one.Currency))
 		}
 		doc.DiscountTotalString = fmt.Sprintf("%s %s%s", symbol, utility.ConvertCentToDollarStr(-one.DiscountAmount, one.Currency), originalDiscountString)
+	}
+	if one.PromoCreditDiscountAmount != 0 {
+		creditPayment := query.GetCreditPaymentByExternalCreditPaymentId(ctx, one.MerchantId, one.InvoiceId)
+		if creditPayment != nil {
+			doc.PromoCreditTitle = fmt.Sprintf("Promo Credits(%d)", creditPayment.TotalAmount)
+		} else {
+			doc.PromoCreditTitle = fmt.Sprintf("Promo Credits")
+		}
+		originalPromoCreditString := ""
+		if len(one.RefundId) > 0 {
+			originalPromoCreditString = fmt.Sprintf("(%s %s)", symbol, utility.ConvertCentToDollarStr(-one.OriginalPaymentInvoice.PromoCreditDiscountAmount, one.Currency))
+		}
+		doc.PromoCreditString = fmt.Sprintf("%s %s%s", symbol, utility.ConvertCentToDollarStr(-one.PromoCreditDiscountAmount, one.Currency), originalPromoCreditString)
 	}
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency))
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TaxAmount, one.Currency))
