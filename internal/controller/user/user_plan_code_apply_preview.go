@@ -3,11 +3,13 @@ package user
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strings"
 	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	discount2 "unibee/internal/logic/discount"
+	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -38,11 +40,15 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 	}
 	//utility.Assert(oneDiscount != nil, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"))
 	canApply, _, message := discount2.UserDiscountApplyPreview(ctx, &discount2.UserDiscountApplyReq{
-		MerchantId:   _interface.GetMerchantId(ctx),
-		PLanId:       uint64(req.PlanId),
-		DiscountCode: req.Code,
-		Currency:     one.Currency,
-		TimeNow:      gtime.Now().Timestamp(),
+		MerchantId:         _interface.GetMerchantId(ctx),
+		PLanId:             uint64(req.PlanId),
+		DiscountCode:       req.Code,
+		Currency:           one.Currency,
+		TimeNow:            gtime.Now().Timestamp(),
+		IsUpgrade:          req.IsUpgrade,
+		IsChangeToLongPlan: req.IsChangeToLongPlan,
+		IsRenew:            req.IsRenew,
+		IsNewUser:          service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(req.Email)),
 	})
 	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, one.MerchantId, one.Amount, one.Currency, req.Code, gtime.Now().Timestamp()), one.Amount)
 	return &plan.CodeApplyPreviewRes{

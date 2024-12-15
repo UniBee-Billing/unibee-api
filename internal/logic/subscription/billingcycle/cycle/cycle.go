@@ -200,14 +200,18 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				var invoice *bean.Invoice
 				var discountCode = ""
 				canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-					MerchantId:       sub.MerchantId,
-					UserId:           sub.UserId,
-					DiscountCode:     sub.DiscountCode,
-					Currency:         sub.Currency,
-					SubscriptionId:   sub.SubscriptionId,
-					PLanId:           sub.PlanId,
-					TimeNow:          timeNow,
-					IsRecurringApply: true,
+					MerchantId:         sub.MerchantId,
+					UserId:             sub.UserId,
+					DiscountCode:       sub.DiscountCode,
+					Currency:           sub.Currency,
+					SubscriptionId:     sub.SubscriptionId,
+					PLanId:             sub.PlanId,
+					TimeNow:            timeNow,
+					IsRecurringApply:   true,
+					IsUpgrade:          false,
+					IsChangeToLongPlan: false,
+					IsRenew:            false,
+					IsNewUser:          false,
 				})
 				if canApply && isRecurring {
 					discountCode = sub.DiscountCode

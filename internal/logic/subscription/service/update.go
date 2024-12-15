@@ -44,7 +44,7 @@ func GetPlanIntervalLength(plan *entity.Plan) int {
 	return plan2.PlanIntervalLength[plan.IntervalUnit] * plan.IntervalCount
 }
 
-func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, plan *entity.Plan, quantity int64, addonParams []*bean.PlanAddonParam) (isUpgrade bool, changed bool) {
+func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, plan *entity.Plan, quantity int64, addonParams []*bean.PlanAddonParam) (isUpgrade bool, isChangeToLongPlan bool, changed bool) {
 	//default logical，Effect Immediately for upgrade, effect at period end for downgrade
 	//situation 1，NewPlan IntervalLength >  OldPlan IntervalLength，is upgrade，ignore Amount, Quantity and addon change
 	//situation 2，NewPlan Unit Amount >  OldPlan Unit Amount，is upgrade，ignore Quantity and addon change
@@ -58,6 +58,7 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 	//if plan.IntervalUnit != oldPlan.IntervalUnit || plan.IntervalCount != oldPlan.IntervalCount {
 	if GetPlanIntervalLength(plan) > GetPlanIntervalLength(oldPlan) {
 		isUpgrade = true
+		isChangeToLongPlan = true
 		changed = true
 	} else if plan.Amount > oldPlan.Amount || plan.Amount*quantity > oldPlan.Amount*sub.Quantity {
 		isUpgrade = true
@@ -221,7 +222,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 
 	var effectImmediate = false
 
-	isUpgrade, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
+	isUpgrade, isChangeToLongPlan, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
 	utility.Assert(changed, "subscription update should have plan or addons changed")
 	if req.Metadata == nil {
 		req.Metadata = make(map[string]interface{})
@@ -258,13 +259,17 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	promoCreditDiscountCodeExclusive := config3.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency)
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     plan.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   req.DiscountCode,
-			Currency:       sub.Currency,
-			SubscriptionId: sub.SubscriptionId,
-			PLanId:         req.NewPlanId,
-			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			MerchantId:         plan.MerchantId,
+			UserId:             sub.UserId,
+			DiscountCode:       req.DiscountCode,
+			Currency:           sub.Currency,
+			SubscriptionId:     sub.SubscriptionId,
+			PLanId:             req.NewPlanId,
+			TimeNow:            utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			IsUpgrade:          isUpgrade,
+			IsChangeToLongPlan: isChangeToLongPlan,
+			IsRenew:            false,
+			IsNewUser:          false,
 		})
 		if canApply {
 			if isRecurring {

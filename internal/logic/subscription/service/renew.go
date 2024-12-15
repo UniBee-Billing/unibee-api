@@ -89,13 +89,17 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 
 	if len(req.DiscountCode) > 0 {
 		canApply, _, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     sub.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   req.DiscountCode,
-			Currency:       sub.Currency,
-			SubscriptionId: sub.SubscriptionId,
-			PLanId:         sub.PlanId,
-			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			MerchantId:         sub.MerchantId,
+			UserId:             sub.UserId,
+			DiscountCode:       req.DiscountCode,
+			Currency:           sub.Currency,
+			SubscriptionId:     sub.SubscriptionId,
+			PLanId:             sub.PlanId,
+			TimeNow:            utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			IsUpgrade:          false,
+			IsChangeToLongPlan: false,
+			IsRenew:            true,
+			IsNewUser:          false,
 		})
 		utility.Assert(canApply, message)
 		promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency)

@@ -39,6 +39,11 @@ type UserDiscountApplyReq struct {
 	Currency         string `json:"currency"        description:"Currency"`
 	TimeNow          int64  `json:"timeNow"        description:"TimeNow"`
 	IsRecurringApply bool   `json:"isRecurringApply"        description:"IsRecurringApply"`
+	// FeatureV2
+	IsRenew            bool `json:"isRenew"  description:"IsRenew"`
+	IsUpgrade          bool `json:"isUpgrade"            description:"IsUpgrade"`
+	IsChangeToLongPlan bool `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
+	IsNewUser          bool `json:"isNewUser"  description:"IsNewUser"`
 }
 
 func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, isRecurring bool, message string) {
@@ -102,6 +107,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
 			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+			Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
 		if err != nil {
@@ -120,6 +126,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
 			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+			Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
 		if err != nil {

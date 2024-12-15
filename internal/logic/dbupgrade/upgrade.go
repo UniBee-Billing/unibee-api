@@ -29,6 +29,7 @@ func StandAloneInit(ctx context.Context) {
 		tables, err := database.Tables(ctx, database.GetSchema())
 		liberr.ErrIsNil(ctx, err, "DB Not Ready For Upgrade")
 		utility.AssertError(err, "StandAloneInit DBUpgrade Get Database Instance failure,%v")
+		var needClearTableCache = false
 		for _, one := range list {
 			if utility.IsUint64InArray(historyIds, one.Id) {
 				continue
@@ -64,6 +65,7 @@ func StandAloneInit(ctx context.Context) {
 								glog.Errorf(ctx, "StandAloneInit DBUpgrade Append Table Column %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
 							} else {
 								SaveUpgradeHistory(ctx, one)
+								needClearTableCache = true
 							}
 						}
 					}
@@ -84,6 +86,7 @@ func StandAloneInit(ctx context.Context) {
 								glog.Errorf(ctx, "StandAloneInit DBUpgrade Edit Table Column %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
 							} else {
 								SaveUpgradeHistory(ctx, one)
+								needClearTableCache = true
 							}
 						}
 					}
@@ -104,6 +107,16 @@ func StandAloneInit(ctx context.Context) {
 						}
 					}
 				}
+			}
+		}
+		if needClearTableCache {
+			err = g.DB().GetCore().ClearTableFieldsAll(ctx)
+			if err != nil {
+				glog.Errorf(ctx, "StandAloneInit ClearTableFieldsAll error:%v", err.Error())
+			}
+			err = g.DB().GetCore().ClearCacheAll(ctx)
+			if err != nil {
+				glog.Errorf(ctx, "StandAloneInit ClearCacheAll error:%v", err.Error())
 			}
 		}
 		glog.Infof(ctx, "StandAloneInit DBUpgrade end")

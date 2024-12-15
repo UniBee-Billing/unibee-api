@@ -243,12 +243,16 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency)
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:   req.MerchantId,
-			UserId:       req.UserId,
-			DiscountCode: req.DiscountCode,
-			Currency:     plan.Currency,
-			PLanId:       plan.Id,
-			TimeNow:      gtime.Now().Timestamp(),
+			MerchantId:         req.MerchantId,
+			UserId:             req.UserId,
+			DiscountCode:       req.DiscountCode,
+			Currency:           plan.Currency,
+			PLanId:             plan.Id,
+			TimeNow:            gtime.Now().Timestamp(),
+			IsUpgrade:          false,
+			IsChangeToLongPlan: false,
+			IsRenew:            false,
+			IsNewUser:          IsNewSubscriptionUser(ctx, req.MerchantId, userEmail),
 		})
 		if canApply {
 			if isRecurring {

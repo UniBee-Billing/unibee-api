@@ -15,6 +15,7 @@ import (
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/service"
+	service2 "unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -76,12 +77,16 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 
 	if len(req.DiscountCode) > 0 {
 		canApply, _, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:   sub.MerchantId,
-			UserId:       sub.UserId,
-			DiscountCode: req.DiscountCode,
-			Currency:     sub.Currency,
-			PLanId:       req.AddonId,
-			TimeNow:      gtime.Now().Timestamp(),
+			MerchantId:         sub.MerchantId,
+			UserId:             sub.UserId,
+			DiscountCode:       req.DiscountCode,
+			Currency:           sub.Currency,
+			PLanId:             req.AddonId,
+			TimeNow:            gtime.Now().Timestamp(),
+			IsUpgrade:          false,
+			IsChangeToLongPlan: false,
+			IsRenew:            false,
+			IsNewUser:          service2.IsNewSubscriptionUser(ctx, sub.MerchantId, user.Email),
 		})
 		utility.Assert(canApply, message)
 	}
@@ -118,12 +123,16 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 		utility.Assert(discountCode.Type == 0, "invalid code, code is from external")
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:   req.MerchantId,
-			UserId:       sub.UserId,
-			DiscountCode: req.DiscountCode,
-			Currency:     plan.Currency,
-			PLanId:       plan.Id,
-			TimeNow:      utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			MerchantId:         req.MerchantId,
+			UserId:             sub.UserId,
+			DiscountCode:       req.DiscountCode,
+			Currency:           plan.Currency,
+			PLanId:             plan.Id,
+			TimeNow:            utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			IsUpgrade:          false,
+			IsChangeToLongPlan: false,
+			IsRenew:            false,
+			IsNewUser:          service2.IsNewSubscriptionUser(ctx, req.MerchantId, user.Email),
 		})
 		utility.Assert(canApply, message)
 		utility.Assert(!isRecurring, "recurring discount code not available for one-time addon")
