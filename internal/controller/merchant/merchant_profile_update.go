@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	merchant2 "unibee/internal/logic/merchant"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"

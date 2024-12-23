@@ -6,7 +6,7 @@ import (
 	merchantPaymentApi "unibee/api/merchant/payment"
 	"unibee/api/user/payment"
 	merchant "unibee/internal/controller/merchant"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"

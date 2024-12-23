@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	_ "unibee/internal/consts"
 	_interface "unibee/internal/interface"
+	"unibee/internal/interface/context"
 	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/merchant"
@@ -54,7 +55,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		Data:    make(g.Map),
 	}
 	customCtx.RequestId = utility.CreateRequestId()
-	_interface.Context().Init(r, customCtx)
+	context.Context().Init(r, customCtx)
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})
@@ -108,7 +109,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 			code = gcode.CodeInternalError
 		}
 		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.Context().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
+		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", context.Context().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
 		r.Response.ClearBuffer() // inner panic will contain json data，need clean
 
 		message := err.Error()
@@ -131,10 +132,10 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		} else {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
+				_interface.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", context.Context().Get(r.Context()).RequestId, code.Code()))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
-				_interface.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
+				_interface.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", context.Context().Get(r.Context()).RequestId, code.Code()))
 			}
 		}
 	} else {
@@ -148,7 +149,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
-	customCtx := _interface.Context().Get(r.Context())
+	customCtx := context.Context().Get(r.Context())
 	if len(customCtx.TokenString) == 0 {
 		g.Log().Infof(r.Context(), "MerchantHandler empty token string of auth header")
 		if customCtx.IsOpenApiCall {
@@ -243,7 +244,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
-	customCtx := _interface.Context().Get(r.Context())
+	customCtx := context.Context().Get(r.Context())
 	list := query.GetActiveMerchantList(r.Context())
 	if customCtx.IsOpenApiCall == true {
 		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
@@ -301,7 +302,7 @@ func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
-	customCtx := _interface.Context().Get(r.Context())
+	customCtx := context.Context().Get(r.Context())
 	if len(customCtx.TokenString) == 0 {
 		g.Log().Infof(r.Context(), "MerchantHandler empty token string of auth header")
 		if customCtx.IsOpenApiCall {

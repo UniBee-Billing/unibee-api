@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	role2 "unibee/internal/logic/role"
 	"unibee/utility"
 

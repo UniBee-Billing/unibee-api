@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	product2 "unibee/internal/logic/product"
 
 	"unibee/api/merchant/product"

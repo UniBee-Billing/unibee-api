@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/invoice"
+	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -27,11 +28,17 @@ func (t InvoiceFailedListener) GetTag() string {
 func (t InvoiceFailedListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Debugf(ctx, "InvoiceFailedListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "InvoiceFailedListener Receive Message:%s", utility.MarshalToJsonString(message))
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
 		one.Status = consts.InvoiceStatusFailed
 		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_FAILED, message.CustomData)
+		err := discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, one.InvoiceId)
+		if err != nil {
+			g.Log().Errorf(ctx, "TopicInvoiceFailed InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
+		} else {
+			g.Log().Infof(ctx, "TopicInvoiceFailed InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s ", one.InvoiceId)
+		}
 	}
 	return redismq.CommitMessage
 }

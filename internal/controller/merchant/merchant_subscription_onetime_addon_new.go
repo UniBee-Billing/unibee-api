@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/onetime"
 	"unibee/internal/query"
 	"unibee/utility"

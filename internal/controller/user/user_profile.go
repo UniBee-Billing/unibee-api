@@ -4,8 +4,7 @@ import (
 	"context"
 	"unibee/api/bean/detail"
 	v1 "unibee/api/user/profile"
-
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"

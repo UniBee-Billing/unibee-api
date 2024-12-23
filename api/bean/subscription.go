@@ -8,7 +8,9 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
 )
 
 type SubscriptionConfig struct {
@@ -46,6 +48,7 @@ type Subscription struct {
 	LastUpdateTime         int64                  `json:"lastUpdateTime"              description:""`                                                                                                                                                               //
 	CurrentPeriodStart     int64                  `json:"currentPeriodStart"          description:"current_period_start, utc time"`                                                                                                                                 // current_period_start, utc time
 	CurrentPeriodEnd       int64                  `json:"currentPeriodEnd"            description:"current_period_end, utc time"`                                                                                                                                   // current_period_end, utc time
+	OriginalPeriodEnd      int64                  `json:"originalPeriodEnd"            description:"original_period_end, utc time"`                                                                                                                                 // original_period_end, utc time
 	BillingCycleAnchor     int64                  `json:"billingCycleAnchor"          description:"billing_cycle_anchor"`                                                                                                                                           // billing_cycle_anchor
 	DunningTime            int64                  `json:"dunningTime"                 description:"dunning_time, utc time"`                                                                                                                                         // dunning_time, utc time
 	TrialEnd               int64                  `json:"trialEnd"                    description:"trial_end, utc time"`                                                                                                                                            // trial_end, utc time
@@ -100,6 +103,12 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 			cancelOrExpireTime = one.GmtModify.Timestamp()
 		}
 	}
+	var currentPeriodEnd = utility.MaxInt64(one.CurrentPeriodEnd, one.TrialEnd)
+	if _interface.Context() != nil &&
+		_interface.Context().Get(ctx) != nil &&
+		_interface.Context().Get(ctx).IsAdminPortalCall {
+		currentPeriodEnd = one.CurrentPeriodEnd
+	}
 	return &Subscription{
 		Id:                     one.Id,
 		SubscriptionId:         one.SubscriptionId,
@@ -122,7 +131,8 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		CancelAtPeriodEnd:      one.CancelAtPeriodEnd,
 		LastUpdateTime:         one.LastUpdateTime,
 		CurrentPeriodStart:     one.CurrentPeriodStart,
-		CurrentPeriodEnd:       one.CurrentPeriodEnd,
+		CurrentPeriodEnd:       currentPeriodEnd,
+		OriginalPeriodEnd:      one.CurrentPeriodEnd,
 		BillingCycleAnchor:     one.BillingCycleAnchor,
 		DunningTime:            one.DunningTime,
 		TrialEnd:               one.TrialEnd,

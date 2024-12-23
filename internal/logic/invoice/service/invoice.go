@@ -14,11 +14,12 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/invoice"
+	"unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/operation_log"
 	handler2 "unibee/internal/logic/payment/handler"
@@ -410,6 +411,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	}
 	one.Status = invoiceStatus
 	one.Link = invoiceLink
+	one.SendTerms = st
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	_, _ = redismq.Send(&redismq.Message{
 		Topic:      redismq2.TopicInvoiceProcessed.Topic,
@@ -449,7 +451,9 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(gateway != nil, "gateway not found")
 	if _interface.Context().Get(ctx).IsOpenApiCall {
 		utility.Assert(gateway.GatewayType != consts.GatewayTypeCrypto, "crypto payment refund not available, refund manual is need and then mark a payment refund")
-		utility.Assert(gateway.GatewayType != consts.GatewayTypeWireTransfer, "wire transfer payment refund not available, refund manual is need and then mark a payment refund")
+		if config.GetConfigInstance().IsProd() {
+			utility.Assert(gateway.GatewayType != consts.GatewayTypeWireTransfer, "wire transfer payment refund not available, should refund manual and then mark a payment refund in admin portal")
+		}
 	} else if gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto {
 		utility.Assert(len(req.Reason) > 0, "reason is need for crypto|wire transfer refund")
 	}

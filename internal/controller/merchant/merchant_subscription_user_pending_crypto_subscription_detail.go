@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/logic/credit/account"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
@@ -80,6 +81,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		}
 	}
 
+	account.InitPromoCreditUserAccount(ctx, one.MerchantId, one.Id)
 	return &UserAccountDetail{
 		Id:                  one.Id,
 		MerchantId:          one.MerchantId,
@@ -131,8 +133,8 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		PlanId:              one.PlanId,
 		Language:            one.Language,
 		RegistrationNumber:  one.RegistrationNumber,
-		PromoCreditAccounts: bean.SimplifyCreditAccountList(query.GetCreditAccountListByUserId(ctx, one.Id, consts.CreditAccountTypePromo)),
-		CreditAccounts:      bean.SimplifyCreditAccountList(query.GetCreditAccountListByUserId(ctx, one.Id, consts.CreditAccountTypeMain)),
+		PromoCreditAccounts: bean.SimplifyCreditAccountList(ctx, query.GetCreditAccountListByUserId(ctx, one.Id, consts.CreditAccountTypePromo)),
+		CreditAccounts:      bean.SimplifyCreditAccountList(ctx, query.GetCreditAccountListByUserId(ctx, one.Id, consts.CreditAccountTypeMain)),
 		Metadata:            metadata,
 	}
 }

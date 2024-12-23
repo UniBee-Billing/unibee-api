@@ -42,10 +42,14 @@ func InvoiceRollbackAllDiscountsFromInvoice(ctx context.Context, invoiceId strin
 	err := discount.UserDiscountRollbackFromInvoice(context.Background(), invoiceId)
 	if err != nil {
 		g.Log().Error(context.Background(), "InvoiceRollbackAllDiscountsFromInvoice UserDiscountRollbackFromInvoice invoiceId:%s error:%s", invoiceId, err.Error())
+	} else {
+		g.Log().Info(ctx, "UserDiscountRollbackFromInvoice success invoiceId:%s", invoiceId)
 	}
 	err = payment.RollbackCreditPayment(context.Background(), one.MerchantId, one.InvoiceId)
 	if err != nil {
 		g.Log().Error(context.Background(), "InvoiceRollbackAllDiscountsFromInvoice RollbackCreditPayment invoiceId:%s error:%s", invoiceId, err.Error())
+	} else {
+		g.Log().Info(ctx, "RollbackCreditPayment success invoiceId:%s", invoiceId)
 	}
 
 	return nil

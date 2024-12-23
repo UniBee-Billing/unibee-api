@@ -14,7 +14,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
@@ -490,22 +490,23 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 
 	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
-		MerchantId:       req.MerchantId,
-		PlanId:           req.PlanId,
-		UserId:           req.UserId,
-		DiscountCode:     req.DiscountCode,
-		Quantity:         req.Quantity,
-		GatewayId:        req.GatewayId,
-		AddonParams:      req.AddonParams,
-		VatCountryCode:   req.VatCountryCode,
-		VatNumber:        req.VatNumber,
-		TaxPercentage:    req.TaxPercentage,
-		IsSubmit:         true,
-		TrialEnd:         req.TrialEnd,
-		ProductData:      req.ProductData,
-		PaymentMethodId:  req.PaymentMethodId,
-		Metadata:         req.Metadata,
-		ApplyPromoCredit: unibee.Bool(req.ApplyPromoCredit),
+		MerchantId:             req.MerchantId,
+		PlanId:                 req.PlanId,
+		UserId:                 req.UserId,
+		DiscountCode:           req.DiscountCode,
+		Quantity:               req.Quantity,
+		GatewayId:              req.GatewayId,
+		AddonParams:            req.AddonParams,
+		VatCountryCode:         req.VatCountryCode,
+		VatNumber:              req.VatNumber,
+		TaxPercentage:          req.TaxPercentage,
+		IsSubmit:               true,
+		TrialEnd:               req.TrialEnd,
+		ProductData:            req.ProductData,
+		PaymentMethodId:        req.PaymentMethodId,
+		Metadata:               req.Metadata,
+		ApplyPromoCredit:       unibee.Bool(req.ApplyPromoCredit),
+		ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 	})
 	if err != nil {
 		return nil, err

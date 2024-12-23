@@ -6,7 +6,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/profile"
 	"unibee/internal/cmd/config"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/email"

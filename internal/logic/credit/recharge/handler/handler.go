@@ -11,17 +11,18 @@ import (
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/credit"
+	"unibee/internal/logic/credit/account"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
 func HandleCreditRechargeSuccess(ctx context.Context, creditRechargeId string, invoice *entity.Invoice, payment *entity.Payment) (err error) {
-	creditAccount := credit.QueryOrCreateCreditAccount(ctx, invoice.UserId, invoice.Currency, consts.CreditAccountTypeMain)
+	creditAccount := account.QueryOrCreateCreditAccount(ctx, invoice.UserId, invoice.Currency, consts.CreditAccountTypeMain)
 	utility.Assert(creditAccount != nil, "credit creditAccount failed")
 	// update invoiceId to credit recharge
 	one := query.GetCreditRechargeByRechargeId(ctx, creditRechargeId)
+	creditConfig := query.GetCreditConfig(ctx, one.MerchantId, consts.CreditAccountTypeMain, one.Currency)
 	if one.RechargeStatus == consts.CreditRechargeSuccess {
 		return gerror.New("recharge already success")
 	}
@@ -53,6 +54,7 @@ func HandleCreditRechargeSuccess(ctx context.Context, creditRechargeId string, i
 				Description:        one.Description,
 				CreateTime:         gtime.Now().Timestamp(),
 				MerchantId:         one.MerchantId,
+				ExchangeRate:       creditConfig.ExchangeRate,
 				AccountType:        creditAccount.Type,
 			}
 			_, err = dao.CreditTransaction.Ctx(ctx).Data(trans).OmitNil().Insert(trans)

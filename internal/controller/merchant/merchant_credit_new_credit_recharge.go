@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	credit2 "unibee/internal/logic/credit/recharge"
 	"unibee/internal/query"
 	"unibee/utility"

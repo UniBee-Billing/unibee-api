@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	_webhook "unibee/internal/logic/webhook"
 	"unibee/internal/query"
 

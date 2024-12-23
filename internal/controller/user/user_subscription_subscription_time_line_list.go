@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"unibee/api/user/subscription"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/timeline"
 )
 

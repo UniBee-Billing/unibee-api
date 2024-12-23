@@ -7,7 +7,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	discount2 "unibee/internal/logic/discount"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
@@ -47,7 +47,7 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 		TimeNow:            gtime.Now().Timestamp(),
 		IsUpgrade:          req.IsUpgrade,
 		IsChangeToLongPlan: req.IsChangeToLongPlan,
-		IsRenew:            req.IsRenew,
+		IsRenew:            false,
 		IsNewUser:          service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(req.Email)),
 	})
 	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, one.MerchantId, one.Amount, one.Currency, req.Code, gtime.Now().Timestamp()), one.Amount)

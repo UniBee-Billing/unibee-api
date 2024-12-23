@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"

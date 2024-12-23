@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	product2 "unibee/internal/logic/product"
 
 	"unibee/api/user/product"

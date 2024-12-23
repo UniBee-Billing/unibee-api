@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/model"
 	"unibee/test"
 	"unibee/utility"

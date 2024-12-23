@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/api/merchant/vat"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/vat_gateway"
 )
 

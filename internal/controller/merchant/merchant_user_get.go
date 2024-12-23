@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/user"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/query"
 	"unibee/utility"
 )

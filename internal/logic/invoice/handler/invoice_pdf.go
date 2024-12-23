@@ -58,7 +58,7 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 
 	hideDetailStatus := one.Metadata["hideDetailStatus"]
 	if one.Status == consts.InvoiceStatusProcessing {
-		doc.SetStatus("Process")
+		doc.SetStatus("Awaiting payment")
 		if hideDetailStatus != nil {
 			if _hideDetailStatus, ok := hideDetailStatus.(bool); ok {
 				if _hideDetailStatus {

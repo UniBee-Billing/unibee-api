@@ -6,11 +6,12 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"strings"
 	"unibee/api/bean"
 	config2 "unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -49,6 +50,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
+	user := query.GetUserAccountById(ctx, sub.UserId)
+	utility.Assert(user != nil, "user not found")
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
@@ -99,7 +102,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			IsUpgrade:          false,
 			IsChangeToLongPlan: false,
 			IsRenew:            true,
-			IsNewUser:          false,
+			IsNewUser:          IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
 		})
 		utility.Assert(canApply, message)
 		promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency)

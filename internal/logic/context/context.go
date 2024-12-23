@@ -3,7 +3,7 @@ package context
 import (
 	"context"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/model"
 
 	"github.com/gogf/gf/v2/frame/g"

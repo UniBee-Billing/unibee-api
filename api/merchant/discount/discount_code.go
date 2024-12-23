@@ -128,7 +128,6 @@ type PlanApplyPreviewReq struct {
 	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
 	PlanId             int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
 	ExternalPlanId     string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
-	IsRenew            bool   `json:"isRenew"  description:"IsRenew"`
 	IsUpgrade          bool   `json:"isUpgrade"            description:"IsUpgrade"`
 	IsChangeToLongPlan bool   `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
 	Email              string `json:"email"  description:"Email"`

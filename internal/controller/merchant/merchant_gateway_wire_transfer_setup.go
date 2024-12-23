@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	gateway2 "unibee/internal/logic/gateway/service"
 
 	"unibee/api/merchant/gateway"

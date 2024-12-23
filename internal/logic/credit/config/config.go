@@ -3,10 +3,8 @@ package config
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee/internal/consts"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/query"
-	"unibee/utility"
 )
 
 func CheckCreditConfig(ctx context.Context, merchantId uint64, creditType int, currency string) error {
@@ -124,28 +122,4 @@ func CheckCreditConfigPayout(ctx context.Context, merchantId uint64, creditType 
 		return gerror.New("credit account payout disable")
 	}
 	return nil
-}
-
-func ConvertCreditAmountToCurrency(ctx context.Context, merchantId uint64, creditType int, currency string, creditAmount int64) (currencyAmount int64, exchangeRate int64) {
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
-	if one == nil {
-		return 0, 0
-	}
-	if one.Type == consts.CreditAccountTypePromo {
-		return utility.ConvertDollarFloatToInt64Cent(float64(creditAmount)*(float64(one.ExchangeRate)/100), currency), one.ExchangeRate
-	} else {
-		return creditAmount, one.ExchangeRate
-	}
-}
-
-func ConvertCurrencyAmountToCreditAmount(ctx context.Context, merchantId uint64, creditType int, currency string, currencyAmount int64) (creditAmount int64, exchangeRate int64) {
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
-	if one == nil {
-		return 0, 0
-	}
-	if one.Type == consts.CreditAccountTypePromo {
-		return int64(utility.ConvertCentToDollarFloat(currencyAmount, currency) / (float64(one.ExchangeRate) / 100)), one.ExchangeRate
-	} else {
-		return currencyAmount, one.ExchangeRate
-	}
 }

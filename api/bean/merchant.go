@@ -49,14 +49,15 @@ func SimplifyMerchant(one *entity.Merchant) *Merchant {
 }
 
 type MerchantMember struct {
-	Id         uint64 `json:"id"         description:"userId"`          // userId
-	MerchantId uint64 `json:"merchantId" description:"merchant id"`     // merchant id
-	Email      string `json:"email"      description:"email"`           // email
-	FirstName  string `json:"firstName"  description:"first name"`      // first name
-	LastName   string `json:"lastName"   description:"last name"`       // last name
-	CreateTime int64  `json:"createTime" description:"create utc time"` // create utc time
-	Mobile     string `json:"mobile"     description:"mobile"`          // mobile
-	IsOwner    bool   `json:"isOwner" description:"Check Member is Owner" `
+	Id            uint64 `json:"id"         description:"userId"`          // userId
+	MerchantId    uint64 `json:"merchantId" description:"merchant id"`     // merchant id
+	Email         string `json:"email"      description:"email"`           // email
+	FirstName     string `json:"firstName"  description:"first name"`      // first name
+	LastName      string `json:"lastName"   description:"last name"`       // last name
+	CreateTime    int64  `json:"createTime" description:"create utc time"` // create utc time
+	Mobile        string `json:"mobile"     description:"mobile"`          // mobile
+	IsOwner       bool   `json:"isOwner" description:"Check Member is Owner" `
+	IsBlankPasswd bool   `json:"isBlankPasswd" description:"is blank password"`
 }
 
 func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMember {
@@ -68,13 +69,14 @@ func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMember {
 		isOwner = true
 	}
 	return &MerchantMember{
-		Id:         one.Id,
-		MerchantId: one.MerchantId,
-		Email:      one.Email,
-		FirstName:  one.FirstName,
-		LastName:   one.LastName,
-		CreateTime: one.CreateTime,
-		Mobile:     one.Mobile,
-		IsOwner:    isOwner,
+		Id:            one.Id,
+		MerchantId:    one.MerchantId,
+		Email:         one.Email,
+		FirstName:     one.FirstName,
+		LastName:      one.LastName,
+		CreateTime:    one.CreateTime,
+		Mobile:        one.Mobile,
+		IsBlankPasswd: len(one.Password) == 0,
+		IsOwner:       isOwner,
 	}
 }

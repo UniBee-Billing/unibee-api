@@ -29,8 +29,8 @@ type CreditAccountColumns struct {
 	GmtModify      string // update time
 	CreateTime     string // create utc time
 	MerchantId     string // merchant id
-	RechargeEnable string // 0-no, 1-yes
-	PayoutEnable   string // 0-no, 1-yes
+	RechargeEnable string // 0-yes, 1-no
+	PayoutEnable   string // 0-yes, 1-no
 }
 
 // creditAccountColumns holds the columns for table credit_account.

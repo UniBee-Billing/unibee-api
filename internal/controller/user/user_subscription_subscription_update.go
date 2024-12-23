@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/api/user/subscription"
 	"unibee/internal/cmd/config"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"

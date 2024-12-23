@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/analysis/segment"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"

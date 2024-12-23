@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/interface"
+	context2 "unibee/internal/interface/context"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -38,7 +39,7 @@ func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
 		g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
 	}
 	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
-	if _interface.Context().Get(ctx) != nil && (_interface.Context().Get(ctx).MerchantMember != nil || _interface.Context().Get(ctx).IsOpenApiCall) {
+	if context2.Context().Get(ctx) != nil && (context2.Context().Get(ctx).MerchantMember != nil || context2.Context().Get(ctx).IsOpenApiCall) {
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			MerchantId:     gateway.MerchantId,
 			Target:         fmt.Sprintf("Gateway(%v-%s)", gateway.Id, gateway.GatewayName),

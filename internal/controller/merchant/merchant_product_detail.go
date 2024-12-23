@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/api/bean"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/query"
 	"unibee/utility"
 

@@ -9,7 +9,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"

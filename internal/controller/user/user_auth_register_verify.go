@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"unibee/api/bean"
 	"unibee/api/user/auth"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	auth2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"

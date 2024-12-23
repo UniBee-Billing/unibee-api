@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/fiat_exchange"
 	"unibee/internal/logic/merchant_config/update"

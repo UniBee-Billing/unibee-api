@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"unibee/api/bean"
 	"unibee/api/user/auth"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/jwt"
 	"unibee/utility"
 

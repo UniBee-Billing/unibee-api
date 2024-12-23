@@ -9,7 +9,7 @@ import (
 	"unibee/api/merchant/credit"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"

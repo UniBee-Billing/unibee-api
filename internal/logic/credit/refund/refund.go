@@ -11,7 +11,7 @@ import (
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/credit"
+	"unibee/internal/logic/credit/account"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -47,13 +47,13 @@ func NewCreditRefund(ctx context.Context, req *CreditRefundInternalReq) (res *Cr
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid merchantId")
-	creditAccount := credit.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, consts.CreditAccountTypeMain)
-	utility.Assert(creditAccount != nil, "credit creditAccount failed")
 	payment := query.GetCreditPaymentByCreditPaymentId(ctx, req.CreditPaymentId)
 	utility.Assert(payment != nil, "credit payment not found")
 	if payment.TotalAmount-payment.TotalRefundAmount < req.RefundAmount {
 		return nil, gerror.New("no enough amount can refund")
 	}
+	creditAccount := account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, payment.AccountType)
+	utility.Assert(creditAccount != nil, "credit creditAccount failed")
 	// check exist externalCreditRefundId
 	one := query.GetCreditRefundByExternalCreditRefundId(ctx, req.MerchantId, req.ExternalCreditRefundId)
 	utility.Assert(one == nil, "credit payment exist with same externalCreditRefundId")
@@ -116,6 +116,7 @@ func NewCreditRefund(ctx context.Context, req *CreditRefundInternalReq) (res *Cr
 				Description:        one.Description,
 				CreateTime:         gtime.Now().Timestamp(),
 				MerchantId:         one.MerchantId,
+				ExchangeRate:       payment.ExchangeRate,
 				AccountType:        creditAccount.Type,
 			}
 			_, err = dao.CreditTransaction.Ctx(ctx).Data(trans).OmitNil().Insert(trans)

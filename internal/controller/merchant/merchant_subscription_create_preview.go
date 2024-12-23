@@ -9,7 +9,7 @@ import (
 	"unibee/api/merchant/subscription"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/service"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/query"

@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/credit/admin"
 	"unibee/utility"
 

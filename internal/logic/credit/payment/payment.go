@@ -12,7 +12,9 @@ import (
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/credit"
+	_interface "unibee/internal/interface/context"
+	"unibee/internal/logic/credit/account"
+	"unibee/internal/logic/credit/amount"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/credit/refund"
 	currency2 "unibee/internal/logic/currency"
@@ -39,22 +41,25 @@ func CheckCreditUserPayout(ctx context.Context, merchantId uint64, userId uint64
 		return nil, nil, gerror.New("credit config need setup")
 	}
 	if one.PayoutEnable == 0 {
-		return nil, nil, gerror.New("credit account payout disable")
+		return nil, nil, gerror.New("credit payout disable")
 	}
-	account := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
-	if account == nil {
+	creditAccount := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
+	if creditAccount == nil {
 		return nil, nil, gerror.New("credit account not found")
 	}
-	if account.Amount == 0 {
+	if creditAccount.Amount == 0 {
 		return nil, nil, gerror.New("credit account amount is zero")
 	}
+	if creditAccount.PayoutEnable == 0 {
+		return nil, nil, gerror.New("credit account payout disable")
+	}
 	if applyCreditPaymentAmount == nil {
-		creditPaymentAmount, _ := config.ConvertCurrencyAmountToCreditAmount(ctx, merchantId, creditType, currency, currencyAmount)
-		if creditPaymentAmount > account.Amount {
-			creditPaymentAmount = account.Amount
-			currencyAmount, _ = config.ConvertCreditAmountToCurrency(ctx, merchantId, creditType, currency, creditPaymentAmount)
+		creditPaymentAmount, _ := amount.ConvertCurrencyAmountToCreditAmount(ctx, merchantId, creditType, currency, currencyAmount)
+		if creditPaymentAmount > creditAccount.Amount {
+			creditPaymentAmount = creditAccount.Amount
+			currencyAmount, _ = amount.ConvertCreditAmountToCurrency(ctx, merchantId, creditType, currency, creditPaymentAmount)
 		}
-		return bean.SimplifyCreditAccount(account), &bean.CreditPayout{
+		return bean.SimplifyCreditAccount(ctx, creditAccount), &bean.CreditPayout{
 			ExchangeRate:   one.ExchangeRate,
 			CreditAmount:   creditPaymentAmount,
 			CurrencyAmount: currencyAmount,
@@ -63,14 +68,18 @@ func CheckCreditUserPayout(ctx context.Context, merchantId uint64, userId uint64
 		if *applyCreditPaymentAmount < 0 {
 			return nil, nil, gerror.New("invalid promo credit amount")
 		}
-		if *applyCreditPaymentAmount > account.Amount {
-			*applyCreditPaymentAmount = account.Amount
+		if *applyCreditPaymentAmount > creditAccount.Amount {
+			*applyCreditPaymentAmount = creditAccount.Amount
 		}
-		currencyAmount, _ = config.ConvertCreditAmountToCurrency(ctx, merchantId, creditType, currency, *applyCreditPaymentAmount)
-		return bean.SimplifyCreditAccount(account), &bean.CreditPayout{
+		targetCurrencyAmount, _ := amount.ConvertCreditAmountToCurrency(ctx, merchantId, creditType, currency, *applyCreditPaymentAmount)
+		if targetCurrencyAmount > currencyAmount {
+			*applyCreditPaymentAmount, _ = amount.ConvertCurrencyAmountToCreditAmount(ctx, merchantId, creditType, currency, currencyAmount)
+			targetCurrencyAmount = currencyAmount
+		}
+		return bean.SimplifyCreditAccount(ctx, creditAccount), &bean.CreditPayout{
 			ExchangeRate:   one.ExchangeRate,
 			CreditAmount:   *applyCreditPaymentAmount,
-			CurrencyAmount: currencyAmount,
+			CurrencyAmount: targetCurrencyAmount,
 		}, nil
 	}
 }
@@ -105,11 +114,11 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid merchantId")
 	utility.Assert(req.CreditType == consts.CreditAccountTypeMain || req.CreditType == consts.CreditAccountTypePromo, "invalid creditType")
-	creditAccount := credit.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
+	creditAccount := account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
 	utility.Assert(creditAccount != nil, "credit creditAccount failed")
 	utility.Assert(creditAccount.Type == req.CreditType, "invalid credit account type, should be main account")
 	utility.AssertError(config.CheckCreditConfigPayout(ctx, req.MerchantId, creditAccount.Type, req.Currency), "Credit Config Error")
-	creditPaymentAmount, exchangeRate := config.ConvertCurrencyAmountToCreditAmount(ctx, req.MerchantId, creditAccount.Type, req.Currency, req.CurrencyAmount)
+	creditPaymentAmount, exchangeRate := amount.ConvertCurrencyAmountToCreditAmount(ctx, req.MerchantId, creditAccount.Type, req.Currency, req.CurrencyAmount)
 	if creditAccount.Amount < creditPaymentAmount {
 		return nil, gerror.New("credit amount is not enough")
 	}
@@ -157,6 +166,10 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 			if creditAccount.Amount < creditPaymentAmount {
 				return gerror.New("credit amount is less than total amount")
 			}
+			var adminMemberId uint64 = 0
+			if _interface.Context().Get(ctx).IsAdminPortalCall && _interface.Context().Get(ctx).MerchantMember != nil {
+				adminMemberId = _interface.Context().Get(ctx).MerchantMember.Id
+			}
 			trans := &entity.CreditTransaction{
 				UserId:             one.UserId,
 				CreditId:           one.CreditId,
@@ -166,13 +179,15 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 				TransactionType:    consts.CreditTransactionPayout,
 				CreditAmountAfter:  creditAccount.Amount - one.TotalAmount,
 				CreditAmountBefore: creditAccount.Amount,
-				DeltaAmount:        one.TotalAmount,
+				DeltaAmount:        -one.TotalAmount,
 				BizId:              one.CreditPaymentId,
 				Name:               one.Name,
 				Description:        one.Description,
 				CreateTime:         gtime.Now().Timestamp(),
 				MerchantId:         one.MerchantId,
+				ExchangeRate:       exchangeRate,
 				AccountType:        creditAccount.Type,
+				AdminMemberId:      adminMemberId,
 			}
 			_, err = dao.CreditTransaction.Ctx(ctx).Data(trans).OmitNil().Insert(trans)
 			if err != nil {
@@ -258,7 +273,9 @@ func RollbackCreditPayment(ctx context.Context, merchantId uint64, externalCredi
 			Description:            one.Description,
 		})
 		if err != nil {
-			g.Log().Error(context.Background(), "RollbackCreditPayment NewCreditRefund externalCreditPaymentId:%s error:%s", externalCreditPaymentId, err.Error())
+			g.Log().Errorf(backgroundCtx, "RollbackCreditPayment NewCreditRefund externalCreditPaymentId:%s error:%s", externalCreditPaymentId, err.Error())
+		} else {
+			g.Log().Infof(backgroundCtx, "RollbackCreditPayment NewCreditRefund success externalCreditPaymentId:%s", externalCreditPaymentId)
 		}
 	}()
 	return nil

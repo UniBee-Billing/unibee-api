@@ -10,7 +10,7 @@ import (
 	"unibee/internal/cmd/i18n"
 	redismq2 "unibee/internal/cmd/redismq"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	metric2 "unibee/internal/logic/metric"

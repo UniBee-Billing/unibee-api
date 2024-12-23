@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"

@@ -29,4 +29,5 @@ type CreditTransaction struct {
 	InvoiceId          string      `json:"invoiceId"          description:"invoice_id"`                                                                                                                                     // invoice_id
 	AccountType        int         `json:"accountType"        description:"type of credit account, 1-main recharge account, 2-promo credit account"`                                                                        // type of credit account, 1-main recharge account, 2-promo credit account
 	AdminMemberId      uint64      `json:"adminMemberId"      description:"admin_member_id"`                                                                                                                                // admin_member_id
+	ExchangeRate       int64       `json:"exchangeRate"       description:"keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100"`                     // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
 }

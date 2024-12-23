@@ -5,7 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/user/auth"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/jwt"
 	auth2 "unibee/internal/logic/user"
 	"unibee/utility"

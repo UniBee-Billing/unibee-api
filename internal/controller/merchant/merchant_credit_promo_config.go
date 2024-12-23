@@ -6,7 +6,7 @@ import (
 	"unibee/api/merchant/credit"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/currency"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"

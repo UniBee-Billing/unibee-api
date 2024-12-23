@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -45,5 +45,5 @@ func (c *ControllerCredit) EditCreditAccount(ctx context.Context, req *credit.Ed
 		DiscountCode:   "",
 	}, err)
 	one = query.GetCreditAccountById(ctx, req.Id)
-	return &credit.EditCreditAccountRes{UserCreditAccount: bean.SimplifyCreditAccount(one)}, nil
+	return &credit.EditCreditAccountRes{UserCreditAccount: bean.SimplifyCreditAccount(ctx, one)}, nil
 }

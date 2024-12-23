@@ -9,7 +9,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/credit"
+	"unibee/internal/logic/credit/account"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/credit/recharge/handler"
 	"unibee/internal/logic/payment/service"
@@ -54,9 +54,10 @@ func CreateRechargePayment(ctx context.Context, req *CreditRechargeInternalReq) 
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "merchant not match")
-	creditAccount := credit.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, consts.CreditAccountTypeMain)
+	creditAccount := account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, consts.CreditAccountTypeMain)
 	utility.Assert(creditAccount != nil, "credit creditAccount create failed")
 	utility.Assert(creditAccount.Type == consts.CreditAccountTypeMain, "invalid credit account type, should be main account")
+	utility.Assert(creditAccount.RechargeEnable == 1, "Credit account recharge disabled")
 	utility.AssertError(config.CheckCreditConfigRecharge(ctx, req.MerchantId, creditAccount.Type, req.Currency), "Invalid Credit Config")
 
 	one := &entity.CreditRecharge{

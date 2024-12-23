@@ -9,7 +9,7 @@ import (
 	"unibee/api/merchant/payment"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/payment/service"
 	user2 "unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/default"

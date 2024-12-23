@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
+	context2 "unibee/internal/interface/context"
 	"unibee/internal/logic/gateway/api/credit"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/gateway/util"
@@ -425,8 +426,8 @@ func (p GatewayProxy) GatewayRefundList(ctx context.Context, gateway *entity.Mer
 
 func printChannelPanic(ctx context.Context, err error) {
 	var requestId = "init"
-	if _interface.Context().Get(ctx) != nil {
-		requestId = _interface.Context().Get(ctx).RequestId
+	if context2.Context().Get(ctx) != nil {
+		requestId = context2.Context().Get(ctx).RequestId
 	}
 	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", requestId, err.Error())
 }

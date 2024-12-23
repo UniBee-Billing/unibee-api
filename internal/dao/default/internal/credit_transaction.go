@@ -39,6 +39,7 @@ type CreditTransactionColumns struct {
 	InvoiceId          string // invoice_id
 	AccountType        string // type of credit account, 1-main recharge account, 2-promo credit account
 	AdminMemberId      string // admin_member_id
+	ExchangeRate       string // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
 }
 
 // creditTransactionColumns holds the columns for table credit_transaction.
@@ -62,6 +63,7 @@ var creditTransactionColumns = CreditTransactionColumns{
 	InvoiceId:          "invoice_id",
 	AccountType:        "account_type",
 	AdminMemberId:      "admin_member_id",
+	ExchangeRate:       "exchange_rate",
 }
 
 // NewCreditTransactionDao creates and returns a new DAO object for table data access.

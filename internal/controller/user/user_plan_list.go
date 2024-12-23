@@ -5,7 +5,7 @@ import (
 	"unibee/api/user/plan"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	plan2 "unibee/internal/logic/plan"
 	"unibee/internal/query"
 	"unibee/utility"

@@ -255,14 +255,14 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return one, err
 	}
 	if one.Status != status {
-		if len(one.DiscountCode) > 0 {
-			if status == consts.InvoiceStatusCancelled || status == consts.InvoiceStatusFailed {
-				err = discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, one.InvoiceId)
-				if err != nil {
-					g.Log().Errorf(ctx, "UpdateInvoiceFromPayment InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
-				}
-			}
-		}
+		//if len(one.DiscountCode) > 0 {
+		//	if status == consts.InvoiceStatusCancelled || status == consts.InvoiceStatusFailed {
+		//		err = discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, one.InvoiceId)
+		//		if err != nil {
+		//			g.Log().Errorf(ctx, "UpdateInvoiceFromPayment InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
+		//		}
+		//	}
+		//}
 		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()

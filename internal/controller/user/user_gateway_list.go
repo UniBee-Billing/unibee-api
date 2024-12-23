@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	gateway2 "unibee/api/bean"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/query"
 
 	"unibee/api/user/gateway"

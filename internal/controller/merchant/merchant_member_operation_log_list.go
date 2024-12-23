@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"strings"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	member2 "unibee/internal/logic/operation_log"
 
 	"unibee/api/merchant/member"

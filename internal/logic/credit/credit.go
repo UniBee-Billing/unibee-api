@@ -2,39 +2,12 @@ package credit
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func QueryOrCreateCreditAccount(ctx context.Context, userId uint64, currency string, creditType int) *entity.CreditAccount {
-	utility.Assert(userId > 0, "Invalid UserId")
-	currency = strings.ToUpper(strings.TrimSpace(currency))
-	utility.Assert(len(currency) > 0, "invalid currency")
-	user := query.GetUserAccountById(ctx, userId)
-	utility.Assert(user != nil, "user not found")
-	one := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
-	if one == nil {
-		one = &entity.CreditAccount{
-			UserId:     userId,
-			MerchantId: user.MerchantId,
-			Type:       creditType,
-			Currency:   currency,
-			Amount:     0,
-			CreateTime: gtime.Now().Timestamp(),
-		}
-		result, err := dao.CreditAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		utility.AssertError(err, "Server Error")
-		id, err := result.LastInsertId()
-		utility.AssertError(err, "Server Error")
-		one.Id = uint64(id)
-	}
-	return one
-}
 
 type CreditAccountListInternalReq struct {
 	MerchantId      uint64 `json:"merchantId"  description:"merchantId"`
@@ -74,10 +47,10 @@ func CreditAccountList(ctx context.Context, req *CreditAccountListInternalReq) (
 			sortKey = req.SortField + " desc"
 		}
 	}
-	query := dao.CreditAccount.Ctx(ctx).
+	q := dao.CreditAccount.Ctx(ctx).
 		Where(dao.CreditAccount.Columns().MerchantId, req.MerchantId)
 	if req.UserId > 0 {
-		query = query.Where(dao.CreditAccount.Columns().UserId, req.UserId)
+		q = q.Where(dao.CreditAccount.Columns().UserId, req.UserId)
 	}
 
 	if len(req.Email) > 0 {
@@ -94,20 +67,20 @@ func CreditAccountList(ctx context.Context, req *CreditAccountListInternalReq) (
 		if len(userIdList) == 0 {
 			return &CreditAccountListInternalRes{CreditAccounts: make([]*detail.CreditAccountDetail, 0), Total: 0}, nil
 		}
-		query = query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
+		q = q.WhereIn(dao.Invoice.Columns().UserId, userIdList)
 
 	}
 	if req.CreateTimeStart > 0 {
-		query = query.WhereGTE(dao.Invoice.Columns().CreateTime, req.CreateTimeStart)
+		q = q.WhereGTE(dao.Invoice.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
-		query = query.WhereLTE(dao.Invoice.Columns().CreateTime, req.CreateTimeEnd)
+		q = q.WhereLTE(dao.Invoice.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	query = query.
+	q = q.
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty()
-	err = query.ScanAndCount(&mainList, &total, true)
+	err = q.ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}

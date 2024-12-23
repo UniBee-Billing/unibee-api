@@ -140,7 +140,7 @@ type CreditAccountListRes struct {
 }
 
 type CreditTransactionListReq struct {
-	g.Meta           `path:"/credit_transaction_list" tags:"Credit" method:"get" summary:"CreditTransactionList" dc:"Get Credit Transaction list"`
+	g.Meta           `path:"/credit_transaction_list" tags:"Credit" method:"get,post" summary:"CreditTransactionList" dc:"Get Credit Transaction list"`
 	AccountType      int    `json:"accountType"  description:"filter type of account, 1-main account, 2-promo credit account" v:"required"`
 	UserId           uint64 `json:"userId"  description:"filter id of user"`
 	Email            string `json:"email"  description:"filter email of user"`

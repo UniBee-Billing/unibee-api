@@ -11,7 +11,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/logic/credit"
+	"unibee/internal/logic/credit/account"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
@@ -45,12 +45,14 @@ func CreditAccountAdminChange(ctx context.Context, req *CreditAccountAdminChange
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "merchant not match")
-	creditAccount := credit.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
+	creditAccount := account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
 	utility.Assert(creditAccount != nil, "Credit account create failed")
+	utility.Assert(creditAccount.RechargeEnable == 1, "Credit account editable disabled")
 	utility.AssertError(config.CheckCreditConfig(ctx, req.MerchantId, creditAccount.Type, req.Currency), "Invalid Credit Config")
 	if req.Amount < 0 {
 		utility.Assert(creditAccount.Amount >= -req.Amount, "no enough amount to decrement")
 	}
+	creditConfig := query.GetCreditConfig(ctx, req.MerchantId, creditAccount.Type, req.Currency)
 	err := dao.CreditRecharge.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		creditAccount = query.GetCreditAccountById(ctx, creditAccount.Id)
 		transactionId := utility.CreateEventId()
@@ -69,6 +71,7 @@ func CreditAccountAdminChange(ctx context.Context, req *CreditAccountAdminChange
 			CreateTime:         gtime.Now().Timestamp(),
 			MerchantId:         req.MerchantId,
 			AccountType:        creditAccount.Type,
+			ExchangeRate:       creditConfig.ExchangeRate,
 			AdminMemberId:      req.AdminMemberId,
 		}
 		_, err := dao.CreditTransaction.Ctx(ctx).Data(trans).OmitNil().Insert(trans)
@@ -126,7 +129,7 @@ func CreditAccountAdminChange(ctx context.Context, req *CreditAccountAdminChange
 	if err != nil {
 		return nil, err
 	}
-	creditAccount = credit.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
+	creditAccount = account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, req.CreditType)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     req.MerchantId,
 		Target:         fmt.Sprintf("CreditAccount(%d)", creditAccount.Id),
@@ -139,6 +142,6 @@ func CreditAccountAdminChange(ctx context.Context, req *CreditAccountAdminChange
 	}, err)
 	return &CreditAccountAdminChangeInternalRes{
 		User:          bean.SimplifyUserAccount(user),
-		CreditAccount: bean.SimplifyCreditAccount(creditAccount),
+		CreditAccount: bean.SimplifyCreditAccount(ctx, creditAccount),
 	}, nil
 }

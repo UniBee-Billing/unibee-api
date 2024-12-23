@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	auth2 "unibee/internal/logic/user"
 	"unibee/utility"
 

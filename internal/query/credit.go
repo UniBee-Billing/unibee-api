@@ -21,6 +21,21 @@ func GetCreditConfigById(ctx context.Context, merchantId uint64, id uint64) (one
 	return one
 }
 
+func GetCreditConfigList(ctx context.Context, merchantId uint64, creditConfigType int) (list []*entity.CreditConfig) {
+	if merchantId <= 0 {
+		return nil
+	}
+	err := dao.CreditConfig.Ctx(ctx).
+		Where(dao.CreditConfig.Columns().MerchantId, merchantId).
+		Where(dao.CreditConfig.Columns().Type, creditConfigType).
+		OrderAsc(dao.CreditConfig.Columns().Id).
+		Scan(&list)
+	if err != nil {
+		return nil
+	}
+	return list
+}
+
 func GetCreditConfig(ctx context.Context, merchantId uint64, creditConfigType int, currency string) (one *entity.CreditConfig) {
 	if merchantId <= 0 {
 		return nil
@@ -60,6 +75,7 @@ func GetCreditAccountListByUserId(ctx context.Context, userId uint64, creditType
 	err := dao.CreditAccount.Ctx(ctx).
 		Where(dao.CreditAccount.Columns().UserId, userId).
 		Where(dao.CreditAccount.Columns().Type, creditType).
+		OrderAsc(dao.CreditAccount.Columns().Id).
 		Scan(&list)
 	if err != nil {
 		return nil

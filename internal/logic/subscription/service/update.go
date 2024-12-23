@@ -17,7 +17,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	config3 "unibee/internal/logic/credit/config"
 	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
@@ -170,8 +170,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
-	// todo mark addon binding check
 
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
@@ -245,6 +243,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		}
 	}
 
+	if sub.Status != consts.PlanStatusActive {
+		effectImmediate = true
+	}
+
 	var currentInvoice *bean.Invoice
 	var nextPeriodInvoice *bean.Invoice
 	var recurringDiscountCode string
@@ -269,7 +271,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			IsUpgrade:          isUpgrade,
 			IsChangeToLongPlan: isChangeToLongPlan,
 			IsRenew:            false,
-			IsNewUser:          false,
+			IsNewUser:          IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
 		})
 		if canApply {
 			if isRecurring {
@@ -306,7 +308,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 
 	if effectImmediate {
-		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
+		if sub.Status != consts.SubStatusActive || !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				UserId:                 sub.UserId,
@@ -495,6 +497,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		}
 	}
 	nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+		UserId:             sub.UserId,
 		InvoiceName:        "SubscriptionCycle",
 		Currency:           sub.Currency,
 		DiscountCode:       nextCode,
@@ -511,7 +514,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: prorationDate,
 		Metadata:           req.Metadata,
-		ApplyPromoCredit:   false,
+		ApplyPromoCredit:   config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
 	})
 
 	if currentInvoice.TotalAmount <= 0 {

@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/api/merchant/email"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	email2 "unibee/internal/logic/email"
 )
 

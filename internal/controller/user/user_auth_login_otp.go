@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"unibee/api/user/auth"
 	"unibee/internal/cmd/i18n"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/email"
 	"unibee/internal/query"
 	"unibee/utility"

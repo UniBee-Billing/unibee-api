@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	gateway2 "unibee/internal/logic/gateway"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"

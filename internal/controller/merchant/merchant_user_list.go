@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 	"unibee/api/merchant/user"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	user2 "unibee/internal/logic/user"
 )
 

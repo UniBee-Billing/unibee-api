@@ -8,6 +8,7 @@ import (
 	go_redismq "github.com/jackyang-hk/go-redismq"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
+	context2 "unibee/internal/interface/context"
 	"unibee/utility"
 )
 
@@ -65,7 +66,7 @@ func PremiumLicenseHandler(r *ghttp.Request) {
 		r.Middleware.Next()
 		return
 	}
-	uniBeeContext := _interface.Context().Get(r.Context())
+	uniBeeContext := context2.Context().Get(r.Context())
 	if uniBeeContext == nil || uniBeeContext.MerchantId <= 0 {
 		//merchant not found
 		_interface.OpenApiJsonExit(r, 61, "Merchant Not found")

@@ -21,6 +21,6 @@ type CreditAccount struct {
 	GmtModify      *gtime.Time // update time
 	CreateTime     interface{} // create utc time
 	MerchantId     interface{} // merchant id
-	RechargeEnable interface{} // 0-no, 1-yes
-	PayoutEnable   interface{} // 0-no, 1-yes
+	RechargeEnable interface{} // 0-yes, 1-no
+	PayoutEnable   interface{} // 0-yes, 1-no
 }

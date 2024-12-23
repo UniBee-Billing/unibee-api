@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
-	"unibee/internal/interface"
+	vat2 "unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/merchant_config/update"
 	"unibee/internal/logic/operation_log"
@@ -31,7 +31,7 @@ const (
 	VAT_IMPLEMENT_NAMES = "vatsense|github|vatstack"
 )
 
-func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VATGateway {
+func GetDefaultVatGateway(ctx context.Context, merchantId uint64) vat2.VATGateway {
 	vatName, vatData := GetDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
 		return nil

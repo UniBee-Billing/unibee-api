@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/api/merchant/metric"
-	_interface "unibee/internal/interface"
+	_interface "unibee/internal/interface/context"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/query"
 )
