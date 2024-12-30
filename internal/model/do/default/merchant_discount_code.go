@@ -22,7 +22,6 @@ type MerchantDiscountCode struct {
 	DiscountAmount     interface{} // amount of discount, available when discount_type is fixed_amount
 	DiscountPercentage interface{} // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           interface{} // currency of discount, available when discount_type is fixed_amount
-	UserLimit          interface{} // the limit of every user apply, 0-unlimited
 	SubscriptionLimit  interface{} // the limit of every subscription apply, 0-unlimited
 	StartTime          interface{} // start of discount available utc time
 	EndTime            interface{} // end of discount available utc time, 0-invalid
@@ -35,4 +34,9 @@ type MerchantDiscountCode struct {
 	Type               interface{} // type, 1-external discount code
 	PlanIds            interface{} // Ids of plan which discount code can effect, default effect all plans if not set
 	Quantity           interface{} // quantity of code
+	Advance            interface{} // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserLimit          interface{} // AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"
+	UserScope          interface{} // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
+	UpgradeOnly        interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
+	UpgradeLongerOnly  interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 }

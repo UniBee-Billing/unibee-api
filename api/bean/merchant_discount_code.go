@@ -28,6 +28,11 @@ type MerchantDiscountCode struct {
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit"`
 	IsDeleted          int                    `json:"isDeleted"          description:"0-UnDeleted，> 0, Deleted, the deleted utc time"`
+	Advance            int                    `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set 1"`                                                   // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserLimit          int                    `json:"userLimit"          description:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited\""`                    // AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"
+	UserScope          int                    `json:"userScope"          description:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"` // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
+	UpgradeOnly        int                    `json:"upgradeOnly"        description:"AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1"`                                        // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
+	UpgradeLongerOnly  int                    `json:"upgradeLongerOnly"  description:"AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1"`                                // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 }
 
 func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCode {
@@ -76,5 +81,10 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 		Metadata:           metadata,
 		Quantity:           one.Quantity,
 		IsDeleted:          one.IsDeleted,
+		Advance:            one.Advance,
+		UserLimit:          one.UserLimit,
+		UserScope:          one.UserScope,
+		UpgradeOnly:        one.UpgradeOnly,
+		UpgradeLongerOnly:  one.UpgradeLongerOnly,
 	}
 }

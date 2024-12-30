@@ -98,49 +98,61 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 					return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
 				}
 			}
+			if discountCode.Advance == 1 {
+				if discountCode.UserScope == 1 && !req.IsNewUser {
+					return false, false, "Code only available for new user"
+				}
+				if discountCode.UserScope == 2 && req.IsNewUser {
+					return false, false, "Code only available for renewal"
+				}
+				if discountCode.UpgradeOnly == 1 && !req.IsUpgrade {
+					return false, false, "Code only available for upgrade"
+				}
+				if discountCode.UpgradeLongerOnly == 1 && !req.IsChangeToLongPlan {
+					return false, false, "Code only available for upgrade to longer plan"
+				}
+				if discountCode.UserLimit > 0 && req.UserId > 0 {
+					//check user limit
+					count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
+						Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+						Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+						Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
+						Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+						Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
+						Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+						Count()
+					if err != nil {
+						g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
+						return false, false, "Server Error"
+					}
+					if discountCode.UserLimit < count+1 {
+						return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
+					}
+				}
+				if discountCode.SubscriptionLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
+					//check user subscription limit
+					count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
+						Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+						Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+						Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
+						Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
+						Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+						Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
+						Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+						Count()
+					if err != nil {
+						g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
+						return false, false, "Server Error"
+					}
+					if discountCode.SubscriptionLimit < count+1 {
+						return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
+					}
+				}
+			}
 		}
 	}
-	if discountCode.UserLimit > 0 && req.UserId > 0 {
-		//check user limit
-		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
-			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
-			Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
-			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-			Count()
-		if err != nil {
-			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
-			return false, false, "Server Error"
-		}
-		if discountCode.UserLimit < count+1 {
-			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
-		}
-	}
-	if discountCode.SubscriptionLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
-		//check user subscription limit
-		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
-			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
-			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
-			Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
-			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-			Count()
-		if err != nil {
-			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
-			return false, false, "Server Error"
-		}
-		if discountCode.SubscriptionLimit < count+1 {
-			return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodeReachLimitation}")
-		}
-	}
+
 	if req.IsRecurringApply {
-		//if discountCode.BillingType != consts.DiscountBillingTypeRecurring {
-		//	return false, false, "Code not Recurring Type"
-		//}
 		if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && req.UserId > 0 && len(req.SubscriptionId) > 0 {
 			one := getLastNonRecurringPurchase(ctx, req)
 			if one != nil && one.Status == 2 {

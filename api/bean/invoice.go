@@ -11,6 +11,7 @@ import (
 
 type Invoice struct {
 	Id                             uint64                 `json:"id"                             description:""`
+	UserId                         uint64                 `json:"userId"                         description:"UserId"`
 	InvoiceId                      string                 `json:"invoiceId"`
 	InvoiceName                    string                 `json:"invoiceName"`
 	ProductName                    string                 `json:"productName"`
@@ -57,6 +58,7 @@ type Invoice struct {
 	CreditAccount                  *CreditAccount         `json:"creditAccount"                      description:""`
 	CreditPayout                   *CreditPayout          `json:"creditPayout"                      description:""`
 	PartialCreditPaidAmount        int64                  `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
+	PromoCreditTransaction         *CreditTransaction     `json:"promoCreditTransaction"               description:"promo credit transaction"`
 }
 
 type InvoiceItemSimplify struct {
@@ -109,6 +111,7 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 	}
 	return &Invoice{
 		Id:                             one.Id,
+		UserId:                         one.UserId,
 		InvoiceName:                    one.InvoiceName,
 		ProductName:                    one.ProductName,
 		InvoiceId:                      one.InvoiceId,

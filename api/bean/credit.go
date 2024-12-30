@@ -247,7 +247,7 @@ func SimplifyCreditTransaction(ctx context.Context, one *entity.CreditTransactio
 		Currency:            one.Currency,
 		TransactionId:       one.TransactionId,
 		TransactionType:     one.TransactionType,
-		CreditAmountAfter:   one.CreditAmountBefore,
+		CreditAmountAfter:   one.CreditAmountAfter,
 		CreditAmountBefore:  one.CreditAmountBefore,
 		DeltaAmount:         one.DeltaAmount,
 		DeltaCurrencyAmount: deltaCurrencyAmount,

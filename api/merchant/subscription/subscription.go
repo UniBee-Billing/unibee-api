@@ -327,6 +327,7 @@ type UserSubscriptionDetailRes struct {
 	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
 	Gateway                             *bean.Gateway                           `json:"gateway" dc:"Gateway"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	LatestInvoice                       *bean.Invoice                           `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }
 

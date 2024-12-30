@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"strings"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 )
@@ -95,6 +96,21 @@ func GetCreditAccountByUserId(ctx context.Context, userId uint64, creditType int
 		Where(dao.CreditAccount.Columns().UserId, userId).
 		Where(dao.CreditAccount.Columns().Type, creditType).
 		Where(dao.CreditAccount.Columns().Currency, currency).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetPromoCreditTransactionByInvoiceId(ctx context.Context, userId uint64, invoiceId string) (one *entity.CreditTransaction) {
+	if userId <= 0 || len(invoiceId) <= 0 {
+		return nil
+	}
+	err := dao.CreditTransaction.Ctx(ctx).
+		Where(dao.CreditTransaction.Columns().UserId, userId).
+		Where(dao.CreditTransaction.Columns().AccountType, consts.CreditAccountTypePromo).
+		Where(dao.CreditTransaction.Columns().InvoiceId, invoiceId).
 		Scan(&one)
 	if err != nil {
 		return nil

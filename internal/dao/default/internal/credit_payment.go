@@ -36,7 +36,7 @@ type CreditPaymentColumns struct {
 	MerchantId              string // merchant id
 	InvoiceId               string // invoice_id
 	TotalRefundAmount       string // total amount,cent
-	ExchangeRate            string //
+	ExchangeRate            string // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
 	PaidCurrencyAmount      string //
 	AccountType             string // type of credit account, 1-main recharge account, 2-promo credit account
 }

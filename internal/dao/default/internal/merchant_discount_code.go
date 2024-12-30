@@ -30,7 +30,6 @@ type MerchantDiscountCodeColumns struct {
 	DiscountAmount     string // amount of discount, available when discount_type is fixed_amount
 	DiscountPercentage string // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string // currency of discount, available when discount_type is fixed_amount
-	UserLimit          string // the limit of every user apply, 0-unlimited
 	SubscriptionLimit  string // the limit of every subscription apply, 0-unlimited
 	StartTime          string // start of discount available utc time
 	EndTime            string // end of discount available utc time, 0-invalid
@@ -43,6 +42,11 @@ type MerchantDiscountCodeColumns struct {
 	Type               string // type, 1-external discount code
 	PlanIds            string // Ids of plan which discount code can effect, default effect all plans if not set
 	Quantity           string // quantity of code
+	Advance            string // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserLimit          string // AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"
+	UserScope          string // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
+	UpgradeOnly        string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
+	UpgradeLongerOnly  string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -57,7 +61,6 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	DiscountAmount:     "discount_amount",
 	DiscountPercentage: "discount_percentage",
 	Currency:           "currency",
-	UserLimit:          "user_limit",
 	SubscriptionLimit:  "subscription_limit",
 	StartTime:          "start_time",
 	EndTime:            "end_time",
@@ -70,6 +73,11 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	Type:               "type",
 	PlanIds:            "plan_ids",
 	Quantity:           "quantity",
+	Advance:            "advance",
+	UserLimit:          "user_limit",
+	UserScope:          "user_scope",
+	UpgradeOnly:        "upgrade_only",
+	UpgradeLongerOnly:  "upgrade_longer_only",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

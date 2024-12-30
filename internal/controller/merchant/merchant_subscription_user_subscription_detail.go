@@ -38,6 +38,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 					Plan:                                detail.Plan,
 					Gateway:                             detail.Gateway,
 					Addons:                              detail.Addons,
+					LatestInvoice:                       detail.LatestInvoice,
 					UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
 				}, nil
 			}
@@ -69,6 +70,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 					Plan:                                detail.Plan,
 					Gateway:                             detail.Gateway,
 					Addons:                              detail.Addons,
+					LatestInvoice:                       detail.LatestInvoice,
 					UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
 				}, nil
 			}
@@ -81,6 +83,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		Plan:                                nil,
 		Gateway:                             nil,
 		Addons:                              nil,
+		LatestInvoice:                       nil,
 		UnfinishedSubscriptionPendingUpdate: nil,
 	}, nil
 }

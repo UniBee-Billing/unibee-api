@@ -29,13 +29,17 @@ type CreateDiscountCodeInternalReq struct {
 	DiscountAmount     int64                  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
 	DiscountPercentage int64                  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string                 `json:"Currency"          description:"Currency of discount, available when discount_type is fixed_amount"`          // Currency of discount, available when discount_type is fixed_amount
-	UserLimit          int                    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
 	CycleLimit         int                    `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
 	SubscriptionLimit  int                    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
 	StartTime          *int64                 `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
 	EndTime            *int64                 `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	AdvanceConfig      *bool                  `json:"advanceConfig"  dc:"AdvanceConfig, true or false, will disable all advance config if set false" `
+	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
+	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
+	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
+	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
@@ -45,7 +49,6 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(one == nil, "exist Code:"+req.Code)
 	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
-	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
 	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater than time now")
 	utility.Assert(req.StartTime != nil && req.EndTime != nil, "startTime and endTime should not be nil")
@@ -62,9 +65,38 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
 
+	// advanceConfig
+	userLimit := 0
+	if req.UserLimit != nil {
+		utility.Assert(*req.UserLimit >= 0, "invalid UserLimit")
+		userLimit = *req.UserLimit
+	}
+
 	var quantity int64 = 0
 	if req.Quantity != nil {
 		quantity = int64(*req.Quantity)
+	}
+	advance := 0
+	if req.AdvanceConfig != nil && *req.AdvanceConfig {
+		advance = 1
+	} else if req.AdvanceConfig != nil && !*req.AdvanceConfig {
+		advance = 0
+	}
+	userScope := 0
+	if req.UserScope != nil {
+		userScope = *req.UserScope
+	}
+	upgradeOnly := 0
+	if req.UpgradeOnly != nil && *req.UpgradeOnly {
+		upgradeOnly = 1
+	} else if req.UpgradeOnly != nil && !*req.UpgradeOnly {
+		upgradeOnly = 0
+	}
+	upgradeLongerOnly := 0
+	if req.UpgradeLongerOnly != nil && *req.UpgradeLongerOnly {
+		upgradeLongerOnly = 1
+	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
+		upgradeLongerOnly = 0
 	}
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
@@ -77,7 +109,6 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		Type:               req.Type,
 		DiscountPercentage: req.DiscountPercentage,
 		Currency:           req.Currency,
-		UserLimit:          req.UserLimit,
 		CycleLimit:         req.CycleLimit,
 		SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime:          *req.StartTime,
@@ -86,6 +117,11 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		MetaData:           utility.MarshalToJsonString(req.Metadata),
 		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
+		Advance:            advance,
+		UserLimit:          userLimit,
+		UserScope:          userScope,
+		UpgradeOnly:        upgradeOnly,
+		UpgradeLongerOnly:  upgradeLongerOnly,
 	}
 	result, err := dao.MerchantDiscountCode.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -148,7 +184,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(one.Status == consts.DiscountStatusEditable, "Code not editable :"+req.Code)
 	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
-	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
+	utility.Assert(*req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
 	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater than time now")
 	utility.Assert(req.StartTime != nil && req.EndTime != nil, "startTime and endTime should not be nil")
@@ -164,7 +200,24 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
-
+	advance := one.Advance
+	if req.AdvanceConfig != nil && *req.AdvanceConfig {
+		advance = 1
+	} else if req.AdvanceConfig != nil && !*req.AdvanceConfig {
+		advance = 0
+	}
+	upgradeOnly := one.UpgradeOnly
+	if req.UpgradeOnly != nil && *req.UpgradeOnly {
+		upgradeOnly = 1
+	} else if req.UpgradeOnly != nil && !*req.UpgradeOnly {
+		upgradeOnly = 0
+	}
+	upgradeLongerOnly := one.UpgradeLongerOnly
+	if req.UpgradeLongerOnly != nil && *req.UpgradeLongerOnly {
+		upgradeLongerOnly = 1
+	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
+		upgradeLongerOnly = 0
+	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().Name:               req.Name,
 		dao.MerchantDiscountCode.Columns().BillingType:        req.BillingType,
@@ -172,7 +225,6 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().DiscountAmount:     req.DiscountAmount,
 		dao.MerchantDiscountCode.Columns().DiscountPercentage: req.DiscountPercentage,
 		dao.MerchantDiscountCode.Columns().Currency:           req.Currency,
-		dao.MerchantDiscountCode.Columns().UserLimit:          req.UserLimit,
 		dao.MerchantDiscountCode.Columns().CycleLimit:         req.CycleLimit,
 		dao.MerchantDiscountCode.Columns().SubscriptionLimit:  req.SubscriptionLimit,
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
@@ -181,6 +233,11 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
 		dao.MerchantDiscountCode.Columns().MetaData:           utility.MarshalToJsonString(req.Metadata),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),
+		dao.MerchantDiscountCode.Columns().Advance:            advance,
+		dao.MerchantDiscountCode.Columns().UserLimit:          req.UserLimit,
+		dao.MerchantDiscountCode.Columns().UserScope:          req.UserScope,
+		dao.MerchantDiscountCode.Columns().UpgradeOnly:        upgradeOnly,
+		dao.MerchantDiscountCode.Columns().UpgradeLongerOnly:  upgradeLongerOnly,
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		err = gerror.Newf(`EditMerchantDiscountCode update failure %s`, err)

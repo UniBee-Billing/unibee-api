@@ -75,6 +75,7 @@ type InvoiceDetail struct {
 	AutoCharge                     bool                        `json:"autoCharge"                      description:""`
 	OriginalPaymentInvoice         *bean.Invoice               `json:"originalPaymentInvoice"                      description:""`
 	PromoCreditDiscountAmount      int64                       `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`
+	PromoCreditTransaction         *bean.CreditTransaction     `json:"promoCreditTransaction"               description:"promo credit transaction"`
 	PartialCreditPaidAmount        int64                       `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
 }
 
@@ -172,6 +173,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		AutoCharge:                     autoCharge,
 		OriginalPaymentInvoice:         originalPaymentInvoice,
 		PromoCreditDiscountAmount:      invoice.PromoCreditDiscountAmount,
+		PromoCreditTransaction:         bean.SimplifyCreditTransaction(ctx, query.GetPromoCreditTransactionByInvoiceId(ctx, invoice.UserId, invoice.InvoiceId)),
 		PartialCreditPaidAmount:        invoice.PartialCreditPaidAmount,
 	}
 }

@@ -28,7 +28,7 @@ type CreditPayment struct {
 	MerchantId              interface{} // merchant id
 	InvoiceId               interface{} // invoice_id
 	TotalRefundAmount       interface{} // total amount,cent
-	ExchangeRate            interface{} //
+	ExchangeRate            interface{} // keep two decimal places，multiply by 100 saved, 1 currency = 1 credit * (exchange_rate/100), main account fixed rate to 100
 	PaidCurrencyAmount      interface{} //
 	AccountType             interface{} // type of credit account, 1-main recharge account, 2-promo credit account
 }

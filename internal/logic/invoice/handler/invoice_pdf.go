@@ -232,12 +232,10 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 		doc.SetIsRefund(true)
 		for i, line := range one.Lines {
 
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
-			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
-			//if localized {
-			//	amountString = fmt.Sprintf("%s | %s%s", amountString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Amount)*localizedExchangeRate), localizedCurrencyStr))
-			//	taxString = fmt.Sprintf("%s | %s%s", taxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(line.Tax)*localizedExchangeRate), localizedCurrencyStr))
-			//}
+			//amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)) // remove tax
+			//taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
+			taxString := ""
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
@@ -261,8 +259,10 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
 		for i, line := range one.Lines {
-			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
-			taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
+			//amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)) // remove tax
+			//taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
+			taxString := ""
 			description := line.Description
 			if len(line.PdfDescription) > 0 {
 				description = line.PdfDescription
