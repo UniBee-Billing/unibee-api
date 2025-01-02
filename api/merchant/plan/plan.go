@@ -7,7 +7,7 @@ import (
 )
 
 type NewReq struct {
-	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"CreatePlan"`
+	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"Create Plan"`
 	ExternalPlanId     string                                  `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
@@ -36,7 +36,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
+	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"Edit Plan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
 	PlanId             uint64                                  `json:"planId" dc:"Id of plan" v:"required"`
 	ExternalPlanId     *string                                 `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName           *string                                 `json:"planName" dc:"Name of plan" `
@@ -65,7 +65,7 @@ type EditRes struct {
 }
 
 type AddonsBindingReq struct {
-	g.Meta          `path:"/addons_binding" tags:"Plan" method:"post" summary:"AddonBinding"`
+	g.Meta          `path:"/addons_binding" tags:"Plan" method:"post" summary:"Addon Binding"`
 	PlanId          uint64  `json:"planId" dc:"PlanID" v:"required"`
 	Action          int64   `json:"action" dc:"Action Type，0-override,1-add，2-delete" v:"required"`
 	AddonIds        []int64 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type"  v:"required" `
@@ -76,7 +76,7 @@ type AddonsBindingRes struct {
 }
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"PlanList"`
+	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"Get Plan List"`
 	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
 	Type          []int   `json:"type"  dc:"1-main plan，2-addon plan" `
 	Status        []int   `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
@@ -94,7 +94,7 @@ type ListRes struct {
 }
 
 type CopyReq struct {
-	g.Meta `path:"/copy" tags:"Plan" method:"post" summary:"CopyPlan"`
+	g.Meta `path:"/copy" tags:"Plan" method:"post" summary:"Copy Plan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type CopyRes struct {
@@ -102,28 +102,28 @@ type CopyRes struct {
 }
 
 type ActivateReq struct {
-	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"ActivatePlan"`
+	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"Activate Plan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type ActivateRes struct {
 }
 
 type PublishReq struct {
-	g.Meta `path:"/publish" tags:"Plan" method:"post" summary:"PublishPlan" dc:"Publish plan，a plan will display at user portal when its published"`
+	g.Meta `path:"/publish" tags:"Plan" method:"post" summary:"Publish Plan" dc:"Publish plan，a plan will display at user portal when its published"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type PublishRes struct {
 }
 
 type UnPublishReq struct {
-	g.Meta `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublishPlan" `
+	g.Meta `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublish Plan" `
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type UnPublishRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"PlanDetail"`
+	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"Plan Detail"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {
@@ -131,7 +131,7 @@ type DetailRes struct {
 }
 
 type ExpireReq struct {
-	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"ExpirePlan"`
+	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"Expire Plan"`
 	PlanId    uint64 `json:"planId" dc:"PlanId" v:"required"`
 	EmailCode int64  `json:"emailCode" dc:"Code From Email" v:"required"`
 }
@@ -139,7 +139,7 @@ type ExpireRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"Plan" method:"post" summary:"DeletePlan"`
+	g.Meta `path:"/delete" tags:"Plan" method:"post" summary:"Delete Plan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DeleteRes struct {

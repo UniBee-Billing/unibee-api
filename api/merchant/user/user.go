@@ -7,7 +7,7 @@ import (
 )
 
 type NewReq struct {
-	g.Meta         `path:"/new" tags:"User" method:"post" summary:"NewUser" dc:"User Creation If Not Exist "`
+	g.Meta         `path:"/new" tags:"User" method:"post" summary:"New User" dc:"User Creation If Not Exist "`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
 	Email          string `json:"email" dc:"Email" v:"required"`
 	FirstName      string `json:"firstName" dc:"First Name"`
@@ -23,7 +23,7 @@ type NewRes struct {
 }
 
 type ListReq struct {
-	g.Meta          `path:"/list" tags:"User" method:"get,post" summary:"UserList"`
+	g.Meta          `path:"/list" tags:"User" method:"get,post" summary:"User List"`
 	UserId          int64  `json:"userId" dc:"Filter UserId" `
 	FirstName       string `json:"firstName" dc:"Search FirstName" `
 	LastName        string `json:"lastName" dc:"Search LastName" `
@@ -47,7 +47,7 @@ type ListRes struct {
 }
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"User" method:"get" summary:"GetUserProfile"`
+	g.Meta `path:"/get" tags:"User" method:"get" summary:"Get User Profile"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -56,7 +56,7 @@ type GetRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta `path:"/suspend_user" tags:"User" method:"post" summary:"SuspendUser"`
+	g.Meta `path:"/suspend_user" tags:"User" method:"post" summary:"Suspend User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -64,7 +64,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta `path:"/resume_user" tags:"User" method:"post" summary:"ResumeUser"`
+	g.Meta `path:"/resume_user" tags:"User" method:"post" summary:"Resume User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -72,7 +72,7 @@ type ReleaseRes struct {
 }
 
 type SearchReq struct {
-	g.Meta    `path:"/search" tags:"User" method:"get,post" summary:"UserSearch"`
+	g.Meta    `path:"/search" tags:"User" method:"get,post" summary:"User Search"`
 	SearchKey string `json:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
@@ -81,7 +81,7 @@ type SearchRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta             `path:"/update" tags:"User" method:"post" summary:"UpdateUserProfile"`
+	g.Meta             `path:"/update" tags:"User" method:"post" summary:"Update User Profile"`
 	UserId             *uint64                 `json:"userId" dc:"The id of user, either Email or UserId needed"`
 	Email              *string                 `json:"email" dc:"The email of user, either Email or UserId needed"`
 	FirstName          *string                 `json:"firstName" dc:"First name"`
@@ -115,7 +115,7 @@ type UpdateRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta          `path:"/change_gateway" tags:"User" method:"post" summary:"ChangeUserDefaultGateway" `
+	g.Meta          `path:"/change_gateway" tags:"User" method:"post" summary:"Change User Default Gateway" `
 	UserId          uint64 `json:"userId" dc:"User Id" v:"required"`
 	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
 	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
@@ -124,7 +124,7 @@ type ChangeGatewayRes struct {
 }
 
 type ChangeEmailReq struct {
-	g.Meta         `path:"/change_email" tags:"User" method:"post" summary:"ChangeUserEmail"`
+	g.Meta         `path:"/change_email" tags:"User" method:"post" summary:"Change User Email"`
 	UserId         uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" `
 	ExternalUserId string `json:"externalUserId" dc:"The externalUserId of user, either ExternalUserId or UserId needed"`
 	NewEmail       string `json:"newEmail" dc:"Target Email want to change" v:"required"`
@@ -134,7 +134,7 @@ type ChangeEmailRes struct {
 }
 
 type ClearAutoChargeMethodReq struct {
-	g.Meta `path:"/clear_auto_charge_method" tags:"User" method:"post" summary:"ClearAutoChargeMethod"`
+	g.Meta `path:"/clear_auto_charge_method" tags:"User" method:"post" summary:"Clear AutoCharge Method"`
 	UserId uint64 `json:"userId" dc:"The id of user" v:"required"`
 }
 
@@ -142,7 +142,7 @@ type ClearAutoChargeMethodRes struct {
 }
 
 type NewAdminNoteReq struct {
-	g.Meta `path:"/new_admin_note" tags:"User" method:"post" summary:"NewAdminNote"`
+	g.Meta `path:"/new_admin_note" tags:"User" method:"post" summary:"New Admin Note"`
 	UserId uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" v:"required"`
 	Note   string `json:"note" dc:"Note" v:"required"`
 }
@@ -151,7 +151,7 @@ type NewAdminNoteRes struct {
 }
 
 type AdminNoteListReq struct {
-	g.Meta `path:"/admin_note_list" tags:"User" method:"get,post" summary:"UserAdminNoteList"`
+	g.Meta `path:"/admin_note_list" tags:"User" method:"get,post" summary:"Get User Admin Note List"`
 	UserId uint64 `json:"userId" dc:"The id of user, either ExternalUserId or UserId needed" v:"required"`
 	Page   int    `json:"page"  dc:"Page, Start With 0" `
 	Count  int    `json:"count" dc:"Count Of Page" `

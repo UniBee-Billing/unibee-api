@@ -6,7 +6,7 @@ import (
 )
 
 type EventListReq struct {
-	g.Meta `path:"/event_list" tags:"Webhook" method:"get" summary:"WebhookEventList"`
+	g.Meta `path:"/event_list" tags:"Webhook" method:"get" summary:"Webhook Event List"`
 }
 
 type EventListRes struct {
@@ -14,7 +14,7 @@ type EventListRes struct {
 }
 
 type EndpointListReq struct {
-	g.Meta `path:"/endpoint_list" tags:"Webhook" method:"get" summary:"WebhookEndpointlist"`
+	g.Meta `path:"/endpoint_list" tags:"Webhook" method:"get" summary:"Get Webhook Endpoint list"`
 }
 
 type EndpointListRes struct {
@@ -22,7 +22,7 @@ type EndpointListRes struct {
 }
 
 type EndpointLogListReq struct {
-	g.Meta     `path:"/endpoint_log_list" tags:"Webhook" method:"get" summary:"WebhookEndpointLogList"`
+	g.Meta     `path:"/endpoint_log_list" tags:"Webhook" method:"get" summary:"Get Webhook Endpoint Log List"`
 	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
 	Page       int    `json:"page" dc:"Page, Start With 0" `
 	Count      int    `json:"count" dc:"Count Of Page" `
@@ -34,7 +34,7 @@ type EndpointLogListRes struct {
 }
 
 type ResendWebhookReq struct {
-	g.Meta `path:"/resend" tags:"Webhook" method:"post" summary:"ResentWebhook"`
+	g.Meta `path:"/resend" tags:"Webhook" method:"post" summary:"Resent Webhook"`
 	LogId  uint64 `json:"logId" dc:"LogId" v:"required"`
 }
 
@@ -43,7 +43,7 @@ type ResendWebhookRes struct {
 }
 
 type NewEndpointReq struct {
-	g.Meta `path:"/new_endpoint" tags:"Webhook" method:"post" summary:"NewWebhookEndpoint"`
+	g.Meta `path:"/new_endpoint" tags:"Webhook" method:"post" summary:"New Webhook Endpoint"`
 	Url    string   `json:"url" dc:"Url" v:"required"`
 	Events []string `json:"events" dc:"Events"`
 }
@@ -52,7 +52,7 @@ type NewEndpointRes struct {
 }
 
 type UpdateEndpointReq struct {
-	g.Meta     `path:"/update_endpoint" tags:"Webhook" method:"post" summary:"UpdateWebhookEndpoint"`
+	g.Meta     `path:"/update_endpoint" tags:"Webhook" method:"post" summary:"Update Webhook Endpoint"`
 	EndpointId uint64   `json:"endpointId" dc:"EndpointId" v:"required"`
 	Url        string   `json:"url" dc:"Url To Update" v:"required"`
 	Events     []string `json:"events" dc:"Events To Update"`
@@ -62,7 +62,7 @@ type UpdateEndpointRes struct {
 }
 
 type DeleteEndpointReq struct {
-	g.Meta     `path:"/delete_endpoint" tags:"Webhook" method:"post" summary:"DeleteWebhookEndpoint"`
+	g.Meta     `path:"/delete_endpoint" tags:"Webhook" method:"post" summary:"Delete Webhook Endpoint"`
 	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
 }
 

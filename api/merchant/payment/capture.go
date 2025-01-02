@@ -5,7 +5,7 @@ import (
 )
 
 type CaptureReq struct {
-	g.Meta            `path:"/capture" tags:"Payment" method:"post" summary:"CapturePayment"`
+	g.Meta            `path:"/capture" tags:"Payment" method:"post" summary:"Capture Payment"`
 	PaymentId         string `json:"paymentId" dc:"The unique id of payment" v:"required"`
 	ExternalCaptureId string `json:"externalCaptureId" dc:"The external id of payment capture" v:"required"`
 }

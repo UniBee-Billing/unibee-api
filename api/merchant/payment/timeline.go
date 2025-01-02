@@ -6,7 +6,7 @@ import (
 )
 
 type TimeLineListReq struct {
-	g.Meta          `path:"/timeline/list" tags:"Payment" method:"get" summary:"PaymentTimeLineList"`
+	g.Meta          `path:"/timeline/list" tags:"Payment" method:"get" summary:"Get Payment TimeLine List"`
 	UserId          uint64   `json:"userId" dc:"Filter UserId, Default All" `
 	AmountStart     *int64   `json:"amountStart" dc:"The filter start amount of timeline" `
 	AmountEnd       *int64   `json:"amountEnd" dc:"The filter end amount of timeline" `

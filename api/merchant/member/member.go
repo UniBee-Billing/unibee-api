@@ -6,7 +6,7 @@ import (
 )
 
 type ProfileReq struct {
-	g.Meta `path:"/profile" tags:"Member" method:"get" summary:"GetMemberProfile"`
+	g.Meta `path:"/profile" tags:"Admin Member" method:"get" summary:"Get Member Profile"`
 }
 
 type ProfileRes struct {
@@ -14,14 +14,14 @@ type ProfileRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/logout" tags:"Member" method:"post" summary:"MemberLogout"`
+	g.Meta `path:"/logout" tags:"Admin Member" method:"post" summary:"Logout"`
 }
 
 type LogoutRes struct {
 }
 
 type PasswordResetReq struct {
-	g.Meta      `path:"/passwordReset" tags:"Member" method:"post" summary:"MemberResetPassword"`
+	g.Meta      `path:"/passwordReset" tags:"Admin Member" method:"post" summary:"Member Reset Password"`
 	OldPassword string `json:"oldPassword" dc:"The old password of member" v:"required"`
 	NewPassword string `json:"newPassword" dc:"The new password of member" v:"required"`
 }
@@ -30,7 +30,7 @@ type PasswordResetRes struct {
 }
 
 type ListReq struct {
-	g.Meta  `path:"/list" tags:"Member" method:"get,post" summary:"GetMemberList"`
+	g.Meta  `path:"/list" tags:"Admin Member" method:"get,post" summary:"Get Member List"`
 	RoleIds []uint64 `json:"roleIds" description:"The member roleId if specified'"`
 	Page    int      `json:"page"  description:"Page, Start With 0" `
 	Count   int      `json:"count"  description:"Count Of Page"`
@@ -42,7 +42,7 @@ type ListRes struct {
 }
 
 type UpdateMemberRoleReq struct {
-	g.Meta   `path:"/update_member_role" tags:"Member" method:"post" summary:"UpdateMemberRole"`
+	g.Meta   `path:"/update_member_role" tags:"Admin Member" method:"post" summary:"Update Member Role"`
 	MemberId uint64   `json:"memberId"         description:"The unique id of member"`
 	RoleIds  []uint64 `json:"roleIds"         description:"The id list of role"`
 }
@@ -51,7 +51,7 @@ type UpdateMemberRoleRes struct {
 }
 
 type NewMemberReq struct {
-	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"Invite member" description:"Will send email to member email provided, member can enter admin portal by email otp login"`
+	g.Meta    `path:"/new_member" tags:"Admin Member" method:"post" summary:"Invite member" description:"Will send email to member email provided, member can enter admin portal by email otp login"`
 	Email     string   `json:"email"  v:"required"   description:"The email of member" `
 	RoleIds   []uint64 `json:"roleIds"    v:"required"     description:"The id list of role" `
 	FirstName string   `json:"firstName"     description:"The firstName of member"`
@@ -62,7 +62,7 @@ type NewMemberRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta   `path:"/suspend_member" tags:"Member" method:"post" summary:"SuspendMember"`
+	g.Meta   `path:"/suspend_member" tags:"Admin Member" method:"post" summary:"Suspend Member"`
 	MemberId uint64 `json:"memberId"         description:"The unique id of member"`
 }
 
@@ -70,7 +70,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta   `path:"/resume_member" tags:"Member" method:"post" summary:"ResumeMember"`
+	g.Meta   `path:"/resume_member" tags:"Admin Member" method:"post" summary:"Resume Member"`
 	MemberId uint64 `json:"memberId"         description:"The unique id of member"`
 }
 
@@ -78,7 +78,7 @@ type ReleaseRes struct {
 }
 
 type OperationLogListReq struct {
-	g.Meta          `path:"/operation_log_list" tags:"Member" method:"get" summary:"GetMemberOperationLogList"`
+	g.Meta          `path:"/operation_log_list" tags:"Admin Member" method:"get" summary:"Get Member Operation Log List"`
 	MemberFirstName string `json:"memberFirstName" description:"Filter Member's FirstName Default All" `
 	MemberLastName  string `json:"memberLastName" description:"Filter Member's LastName, Default All" `
 	MemberEmail     string `json:"memberEmail" description:"Filter Member's Email, Default All" `

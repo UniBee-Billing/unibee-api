@@ -43,6 +43,29 @@ func (transactionType TransactionTypeEnum) Description() string {
 	}
 }
 
+func (transactionType TransactionTypeEnum) ExportDescription(amount int64) string {
+	switch transactionType {
+	case CreditTransactionRechargeIncome:
+		return "RechargeIncome"
+	case CreditTransactionPayout:
+		return "Applied to an invoice"
+	case CreditTransactionRefundIncome:
+		return "From refund"
+	case CreditTransactionWithdrawOut:
+		return "WithdrawOut"
+	case CreditTransactionWithdrawFailedIncome:
+		return "WithdrawFailedIncome"
+	case CreditTransactionRechargeRefundOut:
+		return "RechargeRefundOut"
+	default:
+		if amount > 0 {
+			return "Added by admin"
+		} else {
+			return "Reduced by admin"
+		}
+	}
+}
+
 func CreditTransactionTypeToEnum(transactionType int) TransactionTypeEnum {
 	switch transactionType {
 	case CreditTransactionRechargeIncome:

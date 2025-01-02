@@ -6,7 +6,7 @@ import (
 )
 
 type NewPaymentRefundReq struct {
-	g.Meta           `path:"/refund/new" tags:"Payment" method:"post" summary:"NewPaymentRefund"`
+	g.Meta           `path:"/refund/new" tags:"Payment" method:"post" summary:"New Payment Refund"`
 	PaymentId        string                 `json:"paymentId" dc:"PaymentId" v:"required"`
 	ExternalRefundId string                 `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
 	RefundAmount     int64                  `json:"refundAmount" dc:"RefundAmount, Cent" v:"required"`
@@ -23,7 +23,7 @@ type NewPaymentRefundRes struct {
 }
 
 type RefundDetailReq struct {
-	g.Meta   `path:"/refund/detail" tags:"Payment" method:"get" summary:"PaymentRefundDetail"`
+	g.Meta   `path:"/refund/detail" tags:"Payment" method:"get" summary:"Payment Refund Detail"`
 	RefundId string `json:"refundId" dc:"RefundId"`
 }
 
@@ -32,7 +32,7 @@ type RefundDetailRes struct {
 }
 
 type RefundListReq struct {
-	g.Meta    `path:"/refund/list" tags:"Payment" method:"get" summary:"PaymentRefundList"`
+	g.Meta    `path:"/refund/list" tags:"Payment" method:"get" summary:"Get Payment Refund List"`
 	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 	Status    int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`
 	GatewayId uint64 `json:"gatewayId" dc:"GatewayId"`

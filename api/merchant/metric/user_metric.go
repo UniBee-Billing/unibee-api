@@ -6,7 +6,7 @@ import (
 )
 
 type UserMetricReq struct {
-	g.Meta         `path:"/user/metric" tags:"User-Metric" method:"get" summary:"Query User Metric"`
+	g.Meta         `path:"/user/metric" tags:"User Metric" method:"get" summary:"Query User Metric"`
 	UserId         int64  `json:"userId" dc:"UserId, One Of UserId|ExternalUserId Needed"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, One Of UserId|ExternalUserId Needed"`
 	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`

@@ -44,12 +44,6 @@ func NewVat() merchant.IMerchantVat {
 	return &ControllerVat{}
 }
 
-type ControllerBalance struct{}
-
-func NewBalance() merchant.IMerchantBalance {
-	return &ControllerBalance{}
-}
-
 type ControllerMember struct{}
 
 func NewMember() merchant.IMerchantMember {

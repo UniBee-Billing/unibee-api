@@ -92,7 +92,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().PlanId:                 one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:               one.UpdateQuantity,
 		dao.Subscription.Columns().AddonData:              one.UpdateAddonData,
-		dao.Subscription.Columns().Amount:                 one.UpdateAmount,
+		dao.Subscription.Columns().Amount:                 invoice.TotalAmount,
 		dao.Subscription.Columns().Currency:               one.UpdateCurrency,
 		dao.Subscription.Columns().GatewayId:              invoice.GatewayId,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),

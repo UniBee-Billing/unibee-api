@@ -7,7 +7,7 @@ import (
 )
 
 type NewReq struct {
-	g.Meta            `path:"/new" tags:"Payment" method:"post" summary:"NewPayment"`
+	g.Meta            `path:"/new" tags:"Payment" method:"post" summary:"New Payment"`
 	ExternalPaymentId string                 `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
 	ExternalUserId    string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 	Email             string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
@@ -48,7 +48,7 @@ type Item struct {
 }
 
 type DetailReq struct {
-	g.Meta    `path:"/detail" tags:"Payment" method:"get" summary:"PaymentDetail"`
+	g.Meta    `path:"/detail" tags:"Payment" method:"get" summary:"Payment Detail"`
 	PaymentId string `json:"paymentId" dc:"The unique id of payment" v:"required"`
 }
 type DetailRes struct {
@@ -56,7 +56,7 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta      `path:"/list" tags:"Payment" method:"get" summary:"PaymentList"`
+	g.Meta      `path:"/list" tags:"Payment" method:"get" summary:"Get Payment List"`
 	GatewayId   uint64 `json:"gatewayId"   dc:"The filter unique id of gateway"`
 	UserId      uint64 `json:"userId" dc:"The filter userid of payment" `
 	Email       string `json:"email" dc:"The filter email of payment"`

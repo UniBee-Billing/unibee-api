@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Metric" method:"get" summary:"Merchant Metric list"`
+	g.Meta `path:"/list" tags:"Metric" method:"get" summary:"Get Merchant Metric list"`
 }
 
 type ListRes struct {

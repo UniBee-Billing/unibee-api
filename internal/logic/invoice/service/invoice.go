@@ -490,13 +490,13 @@ func MarkInvoiceRefundSuccess(ctx context.Context, merchantId uint64, invoiceId 
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.MerchantId == merchantId, "wrong merchant")
-	gateway := query.GetGatewayById(ctx, one.GatewayId)
-	utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
+	//gateway := query.GetGatewayById(ctx, one.GatewayId)
+	//utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
 	utility.Assert(len(one.RefundId) > 0, "invoiceId not refund invoice")
 	refund := query.GetRefundByRefundId(ctx, one.RefundId)
 	utility.Assert(refund != nil, "refund not found")
-	gateway = query.GetGatewayById(ctx, refund.GatewayId)
-	utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
+	//gateway = query.GetGatewayById(ctx, refund.GatewayId)
+	//utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
 
 	err := handler2.HandleRefundSuccess(ctx, &handler2.HandleRefundReq{
 		RefundId:         one.RefundId,

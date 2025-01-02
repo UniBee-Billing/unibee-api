@@ -22,11 +22,16 @@ func (c *ControllerDiscount) New(ctx context.Context, req *discount.NewReq) (res
 		Currency:           req.Currency,
 		CycleLimit:         req.CycleLimit,
 		//SubscriptionLimit:  req.SubscriptionLimit,
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		PlanIds:   req.PlanIds,
-		Metadata:  req.Metadata,
-		Quantity:  req.Quantity,
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
+		PlanIds:           req.PlanIds,
+		Metadata:          req.Metadata,
+		Quantity:          req.Quantity,
+		AdvanceConfig:     req.AdvanceConfig,
+		UserLimit:         req.UserLimit,
+		UserScope:         req.UserScope,
+		UpgradeLongerOnly: req.UpgradeLongerOnly,
+		UpgradeOnly:       req.UpgradeOnly,
 	})
 	if err != nil {
 		return nil, err

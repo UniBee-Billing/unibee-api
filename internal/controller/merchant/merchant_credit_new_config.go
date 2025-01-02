@@ -66,5 +66,5 @@ func (c *ControllerCredit) NewConfig(ctx context.Context, req *credit.NewConfigR
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	return &credit.NewConfigRes{CreditConfig: bean.SimplifyCreditConfig(one)}, nil
+	return &credit.NewConfigRes{CreditConfig: bean.SimplifyCreditConfig(ctx, one)}, nil
 }

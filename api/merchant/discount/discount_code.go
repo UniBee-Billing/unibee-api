@@ -7,7 +7,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta          `path:"/list" tags:"Discount" method:"get" summary:"DiscountCodeList" dc:"Get discountCode list"`
+	g.Meta          `path:"/list" tags:"Discount" method:"get" summary:"Get Discount Code List" dc:"Get discountCode list"`
 	DiscountType    []int  `json:"discountType"  dc:"discount_type, 1-percentage, 2-fixed_amount" `
 	BillingType     []int  `json:"billingType"  dc:"billing_type, 1-one-time, 2-recurring" `
 	Status          []int  `json:"status" dc:"status, 1-editable, 2-active, 3-deactive, 4-expire, 10-archive" `
@@ -28,7 +28,7 @@ type ListRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Discount" method:"get,post" summary:"Merchant Discount Detail"`
+	g.Meta `path:"/detail" tags:"Discount" method:"get,post" summary:"Get Merchant Discount Detail"`
 	Id     uint64 `json:"id"                 dc:"The discount's Id" v:"required"`
 }
 
@@ -37,7 +37,7 @@ type DetailRes struct {
 }
 
 type NewReq struct {
-	g.Meta             `path:"/new" tags:"Discount" method:"post" summary:"NewDiscountCode" dc:"Create a new discount code, code can used in onetime or subscription purchase to make discount"`
+	g.Meta             `path:"/new" tags:"Discount" method:"post" summary:"New Discount Code" dc:"Create a new discount code, code can used in onetime or subscription purchase to make discount"`
 	Code               string                 `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
 	Name               string                 `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                                    // name
 	BillingType        int                    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"  v:"required"` // billing_type, 1-one-time, 2-recurring
@@ -63,7 +63,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta             `path:"/edit" tags:"Discount" method:"post" summary:"EditDiscountCode" dc:"Edit the discount code before activate"`
+	g.Meta             `path:"/edit" tags:"Discount" method:"post" summary:"Edit Discount Code" dc:"Edit the discount code before activate"`
 	Id                 uint64                 `json:"id"                 dc:"The discount's Id" v:"required"`
 	Name               string                 `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                      // name
 	BillingType        int                    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"` // billing_type, 1-one-time, 2-recurring
@@ -89,7 +89,7 @@ type EditRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"Discount" method:"post" summary:"DeleteDiscountCode" dc:"Delete discount code before activate"`
+	g.Meta `path:"/delete" tags:"Discount" method:"post" summary:"Delete Discount Code" dc:"Delete discount code before activate"`
 	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
@@ -97,7 +97,7 @@ type DeleteRes struct {
 }
 
 type ActivateReq struct {
-	g.Meta `path:"/activate" tags:"Discount" method:"post" summary:"ActivateDiscountCode" dc:"Activate discount code, the discount code can only effect to payment or subscription after activated"`
+	g.Meta `path:"/activate" tags:"Discount" method:"post" summary:"Activate Discount Code" dc:"Activate discount code, the discount code can only effect to payment or subscription after activated"`
 	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
@@ -105,7 +105,7 @@ type ActivateRes struct {
 }
 
 type DeactivateReq struct {
-	g.Meta `path:"/deactivate" tags:"Discount" method:"post" summary:"DeactivateDiscountCode" dc:"Deactivate discount code"`
+	g.Meta `path:"/deactivate" tags:"Discount" method:"post" summary:"Deactivate Discount Code" dc:"Deactivate discount code"`
 	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
@@ -113,7 +113,7 @@ type DeactivateRes struct {
 }
 
 type UserDiscountListReq struct {
-	g.Meta          `path:"/user_discount_list" tags:"Discount" method:"get" summary:"UserDiscountCodeList" dc:"Get user discountCode list"`
+	g.Meta          `path:"/user_discount_list" tags:"User Discount" method:"get" summary:"Get User Discount Code List" dc:"Get user discountCode list"`
 	Id              uint64   `json:"id"                 description:"The discount's Id" v:"required"`
 	UserIds         []uint64 `json:"userIds" dc:"Filter UserIds Default All" `
 	Email           string   `json:"email" dc:"Filter Email Default All" `
@@ -132,7 +132,7 @@ type UserDiscountListRes struct {
 }
 
 type PlanApplyPreviewReq struct {
-	g.Meta             `path:"/plan_apply_preview" tags:"Discount" method:"post" summary:"PlanApplyPreview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
+	g.Meta             `path:"/plan_apply_preview" tags:"User Discount" method:"post" summary:"Plan Apply Preview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
 	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
 	PlanId             int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
 	ExternalPlanId     string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
@@ -149,7 +149,7 @@ type PlanApplyPreviewRes struct {
 }
 
 type QuantityIncrementReq struct {
-	g.Meta `path:"/quantity_increment" tags:"Discount" method:"post" summary:"QuantityIncrement" dc:"Increase discount code quantity, if original quantity is 0, increase greater than 0 will enable quantity control"`
+	g.Meta `path:"/quantity_increment" tags:"Discount" method:"post" summary:"Quantity Increment" dc:"Increase discount code quantity, if original quantity is 0, increase greater than 0 will enable quantity control"`
 	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 	Amount uint64 `json:"amount" dc:"The discount quantity amount to increase, should greater than 0" `
 }
@@ -159,7 +159,7 @@ type QuantityIncrementRes struct {
 }
 
 type QuantityDecrementReq struct {
-	g.Meta `path:"/decrease_quantity" tags:"Discount" method:"post" summary:"QuantityDecrement" dc:"Decrease discount code quantity, the quantity after decreased should greater than 0, the action may disable quantity control if quantity decrease to 0 or lower than quantityUsed after decreased"`
+	g.Meta `path:"/decrease_quantity" tags:"Discount" method:"post" summary:"Quantity Decrement" dc:"Decrease discount code quantity, the quantity after decreased should greater than 0, the action may disable quantity control if quantity decrease to 0 or lower than quantityUsed after decreased"`
 	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 	Amount uint64 `json:"amount" dc:"The discount quantity Amount to decrease, should greater than 0" `
 }

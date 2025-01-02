@@ -184,7 +184,9 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(one.Status == consts.DiscountStatusEditable, "Code not editable :"+req.Code)
 	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
-	utility.Assert(*req.UserLimit >= 0, "invalid UserLimit")
+	if req.UserLimit != nil {
+		utility.Assert(*req.UserLimit >= 0, "invalid UserLimit")
+	}
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
 	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater than time now")
 	utility.Assert(req.StartTime != nil && req.EndTime != nil, "startTime and endTime should not be nil")

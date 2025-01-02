@@ -7,6 +7,7 @@ import (
 	"github.com/stripe/stripe-go/v78/checkout/session"
 	"github.com/stripe/stripe-go/v78/customer"
 	"github.com/stripe/stripe-go/v78/paymentmethod"
+	"github.com/stripe/stripe-go/v78/refund"
 	"strings"
 	"unibee/utility"
 
@@ -20,7 +21,7 @@ func init() {
 
 }
 
-func setUnibeeAppInfo() {
+func setUniBeeAppInfo() {
 	stripe.SetAppInfo(&stripe.AppInfo{
 		Name:    "unibee.server",
 		Version: "0.0.1",
@@ -34,7 +35,7 @@ func TestCheckout(t *testing.T) {
 		gateway := query.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
-		setUnibeeAppInfo()
+		setUniBeeAppInfo()
 		{
 			var items []*stripe.CheckoutSessionLineItemParams
 			items = append(items, &stripe.CheckoutSessionLineItemParams{
@@ -81,7 +82,7 @@ func TestStripe(t *testing.T) {
 		gateway := query.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
-		setUnibeeAppInfo()
+		setUniBeeAppInfo()
 		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, 2235427988)
 
 		{
@@ -110,7 +111,7 @@ func TestStripe(t *testing.T) {
 		gateway := query.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
-		setUnibeeAppInfo()
+		setUniBeeAppInfo()
 		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, 2235427988)
 		{
 			params := &stripe.PaymentMethodListParams{
@@ -139,5 +140,16 @@ func TestStripe(t *testing.T) {
 			}
 			fmt.Println(utility.MarshalToJsonString(result))
 		}
+	})
+}
+
+func TestStripeQueryAllRefunds(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		stripe.Key = ""
+		setUniBeeAppInfo()
+		response := refund.List(&stripe.RefundListParams{
+			PaymentIntent: stripe.String("pi_3QWhDnDaLWZKMs9N2ecEfXU8"),
+		})
+		fmt.Println(utility.MarshalToJsonString(response))
 	})
 }

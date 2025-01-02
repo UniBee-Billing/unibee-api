@@ -6,14 +6,14 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Gateway" method:"get" summary:"PaymentGatewayList"`
+	g.Meta `path:"/list" tags:"Gateway" method:"get" summary:"Get Payment Gateway List"`
 }
 type ListRes struct {
 	Gateways []*bean.Gateway `json:"gateways" dc:"Payment Gateway Object List"`
 }
 
 type SetupReq struct {
-	g.Meta        `path:"/setup" tags:"Gateway" method:"post" summary:"PaymentGatewaySetup" dc:"Setup the payment gateway"`
+	g.Meta        `path:"/setup" tags:"Gateway" method:"post" summary:"Payment Gateway Setup" dc:"Setup the payment gateway"`
 	GatewayName   string `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly" v:"required"`
 	GatewayKey    string `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
@@ -23,7 +23,7 @@ type SetupRes struct {
 }
 
 type EditReq struct {
-	g.Meta        `path:"/edit" tags:"Gateway" method:"post" summary:"PaymentGatewayEdit" dc:"edit the exist payment gateway"`
+	g.Meta        `path:"/edit" tags:"Gateway" method:"post" summary:"Payment Gateway Edit" dc:"edit the exist payment gateway"`
 	GatewayId     uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	GatewayKey    string `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
@@ -33,7 +33,7 @@ type EditRes struct {
 }
 
 type EditCountryConfigReq struct {
-	g.Meta        `path:"/edit_country_config" tags:"Gateway" method:"post" summary:"PaymentGatewayCountryConfigEdit" dc:"Edit country config for payment gateway, to enable or disable the payment for countryCode, default is enable"`
+	g.Meta        `path:"/edit_country_config" tags:"Gateway" method:"post" summary:"Payment Gateway Country Config Edit" dc:"Edit country config for payment gateway, to enable or disable the payment for countryCode, default is enable"`
 	GatewayId     uint64          `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	CountryConfig map[string]bool `json:"countryConfig"  dc:"The country config of payment gateway, a map with countryCode as key, and value for enable or disable" `
 }
@@ -41,7 +41,7 @@ type EditCountryConfigRes struct {
 }
 
 type SetupWebhookReq struct {
-	g.Meta        `path:"/setup_webhook" tags:"Gateway" method:"post" summary:"PaymentGatewayWebhookSetup"`
+	g.Meta        `path:"/setup_webhook" tags:"Gateway" method:"post" summary:"Payment Gateway Webhook Setup"`
 	GatewayId     uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	WebhookSecret string `json:"webhookSecret"  dc:"The secret of gateway webhook"`
 }
@@ -50,7 +50,7 @@ type SetupWebhookRes struct {
 }
 
 type WireTransferSetupReq struct {
-	g.Meta        `path:"/wire_transfer_setup" tags:"Gateway" method:"post" summary:"WireTransferSetup" dc:"Setup the wire transfer"`
+	g.Meta        `path:"/wire_transfer_setup" tags:"Gateway" method:"post" summary:"Wire Transfer Setup" dc:"Setup the wire transfer"`
 	Currency      string            `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64             `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
 	Bank          *bean.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer" v:"required"`
@@ -59,7 +59,7 @@ type WireTransferSetupRes struct {
 }
 
 type WireTransferEditReq struct {
-	g.Meta        `path:"/wire_transfer_edit" tags:"Gateway" method:"post" summary:"WireTransferEdit" dc:"Edit the wire transfer"`
+	g.Meta        `path:"/wire_transfer_edit" tags:"Gateway" method:"post" summary:"Wire Transfer Edit" dc:"Edit the wire transfer"`
 	GatewayId     uint64            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	Currency      string            `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64             `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
@@ -69,7 +69,7 @@ type WireTransferEditRes struct {
 }
 
 type SetupExchangeApiReq struct {
-	g.Meta             `path:"/setup_exchange_rate_api" tags:"Gateway" method:"post" summary:"ExchangeRateApiSetup"`
+	g.Meta             `path:"/setup_exchange_rate_api" tags:"Gateway" method:"post" summary:"Exchange Rate Api Setup"`
 	ExchangeRateApiKey string `json:"exchangeRateApiKey"  dc:"The key of exchange rate api"`
 }
 type SetupExchangeApiRes struct {

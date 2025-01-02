@@ -167,7 +167,7 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 				return gerror.New("credit amount is less than total amount")
 			}
 			var adminMemberId uint64 = 0
-			if _interface.Context().Get(ctx).IsAdminPortalCall && _interface.Context().Get(ctx).MerchantMember != nil {
+			if _interface.Context() != nil && _interface.Context().Get(ctx) != nil && _interface.Context().Get(ctx).IsAdminPortalCall && _interface.Context().Get(ctx).MerchantMember != nil {
 				adminMemberId = _interface.Context().Get(ctx).MerchantMember.Id
 			}
 			trans := &entity.CreditTransaction{

@@ -6,7 +6,7 @@ import (
 )
 
 type ItemListReq struct {
-	g.Meta    `path:"/item/list" tags:"Payment" method:"get" summary:"OneTimePaymentItemList"`
+	g.Meta    `path:"/item/list" tags:"Payment" method:"get" summary:"Get OneTime Payment Item List"`
 	UserId    uint64 `json:"userId" dc:"Filter UserId, Default All" `
 	SortField string `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `

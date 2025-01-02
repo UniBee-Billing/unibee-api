@@ -286,7 +286,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, sub.PlanId, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true, timeNow)
 				if err != nil {
-					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
+					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:%s", err.Error())
 					return nil, err
 				}
 				if pendingUpdate != nil {

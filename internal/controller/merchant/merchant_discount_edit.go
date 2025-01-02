@@ -21,11 +21,16 @@ func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (r
 		Currency:           req.Currency,
 		CycleLimit:         req.CycleLimit,
 		//SubscriptionLimit:  req.SubscriptionLimit,
-		StartTime: req.StartTime,
-		EndTime:   req.EndTime,
-		Metadata:  req.Metadata,
-		PlanIds:   req.PlanIds,
-		Quantity:  req.Quantity,
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
+		Metadata:          req.Metadata,
+		PlanIds:           req.PlanIds,
+		Quantity:          req.Quantity,
+		AdvanceConfig:     req.AdvanceConfig,
+		UserLimit:         req.UserLimit,
+		UserScope:         req.UserScope,
+		UpgradeLongerOnly: req.UpgradeLongerOnly,
+		UpgradeOnly:       req.UpgradeOnly,
 	})
 	if err != nil {
 		return nil, err

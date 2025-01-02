@@ -89,20 +89,32 @@ var (
 				)
 			})
 
+			s.Group("/merchant/auth", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewAuth(),
+					)
+				})
+			})
+
 			s.Group("/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().MerchantHandler,
 				)
-				group.Group("/", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						merchant.NewProfile(),
-					)
-				})
 				group.Group("/product", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewProduct(),
+					)
+				})
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewProfile(),
 					)
 				})
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
@@ -138,11 +150,6 @@ var (
 				group.Group("/vat", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewVat(),
-					)
-				})
-				group.Group("/balance", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						merchant.NewBalance(),
 					)
 				})
 				group.Group("/payment", func(group *ghttp.RouterGroup) {
@@ -254,18 +261,6 @@ var (
 					)
 				})
 
-			})
-
-			s.Group("/merchant/auth", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-				)
-				group.Group("/", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						merchant.NewAuth(),
-					)
-				})
 			})
 
 			s.Group("/user/vat", func(group *ghttp.RouterGroup) {

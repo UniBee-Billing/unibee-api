@@ -8,7 +8,6 @@ import (
 	"context"
 
 	"unibee/api/merchant/auth"
-	"unibee/api/merchant/balance"
 	"unibee/api/merchant/credit"
 	"unibee/api/merchant/discount"
 	"unibee/api/merchant/email"
@@ -42,13 +41,9 @@ type IMerchantAuth interface {
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
 }
 
-type IMerchantBalance interface {
-	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
-	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
-}
-
 type IMerchantCredit interface {
 	PromoConfig(ctx context.Context, req *credit.PromoConfigReq) (res *credit.PromoConfigRes, err error)
+	PromoConfigStatistics(ctx context.Context, req *credit.PromoConfigStatisticsReq) (res *credit.PromoConfigStatisticsRes, err error)
 	EditPromoConfig(ctx context.Context, req *credit.EditPromoConfigReq) (res *credit.EditPromoConfigRes, err error)
 	ConfigList(ctx context.Context, req *credit.ConfigListReq) (res *credit.ConfigListRes, err error)
 	NewConfig(ctx context.Context, req *credit.NewConfigReq) (res *credit.NewConfigRes, err error)
@@ -216,31 +211,29 @@ type IMerchantSession interface {
 type IMerchantSubscription interface {
 	Config(ctx context.Context, req *subscription.ConfigReq) (res *subscription.ConfigRes, err error)
 	ConfigUpdate(ctx context.Context, req *subscription.ConfigUpdateReq) (res *subscription.ConfigUpdateRes, err error)
+	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
+	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
+	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
+	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
+	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 	Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error)
-	PendingUpdateDetail(ctx context.Context, req *subscription.PendingUpdateDetailReq) (res *subscription.PendingUpdateDetailRes, err error)
 	UserPendingCryptoSubscriptionDetail(ctx context.Context, req *subscription.UserPendingCryptoSubscriptionDetailReq) (res *subscription.UserPendingCryptoSubscriptionDetailRes, err error)
 	List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error)
 	Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error)
 	CancelAtPeriodEnd(ctx context.Context, req *subscription.CancelAtPeriodEndReq) (res *subscription.CancelAtPeriodEndRes, err error)
 	CancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.CancelLastCancelAtPeriodEndReq) (res *subscription.CancelLastCancelAtPeriodEndRes, err error)
-	Suspend(ctx context.Context, req *subscription.SuspendReq) (res *subscription.SuspendRes, err error)
-	Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error)
 	ChangeGateway(ctx context.Context, req *subscription.ChangeGatewayReq) (res *subscription.ChangeGatewayRes, err error)
 	AddNewTrialStart(ctx context.Context, req *subscription.AddNewTrialStartReq) (res *subscription.AddNewTrialStartRes, err error)
-	Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error)
 	CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error)
 	Create(ctx context.Context, req *subscription.CreateReq) (res *subscription.CreateRes, err error)
-	UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error)
-	Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error)
 	UserSubscriptionDetail(ctx context.Context, req *subscription.UserSubscriptionDetailReq) (res *subscription.UserSubscriptionDetailRes, err error)
+	ActiveTemporarily(ctx context.Context, req *subscription.ActiveTemporarilyReq) (res *subscription.ActiveTemporarilyRes, err error)
 	TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error)
 	PendingUpdateList(ctx context.Context, req *subscription.PendingUpdateListReq) (res *subscription.PendingUpdateListRes, err error)
-	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
-	ActiveTemporarily(ctx context.Context, req *subscription.ActiveTemporarilyReq) (res *subscription.ActiveTemporarilyRes, err error)
-	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
-	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
-	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
-	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
+	PendingUpdateDetail(ctx context.Context, req *subscription.PendingUpdateDetailReq) (res *subscription.PendingUpdateDetailRes, err error)
+	Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error)
+	UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error)
+	Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error)
 }
 
 type IMerchantTask interface {

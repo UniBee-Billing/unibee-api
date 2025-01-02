@@ -11,6 +11,12 @@ import (
 	"unibee/utility"
 )
 
+type CreditConfigStatistics struct {
+	Id                   uint64 `json:"id"                    description:"Id"`
+	TotalIncrementAmount int64  `json:"totalIncrementAmount"     description:"the total increment amount"`
+	TotalDecrementAmount int64  `json:"totalDecrementAmount"     description:"the total decrement amount"`
+}
+
 type CreditConfig struct {
 	Id                    uint64                 `json:"id"                    description:"Id"`                                                                                                                         // Id
 	Type                  int                    `json:"type"                  description:"type of credit account, 1-main account, 2-promo credit account"`                                                             // type of credit account, 1-main account, 2-promo credit account
@@ -28,9 +34,11 @@ type CreditConfig struct {
 	RechargeEnable        int                    `json:"rechargeEnable"        description:"0-no, 1-yes"`
 	PayoutEnable          int                    `json:"payoutEnable"          description:"0-no, 1-yes"`
 	PreviewDefaultUsed    int                    `json:"previewDefaultUsed"    description:"is default used when in purchase preview, default no, 0-no, 1-yes"` // is default used when in purchase preview,0-no, 1-yes
+	TotalIncrementAmount  int64                  `json:"totalIncrementAmount"     description:"the total increment amount"`
+	TotalDecrementAmount  int64                  `json:"totalDecrementAmount"     description:"the total decrement amount"`
 }
 
-func SimplifyCreditConfig(one *entity.CreditConfig) *CreditConfig {
+func SimplifyCreditConfig(ctx context.Context, one *entity.CreditConfig) *CreditConfig {
 	if one == nil {
 		return nil
 	}
@@ -58,7 +66,27 @@ func SimplifyCreditConfig(one *entity.CreditConfig) *CreditConfig {
 		RechargeEnable:        one.RechargeEnable,
 		PayoutEnable:          one.PayoutEnable,
 		PreviewDefaultUsed:    one.PreviewDefaultUsed,
+		TotalDecrementAmount:  int64(GetCreditConfigTotalDecrementAmount(ctx, one.MerchantId, one.Currency)),
+		TotalIncrementAmount:  int64(GetCreditConfigTotalIncrementAmount(ctx, one.MerchantId, one.Currency)),
 	}
+}
+
+func GetCreditConfigTotalIncrementAmount(ctx context.Context, merchantId uint64, currency string) (total float64) {
+	total, _ = dao.CreditTransaction.Ctx(ctx).
+		Where(dao.CreditTransaction.Columns().MerchantId, merchantId).
+		Where(dao.CreditTransaction.Columns().Currency, currency).
+		WhereGT(dao.CreditTransaction.Columns().DeltaAmount, 0).
+		Sum(dao.CreditTransaction.Columns().DeltaAmount)
+	return total
+}
+
+func GetCreditConfigTotalDecrementAmount(ctx context.Context, merchantId uint64, currency string) (total float64) {
+	total, _ = dao.CreditTransaction.Ctx(ctx).
+		Where(dao.CreditTransaction.Columns().MerchantId, merchantId).
+		Where(dao.CreditTransaction.Columns().Currency, currency).
+		WhereLT(dao.CreditTransaction.Columns().DeltaAmount, 0).
+		Sum(dao.CreditTransaction.Columns().DeltaAmount)
+	return total
 }
 
 type CreditAccount struct {

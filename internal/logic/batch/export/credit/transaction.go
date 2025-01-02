@@ -87,46 +87,58 @@ func (t TaskCreditTransactionExport) PageData(ctx context.Context, page int, cou
 			if one.User == nil {
 				one.User = &bean.UserAccount{}
 			}
-			accountType := "Credit"
-			if one.AccountType == 2 {
-				accountType = "Promo Credit"
+			//accountType := "Credit"
+			//if one.AccountType == 2 {
+			//	accountType = "Promo Credit"
+			//}
+			by := ""
+			if one.AdminMember != nil {
+				by = one.AdminMember.Email
 			}
 			mainList = append(mainList, &ExportCreditTransactionEntity{
-				Id:                 fmt.Sprintf("%v", one.Id),
-				UserId:             fmt.Sprintf("%d", one.User.Id),
-				Email:              one.User.Email,
-				TransactionType:    consts.CreditTransactionTypeToEnum(one.TransactionType).Description(),
-				TransactionId:      one.TransactionId,
-				Currency:           one.Currency,
-				InvoiceId:          one.InvoiceId,
-				ChangedAmount:      utility.ConvertCentToDollarStr(one.DeltaAmount, one.Currency),
-				CreditAmountBefore: utility.ConvertCentToDollarStr(one.CreditAmountBefore, one.Currency),
-				CreditAmountAfter:  utility.ConvertCentToDollarStr(one.CreditAmountAfter, one.Currency),
-				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
-				Name:               one.Name,
-				Description:        one.Description,
-				AccountType:        accountType,
-				TimeZone:           timeZoneStr,
+				Id:              fmt.Sprintf("%v", one.Id),
+				ChangedAmount:   ConvertCreditAmountToDollarStr(one.DeltaAmount, one.Currency, one.AccountType),
+				Email:           one.User.Email,
+				TransactionType: consts.CreditTransactionTypeToEnum(one.TransactionType).ExportDescription(one.DeltaAmount),
+				//TransactionId:      one.TransactionId,
+				Currency:  one.Currency,
+				InvoiceId: one.InvoiceId,
+				By:        by,
+				//CreditAmountBefore: ConvertCreditAmountToDollarStr(one.CreditAmountBefore, one.Currency, one.AccountType),
+				//CreditAmountAfter:  ConvertCreditAmountToDollarStr(one.CreditAmountAfter, one.Currency, one.AccountType),
+				CreateTime: gtime.NewFromTimeStamp(one.CreateTime + int64(timeZone*3600)),
+				Name:       one.Name,
+				//Description:        one.Description,
+				//AccountType:        accountType,
+				TimeZone: timeZoneStr,
 			})
 		}
 	}
 	return mainList, nil
 }
 
+func ConvertCreditAmountToDollarStr(cents int64, currency string, AccountType int) string {
+	if AccountType == consts.CreditAccountTypePromo {
+		return fmt.Sprintf("%d", cents)
+	} else {
+		return utility.ConvertCentToDollarStr(cents, currency)
+	}
+}
+
 type ExportCreditTransactionEntity struct {
-	Id                 string      `json:"Id"    comment:"" group:"Transaction"`
-	UserId             string      `json:"UserId"              comment:"The unique id of user" group:"Transaction"`
-	Email              string      `json:"Email"               comment:"The email of user" group:"Transaction"`
-	TransactionType    string      `json:"TransactionType"    comment:"" group:"Transaction"`
-	TransactionId      string      `json:"TransactionId"       comment:"" group:"Transaction"`
-	Currency           string      `json:"Currency" comment:"The currency of invoice" group:"Transaction"`
-	InvoiceId          string      `json:"InvoiceId"  comment:"The invoice id of transaction, pure digital" group:"Transaction"`
-	ChangedAmount      string      `json:"ChangedAmount" comment:"The amount changed" group:"Transaction"`
-	CreditAmountBefore string      `json:"CreditAmountBefore" comment:"The amount before transaction" group:"Transaction"`
-	CreditAmountAfter  string      `json:"CreditAmountAfter" comment:"The amount after transaction" group:"Transaction"`
-	CreateTime         *gtime.Time `json:"CreateTime"  layout:"2006-01-02 15:04:05"   comment:"The create time of invoice" group:"Transaction"`
-	Name               string      `json:"Name" comment:"The name of transaction"  group:"Transaction"`
-	Description        string      `json:"Description" comment:"The description of transaction"  group:"Transaction"`
-	AccountType        string      `json:"AccountType" comment:"The type of transaction account"  group:"Transaction"`
-	TimeZone           string      `json:"TimeZone"         comment:"" group:"Transaction"`
+	Id              string `json:"RecordId"    comment:"" group:"Transaction"`
+	ChangedAmount   string `json:"AmountChanged" comment:"The amount changed" group:"Transaction"`
+	Email           string `json:"UserEmail"               comment:"The email of user" group:"Transaction"`
+	TransactionType string `json:"Type"    comment:"" group:"Transaction"`
+	Name            string `json:"Notes" comment:"The name of transaction"  group:"Transaction"`
+	//TransactionId      string      `json:"TransactionId"       comment:"" group:"Transaction"`
+	Currency string `json:"Currency" comment:"The currency of invoice" group:"Transaction"`
+	By       string `json:"By" comment:"The email of member" group:"Transaction"`
+	//CreditAmountBefore string      `json:"CreditAmountBefore" comment:"The amount before transaction" group:"Transaction"`
+	//CreditAmountAfter  string      `json:"CreditAmountAfter" comment:"The amount after transaction" group:"Transaction"`
+	CreateTime *gtime.Time `json:"CreateTime"  layout:"2006-01-02 15:04:05"   comment:"The create time of invoice" group:"Transaction"`
+	InvoiceId  string      `json:"InvoiceApplied"  comment:"The invoice id of transaction, pure digital" group:"Transaction"`
+	//Description        string      `json:"Description" comment:"The description of transaction"  group:"Transaction"`
+	//AccountType        string      `json:"AccountType" comment:"The type of transaction account"  group:"Transaction"`
+	TimeZone string `json:"TimeZone"         comment:"" group:"Transaction"`
 }

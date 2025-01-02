@@ -59,5 +59,5 @@ func (c *ControllerCredit) PromoConfig(ctx context.Context, req *credit.PromoCon
 		//}, err)
 	}
 
-	return &credit.PromoConfigRes{CreditConfig: bean.SimplifyCreditConfig(one)}, nil
+	return &credit.PromoConfigRes{CreditConfig: bean.SimplifyCreditConfig(ctx, one)}, nil
 }

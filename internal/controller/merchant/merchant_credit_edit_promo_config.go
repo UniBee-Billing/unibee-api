@@ -84,5 +84,5 @@ func (c *ControllerCredit) EditPromoConfig(ctx context.Context, req *credit.Edit
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	return &credit.EditPromoConfigRes{CreditConfig: bean.SimplifyCreditConfig(one)}, nil
+	return &credit.EditPromoConfigRes{CreditConfig: bean.SimplifyCreditConfig(ctx, one)}, nil
 }

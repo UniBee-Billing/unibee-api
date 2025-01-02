@@ -23,7 +23,7 @@ func (c *ControllerCredit) ConfigList(ctx context.Context, req *credit.ConfigLis
 	_ = query.Scan(&list)
 	var resultList = make([]*bean.CreditConfig, 0)
 	for _, v := range list {
-		resultList = append(resultList, bean.SimplifyCreditConfig(v))
+		resultList = append(resultList, bean.SimplifyCreditConfig(ctx, v))
 	}
 	return &credit.ConfigListRes{CreditConfigs: resultList}, nil
 }
