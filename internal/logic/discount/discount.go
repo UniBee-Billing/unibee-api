@@ -35,7 +35,7 @@ type CreateDiscountCodeInternalReq struct {
 	EndTime            *int64                 `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
-	AdvanceConfig      *bool                  `json:"advanceConfig"  dc:"AdvanceConfig, true or false, will disable all advance config if set false" `
+	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
 	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
 	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
@@ -77,9 +77,9 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		quantity = int64(*req.Quantity)
 	}
 	advance := 0
-	if req.AdvanceConfig != nil && *req.AdvanceConfig {
+	if req.Advance != nil && *req.Advance {
 		advance = 1
-	} else if req.AdvanceConfig != nil && !*req.AdvanceConfig {
+	} else if req.Advance != nil && !*req.Advance {
 		advance = 0
 	}
 	userScope := 0
@@ -203,9 +203,9 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
 	advance := one.Advance
-	if req.AdvanceConfig != nil && *req.AdvanceConfig {
+	if req.Advance != nil && *req.Advance {
 		advance = 1
-	} else if req.AdvanceConfig != nil && !*req.AdvanceConfig {
+	} else if req.Advance != nil && !*req.Advance {
 		advance = 0
 	}
 	upgradeOnly := one.UpgradeOnly

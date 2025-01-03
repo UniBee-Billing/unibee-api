@@ -70,6 +70,7 @@ type CreditTransactionDetail struct {
 	InvoiceId           string               `json:"invoiceId"         description:"invoice_id"`                                                                                                                                                   // invoice_id
 	AccountType         int                  `json:"accountType"       description:"type of credit account, 1-main recharge account, 2-promo credit account"`                                                                                      // type of credit account, 1-main recharge account, 2-promo credit account
 	AdminMember         *bean.MerchantMember `json:"adminMember"       description:"admin member"`
+	By                  string               `json:"by"  dc:"" `
 }
 
 func ConvertToCreditTransactionDetail(ctx context.Context, one *entity.CreditTransaction) *CreditTransactionDetail {
@@ -78,6 +79,18 @@ func ConvertToCreditTransactionDetail(ctx context.Context, one *entity.CreditTra
 	}
 	creditAccount := bean.SimplifyCreditAccount(ctx, query.GetCreditAccountById(ctx, one.CreditId))
 	deltaCurrencyAmount, exchangeRate := bean.ConvertTransactionCreditAmountToCurrency(ctx, one.MerchantId, one.AccountType, one.Currency, one.DeltaAmount, one.ExchangeRate)
+	by := "-"
+	if one.AdminMemberId > 0 {
+		member := bean.GetMerchantMemberById(ctx, one.AdminMemberId)
+		if member != nil {
+			by = member.Email
+		}
+	} else if one.UserId > 0 {
+		user := bean.GetUserAccountById(ctx, one.UserId)
+		if user != nil {
+			by = user.Email
+		}
+	}
 	return &CreditTransactionDetail{
 		Id:                  one.Id,
 		User:                bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
@@ -98,5 +111,6 @@ func ConvertToCreditTransactionDetail(ctx context.Context, one *entity.CreditTra
 		InvoiceId:           one.InvoiceId,
 		AccountType:         one.AccountType,
 		AdminMember:         bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, one.AdminMemberId)),
+		By:                  by,
 	}
 }

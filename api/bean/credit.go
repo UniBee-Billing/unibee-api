@@ -247,6 +247,7 @@ type CreditTransaction struct {
 	MerchantId          uint64 `json:"merchantId"         description:"merchant id"`                                                                                                                                                 // merchant id
 	InvoiceId           string `json:"invoiceId"         description:"invoice_id"`                                                                                                                                                   // invoice_id
 	AccountType         int    `json:"accountType"       description:"type of credit account, 1-main recharge account, 2-promo credit account"`                                                                                      // type of credit account, 1-main recharge account, 2-promo credit account
+	By                  string `json:"by"  dc:"" `
 }
 
 func ConvertTransactionCreditAmountToCurrency(ctx context.Context, merchantId uint64, creditType int, currency string, creditAmount int64, transactionExchangeRate int64) (currencyAmount int64, exchangeRate int64) {
@@ -263,11 +264,49 @@ func ConvertTransactionCreditAmountToCurrency(ctx context.Context, merchantId ui
 	}
 }
 
+func GetMerchantMemberById(ctx context.Context, id uint64) (one *entity.MerchantMember) {
+	if id <= 0 {
+		return nil
+	}
+	err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().Id, id).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount) {
+	if id <= 0 {
+		return nil
+	}
+	err := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().Id, id).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
 func SimplifyCreditTransaction(ctx context.Context, one *entity.CreditTransaction) *CreditTransaction {
 	if one == nil {
 		return nil
 	}
 	deltaCurrencyAmount, exchangeRate := ConvertTransactionCreditAmountToCurrency(ctx, one.MerchantId, one.AccountType, one.Currency, one.DeltaAmount, one.ExchangeRate)
+	by := "-"
+	if one.AdminMemberId > 0 {
+		member := GetMerchantMemberById(ctx, one.AdminMemberId)
+		if member != nil {
+			by = member.Email
+		}
+	} else if one.UserId > 0 {
+		user := GetUserAccountById(ctx, one.UserId)
+		if user != nil {
+			by = user.Email
+		}
+	}
 	return &CreditTransaction{
 		Id:                  one.Id,
 		UserId:              one.UserId,
@@ -287,6 +326,7 @@ func SimplifyCreditTransaction(ctx context.Context, one *entity.CreditTransactio
 		MerchantId:          one.MerchantId,
 		InvoiceId:           one.InvoiceId,
 		AccountType:         one.AccountType,
+		By:                  by,
 	}
 }
 

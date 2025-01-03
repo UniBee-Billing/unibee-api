@@ -220,6 +220,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if pendingUpdate != nil && pendingUpdate.EffectImmediate == 1 {
 					pendingUpdate = nil
 				}
+				applyPromoCredit := config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency)
+				if config3.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency) && len(discountCode) > 0 {
+					applyPromoCredit = false
+				}
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice
 					plan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
@@ -243,7 +247,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						FinishTime:       timeNow,
 						CreateFrom:       consts.InvoiceAutoChargeFlag,
 						Metadata:         map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
-						ApplyPromoCredit: config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
+						ApplyPromoCredit: applyPromoCredit,
 					})
 				} else {
 					//generate cycle invoice from sub
@@ -268,7 +272,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						InvoiceName:      "SubscriptionCycle",
 						FinishTime:       timeNow,
 						CreateFrom:       consts.InvoiceAutoChargeFlag,
-						ApplyPromoCredit: config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
+						ApplyPromoCredit: applyPromoCredit,
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {

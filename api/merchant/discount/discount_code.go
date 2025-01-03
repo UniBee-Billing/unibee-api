@@ -50,7 +50,7 @@ type NewReq struct {
 	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
-	AdvanceConfig      *bool                  `json:"advanceConfig"  dc:"AdvanceConfig, true or false, will disable all advance config if set false" `
+	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
 	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
 	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
@@ -76,7 +76,7 @@ type EditReq struct {
 	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, editable after activate, utc time"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
-	AdvanceConfig      *bool                  `json:"advanceConfig"  dc:"AdvanceConfig, true or false, will disable all advance config if set false" `
+	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
 	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
 	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
