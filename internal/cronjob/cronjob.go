@@ -11,6 +11,7 @@ import (
 	"unibee/internal/cronjob/gateway_log"
 	"unibee/internal/cronjob/invoice"
 	"unibee/internal/cronjob/sub"
+	"unibee/internal/cronjob/vat"
 )
 
 func StartCronJobs() {
@@ -77,6 +78,15 @@ func StartCronJobs() {
 	}, dailyTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", dailyTask, err.Error())
+	}
+
+	// every day
+	var weekTask = "JobWeekTask"
+	_, err = gcron.Add(ctx, "@weekly", func(ctx context.Context) {
+		vat.TaskForSyncVatData(ctx)
+	}, weekTask)
+	if err != nil {
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", weekTask, err.Error())
 	}
 
 	return

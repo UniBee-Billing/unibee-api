@@ -160,6 +160,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+		dao.Subscription.Columns().MetaData:               utility.MergeStringMetadata(sub.MetaData, invoice.MetaData),
 		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           invoice.DiscountCode,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),

@@ -21,13 +21,13 @@ type ListRes struct {
 }
 
 type CodeApplyPreviewReq struct {
-	g.Meta             `path:"/code_apply_preview" tags:"User-Plan" method:"post" summary:"CodeApplyPreview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
-	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
-	PlanId             int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
-	ExternalPlanId     string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
-	IsUpgrade          bool   `json:"isUpgrade"            description:"IsUpgrade"`
-	IsChangeToLongPlan bool   `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
-	Email              string `json:"email"  description:"Email"`
+	g.Meta                     `path:"/code_apply_preview" tags:"User-Plan" method:"post" summary:"CodeApplyPreview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
+	Code                       string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	PlanId                     int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
+	ExternalPlanId             string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
+	IsUpgrade                  *bool  `json:"isUpgrade"            description:"IsUpgrade"`
+	IsChangeToSameIntervalPlan *bool  `json:"isChangeToSameIntervalPlan"  description:"IsChangeToSameIntervalPlan"`
+	IsChangeToLongPlan         *bool  `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
 }
 
 type CodeApplyPreviewRes struct {

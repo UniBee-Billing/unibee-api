@@ -43,4 +43,5 @@ type Plan struct {
 	CancelAtTrialEnd          int         `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ExternalPlanId            string      `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 	ProductId                 int64       `json:"productId"                 description:"product id"`                                                                                                      // product id
+	DisableAutoCharge         int         `json:"disableAutoCharge"         description:"disable auto-charge, 0-false,1-true"`                                                                             // disable auto-charge, 0-false,1-true
 }

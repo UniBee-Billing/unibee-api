@@ -25,6 +25,9 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"autotest":        &AutoTest{},
 	"coinbase":        &Coinbase{},
 	"wire_transfer":   &Wire{},
+	"unitpay":         &UnitPay{},
+	"payssion":        &Payssion{},
+	"cryptadium":      &Cryptadium{},
 	"credit":          &credit.Credit{},
 }
 
@@ -37,6 +40,9 @@ var GatewayShortNameMapping = map[string]string{
 	"autotest":        "AP",
 	"coinbase":        "CP",
 	"wire_transfer":   "WT",
+	"unitpay":         "UP",
+	"payssion":        "PS",
+	"cryptadium":      "CTD",
 	"credit":          "CR",
 }
 

@@ -44,6 +44,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	if sub == nil {
 		return &BillingCycleWalkRes{Message: "Sub Not Found"}, nil
 	}
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	if plan == nil {
+		return &BillingCycleWalkRes{Message: "Plan Not Found"}, nil
+	}
 	key := fmt.Sprintf("SubscriptionCycleWalk-%s", sub.SubscriptionId)
 	if utility.TryLock(ctx, key, 60) {
 		g.Log().Debugf(ctx, source, "GetLock 60s", key)
@@ -98,6 +102,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		}
 		// lock the invoice and payment creation half an hour before period end
 		if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-27*60 && timeNow < utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) {
+			needInvoiceGenerate = false
+			needTryInvoiceAutomaticPayment = false
+		}
+		if plan.DisableAutoCharge > 0 {
 			needInvoiceGenerate = false
 			needTryInvoiceAutomaticPayment = false
 		}

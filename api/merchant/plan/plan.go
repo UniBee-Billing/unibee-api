@@ -83,7 +83,7 @@ type ListReq struct {
 	PublishStatus int     `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
 	Currency      string  `json:"currency" dc:"Filter Currency"  `
 	SearchKey     string  `json:"searchKey" dc:"Search Key, plan name or description"  `
-	SortField     string  `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortField     string  `json:"sortField" dc:"Sort Field，plan_name|gmt_create|gmt_modify，Default gmt_create" `
 	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int     `json:"page"  dc:"Page, Start 0" `
 	Count         int     `json:"count"  dc:"Count Of Per Page" `

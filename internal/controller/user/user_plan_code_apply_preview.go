@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
-	"strings"
 	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
@@ -39,16 +38,29 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 		}, nil
 	}
 	//utility.Assert(oneDiscount != nil, i18n.LocalizationFormat(ctx, "{#DiscountCodeInvalid}"))
+	isUpgrade := true
+	if req.IsUpgrade != nil {
+		isUpgrade = *req.IsUpgrade
+	}
+	isChangeToLongPlan := true
+	if req.IsChangeToLongPlan != nil {
+		isChangeToLongPlan = *req.IsChangeToLongPlan
+	}
+	isChangeToSameIntervalPlan := true
+	if req.IsChangeToSameIntervalPlan != nil {
+		isChangeToSameIntervalPlan = *req.IsChangeToSameIntervalPlan
+	}
 	canApply, _, message := discount2.UserDiscountApplyPreview(ctx, &discount2.UserDiscountApplyReq{
-		MerchantId:         _interface.GetMerchantId(ctx),
-		PLanId:             uint64(req.PlanId),
-		DiscountCode:       req.Code,
-		Currency:           one.Currency,
-		TimeNow:            gtime.Now().Timestamp(),
-		IsUpgrade:          req.IsUpgrade,
-		IsChangeToLongPlan: req.IsChangeToLongPlan,
-		IsRenew:            false,
-		IsNewUser:          service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(req.Email)),
+		MerchantId:                 _interface.GetMerchantId(ctx),
+		PLanId:                     uint64(req.PlanId),
+		DiscountCode:               req.Code,
+		Currency:                   one.Currency,
+		TimeNow:                    gtime.Now().Timestamp(),
+		IsUpgrade:                  isUpgrade,
+		IsChangeToSameIntervalPlan: isChangeToSameIntervalPlan,
+		IsChangeToLongPlan:         isChangeToLongPlan,
+		IsRenew:                    false,
+		IsNewUser:                  service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Email),
 	})
 	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, one.MerchantId, one.Amount, one.Currency, req.Code, gtime.Now().Timestamp()), one.Amount)
 	return &plan.CodeApplyPreviewRes{

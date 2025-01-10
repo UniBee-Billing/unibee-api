@@ -261,17 +261,18 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	promoCreditDiscountCodeExclusive := config3.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency)
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:         plan.MerchantId,
-			UserId:             sub.UserId,
-			DiscountCode:       req.DiscountCode,
-			Currency:           sub.Currency,
-			SubscriptionId:     sub.SubscriptionId,
-			PLanId:             req.NewPlanId,
-			TimeNow:            utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
-			IsUpgrade:          isUpgrade,
-			IsChangeToLongPlan: isChangeToLongPlan,
-			IsRenew:            false,
-			IsNewUser:          IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
+			MerchantId:                 plan.MerchantId,
+			UserId:                     sub.UserId,
+			DiscountCode:               req.DiscountCode,
+			Currency:                   sub.Currency,
+			SubscriptionId:             sub.SubscriptionId,
+			PLanId:                     req.NewPlanId,
+			TimeNow:                    utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
+			IsUpgrade:                  isUpgrade,
+			IsChangeToSameIntervalPlan: oldPlan.IntervalCount == plan.IntervalCount && oldPlan.IntervalUnit == plan.IntervalUnit,
+			IsChangeToLongPlan:         isChangeToLongPlan,
+			IsRenew:                    false,
+			IsNewUser:                  IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
 		})
 		if canApply {
 			if isRecurring {

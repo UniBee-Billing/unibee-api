@@ -329,16 +329,18 @@ func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
 				g.Log().Infof(r.Context(), "MerchantHandler user not found :%v", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "account not found", s.LoginUrl)
 				r.Exit()
+				return
 			} else if userAccount.Status == 2 {
 				g.Log().Infof(r.Context(), "MerchantHandler user has suspend :%v", utility.MarshalToJsonString(customCtx.Token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
+				return
 			}
 			customCtx.User = &model.ContextUser{
 				Id:         customCtx.Token.Id,
 				Token:      customCtx.TokenString,
 				MerchantId: customCtx.Token.MerchantId,
-				Email:      customCtx.Token.Email,
+				Email:      userAccount.Email,
 				Lang:       userAccount.Language,
 			}
 			customCtx.MerchantId = customCtx.Token.MerchantId

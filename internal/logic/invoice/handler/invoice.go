@@ -523,7 +523,7 @@ func InvoicePdfGenerateAndEmailSendByTargetTemplateBackground(invoiceId string, 
 			return
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
-			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend, targetTemplate)
+			err = SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend, targetTemplate)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()

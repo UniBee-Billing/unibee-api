@@ -52,7 +52,7 @@ type NewReq struct {
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
-	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
+	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
 	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
 	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
@@ -78,7 +78,7 @@ type EditReq struct {
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
-	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
+	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
 	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
 	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
@@ -132,13 +132,15 @@ type UserDiscountListRes struct {
 }
 
 type PlanApplyPreviewReq struct {
-	g.Meta             `path:"/plan_apply_preview" tags:"User Discount" method:"post" summary:"Plan Apply Preview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
-	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
-	PlanId             int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
-	ExternalPlanId     string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
-	IsUpgrade          bool   `json:"isUpgrade"            description:"IsUpgrade"`
-	IsChangeToLongPlan bool   `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
-	Email              string `json:"email"  description:"Email"`
+	g.Meta         `path:"/plan_apply_preview" tags:"User Discount" method:"post" summary:"Plan Apply Preview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
+	Code           string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	PlanId         int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
+	ExternalPlanId string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
+	//SubscriptionId     string `json:"subscriptionId"            description:"SubscriptionId"`
+	IsUpgrade                  *bool  `json:"isUpgrade"            description:"IsUpgrade"`
+	IsChangeToSameIntervalPlan *bool  `json:"isChangeToSameIntervalPlan"  description:"IsChangeToSameIntervalPlan"`
+	IsChangeToLongPlan         *bool  `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
+	Email                      string `json:"email"  description:"Email"`
 }
 
 type PlanApplyPreviewRes struct {

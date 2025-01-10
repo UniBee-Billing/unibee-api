@@ -99,7 +99,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId:        "", //clear PendingUpdateId
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
-		dao.Subscription.Columns().MetaData:               invoice.MetaData,
+		dao.Subscription.Columns().MetaData:               utility.MergeStringMetadata(sub.MetaData, invoice.MetaData),
 		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           invoice.DiscountCode,
 		dao.Subscription.Columns().CancelAtPeriodEnd:      0,

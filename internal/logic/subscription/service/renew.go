@@ -52,6 +52,10 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	utility.Assert(plan != nil, "plan not found")
+	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
+	utility.Assert(plan.DisableAutoCharge == 0, "plan's auto-charge is disabled")
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
@@ -80,9 +84,6 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
 		utility.Assert(sub.PlanId > 0, "planId invalid")
-		plan := query.GetPlanById(ctx, sub.PlanId)
-		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
-		utility.Assert(plan != nil, "invalid planId")
 		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {

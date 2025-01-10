@@ -40,10 +40,11 @@ type UserDiscountApplyReq struct {
 	TimeNow          int64  `json:"timeNow"        description:"TimeNow"`
 	IsRecurringApply bool   `json:"isRecurringApply"        description:"IsRecurringApply"`
 	// FeatureV2
-	IsRenew            bool `json:"isRenew"  description:"IsRenew"`
-	IsUpgrade          bool `json:"isUpgrade"            description:"IsUpgrade"`
-	IsChangeToLongPlan bool `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
-	IsNewUser          bool `json:"isNewUser"  description:"IsNewUser"`
+	IsRenew                    bool `json:"isRenew"  description:"IsRenew"`
+	IsUpgrade                  bool `json:"isUpgrade"            description:"IsUpgrade"`
+	IsChangeToSameIntervalPlan bool `json:"isChangeToSameIntervalPlan"            description:"IsChangeToSameIntervalPlan"`
+	IsChangeToLongPlan         bool `json:"isChangeToLongPlan"  description:"IsChangeToLongPlan"`
+	IsNewUser                  bool `json:"isNewUser"  description:"IsNewUser"`
 }
 
 func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, isRecurring bool, message string) {
@@ -105,10 +106,11 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 				if discountCode.UserScope == 2 && req.IsNewUser {
 					return false, false, "Code only available for renewal"
 				}
+				//if discountCode.UpgradeOnly == 1 && !(req.IsUpgrade && req.IsChangeToSameIntervalPlan) {
 				if discountCode.UpgradeOnly == 1 && !req.IsUpgrade {
-					return false, false, "Code only available for upgrade"
+					return false, false, "Code only available for upgrade to same interval plan"
 				}
-				if discountCode.UpgradeLongerOnly == 1 && !req.IsChangeToLongPlan {
+				if discountCode.UpgradeLongerOnly == 1 && !(req.IsUpgrade && req.IsChangeToLongPlan) {
 					return false, false, "Code only available for upgrade to longer plan"
 				}
 				if discountCode.UserLimit > 0 && req.UserId > 0 {

@@ -407,6 +407,9 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 
 func toLocalizationTitle(languageData string, defaultTitle string, lang string) (title string) {
 	title = defaultTitle
+	if len(lang) == 0 {
+		lang = "en" // default language
+	}
 	if len(languageData) == 0 || len(lang) == 0 {
 		return title
 	}

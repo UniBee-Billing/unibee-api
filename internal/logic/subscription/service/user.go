@@ -24,5 +24,5 @@ func IsNewSubscriptionUser(ctx context.Context, merchantId uint64, email string)
 		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusPaid).
 		OrderDesc(dao.Invoice.Columns().Id).
 		OmitEmpty().Scan(&one)
-	return one != nil
+	return one == nil
 }

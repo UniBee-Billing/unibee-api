@@ -148,6 +148,26 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	one := query.GetDiscountById(ctx, req.Id)
 	utility.Assert(one != nil, "Discount not found :"+strconv.FormatUint(req.Id, 10))
 	utility.Assert(one.MerchantId == req.MerchantId, "Discount merchant not match :"+req.Code)
+
+	advance := one.Advance
+	if req.Advance != nil && *req.Advance {
+		advance = 1
+	} else if req.Advance != nil && !*req.Advance {
+		advance = 0
+	}
+	upgradeOnly := one.UpgradeOnly
+	if req.UpgradeOnly != nil && *req.UpgradeOnly {
+		upgradeOnly = 1
+	} else if req.UpgradeOnly != nil && !*req.UpgradeOnly {
+		upgradeOnly = 0
+	}
+	upgradeLongerOnly := one.UpgradeLongerOnly
+	if req.UpgradeLongerOnly != nil && *req.UpgradeLongerOnly {
+		upgradeLongerOnly = 1
+	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
+		upgradeLongerOnly = 0
+	}
+
 	//edit after activate
 	if one.Status > consts.DiscountStatusEditable {
 		utility.Assert((req.StartTime != nil && req.EndTime != nil) || req.PlanIds != nil, "startTime&endTime or planIds should not be nil")
@@ -156,11 +176,16 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 			planIdsStr = unibee.String(utility.IntListToString(req.PlanIds))
 		}
 		_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
-			dao.MerchantDiscountCode.Columns().StartTime: req.StartTime,
-			dao.MerchantDiscountCode.Columns().EndTime:   req.EndTime,
-			dao.MerchantDiscountCode.Columns().PlanIds:   planIdsStr,
-			dao.MerchantDiscountCode.Columns().MetaData:  utility.MarshalToJsonString(utility.MergeMetadata(one.MetaData, &req.Metadata)),
-			dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
+			dao.MerchantDiscountCode.Columns().Advance:           advance,
+			dao.MerchantDiscountCode.Columns().UserLimit:         req.UserLimit,
+			dao.MerchantDiscountCode.Columns().UserScope:         req.UserScope,
+			dao.MerchantDiscountCode.Columns().UpgradeOnly:       upgradeOnly,
+			dao.MerchantDiscountCode.Columns().UpgradeLongerOnly: upgradeLongerOnly,
+			dao.MerchantDiscountCode.Columns().StartTime:         req.StartTime,
+			dao.MerchantDiscountCode.Columns().EndTime:           req.EndTime,
+			dao.MerchantDiscountCode.Columns().PlanIds:           planIdsStr,
+			dao.MerchantDiscountCode.Columns().MetaData:          utility.MarshalToJsonString(utility.MergeMetadata(one.MetaData, &req.Metadata)),
+			dao.MerchantDiscountCode.Columns().GmtModify:         gtime.Now(),
 		}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			err = gerror.Newf(`EditMerchantDiscountCode update after activate failure %s`, err)
@@ -202,24 +227,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
-	advance := one.Advance
-	if req.Advance != nil && *req.Advance {
-		advance = 1
-	} else if req.Advance != nil && !*req.Advance {
-		advance = 0
-	}
-	upgradeOnly := one.UpgradeOnly
-	if req.UpgradeOnly != nil && *req.UpgradeOnly {
-		upgradeOnly = 1
-	} else if req.UpgradeOnly != nil && !*req.UpgradeOnly {
-		upgradeOnly = 0
-	}
-	upgradeLongerOnly := one.UpgradeLongerOnly
-	if req.UpgradeLongerOnly != nil && *req.UpgradeLongerOnly {
-		upgradeLongerOnly = 1
-	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
-		upgradeLongerOnly = 0
-	}
+
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().Name:               req.Name,
 		dao.MerchantDiscountCode.Columns().BillingType:        req.BillingType,

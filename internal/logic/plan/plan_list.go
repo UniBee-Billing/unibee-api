@@ -76,14 +76,14 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDetail, total int) {
 	var mainList []*entity.Plan
 	if req.Count <= 0 {
-		req.Count = 20
+		req.Count = 100
 	}
 	if req.Page < 0 {
 		req.Page = 0
 	}
 	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
-		utility.Assert(strings.Contains("gmt_create|gmt_modify", req.SortField), "sortField should one of gmt_create|gmt_modify")
+		utility.Assert(strings.Contains("plan_name|gmt_create|gmt_modify", req.SortField), "sortField should one of plan_name|gmt_create|gmt_modify")
 		if len(req.SortType) > 0 {
 			utility.Assert(strings.Contains("asc|desc", req.SortType), "sortType should one of asc|desc")
 			sortKey = req.SortField + " " + req.SortType

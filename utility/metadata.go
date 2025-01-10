@@ -29,3 +29,22 @@ func MergeMetadata(sourceString string, target *map[string]interface{}) map[stri
 	}
 	return metadata
 }
+
+func MergeStringMetadata(sourceString string, target string) map[string]interface{} {
+	var metadata = make(map[string]interface{})
+	if len(sourceString) > 0 {
+		_ = gjson.Unmarshal([]byte(sourceString), &metadata)
+	}
+	if metadata == nil {
+		metadata = make(map[string]interface{})
+	}
+	if len(target) == 0 {
+		return metadata
+	}
+	var targetMetadata = make(map[string]interface{})
+	_ = gjson.Unmarshal([]byte(target), &targetMetadata)
+	for k, v := range targetMetadata {
+		metadata[k] = v
+	}
+	return metadata
+}

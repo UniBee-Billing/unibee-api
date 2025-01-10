@@ -14,7 +14,7 @@ type Wire struct {
 }
 
 func (w Wire) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
-	return "", consts.GatewayTypeWireTransfer, gerror.New("Please setup by wire transfer setup api")
+	return "https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg", consts.GatewayTypeWireTransfer, gerror.New("Please setup by wire transfer setup api")
 }
 
 func (w Wire) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
