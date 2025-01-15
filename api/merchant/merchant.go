@@ -84,6 +84,8 @@ type IMerchantEmail interface {
 }
 
 type IMerchantGateway interface {
+	SetupList(ctx context.Context, req *gateway.SetupListReq) (res *gateway.SetupListRes, err error)
+	Detail(ctx context.Context, req *gateway.DetailReq) (res *gateway.DetailRes, err error)
 	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)
 	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)

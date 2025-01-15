@@ -45,7 +45,12 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	req.Metadata["MerchantId"] = req.MerchantId
 	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Metadata)
 	utility.AssertError(err, "Server Error")
-	return createResult.Url, createResult.PaymentMethod
+	return createResult.Url, &bean.PaymentMethod{
+		Id:        createResult.PaymentMethod.Id,
+		Type:      createResult.PaymentMethod.Type,
+		IsDefault: createResult.PaymentMethod.IsDefault,
+		Data:      createResult.PaymentMethod.Data,
+	}
 }
 
 func DeletePaymentMethod(ctx context.Context, merchantId uint64, userId uint64, gatewayId uint64, paymentMethodId string) error {
@@ -99,7 +104,16 @@ func QueryPaymentMethodList(ctx context.Context, req *PaymentMethodListInternalR
 			}
 		}
 	}
-	return listQuery.PaymentMethods
+	var list []*bean.PaymentMethod
+	for _, one := range listQuery.PaymentMethods {
+		list = append(list, &bean.PaymentMethod{
+			Id:        one.Id,
+			Type:      one.Type,
+			IsDefault: one.IsDefault,
+			Data:      one.Data,
+		})
+	}
+	return list
 }
 
 func QueryPaymentMethod(ctx context.Context, merchantId uint64, userId uint64, gatewayId uint64, gatewayPaymentMethodId string) *bean.PaymentMethod {
@@ -116,7 +130,12 @@ func QueryPaymentMethod(ctx context.Context, merchantId uint64, userId uint64, g
 		return nil
 	}
 	if listQuery != nil && len(listQuery.PaymentMethods) == 1 {
-		return listQuery.PaymentMethods[0]
+		return &bean.PaymentMethod{
+			Id:        listQuery.PaymentMethods[0].Id,
+			Type:      listQuery.PaymentMethods[0].Type,
+			IsDefault: listQuery.PaymentMethods[0].IsDefault,
+			Data:      listQuery.PaymentMethods[0].Data,
+		}
 	}
 	return nil
 }

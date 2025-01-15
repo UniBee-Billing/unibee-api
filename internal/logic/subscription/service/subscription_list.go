@@ -54,7 +54,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        bean.SimplifySubscription(ctx, one),
-		Gateway:                             bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
+		Gateway:                             detail.ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, one.GatewayId)),
 		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		AddonParams:                         addonParams,
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
@@ -164,7 +164,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		list = append(list, &detail.SubscriptionDetail{
 			User:          bean.SimplifyUserAccount(user),
 			Subscription:  bean.SimplifySubscription(ctx, sub),
-			Gateway:       bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
+			Gateway:       detail.ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, sub.GatewayId)),
 			Plan:          nil,
 			Addons:        nil,
 			LatestInvoice: latestInvoiceOne,

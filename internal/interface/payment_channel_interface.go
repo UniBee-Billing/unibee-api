@@ -7,7 +7,20 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+type GatewayInfo struct {
+	Name                          string
+	Description                   string
+	DisplayName                   string
+	GatewayWebsiteLink            string
+	GatewayWebhookIntegrationLink string
+	GatewayLogo                   string
+	GatewayIcons                  []string
+	GatewayType                   int64
+	Sort                          int64
+}
+
 type GatewayInterface interface {
+	GatewayInfo(ctx context.Context) *GatewayInfo
 	GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error)
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error)

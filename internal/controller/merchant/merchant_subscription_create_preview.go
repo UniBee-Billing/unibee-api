@@ -103,7 +103,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		Plan:                           bean.SimplifyPlan(prepare.Plan),
 		TrialEnd:                       prepare.TrialEnd,
 		Quantity:                       prepare.Quantity,
-		Gateway:                        bean.SimplifyGateway(prepare.Gateway),
+		Gateway:                        detail.ConvertGatewayDetail(ctx, prepare.Gateway),
 		AddonParams:                    prepare.AddonParams,
 		Addons:                         prepare.Addons,
 		TaxPercentage:                  prepare.TaxPercentage,

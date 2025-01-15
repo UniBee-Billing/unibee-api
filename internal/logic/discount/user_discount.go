@@ -106,8 +106,8 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 				if discountCode.UserScope == 2 && req.IsNewUser {
 					return false, false, "Code only available for renewal"
 				}
-				//if discountCode.UpgradeOnly == 1 && !(req.IsUpgrade && req.IsChangeToSameIntervalPlan) {
-				if discountCode.UpgradeOnly == 1 && !req.IsUpgrade {
+				if discountCode.UpgradeOnly == 1 && !(req.IsUpgrade && req.IsChangeToSameIntervalPlan) {
+					//if discountCode.UpgradeOnly == 1 && !req.IsUpgrade {
 					return false, false, "Code only available for upgrade to same interval plan"
 				}
 				if discountCode.UpgradeLongerOnly == 1 && !(req.IsUpgrade && req.IsChangeToLongPlan) {

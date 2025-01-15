@@ -15,6 +15,7 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	handler3 "unibee/internal/logic/invoice/handler"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
@@ -184,7 +185,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				if r.Get("token") != nil {
 					gatewayPaymentMethodId = r.Get("token").String()
 				}
-				_, _ = query.CreateOrUpdateGatewayUser(r.Context(), payment.UserId, gateway.Id, customerId, gatewayPaymentMethodId)
+				_, _ = util.CreateOrUpdateGatewayUser(r.Context(), payment.UserId, gateway.Id, customerId, gatewayPaymentMethodId)
 			}
 		}
 		if r.Get("success").Bool() {

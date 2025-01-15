@@ -26,6 +26,7 @@ import (
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/user/sub_update"
+	"unibee/internal/logic/user/vat"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -199,7 +200,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 			}
 			var taxPercentage = sub.TaxPercentage
-			percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+			percentage, countryCode, vatNumber, err := vat.GetUserTaxPercentage(ctx, sub.UserId)
 			if err == nil {
 				taxPercentage = percentage
 			}

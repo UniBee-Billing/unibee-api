@@ -2,7 +2,6 @@ package prepare
 
 import (
 	"context"
-	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -10,6 +9,13 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 )
+
+type GatewayBank struct {
+	AccountHolder string `json:"accountHolder"   dc:"The AccountHolder of wire transfer " v:"required" `
+	BIC           string `json:"bic"   dc:"The BIC of wire transfer " v:"required" `
+	IBAN          string `json:"iban"   dc:"The IBAN of wire transfer " v:"required" `
+	Address       string `json:"address"   dc:"The address of wire transfer " v:"required" `
+}
 
 func CreateTestGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
 	one := query.GetGatewayByGatewayName(ctx, merchantId, "autotest")
@@ -92,7 +98,7 @@ func CreateTestWireTransferGateway(ctx context.Context, merchantId uint64) *enti
 		Logo:          "autotest_wire_transfer",
 		Currency:      "USD",
 		MinimumAmount: 10,
-		BankData: utility.MarshalToJsonString(&bean.GatewayBank{
+		BankData: utility.MarshalToJsonString(&GatewayBank{
 			AccountHolder: "testAccountHolder",
 			BIC:           "testBic",
 			IBAN:          "testIBAN",

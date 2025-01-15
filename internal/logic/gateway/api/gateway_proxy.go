@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
+	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	context2 "unibee/internal/interface/context"
 	"unibee/internal/logic/gateway/api/credit"
@@ -46,9 +47,47 @@ var GatewayShortNameMapping = map[string]string{
 	"credit":          "CR",
 }
 
+var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion", "cryptadium"}
+
+var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
+	"stripe":     Stripe{}.GatewayInfo(context.Background()),
+	"changelly":  Changelly{}.GatewayInfo(context.Background()),
+	"paypal":     Paypal{}.GatewayInfo(context.Background()),
+	"unitpay":    UnitPay{}.GatewayInfo(context.Background()),
+	"payssion":   Payssion{}.GatewayInfo(context.Background()),
+	"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
+}
+
 type GatewayProxy struct {
 	Gateway     *entity.MerchantGateway
 	GatewayName string
+}
+
+func (p GatewayProxy) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	var err error
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	to := p.getRemoteGateway().GatewayInfo(ctx)
+
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayInfo cost：%s \n", time.Now().Sub(startTime))
+	if to == nil {
+		return &_interface.GatewayInfo{
+			DisplayName:  "Invalid",
+			GatewayIcons: []string{"https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070"},
+			GatewayType:  consts.GatewayTypeCard,
+		}
+	}
+	return to
 }
 
 func (p GatewayProxy) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {

@@ -5,14 +5,23 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
-	"unibee/api/bean"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 
 type AutoTestCrypto struct {
+}
+
+func (a AutoTestCrypto) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		DisplayName:  "AutoTestCrypto",
+		GatewayLogo:  "https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070",
+		GatewayIcons: []string{"https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070"},
+		GatewayType:  consts.GatewayTypeCard,
+	}
 }
 
 func (a AutoTestCrypto) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
@@ -40,7 +49,7 @@ func (a AutoTestCrypto) GatewayRefundCancel(ctx context.Context, payment *entity
 }
 
 func (a AutoTestCrypto) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
-	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &bean.PaymentMethod{
+	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &gateway_bean.PaymentMethod{
 		Id:   strconv.FormatUint(userId, 10),
 		Type: "card",
 		Data: gjson.New(""),

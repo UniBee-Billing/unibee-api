@@ -17,7 +17,7 @@ type GetRes struct {
 	IsProd               bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
 	TimeZone             []string                     `json:"TimeZone" description:"TimeZone List" `
 	Currency             []*bean.Currency             `json:"Currency" description:"Currency List" `
-	Gateways             []*bean.Gateway              `json:"gateways" description:"Gateway List" `
+	Gateways             []*detail.Gateway            `json:"gateways" description:"Gateway List" `
 	ExchangeRateApiKey   string                       `json:"exchangeRateApiKey" description:"ExchangeRateApiKey" `
 	OpenApiKey           string                       `json:"openApiKey" description:"OpenApiKey" `
 	SendGridKey          string                       `json:"sendGridKey" description:"SendGridKey" `

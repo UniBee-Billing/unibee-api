@@ -19,8 +19,8 @@ import (
 	"github.com/stripe/stripe-go/v78/refund"
 	"strconv"
 	"strings"
-	"unibee/api/bean"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -30,6 +30,19 @@ import (
 )
 
 type Stripe struct {
+}
+
+func (s Stripe) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:               "Stripe",
+		Description:        "Use public and private keys to secure the bank card payment.",
+		DisplayName:        "Bank Cards",
+		GatewayWebsiteLink: "https://stripe.com",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d6z43co8yemxf4yjrd.svg",
+		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6yhl1qz7qmcg6zafr.svg", "https://api.unibee.top/oss/file/d6yhlf1t8n3ev3ueii.svg", "https://api.unibee.top/oss/file/d6yhlpshof3muufphd.svg"},
+		GatewayType:        consts.GatewayTypeCard,
+		Sort:               10,
+	}
 }
 
 func (s Stripe) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
@@ -109,7 +122,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	var paymentMethods = make([]*bean.PaymentMethod, 0)
+	var paymentMethods = make([]*gateway_bean.PaymentMethod, 0)
 	if len(req.GatewayPaymentMethodId) > 0 {
 		params := &stripe.PaymentMethodParams{}
 		paymentMethod, err := paymentmethod.Get(req.GatewayPaymentMethodId, params)
@@ -124,7 +137,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 				_ = data.Set("expYear", paymentMethod.Card.ExpYear)
 				_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
 				_ = data.Set("description", paymentMethod.Card.Description)
-				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
+				paymentMethods = append(paymentMethods, &gateway_bean.PaymentMethod{
 					Id:   paymentMethod.ID,
 					Type: "card",
 					Data: data,
@@ -158,7 +171,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 				_ = data.Set("expYear", paymentMethod.Card.ExpYear)
 				_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
 				_ = data.Set("description", paymentMethod.Card.Description)
-				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
+				paymentMethods = append(paymentMethods, &gateway_bean.PaymentMethod{
 					Id:   paymentMethod.ID,
 					Type: "card",
 					Data: data,

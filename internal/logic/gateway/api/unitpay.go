@@ -13,6 +13,7 @@ import (
 	"strings"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -30,6 +31,19 @@ import (
 type UnitPay struct {
 }
 
+func (c UnitPay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:                          "UnitPay",
+		Description:                   "Need to replace Use ClientId and Secret to secure the payment",
+		DisplayName:                   "UnitPay",
+		GatewayWebsiteLink:            "https://unitpay.ru",
+		GatewayWebhookIntegrationLink: "https://unitpay.ru/partner",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z46vn2mytjxvhqcg.svg",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6z46vn2mytjxvhqcg.svg"},
+		GatewayType:                   consts.GatewayTypeCrypto,
+	}
+}
+
 func (c UnitPay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
 	return nil, gerror.New("not support")
 }
@@ -38,11 +52,11 @@ func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string) (ic
 	urlPath := "/api?method=initPayment"
 	param := map[string]interface{}{
 		"currency":    "RUB",
-		"sum":         100,
+		"sum":         100.00,
 		"paymentType": "card",
 		"desc":        "test_payment_description",
 		"projectId":   key,
-		"account":     "test_user",
+		"account":     "test_unitpay",
 		//"locale":      "en",
 		//"preauth":     0,
 		//"ip": "15155-ae12d",
@@ -51,7 +65,11 @@ func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string) (ic
 	responseJson, err := SendUnitPayPaymentRequest(ctx, key, secret, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	utility.Assert(responseJson.Contains("paymentId"), "invalid keys, id is nil")
+	utility.Assert(responseJson.Contains("result.paymentId"), "invalid keys, paymentId is nil")
+	utility.Assert(responseJson.Contains("result.redirectUrl"), "invalid keys, redirectUrl is nil")
+	redirectUrl, err := url.PathUnescape(responseJson.Get("result.redirectUrl").String())
+	utility.Assert(err == nil, "invalid keys, invalid redirectUrl")
+	g.Log().Debugf(ctx, "redirectUrl: %s", redirectUrl)
 	return "http://unibee.top/files/invoice/changelly.png", consts.GatewayTypeCrypto, nil
 }
 
@@ -118,16 +136,20 @@ func (c UnitPay) GatewayNewPayment(ctx context.Context, createPayContext *gatewa
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	if !responseJson.Contains("paymentId") {
+	if !responseJson.Contains("result.paymentId") {
 		return nil, gerror.New("invalid request, paymentId is nil")
 	}
 	var status consts.PaymentStatusEnum = consts.PaymentCreated
-	gatewayPaymentId := responseJson.Get("paymentId").String()
+	gatewayPaymentId := responseJson.Get("result.paymentId").String()
+	redirectUrl, err := url.PathUnescape(responseJson.Get("result.redirectUrl").String())
+	if err != nil {
+		return nil, gerror.New("invalid request, invalid redirectUrl")
+	}
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 status,
 		GatewayPaymentId:       gatewayPaymentId,
 		GatewayPaymentIntentId: gatewayPaymentId,
-		Link:                   responseJson.Get("redirectUrl").String(),
+		Link:                   redirectUrl,
 	}, nil
 }
 

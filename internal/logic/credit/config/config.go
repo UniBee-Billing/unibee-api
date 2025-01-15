@@ -3,8 +3,8 @@ package config
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/internal/logic/credit/credit_query"
 	currency2 "unibee/internal/logic/currency"
-	"unibee/internal/query"
 )
 
 func CheckCreditConfig(ctx context.Context, merchantId uint64, creditType int, currency string) error {
@@ -17,7 +17,7 @@ func CheckCreditConfig(ctx context.Context, merchantId uint64, creditType int, c
 	if !currency2.IsCurrencySupport(currency) {
 		return gerror.New("invalid currency")
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return gerror.New("credit config need setup")
 	}
@@ -34,7 +34,7 @@ func CheckCreditConfigRecurring(ctx context.Context, merchantId uint64, creditTy
 	if !currency2.IsCurrencySupport(currency) {
 		return false
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return false
 	}
@@ -54,7 +54,7 @@ func CheckCreditConfigPreviewDefaultUsed(ctx context.Context, merchantId uint64,
 	if !currency2.IsCurrencySupport(currency) {
 		return false
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return false
 	}
@@ -74,7 +74,7 @@ func CheckCreditConfigDiscountCodeExclusive(ctx context.Context, merchantId uint
 	if !currency2.IsCurrencySupport(currency) {
 		return false
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return false
 	}
@@ -94,7 +94,7 @@ func CheckCreditConfigRecharge(ctx context.Context, merchantId uint64, creditTyp
 	if !currency2.IsCurrencySupport(currency) {
 		return gerror.New("invalid currency")
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return gerror.New("credit config need setup")
 	}
@@ -114,7 +114,7 @@ func CheckCreditConfigPayout(ctx context.Context, merchantId uint64, creditType 
 	if !currency2.IsCurrencySupport(currency) {
 		return gerror.New("invalid currency")
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return gerror.New("credit config need setup")
 	}

@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	config2 "unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
@@ -623,7 +624,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 			gateway := query.GetGatewayById(ctx, one.GatewayId)
 			if gateway != nil && gateway.GatewayType == consts.GatewayTypeWireTransfer {
 				template = email.TemplateNewProcessingInvoiceForWireTransfer
-				gatewaySimplify := bean.SimplifyGateway(gateway)
+				gatewaySimplify := detail.ConvertGatewayDetail(ctx, gateway)
 				if gatewaySimplify != nil {
 					accountHolder = gatewaySimplify.Bank.AccountHolder
 					bic = gatewaySimplify.Bank.BIC

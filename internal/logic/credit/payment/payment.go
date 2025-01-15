@@ -16,10 +16,10 @@ import (
 	"unibee/internal/logic/credit/account"
 	"unibee/internal/logic/credit/amount"
 	"unibee/internal/logic/credit/config"
+	"unibee/internal/logic/credit/credit_query"
 	"unibee/internal/logic/credit/refund"
 	currency2 "unibee/internal/logic/currency"
 	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -36,14 +36,14 @@ func CheckCreditUserPayout(ctx context.Context, merchantId uint64, userId uint64
 	if !currency2.IsCurrencySupport(currency) {
 		return nil, nil, gerror.New("invalid currency")
 	}
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return nil, nil, gerror.New("credit config need setup")
 	}
 	if one.PayoutEnable == 0 {
 		return nil, nil, gerror.New("credit payout disable")
 	}
-	creditAccount := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
+	creditAccount := credit_query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
 	if creditAccount == nil {
 		return nil, nil, gerror.New("credit account not found")
 	}
@@ -110,7 +110,7 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 	utility.Assert(len(req.Currency) > 0, "invalid currency")
 	utility.Assert(len(req.InvoiceId) > 0, "invalid invoiceId")
 	utility.Assert(req.CurrencyAmount > 0, "invalid currencyAmount")
-	user := query.GetUserAccountById(ctx, req.UserId)
+	user := credit_query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid merchantId")
 	utility.Assert(req.CreditType == consts.CreditAccountTypeMain || req.CreditType == consts.CreditAccountTypePromo, "invalid creditType")
@@ -123,7 +123,7 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 		return nil, gerror.New("credit amount is not enough")
 	}
 	// check exist externalCreditPaymentId
-	one := query.GetCreditPaymentByExternalCreditPaymentId(ctx, req.MerchantId, req.ExternalCreditPaymentId)
+	one := credit_query.GetCreditPaymentByExternalCreditPaymentId(ctx, req.MerchantId, req.ExternalCreditPaymentId)
 	utility.Assert(one == nil, "credit payment exist with same externalCreditPaymentId")
 	{
 		//name and description
@@ -162,7 +162,7 @@ func NewCreditPayment(ctx context.Context, req *CreditPaymentInternalReq) (res *
 			id, _ := result.LastInsertId()
 			one.Id = id
 
-			creditAccount = query.GetCreditAccountById(ctx, creditAccount.Id)
+			creditAccount = credit_query.GetCreditAccountById(ctx, creditAccount.Id)
 			if creditAccount.Amount < creditPaymentAmount {
 				return gerror.New("credit amount is less than total amount")
 			}
@@ -243,7 +243,7 @@ func printChannelPanic(ctx context.Context, err error) {
 }
 
 func RollbackCreditPayment(ctx context.Context, merchantId uint64, externalCreditPaymentId string) error {
-	one := query.GetCreditPaymentByExternalCreditPaymentId(ctx, merchantId, externalCreditPaymentId)
+	one := credit_query.GetCreditPaymentByExternalCreditPaymentId(ctx, merchantId, externalCreditPaymentId)
 	if one == nil {
 		return gerror.New("credit payment not found")
 	}

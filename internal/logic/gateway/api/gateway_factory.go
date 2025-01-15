@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"unibee/internal/interface"
-	"unibee/internal/query"
+	"unibee/internal/logic/gateway/util"
 	"unibee/utility"
 )
 
 func GetGatewayServiceProvider(ctx context.Context, gatewayId uint64) (one _interface.GatewayInterface) {
 	proxy := &GatewayProxy{}
-	proxy.Gateway = query.GetGatewayById(ctx, gatewayId)
+	proxy.Gateway = util.GetGatewayById(ctx, gatewayId)
 	proxy.GatewayName = proxy.Gateway.GatewayName
 	utility.Assert(proxy.Gateway != nil, fmt.Sprintf("gateway not found %d", gatewayId))
 	return proxy

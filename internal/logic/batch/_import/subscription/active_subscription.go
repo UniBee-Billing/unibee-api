@@ -15,6 +15,7 @@ import (
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	"unibee/internal/logic/operation_log"
 	user2 "unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/default"
@@ -219,7 +220,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
 				return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
 			}
-			gatewayUser := query.GetGatewayUser(ctx, user.Id, gatewayId)
+			gatewayUser := util.GetGatewayUser(ctx, user.Id, gatewayId)
 			if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
 				// todo mark may delete the old one
 				return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
@@ -243,7 +244,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 				//if response.Email != user.Email {
 				//	return target, gerror.New("Error, stripe customer email not equal user's email")
 				//}
-				gatewayUser, err = query.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
+				gatewayUser, err = util.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
 				if err != nil {
 					return target, err
 				}

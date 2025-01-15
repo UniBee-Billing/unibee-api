@@ -11,6 +11,7 @@ import (
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/service"
 	"unibee/internal/logic/vat_gateway"
+	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -27,14 +28,14 @@ func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 		{
 			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, consts.CloudModeManagerMerchantId)
 			if len(name) > 0 && len(data) > 0 {
-				_ = vat_gateway.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
-				_ = vat_gateway.InitMerchantDefaultVatGateway(ctx, merchantId)
+				_ = setup.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
+				_ = setup.InitMerchantDefaultVatGateway(ctx, merchantId)
 			}
 		}
 		{
 			stripeGateway := query.GetGatewayByGatewayName(ctx, consts.CloudModeManagerMerchantId, "stripe")
 			if stripeGateway != nil {
-				service.SetupGateway(ctx, merchantId, stripeGateway.GatewayName, stripeGateway.GatewayKey, stripeGateway.GatewaySecret)
+				service.SetupGateway(ctx, merchantId, stripeGateway.GatewayName, stripeGateway.GatewayKey, stripeGateway.GatewaySecret, nil, nil, nil, nil)
 			}
 		}
 	}

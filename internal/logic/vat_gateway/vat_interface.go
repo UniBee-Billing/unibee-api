@@ -1,4 +1,4 @@
-package _interface
+package vat_gateway
 
 import (
 	"unibee/api/bean"

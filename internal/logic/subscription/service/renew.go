@@ -24,6 +24,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/user/sub_update"
+	"unibee/internal/logic/user/vat"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/unibee"
@@ -59,7 +60,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, countryCode, vatNumber, err := vat.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}

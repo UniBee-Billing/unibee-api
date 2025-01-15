@@ -98,6 +98,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
 		upgradeLongerOnly = 0
 	}
+	utility.Assert(upgradeOnly+upgradeLongerOnly <= 1, "invalid UpgradeOnly and UpgradeLongerOnly, You can only choose one of two")
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
@@ -167,7 +168,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	} else if req.UpgradeLongerOnly != nil && !*req.UpgradeLongerOnly {
 		upgradeLongerOnly = 0
 	}
-
+	utility.Assert(upgradeOnly+upgradeLongerOnly <= 1, "invalid UpgradeOnly and UpgradeLongerOnly, You can only choose one of two")
 	//edit after activate
 	if one.Status > consts.DiscountStatusEditable {
 		utility.Assert((req.StartTime != nil && req.EndTime != nil) || req.PlanIds != nil, "startTime&endTime or planIds should not be nil")

@@ -12,8 +12,8 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/credit/account"
+	"unibee/internal/logic/credit/credit_query"
 	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -44,10 +44,10 @@ func NewCreditRefund(ctx context.Context, req *CreditRefundInternalReq) (res *Cr
 	utility.Assert(len(req.Currency) > 0, "invalid currency")
 	utility.Assert(len(req.InvoiceId) > 0, "invalid invoiceId")
 	utility.Assert(req.RefundAmount > 0, "invalid totalRefundAmount")
-	user := query.GetUserAccountById(ctx, req.UserId)
+	user := credit_query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid merchantId")
-	payment := query.GetCreditPaymentByCreditPaymentId(ctx, req.CreditPaymentId)
+	payment := credit_query.GetCreditPaymentByCreditPaymentId(ctx, req.CreditPaymentId)
 	utility.Assert(payment != nil, "credit payment not found")
 	if payment.TotalAmount-payment.TotalRefundAmount < req.RefundAmount {
 		return nil, gerror.New("no enough amount can refund")
@@ -55,7 +55,7 @@ func NewCreditRefund(ctx context.Context, req *CreditRefundInternalReq) (res *Cr
 	creditAccount := account.QueryOrCreateCreditAccount(ctx, req.UserId, req.Currency, payment.AccountType)
 	utility.Assert(creditAccount != nil, "credit creditAccount failed")
 	// check exist externalCreditRefundId
-	one := query.GetCreditRefundByExternalCreditRefundId(ctx, req.MerchantId, req.ExternalCreditRefundId)
+	one := credit_query.GetCreditRefundByExternalCreditRefundId(ctx, req.MerchantId, req.ExternalCreditRefundId)
 	utility.Assert(one == nil, "credit payment exist with same externalCreditRefundId")
 	{
 		//name and description
@@ -93,7 +93,7 @@ func NewCreditRefund(ctx context.Context, req *CreditRefundInternalReq) (res *Cr
 			id, _ := result.LastInsertId()
 			one.Id = id
 
-			payment = query.GetCreditPaymentByCreditPaymentId(ctx, req.CreditPaymentId)
+			payment = credit_query.GetCreditPaymentByCreditPaymentId(ctx, req.CreditPaymentId)
 			if payment == nil {
 				return gerror.New("credit payment not found")
 			}

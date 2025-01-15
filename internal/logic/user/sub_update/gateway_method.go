@@ -11,6 +11,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/gateway/util"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
@@ -68,7 +69,7 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	} else if gateway.GatewayType == consts.GatewayTypePaypal && len(paymentMethodId) > 0 {
 		newPaymentMethodId = paymentMethodId
 	}
-	gatewayUser := query.GetGatewayUser(ctx, userId, gatewayId)
+	gatewayUser := util.GetGatewayUser(ctx, userId, gatewayId)
 	if len(newPaymentMethodId) == 0 && gatewayUser != nil && len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
 		newPaymentMethodId = gatewayUser.GatewayDefaultPaymentMethod
 	}
@@ -87,7 +88,7 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 		oldGatewayId, _ = strconv.ParseUint(user.GatewayId, 10, 64)
 	}
 	if len(newPaymentMethodId) > 0 && gatewayUser != nil && strings.Compare(gatewayUser.GatewayDefaultPaymentMethod, newPaymentMethodId) != 0 {
-		_, _ = query.CreateOrUpdateGatewayUser(ctx, userId, gatewayId, gatewayUser.GatewayUserId, newPaymentMethodId)
+		_, _ = util.CreateOrUpdateGatewayUser(ctx, userId, gatewayId, gatewayUser.GatewayUserId, newPaymentMethodId)
 	}
 	if oldGatewayId != gatewayId || user.PaymentMethod != paymentMethodId {
 		_, _ = redismq.Send(&redismq.Message{

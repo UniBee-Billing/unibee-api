@@ -150,12 +150,19 @@ type GatewayUserPaymentMethodReq struct {
 }
 
 type GatewayUserPaymentMethodListResp struct {
-	PaymentMethods []*bean.PaymentMethod `json:"paymentMethods"`
+	PaymentMethods []*PaymentMethod `json:"paymentMethods"`
+}
+
+type PaymentMethod struct {
+	Id        string      `json:"id"`
+	Type      string      `json:"type"`
+	IsDefault bool        `json:"isDefault"`
+	Data      *gjson.Json `json:"data"`
 }
 
 type GatewayUserPaymentMethodCreateAndBindResp struct {
-	PaymentMethod *bean.PaymentMethod `json:"paymentMethod"`
-	Url           string              `json:"url"`
+	PaymentMethod *PaymentMethod `json:"paymentMethod"`
+	Url           string         `json:"url"`
 }
 
 type GatewayMerchantBalanceQueryResp struct {

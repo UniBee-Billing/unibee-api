@@ -6,8 +6,10 @@ import (
 	"strings"
 	"testing"
 	"unibee/internal/cmd/config"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/gateway/api/paypal"
-	"unibee/internal/query"
+	"unibee/internal/logic/gateway/util"
+	entity "unibee/internal/model/entity/default"
 	_ "unibee/test"
 	"unibee/utility"
 )
@@ -20,9 +22,20 @@ func GetPaypalHost() string {
 	return apiHost
 }
 
+func GetPaymentByGatewayPaymentId(ctx context.Context, gatewayPaymentId string) (one *entity.Payment) {
+	if len(gatewayPaymentId) == 0 {
+		return nil
+	}
+	err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().GatewayPaymentId, gatewayPaymentId).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func TestPaypal_Gateway(t *testing.T) {
 	ctx := context.Background()
-	gateway := query.GetGatewayById(ctx, 47)
+	gateway := util.GetGatewayById(ctx, 47)
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, GetPaypalHost())
 	_, err := c.GetAccessToken(context.Background())
 	utility.AssertError(err, "Test Paypal Error")
@@ -42,7 +55,7 @@ func TestPaypal_Gateway(t *testing.T) {
 		if err != nil {
 			t.Errorf("Not expected error for GetOrder(), got %s", err.Error())
 		}
-		payment := query.GetPaymentByGatewayPaymentId(ctx, "2F888037H01542134")
+		payment := GetPaymentByGatewayPaymentId(ctx, "2F888037H01542134")
 		detail, _ := Paypal{}.parsePaypalPayment(ctx, gateway, order, payment)
 		fmt.Println(detail)
 		orderResponse, err := c.CreateOrder(

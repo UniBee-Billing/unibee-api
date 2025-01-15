@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unibee/api/bean"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -31,6 +31,20 @@ import (
 //https://pay.changelly.com/
 
 type Changelly struct {
+}
+
+func (c Changelly) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:                          "Changelly",
+		Description:                   "Use public and private keys to secure the crypto payment.",
+		DisplayName:                   "Crypto",
+		GatewayWebsiteLink:            "https://pay.changelly.com/",
+		GatewayWebhookIntegrationLink: "https://app.pay.changelly.com/integrations",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z44ghlnhkglgo76y.svg",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
+		GatewayType:                   consts.GatewayTypeCrypto,
+		Sort:                          5,
+	}
 }
 
 func (c Changelly) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
@@ -124,14 +138,14 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	var paymentMethods []*bean.PaymentMethod
+	var paymentMethods []*gateway_bean.PaymentMethod
 	for _, a := range responseJson.Array() {
 		if method, ok := a.(map[string]interface{}); ok {
 			if method["code"] != nil && method["networks"] != nil {
 				currencyCode := method["code"].(string)
 				for _, network := range method["networks"].([]interface{}) {
 					if network.(map[string]interface{})["code"] != nil && len(network.(map[string]interface{})["code"].(string)) > 0 {
-						paymentMethods = append(paymentMethods, &bean.PaymentMethod{
+						paymentMethods = append(paymentMethods, &gateway_bean.PaymentMethod{
 							Id: currencyCode + "|" + network.(map[string]interface{})["code"].(string),
 						})
 					}

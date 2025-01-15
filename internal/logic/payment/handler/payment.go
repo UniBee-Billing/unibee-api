@@ -17,6 +17,7 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
@@ -437,7 +438,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			g.Log().Errorf(ctx, `UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 		if len(req.GatewayUserId) > 0 {
-			_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
+			_, _ = util.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
 		}
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 		{
@@ -462,10 +463,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 				sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, payment.UserId, payment.GatewayId, req.GatewayPaymentMethod)
 			}
-			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
+			gatewayUser := util.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
 			gateway := query.GetGatewayById(ctx, payment.GatewayId)
 			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
-				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
+				_, _ = util.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
 				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
 			}
 		}

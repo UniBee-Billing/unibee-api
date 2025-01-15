@@ -18,11 +18,14 @@ import (
 
 var GatewayWebhookNameMapping = map[string]_interface.GatewayWebhookInterface{
 	"stripe":          &StripeWebhook{},
-	"changelly":       &ChangellyWebhook{},
+	"changelly":       &UnitpayWebhook{},
 	"paypal":          &PaypalWebhook{},
 	"invalid":         &InvalidWebhook{},
 	"autotest_crypto": &AutoTestCryptoWebhook{},
 	"autotest":        &AutoTestWebhook{},
+	"unitpay":         &UnitpayWebhook{},
+	"cryptadium":      &PayssionWebhook{},
+	"payssion":        &PayssionWebhook{},
 }
 
 type GatewayWebhookProxy struct {

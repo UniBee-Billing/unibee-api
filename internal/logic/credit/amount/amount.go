@@ -4,12 +4,12 @@ import (
 	"context"
 	"math"
 	"unibee/internal/consts"
-	"unibee/internal/query"
+	"unibee/internal/logic/credit/credit_query"
 	"unibee/utility"
 )
 
 func ConvertCreditAmountToCurrency(ctx context.Context, merchantId uint64, creditType int, currency string, creditAmount int64) (currencyAmount int64, exchangeRate int64) {
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return 0, 0
 	}
@@ -21,7 +21,7 @@ func ConvertCreditAmountToCurrency(ctx context.Context, merchantId uint64, credi
 }
 
 func ConvertCurrencyAmountToCreditAmount(ctx context.Context, merchantId uint64, creditType int, currency string, currencyAmount int64) (creditAmount int64, exchangeRate int64) {
-	one := query.GetCreditConfig(ctx, merchantId, creditType, currency)
+	one := credit_query.GetCreditConfig(ctx, merchantId, creditType, currency)
 	if one == nil {
 		return 0, 0
 	}

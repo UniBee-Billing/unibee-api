@@ -87,7 +87,7 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		mainList = append(mainList, &detail.PaymentDetail{
 			User:    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
 			Payment: bean.SimplifyPayment(one),
-			Gateway: bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
+			Gateway: detail.ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, one.GatewayId)),
 			Invoice: detail2.InvoiceDetail(ctx, one.InvoiceId),
 		})
 	}

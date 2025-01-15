@@ -53,7 +53,7 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		Env:                  config.GetConfigInstance().Env,
 		IsProd:               config.GetConfigInstance().IsProd(),
 		TimeZone:             time.GetTimeZoneList(),
-		Gateways:             bean.SimplifyGatewayList(query.GetMerchantGatewayList(ctx, merchant.Id)),
+		Gateways:             detail.ConvertGatewayList(ctx, query.GetMerchantGatewayList(ctx, merchant.Id)),
 		ExchangeRateApiKey:   utility.HideStar(exchangeApiKey),
 		OpenApiKey:           utility.HideStar(merchant.ApiKey),
 		SendGridKey:          utility.HideStar(emailData),

@@ -13,7 +13,7 @@ import (
 	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
-	"unibee/internal/logic/vat_gateway"
+	"unibee/internal/logic/vat_gateway/setup"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
@@ -64,7 +64,7 @@ func TestSubscription(t *testing.T) {
 		require.Equal(t, true, preview.TotalAmount == (test.TestPlan.Amount*testQuantity)+test.TestRecurringAddon.Amount*testQuantity)
 		require.Equal(t, true, preview.Currency == test.TestPlan.Currency)
 		require.Equal(t, true, len(preview.Gateways) > 0)
-		err = vat_gateway.SetupMerchantVatConfig(ctx, test.TestMerchant.Id, "github", "github", true)
+		err = setup.SetupMerchantVatConfig(ctx, test.TestMerchant.Id, "github", "github", true)
 		require.Nil(t, err)
 		preview, err = service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
 			MerchantId:     test.TestMerchant.Id,
@@ -101,7 +101,7 @@ func TestSubscription(t *testing.T) {
 		require.Equal(t, true, preview.Currency == test.TestPlan.Currency)
 	})
 	t.Run("Test for vat config clean", func(t *testing.T) {
-		require.Nil(t, vat_gateway.CleanMerchantDefaultVatConfig(ctx, test.TestMerchant.Id))
+		require.Nil(t, setup.CleanMerchantDefaultVatConfig(ctx, test.TestMerchant.Id))
 	})
 	t.Run("Test for subscription create|cancelAtPeriodEnd|billing cycle effected", func(t *testing.T) {
 		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{

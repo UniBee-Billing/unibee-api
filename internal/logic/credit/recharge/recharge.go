@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/credit/account"
@@ -33,7 +34,7 @@ type CreditRechargeInternalReq struct {
 type CreditRechargeInternalRes struct {
 	User           *bean.UserAccount    `json:"user"`
 	Merchant       *bean.Merchant       `json:"merchant"`
-	Gateway        *bean.Gateway        `json:"gateway"`
+	Gateway        *detail.Gateway      `json:"gateway"`
 	CreditAccount  *bean.CreditAccount  `json:"creditAccount"`
 	CreditRecharge *bean.CreditRecharge `json:"creditRecharge"`
 	Invoice        *bean.Invoice        `json:"invoice"`
@@ -173,7 +174,7 @@ func CreateRechargePayment(ctx context.Context, req *CreditRechargeInternalReq) 
 
 	return &CreditRechargeInternalRes{
 		User:           bean.SimplifyUserAccount(user),
-		Gateway:        bean.SimplifyGateway(gateway),
+		Gateway:        detail.ConvertGatewayDetail(ctx, gateway),
 		CreditRecharge: bean.SimplifyCreditRecharge(one),
 		Invoice:        bean.SimplifyInvoice(rechargeInvoice),
 		Payment:        bean.SimplifyPayment(createRes.Payment),

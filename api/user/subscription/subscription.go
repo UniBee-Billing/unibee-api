@@ -15,7 +15,7 @@ type UserCurrentSubscriptionDetailRes struct {
 	User                                *bean.UserAccount                       `json:"user" dc:"user"`
 	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
-	Gateway                             *bean.Gateway                           `json:"gateway" dc:"Gateway"`
+	Gateway                             *detail.Gateway                         `json:"gateway" dc:"Gateway"`
 	AddonParams                         []*bean.PlanAddonParam                  `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
 	LatestInvoice                       *bean.Invoice                           `json:"latestInvoice" dc:"LatestInvoice"`
@@ -31,7 +31,7 @@ type DetailRes struct {
 	User                                *bean.UserAccount                       `json:"user" dc:"user"`
 	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
-	Gateway                             *bean.Gateway                           `json:"gateway" dc:"Gateway"`
+	Gateway                             *detail.Gateway                         `json:"gateway" dc:"Gateway"`
 	AddonParams                         []*bean.PlanAddonParam                  `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
 	LatestInvoice                       *bean.Invoice                           `json:"latestInvoice" dc:"LatestInvoice"`
@@ -63,7 +63,7 @@ type CreatePreviewRes struct {
 	Plan                      *bean.Plan                 `json:"plan"`
 	TrialEnd                  int64                      `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 	Quantity                  int64                      `json:"quantity"`
-	Gateway                   *bean.Gateway              `json:"gateway"`
+	Gateway                   *detail.Gateway            `json:"gateway"`
 	AddonParams               []*bean.PlanAddonParam     `json:"addonParams"`
 	Addons                    []*bean.PlanAddonDetail    `json:"addons"`
 	OriginAmount              int64                      `json:"originAmount"                `

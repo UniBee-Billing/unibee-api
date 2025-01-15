@@ -10,7 +10,7 @@ type SubscriptionDetail struct {
 	User                                *bean.UserAccount                `json:"user" dc:"user"`
 	Subscription                        *bean.Subscription               `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.Plan                       `json:"plan" dc:"Plan"`
-	Gateway                             *bean.Gateway                    `json:"gateway" dc:"Gateway"`
+	Gateway                             *Gateway                         `json:"gateway" dc:"Gateway"`
 	AddonParams                         []*bean.PlanAddonParam           `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail          `json:"addons" dc:"Addon"`
 	LatestInvoice                       *bean.Invoice                    `json:"latestInvoice" dc:"LatestInvoice"`

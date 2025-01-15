@@ -122,7 +122,7 @@ type NewCreditRechargeReq struct {
 type NewCreditRechargeRes struct {
 	User           *bean.UserAccount    `json:"user"`
 	Merchant       *bean.Merchant       `json:"merchant"`
-	Gateway        *bean.Gateway        `json:"gateway"`
+	Gateway        *detail.Gateway      `json:"gateway"`
 	CreditAccount  *bean.CreditAccount  `json:"creditAccount"`
 	CreditRecharge *bean.CreditRecharge `json:"creditRecharge"`
 	Invoice        *bean.Invoice        `json:"invoice"`

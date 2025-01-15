@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
+	"unibee/internal/logic/gateway/util"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -97,7 +98,7 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 			if one.Gateway != nil {
 				subGateway = one.Gateway.GatewayName
 				if one.Gateway.GatewayType == consts.GatewayTypeCard {
-					gatewayUser := query.GetGatewayUser(ctx, one.Subscription.UserId, one.Gateway.Id)
+					gatewayUser := util.GetGatewayUser(ctx, one.Subscription.UserId, one.Gateway.Id)
 					if gatewayUser != nil {
 						stripeUserId = gatewayUser.GatewayUserId
 						stripePaymentMethod = one.Subscription.DefaultPaymentMethodId

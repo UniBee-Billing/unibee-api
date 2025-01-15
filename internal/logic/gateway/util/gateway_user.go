@@ -1,4 +1,4 @@
-package query
+package util
 
 import (
 	"context"

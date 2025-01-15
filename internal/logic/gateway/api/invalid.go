@@ -2,11 +2,24 @@ package api
 
 import (
 	"context"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
 )
 
 type Invalid struct{}
+
+func (i Invalid) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:         "Invalid",
+		Description:  "Invalid",
+		DisplayName:  "Invalid",
+		GatewayLogo:  "https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070",
+		GatewayIcons: []string{"https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070"},
+		GatewayType:  consts.GatewayTypeCrypto,
+	}
+}
 
 func (i Invalid) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
 	//TODO implement me

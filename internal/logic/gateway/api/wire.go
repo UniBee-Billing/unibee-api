@@ -6,11 +6,24 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
 )
 
 type Wire struct {
+}
+
+func (w Wire) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:               "Wire Transfer",
+		Description:        "Use this method to receive payment from bank transfer",
+		DisplayName:        "Wire Transfer",
+		GatewayWebsiteLink: "",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg",
+		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg"},
+		GatewayType:        consts.GatewayTypeWireTransfer,
+	}
 }
 
 func (w Wire) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {

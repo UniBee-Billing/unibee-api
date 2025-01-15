@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/credit/payment"
 	refund2 "unibee/internal/logic/credit/refund"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -11,6 +12,14 @@ import (
 )
 
 type Credit struct {
+}
+
+func (c Credit) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		DisplayName:  "Credit",
+		GatewayIcons: []string{"https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070"},
+		GatewayType:  consts.GatewayTypeCredit,
+	}
 }
 
 func (c Credit) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {

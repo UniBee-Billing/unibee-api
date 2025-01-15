@@ -34,6 +34,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/user/sub_update"
+	"unibee/internal/logic/user/vat"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -153,7 +154,7 @@ type UpdatePreviewInternalRes struct {
 	NextPeriodInvoice     *bean.Invoice              `json:"nextPeriodInvoice"`
 	ProrationDate         int64                      `json:"prorationDate"`
 	EffectImmediate       bool                       `json:"EffectImmediate"`
-	Gateways              []*bean.Gateway            `json:"gateways"`
+	Gateways              []*detail.Gateway          `json:"gateways"`
 	Changed               bool                       `json:"changed"`
 	IsUpgrade             bool                       `json:"isUpgrade"`
 	TaxPercentage         int64                      `json:"taxPercentage" `
@@ -189,7 +190,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, countryCode, vatNumber, err := vat.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}

@@ -41,7 +41,7 @@ func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*ent
 	err := dao.MerchantGateway.Ctx(ctx).
 		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
 		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
-		OrderAsc(dao.MerchantGateway.Columns().GatewayType).
+		OrderDesc(dao.MerchantGateway.Columns().EnumKey).
 		Scan(&data)
 	if err != nil {
 		g.Log().Errorf(ctx, "GetMerchantGatewayList error:%s", err)

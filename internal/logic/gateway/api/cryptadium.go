@@ -13,6 +13,7 @@ import (
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -24,6 +25,19 @@ import (
 //https://cryptadium.gitbook.io/cryptadium-api/basics/editor/fiat-payment
 
 type Cryptadium struct {
+}
+
+func (c Cryptadium) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:                          "Cryptadium",
+		Description:                   "Use public and private keys to secure the crypto payment.",
+		DisplayName:                   "Cryptadium",
+		GatewayWebsiteLink:            "https://cryptadium.com/",
+		GatewayWebhookIntegrationLink: "https://cryptadium.gitbook.io/cryptadium-api/webhooks",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z4aupqizzcqsn0pv.jpg",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
+		GatewayType:                   consts.GatewayTypeCrypto,
+	}
 }
 
 func (c Cryptadium) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {

@@ -42,7 +42,7 @@ func ConvertToCreditAccountDetail(ctx context.Context, one *entity.CreditAccount
 type CreditRechargeDetail struct {
 	User           *bean.UserAccount    `json:"user"`
 	Merchant       *bean.Merchant       `json:"merchant"`
-	Gateway        *bean.Gateway        `json:"gateway"`
+	Gateway        *Gateway             `json:"gateway"`
 	CreditAccount  *bean.CreditAccount  `json:"creditAccount"`
 	CreditRecharge *bean.CreditRecharge `json:"creditRecharge"`
 	Invoice        *bean.Invoice        `json:"invoice"`

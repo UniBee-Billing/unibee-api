@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/google/uuid"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -16,6 +17,18 @@ import (
 )
 
 type Coinbase struct {
+}
+
+func (c Coinbase) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:               "CoinBase",
+		Description:        "Use public and private keys to secure the crypto payment.",
+		DisplayName:        "CoinBase",
+		GatewayWebsiteLink: "https://www.coinbase.com/commerce",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d6z4bznbiigd1mq0ug.png",
+		GatewayIcons:       []string{"https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070"},
+		GatewayType:        consts.GatewayTypeCrypto,
+	}
 }
 
 func (c Coinbase) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {

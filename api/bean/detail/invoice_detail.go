@@ -51,7 +51,7 @@ type InvoiceDetail struct {
 	PeriodEnd                      int64                       `json:"periodEnd"                      description:"period_end"`
 	PaymentId                      string                      `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                      `json:"refundId"                       description:"refundId"`
-	Gateway                        *bean.Gateway               `json:"gateway"                        description:"Gateway"`
+	Gateway                        *Gateway                    `json:"gateway"                        description:"Gateway"`
 	Merchant                       *bean.Merchant              `json:"merchant"                       description:"Merchant"`
 	UserAccount                    *bean.UserAccount           `json:"userAccount"                    description:"UserAccount"`
 	UserSnapshot                   *bean.UserAccount           `json:"userSnapshot"                   description:"UserSnapshot"`
@@ -148,7 +148,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
-		Gateway:                        bean.SimplifyGateway(query.GetGatewayById(ctx, invoice.GatewayId)),
+		Gateway:                        ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, invoice.GatewayId)),
 		Merchant:                       bean.SimplifyMerchant(query.GetMerchantById(ctx, invoice.MerchantId)),
 		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, invoice.UserId)),
 		UserSnapshot:                   bean.SimplifyUserAccount(userSnapShot),

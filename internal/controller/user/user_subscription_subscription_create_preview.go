@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/api/user/subscription"
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/service"
@@ -29,7 +30,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		Plan:                      bean.SimplifyPlan(prepare.Plan),
 		TrialEnd:                  prepare.TrialEnd,
 		Quantity:                  prepare.Quantity,
-		Gateway:                   bean.SimplifyGateway(prepare.Gateway),
+		Gateway:                   detail.ConvertGatewayDetail(ctx, prepare.Gateway),
 		AddonParams:               prepare.AddonParams,
 		Addons:                    prepare.Addons,
 		OriginAmount:              prepare.OriginAmount,

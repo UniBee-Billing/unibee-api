@@ -11,12 +11,13 @@ import (
 	"strings"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -27,6 +28,19 @@ import (
 //APIBaseLive = "https://api-m.paypal.com"
 
 type Paypal struct {
+}
+
+func (p Paypal) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:               "PayPal",
+		Description:        "Use ClientId and Secret to secure the payment.",
+		DisplayName:        "PayPal",
+		GatewayWebsiteLink: "https://www.paypal.com/c2/home",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d6yhmepg0oh4xwzzjb.svg",
+		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6yhmepg0oh4xwzzjb.svg"},
+		GatewayType:        consts.GatewayTypePaypal,
+		Sort:               7,
+	}
 }
 
 func (p Paypal) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
@@ -234,7 +248,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 
 func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	utility.Assert(payment != nil, "payment not found")
-	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
@@ -259,7 +273,7 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(len(payment.PaymentData) > 0, "payment capture data not found")
 	var availableCapture *paypal.CaptureAmount
-	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(payment != nil, "gateway not found")
 	gatewayPaymentRo, err := p.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
 	utility.Assert(len(gatewayPaymentRo.PaymentData) > 0, "available capture not found")

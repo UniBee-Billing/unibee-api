@@ -23,6 +23,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	handler3 "unibee/internal/logic/invoice/handler"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/handler"
@@ -264,9 +265,9 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 
 				params := &stripe.SetupIntentParams{}
 				result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
-				one := query.GetGatewayUserByGatewayUserId(r.Context(), result.Customer.ID, gateway.Id)
+				one := util.GetGatewayUserByGatewayUserId(r.Context(), result.Customer.ID, gateway.Id)
 				if one != nil {
-					_, err = query.CreateOrUpdateGatewayUser(r.Context(), one.UserId, gateway.Id, result.Customer.ID, result.PaymentMethod.ID)
+					_, err = util.CreateOrUpdateGatewayUser(r.Context(), one.UserId, gateway.Id, result.Customer.ID, result.PaymentMethod.ID)
 					if err != nil {
 						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error CreateOrUpdateGatewayUser: %s\n", gateway.GatewayName, err.Error())
 					}
@@ -347,7 +348,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				if err != nil {
 					response = "payment not match"
 				}
-				gatewayUser := query.GetGatewayUser(r.Context(), payment.UserId, gateway.Id)
+				gatewayUser := util.GetGatewayUser(r.Context(), payment.UserId, gateway.Id)
 				if gatewayUser != nil && result != nil {
 					//find
 					if strings.Compare(result.Customer.ID, gatewayUser.GatewayUserId) != 0 {

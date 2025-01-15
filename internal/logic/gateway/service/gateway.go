@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -16,11 +16,20 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
-func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string) *entity.MerchantGateway {
+func JoinGatewayIcon(gatewayIcon *[]string) *string {
+	if gatewayIcon == nil {
+		return nil
+	} else {
+		return unibee.String(strings.Join(*gatewayIcon, "|"))
+	}
+}
+
+func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
-	icon, gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
+	_, gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
@@ -28,21 +37,40 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		err = dao.MerchantGateway.Ctx(ctx).
 			Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
 			Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
-			Where(dao.MerchantGateway.Columns().GatewayKey, gatewayKey).
-			Where(dao.MerchantGateway.Columns().GatewaySecret, gatewaySecret).
+			//Where(dao.MerchantGateway.Columns().GatewayKey, gatewayKey).
+			//Where(dao.MerchantGateway.Columns().GatewaySecret, gatewaySecret).
 			OmitEmpty().
 			Scan(&one)
 		utility.AssertError(err, "system error")
 		utility.Assert(one == nil, "same gateway exist")
 	}
+	var name = ""
+	if displayName != nil {
+		name = *displayName
+	}
+	var logo = ""
+	if gatewayIcon != nil {
+		logo = unibee.StringValue(JoinGatewayIcon(gatewayIcon))
+	}
+	var gatewaySort int64 = 0
+	if sort != nil {
+		gatewaySort = *sort
+	} else {
+		gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
+		if gatewayInfo != nil {
+			gatewaySort = gatewayInfo.Sort
+		}
+	}
 	one = &entity.MerchantGateway{
 		MerchantId:    merchantId,
 		GatewayName:   gatewayName,
-		Name:          gatewayName,
 		GatewayKey:    gatewayKey,
 		GatewaySecret: gatewaySecret,
+		EnumKey:       gatewaySort,
 		GatewayType:   gatewayType,
-		Logo:          icon,
+		Name:          name,
+		Logo:          logo,
+		Custom:        utility.MarshalToJsonString(currencyExchange),
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "system error")
@@ -64,20 +92,23 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	return one
 }
 
-func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatewayKey string, gatewaySecret string) *entity.MerchantGateway {
+func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatewayKey string, gatewaySecret string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == merchantId, "merchant not match")
-	icon, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
+	_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 
 	_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
-		dao.MerchantGateway.Columns().Logo:          icon,
+		dao.MerchantGateway.Columns().Logo:          JoinGatewayIcon(gatewayIcon),
+		dao.MerchantGateway.Columns().Name:          displayName,
+		dao.MerchantGateway.Columns().EnumKey:       sort,
 		dao.MerchantGateway.Columns().GatewaySecret: gatewaySecret,
 		dao.MerchantGateway.Columns().GatewayKey:    gatewayKey,
+		dao.MerchantGateway.Columns().Custom:        utility.MarshalMetadataToJsonString(currencyExchange),
 		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
-	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
+	}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "system error")
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
@@ -119,7 +150,7 @@ func EditGatewayCountryConfig(ctx context.Context, merchantId uint64, gatewayId 
 }
 
 func IsGatewaySupportCountryCode(ctx context.Context, gateway *entity.MerchantGateway, countryCode string) bool {
-	gatewaySimplify := bean.SimplifyGateway(gateway)
+	gatewaySimplify := detail.ConvertGatewayDetail(ctx, gateway)
 	var support = true
 	if gatewaySimplify.CountryConfig != nil {
 		if _, ok := gatewaySimplify.CountryConfig[countryCode]; ok {
@@ -131,23 +162,23 @@ func IsGatewaySupportCountryCode(ctx context.Context, gateway *entity.MerchantGa
 	return support
 }
 
-func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*bean.Gateway {
-	var availableGateways []*bean.Gateway
+func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*detail.Gateway {
+	var availableGateways []*detail.Gateway
 	gateways := query.GetMerchantGatewayList(ctx, merchantId)
 	for _, one := range gateways {
 		if IsGatewaySupportCountryCode(ctx, one, countryCode) {
-			availableGateways = append(availableGateways, bean.SimplifyGateway(one))
+			availableGateways = append(availableGateways, detail.ConvertGatewayDetail(ctx, one))
 		}
 	}
 	return availableGateways
 }
 
 type WireTransferSetupReq struct {
-	GatewayId     uint64            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
-	MerchantId    uint64            `json:"merchantId"   dc:"The merchantId of wire transfer" v:"required" `
-	Currency      string            `json:"currency"   dc:"The currency of wire transfer " v:"required" `
-	MinimumAmount int64             `json:"minimumAmount"   dc:"The minimum amount of wire transfer" v:"required" `
-	Bank          *bean.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer " v:"required" `
+	GatewayId     uint64              `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	MerchantId    uint64              `json:"merchantId"   dc:"The merchantId of wire transfer" v:"required" `
+	Currency      string              `json:"currency"   dc:"The currency of wire transfer " v:"required" `
+	MinimumAmount int64               `json:"minimumAmount"   dc:"The minimum amount of wire transfer" v:"required" `
+	Bank          *detail.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer " v:"required" `
 }
 type WireTransferSetupRes struct {
 }

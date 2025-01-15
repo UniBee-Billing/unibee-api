@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -22,6 +23,19 @@ import (
 //https://payssion.com/cn/docs/#api-reference-payment-request
 
 type Payssion struct {
+}
+
+func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+	return &_interface.GatewayInfo{
+		Name:                          "Payssion",
+		Description:                   "Need to replace Use ClientId and Secret to secure the payment",
+		DisplayName:                   "Payssion",
+		GatewayWebsiteLink:            "https://payssion.com",
+		GatewayWebhookIntegrationLink: "https://www.payssion.com/account/app",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d6yhr3m8mzbbgqla37.png",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhr3m8mzbbgqla37.png"},
+		GatewayType:                   consts.GatewayTypeCard,
+	}
 }
 
 func (c Payssion) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {

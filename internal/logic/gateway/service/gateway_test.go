@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"testing"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/query"
 	"unibee/test"
 )
@@ -19,7 +19,7 @@ func TestEditGateway(t *testing.T) {
 				MerchantId:    test.TestMerchant.Id,
 				Currency:      "USD",
 				MinimumAmount: 100,
-				Bank: &bean.GatewayBank{
+				Bank: &detail.GatewayBank{
 					AccountHolder: "testAccountHolder",
 					BIC:           "testBic",
 					IBAN:          "testIBAN",
@@ -35,7 +35,7 @@ func TestEditGateway(t *testing.T) {
 			MerchantId:    test.TestMerchant.Id,
 			Currency:      "USD",
 			MinimumAmount: 200,
-			Bank: &bean.GatewayBank{
+			Bank: &detail.GatewayBank{
 				AccountHolder: "testAccountHolder",
 				BIC:           "testBic",
 				IBAN:          "testIBAN",

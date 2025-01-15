@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/cmd/i18n"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
@@ -80,7 +81,7 @@ type CreatePreviewInternalRes struct {
 	UserId                    uint64                     `json:"userId" `
 	Email                     string                     `json:"email" `
 	VatCountryRate            *bean.VatCountryRate       `json:"vatCountryRate" `
-	Gateways                  []*bean.Gateway            `json:"gateways" `
+	Gateways                  []*detail.Gateway          `json:"gateways" `
 	RecurringDiscountCode     string                     `json:"recurringDiscountCode" `
 	Discount                  *bean.MerchantDiscountCode `json:"discount" `
 	VatNumberValidateMessage  string                     `json:"vatNumberValidateMessage" `

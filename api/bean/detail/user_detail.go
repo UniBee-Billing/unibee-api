@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/credit/account"
+	"unibee/internal/logic/user/vat"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 )
@@ -57,7 +58,7 @@ type UserAccountDetail struct {
 	Status              int                    `json:"status"             description:"0-Active, 2-Suspend"`
 	TaxPercentage       int64                  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`               // taxPercentage，1000 = 10%
 	Type                int64                  `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
-	Gateway             *bean.Gateway          `json:"gateway"            description:"Gateway"`
+	Gateway             *Gateway               `json:"gateway"            description:"Gateway"`
 	City                string                 `json:"city" dc:"city"`
 	ZipCode             string                 `json:"zipCode" dc:"zip_code"`
 	PlanId              uint64                 `json:"planId"             description:"PlanId"`                        // PlanId
@@ -81,6 +82,12 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		}
 	}
 
+	var taxPercentage = one.TaxPercentage
+	percentage, _, _, err := vat.GetUserTaxPercentage(ctx, one.Id)
+	if err == nil {
+		taxPercentage = percentage
+	}
+
 	account.InitPromoCreditUserAccount(ctx, one.MerchantId, one.Id)
 	return &UserAccountDetail{
 		Id:                  one.Id,
@@ -90,7 +97,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		Email:               one.Email,
 		Gender:              one.Gender,
 		Type:                one.Type,
-		TaxPercentage:       one.TaxPercentage,
+		TaxPercentage:       taxPercentage,
 		AvatarUrl:           one.AvatarUrl,
 		ReMark:              one.ReMark,
 		IsSpecial:           one.IsSpecial,
@@ -129,7 +136,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		Status:              one.Status,
 		City:                one.City,
 		ZipCode:             one.ZipCode,
-		Gateway:             bean.SimplifyGateway(query.GetGatewayById(ctx, gatewayId)),
+		Gateway:             ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, gatewayId)),
 		PlanId:              one.PlanId,
 		Language:            one.Language,
 		RegistrationNumber:  one.RegistrationNumber,

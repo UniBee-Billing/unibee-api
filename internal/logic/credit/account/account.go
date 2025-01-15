@@ -6,13 +6,13 @@ import (
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/credit/credit_query"
 	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
 func InitPromoCreditUserAccount(ctx context.Context, merchantId uint64, userId uint64) {
-	list := query.GetCreditConfigList(ctx, merchantId, consts.CreditAccountTypePromo)
+	list := credit_query.GetCreditConfigList(ctx, merchantId, consts.CreditAccountTypePromo)
 	for _, v := range list {
 		QueryOrCreateCreditAccount(ctx, userId, v.Currency, consts.CreditAccountTypePromo)
 	}
@@ -22,9 +22,9 @@ func QueryOrCreateCreditAccount(ctx context.Context, userId uint64, currency str
 	utility.Assert(userId > 0, "Invalid UserId")
 	currency = strings.ToUpper(strings.TrimSpace(currency))
 	utility.Assert(len(currency) > 0, "invalid currency")
-	user := query.GetUserAccountById(ctx, userId)
+	user := credit_query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, "user not found")
-	one := query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
+	one := credit_query.GetCreditAccountByUserId(ctx, userId, creditType, currency)
 	if one == nil {
 		one = &entity.CreditAccount{
 			UserId:         userId,

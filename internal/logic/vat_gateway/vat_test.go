@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	gateway2 "unibee/api/bean"
+	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/test"
 	"unibee/utility"
 )
@@ -19,13 +20,13 @@ func TestVat(t *testing.T) {
 		require.Nil(t, one)
 		_, err = ValidateVatNumberByDefaultGateway(ctx, test.TestMerchant.Id, test.TestUser.Id, "", "")
 		require.NotNil(t, err)
-		err = InitMerchantDefaultVatGateway(ctx, test.TestMerchant.Id)
+		err = setup.InitMerchantDefaultVatGateway(ctx, test.TestMerchant.Id)
 		require.NotNil(t, err)
 		_, err = MerchantCountryRateList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, err)
 		_, err = QueryVatCountryRateByMerchant(ctx, test.TestMerchant.Id, "CN")
 		require.NotNil(t, err)
-		err = SetupMerchantVatConfig(ctx, test.TestMerchant.Id, "github", "github", true)
+		err = setup.SetupMerchantVatConfig(ctx, test.TestMerchant.Id, "github", "github", true)
 		require.Nil(t, err)
 		res, err := ValidateVatNumberByDefaultGateway(ctx, test.TestMerchant.Id, test.TestUser.Id, "IE6388047V", "")
 		require.Nil(t, err)
@@ -34,7 +35,7 @@ func TestVat(t *testing.T) {
 		res, err = ValidateVatNumberByDefaultGateway(ctx, test.TestMerchant.Id, test.TestUser.Id, "IE6388047V"+uuid.New().String(), "")
 		require.NotNil(t, err)
 		require.Nil(t, res)
-		err = InitMerchantDefaultVatGateway(ctx, test.TestMerchant.Id)
+		err = setup.InitMerchantDefaultVatGateway(ctx, test.TestMerchant.Id)
 		require.Nil(t, err)
 		_, err = MerchantCountryRateList(ctx, test.TestMerchant.Id)
 		require.Nil(t, err)
@@ -42,7 +43,7 @@ func TestVat(t *testing.T) {
 		require.Nil(t, err)
 	})
 	t.Run("Test for vat config clean", func(t *testing.T) {
-		require.Nil(t, CleanMerchantDefaultVatConfig(ctx, test.TestMerchant.Id))
+		require.Nil(t, setup.CleanMerchantDefaultVatConfig(ctx, test.TestMerchant.Id))
 	})
 
 	t.Run("Test MLX Gateway Vat Config", func(t *testing.T) {

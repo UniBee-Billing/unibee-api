@@ -9,11 +9,11 @@ import (
 	"github.com/stripe/stripe-go/v78/paymentmethod"
 	"github.com/stripe/stripe-go/v78/refund"
 	"strings"
+	"unibee/internal/logic/gateway/util"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/test/gtest"
 	"testing"
-	"unibee/internal/query"
 	_test "unibee/test"
 )
 
@@ -32,7 +32,7 @@ func setUniBeeAppInfo() {
 func TestCheckout(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		ctx := context.Background()
-		gateway := query.GetGatewayById(ctx, 25)
+		gateway := util.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUniBeeAppInfo()
@@ -79,7 +79,7 @@ func TestCheckout(t *testing.T) {
 func TestStripe(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		ctx := context.Background()
-		gateway := query.GetGatewayById(ctx, 25)
+		gateway := util.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUniBeeAppInfo()
@@ -108,7 +108,7 @@ func TestStripe(t *testing.T) {
 
 	gtest.C(t, func(t *gtest.T) {
 		ctx := context.Background()
-		gateway := query.GetGatewayById(ctx, 25)
+		gateway := util.GetGatewayById(ctx, 25)
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUniBeeAppInfo()
