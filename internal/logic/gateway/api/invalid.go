@@ -26,7 +26,7 @@ func (i Invalid) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.
 	panic("implement me")
 }
 
-func (i Invalid) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (i Invalid) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -91,22 +91,22 @@ func (i Invalid) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Mer
 	panic("implement me")
 }
 
-func (i Invalid) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (i Invalid) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (i Invalid) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (i Invalid) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (i Invalid) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (i Invalid) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (i Invalid) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (i Invalid) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

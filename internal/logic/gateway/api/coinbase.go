@@ -78,7 +78,7 @@ func (c Coinbase) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 	return nil, gerror.New("Not Support")
 }
 
-func (c Coinbase) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c Coinbase) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/charges/"
 	var gasPayer string
 	if createPayContext.Pay.GasPayer == "merchant" {
@@ -100,17 +100,14 @@ func (c Coinbase) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 		"cancel_url\n": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 		"metadata":     createPayContext.Metadata,
 	}
-	responseJson, err := SendCoinbasePaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "CoinbaseNewPayment", nil, createPayContext.Gateway)
+	responseJson, err := SendCoinbasePaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "CoinbaseNewPayment", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	if !responseJson.Contains("id") {
 		return nil, gerror.New("invalid request, id is nil")
-	}
-	if err != nil {
-		return nil, err
 	}
 	var status consts.PaymentStatusEnum = consts.PaymentCreated
 	gatewayPaymentId := responseJson.Get("id").String()
@@ -122,11 +119,11 @@ func (c Coinbase) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 	}, nil
 }
 
-func (c Coinbase) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c Coinbase) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Coinbase) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c Coinbase) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -158,7 +155,7 @@ func (c Coinbase) GatewayRefundDetail(ctx context.Context, gateway *entity.Merch
 	return nil, gerror.New("Not Support")
 }
 
-func (c Coinbase) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Coinbase) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundSuccess,
@@ -166,7 +163,7 @@ func (c Coinbase) GatewayRefund(ctx context.Context, payment *entity.Payment, re
 	}, nil
 }
 
-func (c Coinbase) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Coinbase) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

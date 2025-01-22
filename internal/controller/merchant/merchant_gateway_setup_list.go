@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"sort"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/gateway"
 	_interface "unibee/internal/interface/context"
@@ -14,8 +15,10 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 	for _, gatewayName := range api.ExportGatewaySetupListKeys {
 		if info, exists := api.ExportGatewaySetupList[gatewayName]; exists {
 			one := query.GetGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), gatewayName)
-			if one != nil {
-				list = append(list, detail.ConvertGatewayDetail(ctx, one))
+			if one != nil && one.IsDeleted == 0 {
+				gatewayDetail := detail.ConvertGatewayDetail(ctx, one)
+				gatewayDetail.SubGatewayConfigs = info.SubGatewayConfigs
+				list = append(list, gatewayDetail)
 			} else {
 				list = append(list, &detail.Gateway{
 					Id:                            0,
@@ -38,9 +41,14 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 					WebhookSecret:                 "",
 					Sort:                          0,
 					IsSetupFinished:               false,
+					CurrencyExchangeEnabled:       info.CurrencyExchangeEnabled,
+					SubGatewayConfigs:             info.SubGatewayConfigs,
 				})
 			}
 		}
 	}
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Sort < list[j].Sort
+	})
 	return &gateway.SetupListRes{Gateways: list}, nil
 }

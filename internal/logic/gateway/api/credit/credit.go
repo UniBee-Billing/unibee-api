@@ -54,7 +54,7 @@ func (c Credit) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	return nil, gerror.New("Not Support")
 }
 
-func (c Credit) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c Credit) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	creditPayment, err := payment.NewCreditPayment(ctx, &payment.CreditPaymentInternalReq{
 		UserId:                  createPayContext.Pay.UserId,
 		MerchantId:              createPayContext.Pay.MerchantId,
@@ -79,11 +79,11 @@ func (c Credit) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 	}, nil
 }
 
-func (c Credit) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c Credit) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Credit) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c Credit) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -107,7 +107,7 @@ func (c Credit) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	return nil, gerror.New("Not Support")
 }
 
-func (c Credit) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Credit) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	creditRefund, err := refund2.NewCreditRefund(ctx, &refund2.CreditRefundInternalReq{
 		UserId:                 payment.UserId,
 		MerchantId:             payment.MerchantId,
@@ -129,6 +129,6 @@ func (c Credit) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 	}, nil
 }
 
-func (c Credit) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Credit) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }

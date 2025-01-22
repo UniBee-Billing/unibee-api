@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"strings"
 	"time"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -47,15 +48,15 @@ var GatewayShortNameMapping = map[string]string{
 	"credit":          "CR",
 }
 
-var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion", "cryptadium"}
+var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion"}
 
 var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
-	"stripe":     Stripe{}.GatewayInfo(context.Background()),
-	"changelly":  Changelly{}.GatewayInfo(context.Background()),
-	"paypal":     Paypal{}.GatewayInfo(context.Background()),
-	"unitpay":    UnitPay{}.GatewayInfo(context.Background()),
-	"payssion":   Payssion{}.GatewayInfo(context.Background()),
-	"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
+	"stripe":    Stripe{}.GatewayInfo(context.Background()),
+	"changelly": Changelly{}.GatewayInfo(context.Background()),
+	"paypal":    Paypal{}.GatewayInfo(context.Background()),
+	"unitpay":   UnitPay{}.GatewayInfo(context.Background()),
+	"payssion":  Payssion{}.GatewayInfo(context.Background()),
+	//"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
 }
 
 type GatewayProxy struct {
@@ -115,7 +116,7 @@ func (p GatewayProxy) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayNameMapping[p.GatewayName]
-	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal|changelly|wire_transfer")
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be "+strings.Join(ExportGatewaySetupListKeys, "|"))
 	return
 }
 
@@ -142,6 +143,17 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 }
 
 func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
 	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
 	return icon, gatewayType, err
 }
@@ -280,7 +292,7 @@ func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entit
 	return res, err
 }
 
-func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (p GatewayProxy) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -293,7 +305,7 @@ func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *g
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayNewPayment(ctx, createPayContext)
+	res, err = p.getRemoteGateway().GatewayNewPayment(ctx, gateway, createPayContext)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayNewPayment cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())
@@ -301,7 +313,7 @@ func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *g
 	return res, err
 }
 
-func (p GatewayProxy) GatewayCapture(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (p GatewayProxy) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -314,7 +326,7 @@ func (p GatewayProxy) GatewayCapture(ctx context.Context, pay *entity.Payment) (
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayCapture(ctx, pay)
+	res, err = p.getRemoteGateway().GatewayCapture(ctx, gateway, pay)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayCapture cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())
@@ -322,7 +334,7 @@ func (p GatewayProxy) GatewayCapture(ctx context.Context, pay *entity.Payment) (
 	return res, err
 }
 
-func (p GatewayProxy) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (p GatewayProxy) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -335,7 +347,7 @@ func (p GatewayProxy) GatewayCancel(ctx context.Context, pay *entity.Payment) (r
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayCancel(ctx, pay)
+	res, err = p.getRemoteGateway().GatewayCancel(ctx, gateway, pay)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())
@@ -385,7 +397,7 @@ func (p GatewayProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.
 	return res, err
 }
 
-func (p GatewayProxy) GatewayRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p GatewayProxy) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -398,7 +410,7 @@ func (p GatewayProxy) GatewayRefund(ctx context.Context, pay *entity.Payment, re
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayRefund(ctx, pay, refund)
+	res, err = p.getRemoteGateway().GatewayRefund(ctx, gateway, pay, refund)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefund cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())
@@ -427,7 +439,7 @@ func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.M
 	return res, err
 }
 
-func (p GatewayProxy) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p GatewayProxy) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -440,7 +452,7 @@ func (p GatewayProxy) GatewayRefundCancel(ctx context.Context, payment *entity.P
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayRefundCancel(ctx, payment, refund)
+	res, err = p.getRemoteGateway().GatewayRefundCancel(ctx, gateway, payment, refund)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())

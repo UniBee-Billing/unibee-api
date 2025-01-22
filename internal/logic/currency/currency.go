@@ -18,6 +18,11 @@ func GetMerchantCurrencies() []*bean.Currency {
 		Scale:    100,
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "RUB",
+		Symbol:   "₽",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "JPY",
 		Symbol:   "¥",
 		Scale:    1,

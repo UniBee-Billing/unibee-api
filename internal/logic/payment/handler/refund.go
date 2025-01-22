@@ -126,14 +126,14 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
-	payment := query.GetPaymentByPaymentId(ctx, one.RefundId)
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, refundId=%s", one.RefundId)
 		return gerror.New("payment not found")
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			_, err = transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundFailed, dao.Refund.Columns().RefundComment: req.Reason},
+			_, err = transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundFailed, dao.Refund.Columns().RefundCommentExplain: req.Reason},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
 			if err != nil {
 				return err

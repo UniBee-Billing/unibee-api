@@ -58,6 +58,7 @@ type GatewayPaymentRefundResp struct {
 	Currency         string                  `json:"currency"              `
 	RefundTime       *gtime.Time             `json:"refundTime" `
 	Type             int                     `json:"type" `
+	RefundSequence   *int64                  `json:"refundSequence" `
 }
 
 type GatewayCryptoFromCurrencyAmountDetailReq struct {
@@ -106,6 +107,7 @@ type GatewayPaymentRo struct {
 	GatewayUserId        string      `json:"gatewayUserId"         `
 	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
 	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `
+	RefundSequence       int64       `json:"refundSequence" `
 }
 
 type GatewayCreateSubscriptionResp struct {

@@ -2,6 +2,7 @@ package utility
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -18,7 +19,12 @@ func SendRequest(url string, method string, data []byte, headers map[string]stri
 	for key, value := range headers {
 		request.Header.Set(key, value)
 	}
-	client := &http.Client{}
+	//client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err

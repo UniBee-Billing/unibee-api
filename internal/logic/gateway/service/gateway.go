@@ -29,21 +29,23 @@ func JoinGatewayIcon(gatewayIcon *[]string) *string {
 
 func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
-	_, gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
-	utility.AssertError(err, "gateway test error, key or secret invalid")
+	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
+	utility.Assert(gatewayInfo != nil, "gateway not ready")
+	if len(gatewayKey) > 0 || len(gatewaySecret) > 0 {
+		_, _, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
+		utility.AssertError(err, "gateway test error, key or secret invalid")
+	}
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
-	if config.GetConfigInstance().IsProd() {
-		err = dao.MerchantGateway.Ctx(ctx).
-			Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
-			Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
-			//Where(dao.MerchantGateway.Columns().GatewayKey, gatewayKey).
-			//Where(dao.MerchantGateway.Columns().GatewaySecret, gatewaySecret).
-			OmitEmpty().
-			Scan(&one)
-		utility.AssertError(err, "system error")
-		utility.Assert(one == nil, "same gateway exist")
-	}
+	err := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+		Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
+		OmitEmpty().
+		Scan(&one)
+	utility.AssertError(err, "system error")
+	utility.Assert(one == nil, "same gateway exist")
+
 	var name = ""
 	if displayName != nil {
 		name = *displayName
@@ -56,10 +58,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	if sort != nil {
 		gatewaySort = *sort
 	} else {
-		gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
-		if gatewayInfo != nil {
-			gatewaySort = gatewayInfo.Sort
-		}
+		gatewaySort = gatewayInfo.Sort
 	}
 	one = &entity.MerchantGateway{
 		MerchantId:    merchantId,
@@ -67,7 +66,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		GatewayKey:    gatewayKey,
 		GatewaySecret: gatewaySecret,
 		EnumKey:       gatewaySort,
-		GatewayType:   gatewayType,
+		GatewayType:   gatewayInfo.GatewayType,
 		Name:          name,
 		Logo:          logo,
 		Custom:        utility.MarshalToJsonString(currencyExchange),
@@ -77,7 +76,9 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 
-	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+	if len(gatewayKey) > 0 || len(gatewaySecret) > 0 {
+		gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+	}
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
@@ -92,31 +93,68 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	return one
 }
 
-func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatewayKey string, gatewaySecret string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
+func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targetGatewayKey *string, targetGatewaySecret *string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == merchantId, "merchant not match")
-	_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
-	utility.AssertError(err, "gateway test error, key or secret invalid")
 
-	_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
-		dao.MerchantGateway.Columns().Logo:          JoinGatewayIcon(gatewayIcon),
-		dao.MerchantGateway.Columns().Name:          displayName,
-		dao.MerchantGateway.Columns().EnumKey:       sort,
-		dao.MerchantGateway.Columns().GatewaySecret: gatewaySecret,
-		dao.MerchantGateway.Columns().GatewayKey:    gatewayKey,
-		dao.MerchantGateway.Columns().Custom:        utility.MarshalMetadataToJsonString(currencyExchange),
-		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
+	if targetGatewayKey != nil || targetGatewaySecret != nil {
+		gatewayKey := one.GatewayKey
+		gatewaySecret := one.GatewaySecret
+		if targetGatewayKey != nil {
+			gatewayKey = *targetGatewayKey
+		}
+		if targetGatewaySecret != nil {
+			gatewaySecret = *targetGatewaySecret
+		}
+		_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
+		utility.AssertError(err, "gateway test error, key or secret invalid")
+		_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+			dao.MerchantGateway.Columns().GatewaySecret: gatewaySecret,
+			dao.MerchantGateway.Columns().GatewayKey:    gatewayKey,
+		}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
+		utility.AssertError(err, "system error")
+		gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+	}
+
+	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().Logo:      JoinGatewayIcon(gatewayIcon),
+		dao.MerchantGateway.Columns().Name:      displayName,
+		dao.MerchantGateway.Columns().EnumKey:   sort,
+		dao.MerchantGateway.Columns().Custom:    utility.MarshalMetadataToJsonString(currencyExchange),
+		dao.MerchantGateway.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "system error")
 
-	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 	one = query.GetGatewayById(ctx, gatewayId)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Edit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+	return one
+}
+
+func ArchiveGateway(ctx context.Context, merchantId uint64, gatewayId uint64) *entity.MerchantGateway {
+	utility.Assert(gatewayId > 0, "gatewayId invalid")
+	one := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == merchantId, "merchant not match")
+	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().IsDeleted: gtime.Now().Timestamp(),
+	}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
+	utility.AssertError(err, "system error")
+	one = query.GetGatewayById(ctx, gatewayId)
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
+		Content:        "Archive",
 		UserId:         0,
 		SubscriptionId: "",
 		InvoiceId:      "",
@@ -164,7 +202,7 @@ func IsGatewaySupportCountryCode(ctx context.Context, gateway *entity.MerchantGa
 
 func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*detail.Gateway {
 	var availableGateways []*detail.Gateway
-	gateways := query.GetMerchantGatewayList(ctx, merchantId)
+	gateways := query.GetValidMerchantGatewayList(ctx, merchantId)
 	for _, one := range gateways {
 		if IsGatewaySupportCountryCode(ctx, one, countryCode) {
 			availableGateways = append(availableGateways, detail.ConvertGatewayDetail(ctx, one))

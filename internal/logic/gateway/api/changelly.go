@@ -40,7 +40,7 @@ func (c Changelly) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		DisplayName:                   "Crypto",
 		GatewayWebsiteLink:            "https://pay.changelly.com/",
 		GatewayWebhookIntegrationLink: "https://app.pay.changelly.com/integrations",
-		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z44ghlnhkglgo76y.svg",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q3bqzdzofqxyjxl.png",
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
 		GatewayType:                   consts.GatewayTypeCrypto,
 		Sort:                          5,
@@ -160,7 +160,7 @@ func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, ga
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c Changelly) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api/payment/v1/payments"
 	var gasPayer string
 	if createPayContext.Pay.GasPayer == "merchant" {
@@ -194,17 +194,14 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 		"payment_data":         createPayContext.Metadata,
 		"pending_deadline_at":  time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
 	}
-	responseJson, err := SendChangellyPaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "ChangelyNewPayment", nil, createPayContext.Gateway)
+	responseJson, err := SendChangellyPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "ChangelyNewPayment", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	if !responseJson.Contains("id") {
 		return nil, gerror.New("invalid request, id is nil")
-	}
-	if err != nil {
-		return nil, err
 	}
 	var status consts.PaymentStatusEnum = consts.PaymentCreated
 	gatewayPaymentId := responseJson.Get("id").String()
@@ -216,11 +213,11 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 	}, nil
 }
 
-func (c Changelly) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c Changelly) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c Changelly) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -249,7 +246,7 @@ func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.Merc
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Changelly) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundCreated,
@@ -257,7 +254,7 @@ func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, r
 	}, nil
 }
 
-func (c Changelly) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Changelly) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		MerchantId:       strconv.FormatUint(payment.MerchantId, 10),
 		GatewayRefundId:  refund.GatewayRefundId,

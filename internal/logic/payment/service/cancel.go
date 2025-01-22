@@ -9,6 +9,7 @@ import (
 	"unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err error) {
@@ -28,7 +29,9 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 	if payment.Status != consts.PaymentCreated {
 		return gerror.New("payment not created status or already success")
 	}
-	res, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCancel(ctx, payment)
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	res, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCancel(ctx, gateway, payment)
 	if err != nil {
 		return err
 	}
@@ -66,7 +69,9 @@ func PaymentRefundGatewayCancel(ctx context.Context, refund *entity.Refund) (err
 	if refund.Status != consts.RefundCreated {
 		return gerror.New("refund not create status or already success")
 	}
-	res, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefundCancel(ctx, payment, refund)
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	res, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefundCancel(ctx, gateway, payment, refund)
 	if err != nil {
 		return err
 	}

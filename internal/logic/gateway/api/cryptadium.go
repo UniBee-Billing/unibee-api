@@ -34,7 +34,7 @@ func (c Cryptadium) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		DisplayName:                   "Cryptadium",
 		GatewayWebsiteLink:            "https://cryptadium.com/",
 		GatewayWebhookIntegrationLink: "https://cryptadium.gitbook.io/cryptadium-api/webhooks",
-		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z4aupqizzcqsn0pv.jpg",
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png",
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
 		GatewayType:                   consts.GatewayTypeCrypto,
 	}
@@ -99,7 +99,7 @@ func (c Cryptadium) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, g
 	return nil, gerror.New("Not Support")
 }
 
-func (c Cryptadium) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c Cryptadium) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api/v1/payment/pages/fiat"
 	var gasPayer string
 	if createPayContext.Pay.GasPayer == "merchant" {
@@ -136,8 +136,8 @@ func (c Cryptadium) GatewayNewPayment(ctx context.Context, createPayContext *gat
 		"payment_data":         createPayContext.Metadata,
 		"pending_deadline_at":  time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
 	}
-	responseJson, err := SendCryptadiumPaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "CryptadiumNewPayment", nil, createPayContext.Gateway)
+	responseJson, err := SendCryptadiumPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "CryptadiumNewPayment", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +158,11 @@ func (c Cryptadium) GatewayNewPayment(ctx context.Context, createPayContext *gat
 	}, nil
 }
 
-func (c Cryptadium) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c Cryptadium) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Cryptadium) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c Cryptadium) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -191,7 +191,7 @@ func (c Cryptadium) GatewayRefundDetail(ctx context.Context, gateway *entity.Mer
 	return nil, gerror.New("Not Support")
 }
 
-func (c Cryptadium) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Cryptadium) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundCreated,
@@ -199,7 +199,7 @@ func (c Cryptadium) GatewayRefund(ctx context.Context, payment *entity.Payment, 
 	}, nil
 }
 
-func (c Cryptadium) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Cryptadium) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		MerchantId:       strconv.FormatUint(payment.MerchantId, 10),
 		GatewayRefundId:  refund.GatewayRefundId,

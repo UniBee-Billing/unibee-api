@@ -8,6 +8,7 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/gateway/api"
 	entity "unibee/internal/model/entity/default"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -15,7 +16,9 @@ func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err er
 	utility.Assert(payment != nil, "entity not found")
 	utility.Assert(payment.Status == consts.PaymentCreated, "payment not waiting for pay")
 	utility.Assert(payment.AuthorizeStatus == consts.Authorized, "payment not authorised")
-	_, err = api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCapture(ctx, payment)
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	_, err = api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCapture(ctx, gateway, payment)
 	if err != nil {
 		g.Log().Errorf(ctx, "PaymentGatewayCapture paymentId:%s, error:%s", payment.PaymentId, err.Error())
 		return err

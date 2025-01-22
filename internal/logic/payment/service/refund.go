@@ -50,6 +50,13 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
 	utility.Assert(req.RefundAmount <= payment.TotalAmount-payment.RefundAmount, "no enough amount can refund")
 
+	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gateway.GatewayName).GatewayInfo(ctx)
+	utility.Assert(gatewayInfo != nil, "gateway information not found")
+	if gatewayInfo.QueueForRefund {
+		pendingRefunds := query.GetPendingGatewayTypeRefundsByPaymentId(ctx, req.PaymentId)
+		utility.Assert(len(pendingRefunds) == 0, "Other refund still in process")
+	}
+
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
 
@@ -135,7 +142,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	if err != nil {
 		return nil, err
 	}
-	gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, payment, one)
+	gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, gateway, payment, one)
 	if err != nil {
 		return nil, err
 	}
@@ -144,8 +151,9 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	one.Status = int(gatewayResult.Status)
 	one.Type = gatewayResult.Type
 	_, err = dao.Refund.Ctx(ctx).Data(g.Map{
-		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId,
-		dao.Refund.Columns().Type:            gatewayResult.Type,
+		dao.Refund.Columns().GatewayRefundId:       gatewayResult.GatewayRefundId,
+		dao.Refund.Columns().Type:                  gatewayResult.Type,
+		dao.Refund.Columns().RefundGatewaySequence: gatewayResult.RefundSequence,
 	}).Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
 	if err != nil {
 		return nil, err
@@ -187,6 +195,15 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 			if err != nil {
 				return nil, err
 			}
+		} else if gatewayResult.Status == consts.RefundFailed {
+			err = handler.HandleRefundFailure(ctx, &handler.HandleRefundReq{
+				RefundId:         one.RefundId,
+				GatewayRefundId:  gatewayResult.GatewayRefundId,
+				RefundAmount:     gatewayResult.RefundAmount,
+				RefundStatusEnum: gatewayResult.Status,
+				RefundTime:       gatewayResult.RefundTime,
+				Reason:           gatewayResult.Reason,
+			})
 		}
 	}
 	return one, nil

@@ -45,6 +45,7 @@ func (c CryptadiumWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merc
 	} else {
 		g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled paymentId\n", gateway.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		responseBack = http.StatusBadRequest
 	}
 	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	r.Response.WriteHeader(responseBack)

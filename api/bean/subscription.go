@@ -108,6 +108,10 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		_interface.Context().Get(ctx) != nil &&
 		_interface.Context().Get(ctx).IsAdminPortalCall {
 		currentPeriodEnd = one.CurrentPeriodEnd
+	} else {
+		if one.Status == consts.SubStatusIncomplete {
+			one.Status = consts.SubStatusActive
+		}
 	}
 	return &Subscription{
 		Id:                     one.Id,

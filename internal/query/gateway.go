@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 )
@@ -36,7 +37,7 @@ func GetGatewayById(ctx context.Context, id uint64) (one *entity.MerchantGateway
 	return
 }
 
-func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*entity.MerchantGateway) {
+func GetValidMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*entity.MerchantGateway) {
 	var data []*entity.MerchantGateway
 	err := dao.MerchantGateway.Ctx(ctx).
 		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
@@ -44,10 +45,18 @@ func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*ent
 		OrderDesc(dao.MerchantGateway.Columns().EnumKey).
 		Scan(&data)
 	if err != nil {
-		g.Log().Errorf(ctx, "GetMerchantGatewayList error:%s", err)
+		g.Log().Errorf(ctx, "GetValidMerchantGatewayList error:%s", err)
 		return nil
 	}
-	return data
+	var validGateways []*entity.MerchantGateway
+	for _, v := range data {
+		if v.GatewayType == consts.GatewayTypeWireTransfer {
+			validGateways = append(validGateways, v)
+		} else if len(v.GatewayKey) > 0 {
+			validGateways = append(validGateways, v)
+		}
+	}
+	return validGateways
 }
 
 func UpdateGatewayWebhookSecret(ctx context.Context, id uint64, secret string) error {

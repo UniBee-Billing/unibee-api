@@ -32,7 +32,7 @@ func FileEntry(r *ghttp.Request) {
 	}
 	extension := filepath.Ext(filename)
 	var download bool
-	if extension == ".jpg" || extension == ".jpeg" || extension == ".png" {
+	if extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".svg" {
 		download = false
 	} else {
 		download = true
@@ -41,6 +41,8 @@ func FileEntry(r *ghttp.Request) {
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+filename+"\"")
+	} else if extension == ".svg" {
+		r.Response.Header().Add("Content-type", "image/svg+xml")
 	} else {
 		r.Response.Header().Add("Content-type", "image/"+strings.ReplaceAll(extension, ".", ""))
 	}

@@ -291,13 +291,13 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				// Then define and call a func to handle the successful attachment of a PaymentMethod.
 				gatewayPaymentId := resource.Get("id").String()
 				payment := query.GetPaymentByGatewayPaymentId(r.Context(), gatewayPaymentId)
-				if payment.MerchantId != gateway.MerchantId {
+				if payment != nil && payment.MerchantId != gateway.MerchantId {
 					g.Log().Errorf(r.Context(), "Webhook Channel:%s-%d, Payment Merchant Not Match error:%s\n", gateway.GatewayName, gateway.Id, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				} else if payment != nil {
 					if eventType == "CHECKOUT.ORDER.APPROVED" {
-						_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), payment)
+						_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), gateway, payment)
 						if err != nil {
 							g.Log().Errorf(r.Context(), "Webhook Gateway paypal GatewayCapture error:%s", err.Error())
 						}

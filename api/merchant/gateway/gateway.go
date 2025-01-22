@@ -33,7 +33,7 @@ type SetupReq struct {
 	GatewayName      string                            `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly|unitpay|payssion|cryptadium" v:"required"`
 	DisplayName      *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayIcons     *[]string                         `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer"`
+	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
 	GatewayKey       string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret    string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
@@ -43,16 +43,24 @@ type SetupRes struct {
 }
 
 type EditReq struct {
-	g.Meta           `path:"/edit" tags:"Gateway" method:"post" summary:"Payment Gateway Edit" dc:"edit the exist payment gateway"`
+	g.Meta           `path:"/edit" tags:"Gateway" method:"post" summary:"Payment Gateway Edit" dc:"Edit the exist payment gateway"`
 	GatewayId        uint64                            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	DisplayName      *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayLogo      *[]string                         `json:"gatewayLogo"  dc:"The logo of payment gateway"`
-	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer"`
-	GatewayKey       string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
-	GatewaySecret    string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
+	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	GatewayKey       *string                           `json:"gatewayKey"  dc:"The key of payment gateway" `
+	GatewaySecret    *string                           `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 }
 type EditRes struct {
+	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
+}
+
+type ArchiveReq struct {
+	g.Meta    `path:"/archive" tags:"Gateway" method:"post" summary:"Payment Gateway Archive" dc:"Archive the exist payment gateway，available for setup new one, the old user continue using the old gateway"`
+	GatewayId uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+}
+type ArchiveRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 

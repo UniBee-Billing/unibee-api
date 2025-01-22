@@ -35,7 +35,7 @@ func (a AutoTestCrypto) GatewayCryptoFiatTrans(ctx context.Context, from *gatewa
 	}, nil
 }
 
-func (a AutoTestCrypto) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (a AutoTestCrypto) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		MerchantId:       strconv.FormatUint(payment.MerchantId, 10),
 		GatewayRefundId:  refund.GatewayRefundId,
@@ -135,7 +135,7 @@ func (a AutoTestCrypto) GatewayUserDetailQuery(ctx context.Context, gateway *ent
 	}, nil
 }
 
-func (a AutoTestCrypto) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (a AutoTestCrypto) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	if createPayContext.CheckoutMode || !createPayContext.PayImmediate {
 		return &gateway_bean.GatewayNewPaymentResp{
 			Status:                 consts.PaymentCreated,
@@ -153,12 +153,12 @@ func (a AutoTestCrypto) GatewayNewPayment(ctx context.Context, createPayContext 
 	}
 }
 
-func (a AutoTestCrypto) GatewayCapture(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (a AutoTestCrypto) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AutoTestCrypto) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (a AutoTestCrypto) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{
 		MerchantId:      strconv.FormatUint(pay.MerchantId, 10),
 		GatewayCancelId: pay.PaymentId,
@@ -167,7 +167,7 @@ func (a AutoTestCrypto) GatewayCancel(ctx context.Context, pay *entity.Payment) 
 	}, nil
 }
 
-func (a AutoTestCrypto) GatewayRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (a AutoTestCrypto) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundCreated,

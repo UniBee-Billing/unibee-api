@@ -42,7 +42,7 @@ func (t RefundCheckerListener) Consume(ctx context.Context, message *redismq.Mes
 					g.Log().Errorf(ctx, "RefundCheckerListener_Rollback refund:%s error:%s", message.Body, err.Error())
 				} else {
 					if gatewayRefundRo.Status == consts.RefundSuccess {
-						err := handler2.HandleRefundSuccess(ctx, &handler2.HandleRefundReq{
+						err = handler2.HandleRefundSuccess(ctx, &handler2.HandleRefundReq{
 							RefundId:         one.RefundId,
 							GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
 							RefundAmount:     gatewayRefundRo.RefundAmount,
@@ -57,7 +57,7 @@ func (t RefundCheckerListener) Consume(ctx context.Context, message *redismq.Mes
 							return redismq.CommitMessage
 						}
 					} else if gatewayRefundRo.Status == consts.RefundFailed {
-						err := handler2.HandleRefundFailure(ctx, &handler2.HandleRefundReq{
+						err = handler2.HandleRefundFailure(ctx, &handler2.HandleRefundReq{
 							RefundId:         one.RefundId,
 							GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
 							RefundAmount:     gatewayRefundRo.RefundAmount,
@@ -72,7 +72,7 @@ func (t RefundCheckerListener) Consume(ctx context.Context, message *redismq.Mes
 							return redismq.CommitMessage
 						}
 					} else if gatewayRefundRo.Status == consts.RefundCancelled {
-						err := handler2.HandleRefundCancelled(ctx, &handler2.HandleRefundReq{
+						err = handler2.HandleRefundCancelled(ctx, &handler2.HandleRefundReq{
 							RefundId:         one.RefundId,
 							GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
 							RefundAmount:     gatewayRefundRo.RefundAmount,
@@ -87,7 +87,7 @@ func (t RefundCheckerListener) Consume(ctx context.Context, message *redismq.Mes
 							return redismq.CommitMessage
 						}
 					} else if gatewayRefundRo.Status == consts.RefundReverse {
-						err := handler2.HandleRefundReversed(ctx, &handler2.HandleRefundReq{
+						err = handler2.HandleRefundReversed(ctx, &handler2.HandleRefundReq{
 							RefundId:         one.RefundId,
 							GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
 							RefundAmount:     gatewayRefundRo.RefundAmount,

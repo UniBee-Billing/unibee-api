@@ -10,11 +10,11 @@ import (
 
 func IsNewSubscriptionUser(ctx context.Context, merchantId uint64, email string) bool {
 	if merchantId <= 0 || len(email) == 0 {
-		return false
+		return true
 	}
 	user := query.GetUserAccountByEmail(ctx, merchantId, email)
 	if user == nil {
-		return false
+		return true
 	}
 	var one *entity.Invoice
 	_ = dao.Invoice.Ctx(ctx).

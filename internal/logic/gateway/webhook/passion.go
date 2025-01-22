@@ -35,8 +35,8 @@ func (c PayssionWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Mercha
 	}
 	g.Log().Info(r.Context(), "Receive_Webhook_Channel:", gateway.GatewayName, " hook:", jsonData.String())
 	var responseBack = http.StatusOK
-	if jsonData.Contains("payment_id") {
-		err = ProcessPaymentWebhook(r.Context(), jsonData.Get("order_id").String(), jsonData.Get("payment_id").String(), gateway)
+	if jsonData.Contains("transaction_id") {
+		err = ProcessPaymentWebhook(r.Context(), jsonData.Get("order_id").String(), jsonData.Get("transaction_id").String(), gateway)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
@@ -45,6 +45,7 @@ func (c PayssionWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Mercha
 	} else {
 		g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled paymentId\n", gateway.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		responseBack = http.StatusBadRequest
 	}
 	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	r.Response.WriteHeader(responseBack)
@@ -52,7 +53,7 @@ func (c PayssionWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Mercha
 }
 
 func (c PayssionWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	payIdStr := r.Get("paymentId").String()
+	payIdStr := r.Get("order_id").String()
 	var response string
 	var status = false
 	var returnUrl = ""

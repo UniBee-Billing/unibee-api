@@ -16,7 +16,6 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
-	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -36,7 +35,7 @@ func (p Paypal) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		Description:        "Use ClientId and Secret to secure the payment.",
 		DisplayName:        "PayPal",
 		GatewayWebsiteLink: "https://www.paypal.com/c2/home",
-		GatewayLogo:        "https://api.unibee.top/oss/file/d6yhmepg0oh4xwzzjb.svg",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d76q3sb18tx0d9uclg.png",
 		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6yhmepg0oh4xwzzjb.svg"},
 		GatewayType:        consts.GatewayTypePaypal,
 		Sort:               7,
@@ -47,7 +46,7 @@ func (p Paypal) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 	return nil, gerror.New("not support")
 }
 
-func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p Paypal) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("not support")
 }
 
@@ -158,9 +157,8 @@ func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	return nil, gerror.New("not support")
 }
 
-func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
-	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
-	c, _ := NewClient(createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, p.GetPaypalHost())
+func (p Paypal) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
 	var items = make([]paypal.Item, 0)
 	for _, line := range createPayContext.Invoice.Lines {
@@ -228,12 +226,12 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		},
 		createPayContext.Pay.PaymentId,
 	)
-	log.SaveChannelHttpLog("GatewayNewPayment", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", createPayContext.Gateway.GatewayName, createPayContext.Gateway.Id), nil, createPayContext.Gateway)
+	log.SaveChannelHttpLog("GatewayNewPayment", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 
-	payment, err := p.parsePaypalPayment(ctx, createPayContext.Gateway, detail, createPayContext.Pay)
+	payment, err := p.parsePaypalPayment(ctx, gateway, detail, createPayContext.Pay)
 	if err != nil {
 		return nil, err
 	}
@@ -246,10 +244,8 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 	}, nil
 }
 
-func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (p Paypal) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	utility.Assert(payment != nil, "payment not found")
-	gateway := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
 	captureRes, err := c.CaptureOrder(ctx, payment.GatewayPaymentId, paypal.CaptureOrderRequest{})
@@ -265,16 +261,14 @@ func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 	}, nil
 }
 
-func (p Paypal) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (p Paypal) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
-func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p Paypal) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(len(payment.PaymentData) > 0, "payment capture data not found")
 	var availableCapture *paypal.CaptureAmount
-	gateway := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(payment != nil, "gateway not found")
 	gatewayPaymentRo, err := p.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
 	utility.Assert(len(gatewayPaymentRo.PaymentData) > 0, "available capture not found")
 	utility.AssertError(utility.UnmarshalFromJsonString(gatewayPaymentRo.PaymentData, &availableCapture), "parse capture data error")

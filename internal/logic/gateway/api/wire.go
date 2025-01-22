@@ -58,7 +58,7 @@ func (w Wire) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway
 	return nil, gerror.New("not support")
 }
 
-func (w Wire) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (w Wire) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 consts.PaymentCreated,
 		GatewayPaymentId:       createPayContext.Pay.PaymentId,
@@ -67,11 +67,11 @@ func (w Wire) GatewayNewPayment(ctx context.Context, createPayContext *gateway_b
 	}, nil
 }
 
-func (w Wire) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (w Wire) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("not support")
 }
 
-func (w Wire) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (w Wire) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -118,7 +118,7 @@ func (w Wire) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantG
 	}, nil
 }
 
-func (w Wire) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (w Wire) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundCreated,
@@ -126,7 +126,7 @@ func (w Wire) GatewayRefund(ctx context.Context, payment *entity.Payment, refund
 	}, nil
 }
 
-func (w Wire) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (w Wire) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		MerchantId:       strconv.FormatUint(payment.MerchantId, 10),
 		GatewayRefundId:  refund.GatewayRefundId,

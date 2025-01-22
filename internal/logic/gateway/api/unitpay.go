@@ -20,6 +20,7 @@ import (
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 //https://unitpay.ru/
@@ -27,6 +28,10 @@ import (
 //https://help.unitpay.ru/master/payments/create-payment
 //https://help.unitpay.ru/master/book-of-reference/payment-system-codes
 //How to use test mode https://help.unitpay.ru/master/book-of-reference/test-api
+//https://help.unitpay.ru/other/test-api
+// todo mark 3ds check send email
+// todo mark subscription test
+// todo mark auto-charge response didn't contain paymentId
 
 type UnitPay struct {
 }
@@ -38,9 +43,11 @@ func (c UnitPay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		DisplayName:                   "UnitPay",
 		GatewayWebsiteLink:            "https://unitpay.ru",
 		GatewayWebhookIntegrationLink: "https://unitpay.ru/partner",
-		GatewayLogo:                   "https://api.unibee.top/oss/file/d6z46vn2mytjxvhqcg.svg",
-		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6z46vn2mytjxvhqcg.svg"},
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q4ctiz7jjaemhsr.png",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d76q4ctiz7jjaemhsr.png"},
 		GatewayType:                   consts.GatewayTypeCrypto,
+		CurrencyExchangeEnabled:       true,
+		QueueForRefund:                true,
 	}
 }
 
@@ -49,20 +56,24 @@ func (c UnitPay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.
 }
 
 func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+	utility.Assert(!strings.Contains(key, "-"), "Please using unitpay 'ProjectId' instead 'publicKey'")
 	urlPath := "/api?method=initPayment"
 	param := map[string]interface{}{
 		"currency":    "RUB",
-		"sum":         100.00,
+		"sum":         "100",
 		"paymentType": "card",
 		"desc":        "test_payment_description",
 		"projectId":   key,
-		"account":     "test_unitpay",
+		//"account":     "test_unitpay",
+		"account":        "test",
+		"subscriptionId": 1,
+		//"subscription": true,
 		//"locale":      "en",
 		//"preauth":     0,
 		//"ip": "15155-ae12d",
 	}
 	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), secret)
-	responseJson, err := SendUnitPayPaymentRequest(ctx, key, secret, "GET", urlPath, param)
+	responseJson, err := SendUnitPayPaymentRequest(ctx, secret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("result.paymentId"), "invalid keys, paymentId is nil")
@@ -101,7 +112,15 @@ func (c UnitPay) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gate
 	return nil, gerror.New("Not Support")
 }
 
-func (c UnitPay) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c UnitPay) GetSubscription(ctx context.Context, secret string, subscriptionId string) (res *gjson.Json, err error) {
+	urlPath := "/api?method=getSubscription"
+	param := map[string]interface{}{}
+	param["subscriptionId"] = subscriptionId
+	responseJson, err := SendUnitPayPaymentRequest(ctx, secret, "GET", urlPath, param, false)
+	return responseJson, err
+}
+
+func (c UnitPay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api?method=initPayment"
 	//var name = ""
 	var description = ""
@@ -121,7 +140,7 @@ func (c UnitPay) GatewayNewPayment(ctx context.Context, createPayContext *gatewa
 		"paymentType": "card",
 		//"title":               name,
 		"desc":      description,
-		"projectId": createPayContext.Gateway.GatewayKey,
+		"projectId": gateway.GatewayKey,
 		//"customer_id": strconv.FormatUint(createPayContext.Pay.UserId, 10),
 		"account":   createPayContext.Pay.PaymentId,
 		"resultUrl": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
@@ -129,9 +148,23 @@ func (c UnitPay) GatewayNewPayment(ctx context.Context, createPayContext *gatewa
 		//"payment_data":        createPayContext.Metadata,
 		//"pending_deadline_at": time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
 	}
-	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), createPayContext.Gateway.GatewaySecret)
-	responseJson, err := SendUnitPayPaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "GET", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "UnitPayNewPayment", nil, createPayContext.Gateway)
+	if len(createPayContext.Gateway.UniqueProductId) > 0 && createPayContext.CheckoutMode {
+		param["subscription"] = true
+	}
+	if len(gateway.UniqueProductId) > 0 &&
+		len(createPayContext.GatewayPaymentMethod) > 0 &&
+		!createPayContext.CheckoutMode {
+		subscription, err := c.GetSubscription(ctx, gateway.GatewayKey, createPayContext.GatewayPaymentMethod)
+		if err == nil && subscription != nil &&
+			subscription.Contains("result") &&
+			subscription.Contains("result.status") &&
+			subscription.Get("result.status").String() == "active" {
+			param["subscriptionId"] = createPayContext.GatewayPaymentMethod
+		}
+	}
+	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), gateway.GatewaySecret)
+	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewaySecret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "UnitPayNewPayment", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -153,11 +186,11 @@ func (c UnitPay) GatewayNewPayment(ctx context.Context, createPayContext *gatewa
 	}, nil
 }
 
-func (c UnitPay) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c UnitPay) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c UnitPay) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c UnitPay) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -170,7 +203,7 @@ func (c UnitPay) GatewayPaymentDetail(ctx context.Context, gateway *entity.Merch
 	param := map[string]interface{}{}
 	param["paymentId"] = gatewayPaymentId
 	param["secretKey"] = gateway.GatewaySecret
-	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewaySecret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
 	log.SaveChannelHttpLog("GatewayPaymentDetail", param, responseJson, err, "UnitPayPaymentDetail", nil, gateway)
 	if err != nil {
 		return nil, err
@@ -185,62 +218,75 @@ func (c UnitPay) GatewayRefundList(ctx context.Context, gateway *entity.Merchant
 }
 
 func (c UnitPay) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	urlPath := "/api?method=getPayment"
-	param := map[string]interface{}{}
-	param["paymentId"] = gatewayRefundId
-	param["secretKey"] = gateway.GatewaySecret
-	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
-	log.SaveChannelHttpLog("GatewayPaymentDetail", param, responseJson, err, "UnitPayPaymentDetail", nil, gateway)
+	payment := util.GetPaymentByPaymentId(ctx, refund.PaymentId)
+	if payment == nil {
+		return nil, gerror.New("payment not found")
+	}
+
+	detail, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
 	if err != nil {
 		return nil, err
 	}
-	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	/*
-		success — successful payment;
-		wait — payment is pending;
-		error — payment error;
-		error_pay — error/failure of the store at the PAY stage; in statistics, it is displayed as "incomplete";
-		error_check — error/failure of the store at the CHECK stage, in statistics it is displayed as "rejected";
-		refund — refund to the buyer;
-		secure — being verified by the Bank's security service.
-	*/
-	var status consts.RefundStatusEnum = consts.RefundCreated
-	if strings.Compare(responseJson.Get("state").String(), "refund") == 0 {
-		status = consts.RefundSuccess
+	if detail.RefundSequence > int64(refund.RefundGatewaySequence) {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: gatewayRefundId,
+			Status:          consts.RefundSuccess,
+			Reason:          refund.RefundComment,
+			RefundAmount:    refund.RefundAmount,
+			Currency:        strings.ToUpper(refund.Currency),
+			RefundTime:      gtime.Now(),
+		}, nil
+	} else {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: gatewayRefundId,
+			Status:          consts.RefundCreated,
+			Reason:          refund.RefundComment,
+			RefundAmount:    refund.RefundAmount,
+			Currency:        strings.ToUpper(refund.Currency),
+			RefundTime:      gtime.Now(),
+		}, nil
 	}
-	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: gatewayRefundId,
-		Status:          status,
-		Reason:          refund.RefundComment,
-		RefundAmount:    refund.RefundAmount,
-		Currency:        strings.ToUpper(refund.Currency),
-		RefundTime:      gtime.Now(),
-	}, nil
 }
 
 // https://help.unitpay.ru/master/payments/payment-refund
-func (c UnitPay) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c UnitPay) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	detail, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
+	if err != nil {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: payment.GatewayPaymentId,
+			Status:          consts.RefundFailed,
+			Type:            consts.RefundTypeGateway,
+			Reason:          fmt.Sprintf("Get Gateway Refund Sequence Failed:%s", err.Error()),
+		}, nil
+	}
 	urlPath := "/api?method=refundPayment"
 	param := map[string]interface{}{}
-	gateway := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
 	param["paymentId"] = payment.GatewayPaymentId
-	param["secretKey"] = gateway.GatewaySecret
 	param["sum"] = utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency)
-	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	responseJson, err := SendUnitPayPaymentRequest(ctx, gateway.GatewaySecret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
 	log.SaveChannelHttpLog("GatewayRefund", param, responseJson, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	if err != nil {
 		return nil, err
 	}
+	if responseJson.Contains("error.message") {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: payment.GatewayPaymentId,
+			Status:          consts.RefundFailed,
+			Type:            consts.RefundTypeGateway,
+			Reason:          responseJson.Get("error.message").String(),
+		}, nil
+	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
+
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: payment.GatewayPaymentId,
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeGateway,
+		RefundSequence:  unibee.Int64(detail.RefundSequence),
 	}, nil
 }
 
-func (c UnitPay) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c UnitPay) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -256,18 +302,18 @@ func parseUnitPayPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 	*/
 	var status = consts.PaymentCreated
 	var authorizeStatus = consts.WaitingAuthorized
-	if strings.Compare(item.Get("state").String(), "wait") == 0 {
+	if strings.Compare(item.Get("result.status").String(), "wait") == 0 {
 		authorizeStatus = consts.Authorized
-	} else if strings.Compare(item.Get("state").String(), "success") == 0 {
+	} else if strings.Compare(item.Get("result.status").String(), "success") == 0 {
 		status = consts.PaymentSuccess
-	} else if strings.Compare(item.Get("state").String(), "error_check") == 0 {
+	} else if strings.Compare(item.Get("result.status").String(), "error_check") == 0 {
 		status = consts.PaymentCancelled
-	} else if strings.Compare(item.Get("state").String(), "error_pay") == 0 {
+	} else if strings.Compare(item.Get("result.status").String(), "error_pay") == 0 {
 		status = consts.PaymentFailed
 	}
 
 	var authorizeReason = ""
-	var paymentAmount = utility.ConvertDollarStrToCent(item.GetJson("orderSum").String(), item.Get("orderCurrency").String())
+	var paymentAmount = utility.ConvertDollarStrToCent(item.GetJson("result.orderSum").String(), item.Get("result.orderCurrency").String())
 	var paymentMethod = ""
 	if item.Contains("selected_payment_method") && item.GetJson("selected_payment_method").Contains("payins") {
 		//paymentAmount = utility.ConvertDollarStrToCent(item.GetJson("orderSum").String(), item.Get("orderCurrency").String())
@@ -280,35 +326,41 @@ func parseUnitPayPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 		}
 	}
 
+	var refundSequence int64 = 0
+	if item.Contains("refunds") {
+		refundSequence = int64(len(item.GetJsons("refunds")))
+	}
 	return &gateway_bean.GatewayPaymentRo{
-		GatewayPaymentId:     item.Get("paymentId").String(),
+		GatewayPaymentId:     item.Get("result.paymentId").String(),
 		Status:               status,
 		AuthorizeStatus:      authorizeStatus,
 		AuthorizeReason:      authorizeReason,
 		CancelReason:         "",
 		PaymentData:          item.String(),
-		TotalAmount:          utility.ConvertDollarStrToCent(item.Get("payerSum").String(), item.Get("payerCurrency").String()),
+		TotalAmount:          utility.ConvertDollarStrToCent(item.Get("result.payerSum").String(), item.Get("result.payerCurrency").String()),
 		PaymentAmount:        paymentAmount,
 		GatewayPaymentMethod: paymentMethod,
 		PaidTime:             paidTime,
+		RefundSequence:       refundSequence,
 	}
 }
 
-func SendUnitPayPaymentRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res *gjson.Json, err error) {
+func SendUnitPayPaymentRequest(ctx context.Context, privateKey string, method string, urlPath string, param map[string]interface{}, isProd bool) (res *gjson.Json, err error) {
 	utility.Assert(param != nil, "param is nil")
 
 	param["secretKey"] = privateKey
 	jsonData, err := gjson.Marshal(param)
 	jsonString := string(jsonData)
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
-	g.Log().Debugf(ctx, "\nUnitPay_Start %s %s %s %s\n", method, urlPath, publicKey, jsonString)
+	g.Log().Debugf(ctx, "\nUnitPay_Start %s %s %s\n", method, urlPath, jsonString)
 	body := []byte(jsonString)
 	paramPath := ""
 	for k, v := range param {
 		paramPath = fmt.Sprintf("%s&params[%s]=%v", paramPath, k, url.QueryEscape(fmt.Sprintf("%v", v)))
 	}
 
-	if !config.GetConfigInstance().IsProd() {
+	if !isProd {
+		//paramPath = fmt.Sprintf("%s&params[test]=1&params[login]=senseybiz@gmail.com", paramPath)
 		paramPath = fmt.Sprintf("%s&params[test]=1&params[login]=senseybiz@gmail.com", paramPath)
 	}
 	headers := map[string]string{

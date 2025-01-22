@@ -333,8 +333,8 @@ var (
 				}
 			})
 
-			s.BindHandler("GET:/health", controller.HealthCheck)
-			s.BindHandler("GET:/version", controller.Version)
+			s.BindHandler("/health", controller.HealthCheck)
+			s.BindHandler("/version", controller.Version)
 
 			// Invoice Link
 			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
@@ -348,7 +348,8 @@ var (
 			// Gateway Payment Method Redirect
 			s.BindHandler("GET:/payment/method/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayPaymentMethodRedirectEntrance)
 			// Gateway Webhook
-			s.BindHandler("POST:/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
+			//s.BindHandler("POST:/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
+			s.BindHandler("/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			// Merchant Websocket
 			s.BindHandler("/merchant_ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 

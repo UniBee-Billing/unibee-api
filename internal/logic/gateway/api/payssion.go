@@ -18,11 +18,36 @@ import (
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 //https://payssion.com/cn/docs/#api-reference-payment-request
+// todo mark auto-charge
+// todo mark 3ds check
 
 type Payssion struct {
+}
+
+func fetchSubGateway(ctx context.Context) []*_interface.SubGatewayConfig {
+	//filename := "payssion_sub_gateway.json"
+	//data, err := os.ReadFile(filename)
+	//if err != nil {
+	//	g.Log().Errorf(ctx, "Read sub gateway file: %s", err.Error())
+	//}
+	//
+	//jsonString := string(data)
+	jsonString := "[\n  { \"name\": \"FPX\", \"subGateway\": \"fpx_my\", \"countryName\": \"Malaysia\" },\n  { \"name\": \"eNets\", \"subGateway\": \"enets_sg\", \"countryName\": \"Singapore\" },\n  { \"name\": \"PayNow\", \"subGateway\": \"paynow_sg\", \"countryName\": \"Singapore\" },\n  { \"name\": \"E-banking\", \"subGateway\": \"ebanking_th\", \"countryName\": \"Thailand\" },\n  { \"name\": \"Doku\", \"subGateway\": \"doku_id\", \"countryName\": \"Indonesia\" },\n  { \"name\": \"ATM\", \"subGateway\": \"atm_id\", \"countryName\": \"Indonesia\" },\n  { \"name\": \"Alfamart\", \"subGateway\": \"alfamart_id\", \"countryName\": \"Indonesia\" },\n  { \"name\": \"Dragonpay\", \"subGateway\": \"dragonpay_ph\", \"countryName\": \"Philippines\" },\n  { \"name\": \"Globe Gcash\", \"subGateway\": \"gcash_ph\", \"countryName\": \"Philippines\" },\n  { \"name\": \"CherryCredits\", \"subGateway\": \"cherrycredits\", \"countryName\": \"Global including South East\" },\n  { \"name\": \"MOLPoints\", \"subGateway\": \"molpoints\", \"countryName\": \"Global including South East\" },\n  { \"name\": \"MOLPoints card\", \"subGateway\": \"molpointscard\", \"countryName\": \"Global including South East\" },\n  { \"name\": \"Alipay\", \"subGateway\": \"alipay_cn\", \"countryName\": \"China\" },\n  { \"name\": \"Tenpay\", \"subGateway\": \"tenpay_cn\", \"countryName\": \"China\" },\n  { \"name\": \"Unionpay\", \"subGateway\": \"unionpay_cn\", \"countryName\": \"China\" },\n  { \"name\": \"Gash\", \"subGateway\": \"gash_tw\", \"countryName\": \"Taiwan\" },\n  { \"name\": \"UPI\", \"subGateway\": \"upi_in\", \"countryName\": \"India\" },\n  { \"name\": \"Indian Wallets\", \"subGateway\": \"wallet_in\", \"countryName\": \"India\" },\n  { \"name\": \"India Netbanking\", \"subGateway\": \"ebanking_in\", \"countryName\": \"India\" },\n  { \"name\": \"India Credit/Debit Card\", \"subGateway\": \"bankcard_in\", \"countryName\": \"India\" },\n  { \"name\": \"South Korea Credit Card\", \"subGateway\": \"creditcard_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"South Korea Internet Banking\", \"subGateway\": \"ebanking_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"KakaoPay\", \"subGateway\": \"kakaopay_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"PAYCO\", \"subGateway\": \"payco_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"SSG Pay\", \"subGateway\": \"ssgpay_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"Samsung Pay\", \"subGateway\": \"samsungpay_kr\", \"countryName\": \"South Korea\" },\n  { \"name\": \"onecard\", \"subGateway\": \"onecard\", \"countryName\": \"Middle East & North Africa\" },\n  { \"name\": \"Fawry\", \"subGateway\": \"fawry_eg\", \"countryName\": \"Egypt\" },\n  { \"name\": \"Santander Rio\", \"subGateway\": \"santander_ar\", \"countryName\": \"Argentina\" },\n  { \"name\": \"Pago Fácil\", \"subGateway\": \"pagofacil_ar\", \"countryName\": \"Argentina\" },\n  { \"name\": \"Rapi Pago\", \"subGateway\": \"rapipago_ar\", \"countryName\": \"Argentina\" },\n  { \"name\": \"bancodobrasil\", \"subGateway\": \"bancodobrasil_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"itau\", \"subGateway\": \"itau_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"Boleto\", \"subGateway\": \"boleto_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"bradesco\", \"subGateway\": \"bradesco_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"caixa\", \"subGateway\": \"caixa_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"Santander\", \"subGateway\": \"santander_br\", \"countryName\": \"Brazil\" },\n  { \"name\": \"BBVA Bancomer\", \"subGateway\": \"bancomer_mx\", \"countryName\": \"Mexico\" },\n  { \"name\": \"Santander\", \"subGateway\": \"santander_mx\", \"countryName\": \"Mexico\" },\n  { \"name\": \"oxxo\", \"subGateway\": \"oxxo_mx\", \"countryName\": \"Mexico\" },\n  { \"name\": \"SPEI\", \"subGateway\": \"spei_mx\", \"countryName\": \"Mexico\" },\n  { \"name\": \"redpagos\", \"subGateway\": \"redpagos_uy\", \"countryName\": \"Uruguay\" },\n  { \"name\": \"Abitab\", \"subGateway\": \"abitab_uy\", \"countryName\": \"Uruguay\" },\n  { \"name\": \"Banco de Chile\", \"subGateway\": \"bancochile_cl\", \"countryName\": \"Chile\" },\n  { \"name\": \"RedCompra\", \"subGateway\": \"redcompra_cl\", \"countryName\": \"Chile\" },\n  { \"name\": \"WebPay plus\", \"subGateway\": \"webpay_cl\", \"countryName\": \"Chile\" },\n  { \"name\": \"Servipag\", \"subGateway\": \"servipag_cl\", \"countryName\": \"Chile\" },\n  { \"name\": \"Santander\", \"subGateway\": \"santander_cl\", \"countryName\": \"Chile\" },\n  { \"name\": \"Efecty\", \"subGateway\": \"efecty_co\", \"countryName\": \"Colombia\" },\n  { \"name\": \"PSE\", \"subGateway\": \"pse_co\", \"countryName\": \"Colombia\" },\n  { \"name\": \"BCP\", \"subGateway\": \"bcp_pe\", \"countryName\": \"Peru\" },\n  { \"name\": \"Interbank\", \"subGateway\": \"interbank_pe\", \"countryName\": \"Peru\" },\n  { \"name\": \"BBVA\", \"subGateway\": \"bbva_pe\", \"countryName\": \"Peru\" },\n  { \"name\": \"Pago Efectivo\", \"subGateway\": \"pagoefectivo_pe\", \"countryName\": \"Peru\" },\n  { \"name\": \"BoaCompra\", \"subGateway\": \"boacompra\", \"countryName\": \"Latin America\" },\n  { \"name\": \"QIWI\", \"subGateway\": \"qiwi\", \"countryName\": \"CIS countries\" },\n  { \"name\": \"Yandex.Money\", \"subGateway\": \"yamoney\", \"countryName\": \"CIS countries\" },\n  { \"name\": \"Webmoney\", \"subGateway\": \"webmoney\", \"countryName\": \"CIS countries\" },\n  { \"name\": \"Bank Card (Yandex.Money)\", \"subGateway\": \"yamoneyac\", \"countryName\": \"CIS countries\" },\n  { \"name\": \"Cash (Yandex.Money)\", \"subGateway\": \"yamoneygp\", \"countryName\": \"Russia\" },\n  { \"name\": \"Moneta\", \"subGateway\": \"moneta_ru\", \"countryName\": \"Russia\" },\n  { \"name\": \"Alfa-Click\", \"subGateway\": \"alfaclick_ru\", \"countryName\": \"Russia\" },\n  { \"name\": \"Promsvyazbank\", \"subGateway\": \"promsvyazbank_ru\", \"countryName\": \"Russia\" },\n  { \"name\": \"Faktura\", \"subGateway\": \"faktura_ru\", \"countryName\": \"Russia\" },\n  { \"name\": \"Russia Bank transfer\", \"subGateway\": \"banktransfer_ru\", \"countryName\": \"Russia\" },\n  { \"name\": \"Turkish Credit/Bank Card\", \"subGateway\": \"bankcard_tr\", \"countryName\": \"Turkey\" },\n  { \"name\": \"ininal\", \"subGateway\": \"ininal_tr\", \"countryName\": \"Turkey\" },\n  { \"name\": \"bkmexpress\", \"subGateway\": \"bkmexpress_tr\", \"countryName\": \"Turkey\" },\n  { \"name\": \"Turkish Bank Transfer\", \"subGateway\": \"banktransfer_tr\", \"countryName\": \"Turkey\" },\n  { \"name\": \"Paysafecard\", \"subGateway\": \"paysafecard\", \"countryName\": \"Global\" },\n  { \"name\": \"Sofort\", \"subGateway\": \"sofort\", \"countryName\": \"Europe\" },\n  { \"name\": \"Giropay\", \"subGateway\": \"giropay_de\", \"countryName\": \"Germany\" },\n  { \"name\": \"EPS\", \"subGateway\": \"eps_at\", \"countryName\": \"Austria\" },\n  { \"name\": \"Bancontact/Mistercash\", \"subGateway\": \"bancontact_be\", \"countryName\": \"Belgium\" },\n  { \"name\": \"Dotpay\", \"subGateway\": \"dotpay_pl\", \"countryName\": \"Poland\" },\n  { \"name\": \"P24\", \"subGateway\": \"p24_pl\", \"countryName\": \"Poland\" },\n  { \"name\": \"PayU\", \"subGateway\": \"payu_pl\", \"countryName\": \"Poland\" },\n  { \"name\": \"PayU\", \"subGateway\": \"payu_cz\", \"countryName\": \"Czech Republic\" },\n  { \"name\": \"iDeal\", \"subGateway\": \"ideal_nl\", \"countryName\": \"Netherlands\" },\n  { \"name\": \"Multibanco\", \"subGateway\": \"multibanco_pt\", \"countryName\": \"Portugal\" },\n  { \"name\": \"Neosurf\", \"subGateway\": \"neosurf\", \"countryName\": \"France\" },\n  { \"name\": \"Polipayment\", \"subGateway\": \"polipayment\", \"countryName\": \"Australia & New Zealand\" }\n]\n"
+	if !gjson.Valid(jsonString) {
+		g.Log().Errorf(ctx, "Parse sub gateway file error, invalid json file")
+	}
+
+	var list = make([]*_interface.SubGatewayConfig, 0)
+	err := utility.UnmarshalFromJsonString(jsonString, &list)
+	if err != nil {
+		g.Log().Errorf(ctx, "UnmarshalFromJsonString file error: %s", err.Error())
+	}
+
+	return list
 }
 
 func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
@@ -32,9 +57,11 @@ func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		DisplayName:                   "Payssion",
 		GatewayWebsiteLink:            "https://payssion.com",
 		GatewayWebhookIntegrationLink: "https://www.payssion.com/account/app",
-		GatewayLogo:                   "https://api.unibee.top/oss/file/d6yhr3m8mzbbgqla37.png",
-		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhr3m8mzbbgqla37.png"},
+		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q4s98dnw7x1yzzg.png",
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d76q4s98dnw7x1yzzg.png"},
 		GatewayType:                   consts.GatewayTypeCard,
+		QueueForRefund:                true,
+		SubGatewayConfigs:             fetchSubGateway(ctx),
 	}
 }
 
@@ -44,7 +71,7 @@ func (c Payssion) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean
 
 func (c Payssion) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/v1/payments"
-	pmID := "alipay_cn"
+	pmID := "payssion_test"
 	param := map[string]interface{}{
 		"currency":    "EUR",
 		"pm_id":       pmID,
@@ -61,7 +88,7 @@ func (c Payssion) GatewayTest(ctx context.Context, key string, secret string) (i
 	responseJson, err := SendPayssionPaymentRequest(ctx, key, secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	utility.Assert(responseJson.Contains("paymentId"), "invalid keys, id is nil")
+	utility.Assert(responseJson.Contains("transaction.transaction_id"), "invalid keys, transaction_id is nil")
 	return "http://unibee.top/files/invoice/changelly.png", consts.GatewayTypeCrypto, nil
 }
 
@@ -93,7 +120,7 @@ func (c Payssion) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 	return nil, gerror.New("Not Support")
 }
 
-func (c Payssion) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+func (c Payssion) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api/v1/payments"
 	//var name = ""
 	var description = ""
@@ -107,6 +134,9 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 		}
 	}
 	pmID := "alipay_cn"
+	if len(gateway.SubGateway) > 0 {
+		pmID = gateway.SubGateway
+	}
 	param := map[string]interface{}{
 		"currency": createPayContext.Pay.Currency,
 		"amount":   utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
@@ -117,6 +147,7 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 		//"customer_id": strconv.FormatUint(createPayContext.Pay.UserId, 10),
 		"payer_email": createPayContext.Email,
 		"return_url":  webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
+		"notify_url":  webhook2.GetPaymentWebhookEntranceUrl(gateway.Id),
 		//"backUrl":     webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 		//"payment_data": createPayContext.Metadata,
 		//"pending_deadline_at": time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
@@ -124,10 +155,10 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 	if !config.GetConfigInstance().IsProd() {
 		param["pm_id"] = "payssion_test"
 	}
-	param["api_key"] = createPayContext.Gateway.GatewayKey
-	param["api_sig"] = utility.MD5(fmt.Sprintf("%v|%v|%v|%v|%v|%v", param["api_key"], param["pm_id"], param["amount"], param["currency"], param["order_id"], createPayContext.Gateway.GatewaySecret))
-	responseJson, err := SendPayssionPaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "PayssionNewPayment", nil, createPayContext.Gateway)
+	param["api_key"] = gateway.GatewayKey
+	param["api_sig"] = utility.MD5(fmt.Sprintf("%v|%v|%v|%v|%v|%v", param["api_key"], param["pm_id"], param["amount"], param["currency"], param["order_id"], gateway.GatewaySecret))
+	responseJson, err := SendPayssionPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "PayssionNewPayment", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -149,11 +180,11 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 	}, nil
 }
 
-func (c Payssion) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c Payssion) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Payssion) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+func (c Payssion) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
@@ -165,6 +196,7 @@ func (c Payssion) GatewayPaymentDetail(ctx context.Context, gateway *entity.Merc
 	urlPath := "/api/v1/payment/getDetail"
 	param := map[string]interface{}{}
 	param["transaction_id"] = gatewayPaymentId
+	param["order_id"] = payment.PaymentId
 	param["api_key"] = gateway.GatewayKey
 	param["api_sig"] = utility.MD5(fmt.Sprintf("%v|%v|%v|%v", param["api_key"], param["transaction_id"], param["order_id"], gateway.GatewaySecret))
 	responseJson, err := SendPayssionPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
@@ -189,42 +221,48 @@ func (c Payssion) GatewayRefundList(ctx context.Context, gateway *entity.Merchan
 
 // https://payssion.com/cn/docs/#api-reference-payment-details
 func (c Payssion) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	urlPath := "/api/v1/payment/getDetail"
-	param := map[string]interface{}{}
-	param["transaction_id"] = gatewayRefundId
-	param["api_key"] = gateway.GatewayKey
-	param["api_sig"] = utility.MD5(fmt.Sprintf("%v|%v|%v|%v", param["api_key"], param["transaction_id"], param["order_id"], gateway.GatewaySecret))
-	responseJson, err := SendPayssionPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayPaymentDetail", param, responseJson, err, "PayssionPaymentDetail", nil, gateway)
+	payment := util.GetPaymentByPaymentId(ctx, refund.PaymentId)
+	if payment == nil {
+		return nil, gerror.New("payment not found")
+	}
+	detail, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
 	if err != nil {
 		return nil, err
 	}
-	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	if !responseJson.Contains("result_code") || responseJson.Get("result_code").Int() != 200 {
-		return nil, gerror.New("invalid request, result_code is nil or not 200")
+	if detail.RefundSequence > int64(refund.RefundGatewaySequence) {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: gatewayRefundId,
+			Status:          consts.RefundSuccess,
+			Reason:          refund.RefundComment,
+			RefundAmount:    refund.RefundAmount,
+			Currency:        strings.ToUpper(refund.Currency),
+			RefundTime:      gtime.Now(),
+		}, nil
+	} else {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: gatewayRefundId,
+			Status:          consts.RefundCreated,
+			Reason:          refund.RefundComment,
+			RefundAmount:    refund.RefundAmount,
+			Currency:        strings.ToUpper(refund.Currency),
+			RefundTime:      gtime.Now(),
+		}, nil
 	}
-	if !responseJson.Contains("transaction") {
-		return nil, gerror.New("invalid request, transaction is nil")
-	}
-	var status consts.RefundStatusEnum = consts.RefundCreated
-	if strings.Compare(responseJson.Get("transaction.state").String(), "refunded") == 0 {
-		status = consts.RefundSuccess
-	}
-	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: gatewayRefundId,
-		Status:          status,
-		Reason:          refund.RefundComment,
-		RefundAmount:    refund.RefundAmount,
-		Currency:        strings.ToUpper(refund.Currency),
-		RefundTime:      gtime.Now(),
-	}, nil
 }
 
-func (c Payssion) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Payssion) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	detail, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
+	if err != nil {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: payment.GatewayPaymentId,
+			Status:          consts.RefundFailed,
+			Type:            consts.RefundTypeGateway,
+			Reason:          fmt.Sprintf("Get Gateway Refund Sequence Failed:%s", err.Error()),
+		}, nil
+	}
+
 	urlPath := "/api/v1/refunds"
 	param := map[string]interface{}{}
-	gateway := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
 	param["transaction_id"] = payment.GatewayPaymentId
 	param["amount"] = utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency)
 	param["currency"] = strings.ToUpper(refund.Currency)
@@ -238,20 +276,31 @@ func (c Payssion) GatewayRefund(ctx context.Context, payment *entity.Payment, re
 		return nil, err
 	}
 	if !responseJson.Contains("result_code") || responseJson.Get("result_code").Int() != 200 {
-		return nil, gerror.New("invalid request, result_code is nil or not 200")
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: payment.GatewayPaymentId,
+			Status:          consts.RefundFailed,
+			Type:            consts.RefundTypeGateway,
+			Reason:          "invalid request, result_code is nil or not 200",
+		}, nil
 	}
-	if !responseJson.Contains("transaction") {
-		return nil, gerror.New("invalid request, transaction is nil")
+	if !responseJson.Contains("refund") {
+		return &gateway_bean.GatewayPaymentRefundResp{
+			GatewayRefundId: payment.GatewayPaymentId,
+			Status:          consts.RefundFailed,
+			Type:            consts.RefundTypeGateway,
+			Reason:          "invalid request, refund is nil",
+		}, nil
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: responseJson.Get("transaction.transaction_id").String(),
+		GatewayRefundId: responseJson.Get("refund.transaction_id").String(),
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeGateway,
+		RefundSequence:  unibee.Int64(detail.RefundSequence),
 	}, nil
 }
 
-func (c Payssion) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Payssion) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -281,7 +330,10 @@ func parsePayssionPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 			paidTime = t
 		}
 	}
-
+	var refundSequence int64 = 0
+	if item.Contains("transaction.refund") {
+		refundSequence = int64(item.Get("transaction.refund").Float64() * 100)
+	}
 	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.Get("transaction.transaction_id").String(),
 		Status:               status,
@@ -293,6 +345,7 @@ func parsePayssionPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 		PaymentAmount:        paymentAmount,
 		GatewayPaymentMethod: paymentMethod,
 		PaidTime:             paidTime,
+		RefundSequence:       refundSequence,
 	}
 }
 

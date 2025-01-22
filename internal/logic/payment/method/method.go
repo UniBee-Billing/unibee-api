@@ -45,12 +45,16 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	req.Metadata["MerchantId"] = req.MerchantId
 	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Metadata)
 	utility.AssertError(err, "Server Error")
-	return createResult.Url, &bean.PaymentMethod{
-		Id:        createResult.PaymentMethod.Id,
-		Type:      createResult.PaymentMethod.Type,
-		IsDefault: createResult.PaymentMethod.IsDefault,
-		Data:      createResult.PaymentMethod.Data,
+	var method *bean.PaymentMethod
+	if createResult.PaymentMethod != nil {
+		method = &bean.PaymentMethod{
+			Id:        createResult.PaymentMethod.Id,
+			Type:      createResult.PaymentMethod.Type,
+			IsDefault: createResult.PaymentMethod.IsDefault,
+			Data:      createResult.PaymentMethod.Data,
+		}
 	}
+	return createResult.Url, method
 }
 
 func DeletePaymentMethod(ctx context.Context, merchantId uint64, userId uint64, gatewayId uint64, paymentMethodId string) error {
