@@ -9,9 +9,7 @@ import (
 
 func TestForCreateNewUnitPay(t *testing.T) {
 	unitpay := &UnitPay{}
-	//_, _, _ = unitpay.GatewayTest(context.Background(), "423641", "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7") // indigo prod test key
 	_, _, _ = unitpay.GatewayTest(context.Background(), "443597", "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7") // indigo unibee staging test key
-	//_, _, _ = unitpay.GatewayTest(context.Background(), "443598", "b7bd68017bd0edb89258ef3b068f7771") // indigo x prod key
 }
 
 func TestForGetUnitPay(t *testing.T) {
