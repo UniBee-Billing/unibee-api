@@ -14,6 +14,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
@@ -60,6 +61,10 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
 
+	if req.Metadata == nil {
+		req.Metadata = make(map[string]interface{})
+	}
+
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)
@@ -69,6 +74,30 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
 		utility.Assert(false, "Submit Too Fast")
+	}
+
+	var gatewayExchange *gateway_bean.GatewayCurrencyExchange
+	var exchangeRefundAmount int64 = 0
+	var exchangeRefundCurrency string
+	{
+		//CurrencyExchange
+		var PaymentMetadata = make(map[string]interface{})
+		if len(payment.MetaData) > 0 {
+			_ = utility.UnmarshalFromJsonString(payment.MetaData, &PaymentMetadata)
+		}
+		if s, ok := PaymentMetadata[gateway_bean.GatewayCurrencyExchangeKey]; ok {
+			if value, ok2 := s.(string); ok2 {
+				if len(value) > 0 {
+					_ = utility.UnmarshalFromJsonString(value, &gatewayExchange)
+				}
+			}
+		}
+		if gatewayExchange != nil {
+			req.Metadata[gateway_bean.GatewayCurrencyExchangeKey] = utility.MarshalToJsonString(gatewayExchange)
+			//exchangeRefundAmount = int64(float64(req.RefundAmount) * gatewayExchange.ExchangeRate)
+			exchangeRefundAmount = utility.ExchangeCurrencyConvert(req.RefundAmount, gatewayExchange.FromCurrency, gatewayExchange.ToCurrency, gatewayExchange.ExchangeRate)
+			exchangeRefundCurrency = gatewayExchange.ToCurrency
+		}
 	}
 
 	var (
@@ -81,9 +110,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
-	if req.Metadata == nil {
-		req.Metadata = make(map[string]interface{})
-	}
 	refundId := utility.CreateRefundId()
 	req.Metadata["PaymentId"] = payment.PaymentId
 	req.Metadata["RefundId"] = refundId
@@ -142,8 +168,16 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	if err != nil {
 		return nil, err
 	}
-	gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, gateway, payment, one)
+	gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, gateway, &gateway_bean.GatewayNewPaymentRefundReq{
+		Payment:                 payment,
+		Refund:                  one,
+		Gateway:                 gateway,
+		GatewayCurrencyExchange: gatewayExchange,
+		ExchangeRefundCurrency:  exchangeRefundCurrency,
+		ExchangeRefundAmount:    exchangeRefundAmount,
+	})
 	if err != nil {
+		// todo mark record err to db
 		return nil, err
 	}
 

@@ -22,7 +22,7 @@ func (c Credit) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	}
 }
 
-func (c Credit) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (c Credit) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	return "https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070", consts.GatewayTypeCredit, nil
 }
 
@@ -107,17 +107,17 @@ func (c Credit) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	return nil, gerror.New("Not Support")
 }
 
-func (c Credit) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Credit) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	creditRefund, err := refund2.NewCreditRefund(ctx, &refund2.CreditRefundInternalReq{
-		UserId:                 payment.UserId,
-		MerchantId:             payment.MerchantId,
-		CreditPaymentId:        payment.GatewayPaymentId,
-		ExternalCreditRefundId: refund.RefundId,
-		InvoiceId:              refund.InvoiceId,
-		RefundAmount:           refund.RefundAmount,
-		Currency:               refund.Currency,
-		Name:                   refund.RefundComment,
-		Description:            refund.RefundCommentExplain,
+		UserId:                 createPaymentRefundContext.Payment.UserId,
+		MerchantId:             createPaymentRefundContext.Payment.MerchantId,
+		CreditPaymentId:        createPaymentRefundContext.Payment.GatewayPaymentId,
+		ExternalCreditRefundId: createPaymentRefundContext.Refund.RefundId,
+		InvoiceId:              createPaymentRefundContext.Refund.InvoiceId,
+		RefundAmount:           createPaymentRefundContext.Refund.RefundAmount,
+		Currency:               createPaymentRefundContext.Refund.Currency,
+		Name:                   createPaymentRefundContext.Refund.RefundComment,
+		Description:            createPaymentRefundContext.Refund.RefundCommentExplain,
 	})
 	if err != nil {
 		return nil, err

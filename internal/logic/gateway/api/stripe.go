@@ -40,7 +40,7 @@ func (s Stripe) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayLogo:        "https://api.unibee.top/oss/file/d76q2e3zyv4ylc6vyh.png",
 		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6yhl1qz7qmcg6zafr.svg", "https://api.unibee.top/oss/file/d6yhlf1t8n3ev3ueii.svg", "https://api.unibee.top/oss/file/d6yhlpshof3muufphd.svg"},
 		GatewayType:        consts.GatewayTypeCard,
-		Sort:               10,
+		Sort:               100,
 	}
 }
 
@@ -48,7 +48,7 @@ func (s Stripe) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 	return nil, gerror.New("not support")
 }
 
-func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (s Stripe) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	stripe.Key = secret
 	s.setUnibeeAppInfo()
 	utility.Assert(len(secret) > 0, "invalid gatewaySecret")
@@ -639,16 +639,16 @@ func (s Stripe) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 	}, nil
 }
 
-func (s Stripe) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, one *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
+func (s Stripe) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	utility.Assert(createPaymentRefundContext.Payment.GatewayId > 0, "Gateway Not Found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.GatewayPaymentId)}
+	params := &stripe.RefundParams{PaymentIntent: stripe.String(createPaymentRefundContext.Payment.GatewayPaymentId)}
 	params.Reason = stripe.String("requested_by_customer")
-	params.Amount = stripe.Int64(one.RefundAmount)
+	params.Amount = stripe.Int64(createPaymentRefundContext.Refund.RefundAmount)
 	var metadata = make(map[string]interface{})
-	if len(one.MetaData) > 0 {
-		err := utility.UnmarshalFromJsonString(one.MetaData, &metadata)
+	if len(createPaymentRefundContext.Refund.MetaData) > 0 {
+		err := utility.UnmarshalFromJsonString(createPaymentRefundContext.Refund.MetaData, &metadata)
 		if err != nil {
 			g.Log().Errorf(ctx, "GatewayRefund Unmarshal Metadata error:%s", err.Error())
 		}

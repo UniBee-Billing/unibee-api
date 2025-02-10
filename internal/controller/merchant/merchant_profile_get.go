@@ -17,6 +17,7 @@ import (
 	"unibee/internal/query"
 	"unibee/time"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error) {
@@ -53,7 +54,7 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		Env:                  config.GetConfigInstance().Env,
 		IsProd:               config.GetConfigInstance().IsProd(),
 		TimeZone:             time.GetTimeZoneList(),
-		Gateways:             detail.ConvertGatewayList(ctx, query.GetValidMerchantGatewayList(ctx, merchant.Id)),
+		Gateways:             detail.ConvertGatewayList(ctx, query.GetMerchantGatewayList(ctx, merchant.Id, unibee.Bool(false))),
 		ExchangeRateApiKey:   utility.HideStar(exchangeApiKey),
 		OpenApiKey:           utility.HideStar(merchant.ApiKey),
 		SendGridKey:          utility.HideStar(emailData),

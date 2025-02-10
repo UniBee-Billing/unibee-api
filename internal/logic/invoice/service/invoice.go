@@ -356,6 +356,19 @@ func ProcessingInvoiceFailure(ctx context.Context, invoiceId string, reason stri
 		dao.Invoice.Columns().GmtModify:  gtime.Now(),
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 
+	if err == nil {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+			Content:        "Expired",
+			UserId:         one.UserId,
+			SubscriptionId: one.SubscriptionId,
+			InvoiceId:      one.InvoiceId,
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
+
 	_, _ = redismq.Send(&redismq.Message{
 		Topic:      redismq2.TopicInvoiceFailed.Topic,
 		Tag:        redismq2.TopicInvoiceFailed.Tag,

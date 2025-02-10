@@ -13,6 +13,12 @@ import (
 	"unicode"
 )
 
+type GatewaySort struct {
+	GatewayName string `json:"gatewayName" description:"Required, The gateway name, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
+	Id          uint64 `json:"gatewayId" description:"The gateway id"`
+	Sort        int64  `json:"sort" description:"Required, The sort value of payment gateway, should greater than 0, The bigger, the closer to the front"`
+}
+
 type GatewayCurrencyExchange struct {
 	FromCurrency string  `json:"from_currency" description:"the currency of gateway exchange from"`
 	ToCurrency   string  `json:"to_currency" description:"the currency of gateway exchange to"`
@@ -27,10 +33,11 @@ type Gateway struct {
 	DisplayName                   string                         `json:"displayName" description:"The gateway display name, used at user portal"`
 	GatewayIcons                  []string                       `json:"gatewayIcons"  description:"The gateway display name, used at user portal"`
 	GatewayWebsiteLink            string                         `json:"gatewayWebsiteLink" description:"The gateway website link"`
-	GatewayWebhookIntegrationLink string                         `json:"gatewayWebhookIntegrationLink" description:"The gateway webhook integration link"`
+	GatewayWebhookIntegrationLink string                         `json:"gatewayWebhookIntegrationLink" description:"The gateway webhook integration guide link, gateway webhook need setup if not blank"`
 	GatewayLogo                   string                         `json:"gatewayLogo"`
 	GatewayKey                    string                         `json:"gatewayKey"            description:""`
 	GatewaySecret                 string                         `json:"gatewaySecret"            description:""`
+	SubGateway                    string                         `json:"subGateway"            description:""`
 	GatewayType                   int64                          `json:"gatewayType"           description:"gateway type，1-Bank Card ｜ 2-Crypto | 3 - Wire Transfer"`
 	CountryConfig                 map[string]bool                `json:"countryConfig"`
 	CreateTime                    int64                          `json:"createTime"            description:"create utc time"` // create utc time
@@ -44,6 +51,10 @@ type Gateway struct {
 	CurrencyExchange              []*GatewayCurrencyExchange     `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 	CurrencyExchangeEnabled       bool                           `json:"currencyExchangeEnabled"            description:"whether to enable currency exchange"`
 	SubGatewayConfigs             []*_interface.SubGatewayConfig `json:"subGatewayConfigs"  dc:""`
+	Archive                       bool                           `json:"archive"  dc:""`
+	PublicKeyName                 string                         `json:"publicKeyName"  dc:""`
+	PrivateSecretName             string                         `json:"privateSecretName"  dc:""`
+	SubGatewayName                string                         `json:"subGatewayName"  dc:""`
 }
 
 type GatewayBank struct {
@@ -116,8 +127,20 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		}
 	}
 	currencyExchangeEnabled := false
+	var publicKeyName = "Public Key"
+	var privateSecretName = "Private Key"
+	var subGatewayName = ""
 	if gatewayInfo != nil {
 		currencyExchangeEnabled = gatewayInfo.CurrencyExchangeEnabled
+		if len(gatewayInfo.PublicKeyName) > 0 {
+			publicKeyName = gatewayInfo.PublicKeyName
+		}
+		if len(gatewayInfo.PrivateSecretName) > 0 {
+			privateSecretName = gatewayInfo.PrivateSecretName
+		}
+		if len(gatewayInfo.SubGatewayName) > 0 {
+			subGatewayName = gatewayInfo.SubGatewayName
+		}
 	}
 	var currencyExchangeList = make([]*GatewayCurrencyExchange, 0)
 	_ = utility.UnmarshalFromJsonString(one.Custom, &currencyExchangeList)
@@ -126,6 +149,10 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 	//if gatewayInfo != nil {
 	//	subGatewayConfigs = gatewayInfo.SubGatewayConfigs
 	//}
+	if one.EnumKey <= 0 && gatewayInfo != nil {
+		one.EnumKey = gatewayInfo.Sort
+	}
+
 	return &Gateway{
 		Id:                            one.Id,
 		Name:                          name,
@@ -146,10 +173,15 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		GatewayKey:                    utility.HideStar(one.GatewayKey),
 		GatewaySecret:                 utility.HideStar(one.GatewaySecret),
 		WebhookSecret:                 utility.HideStar(one.WebhookSecret),
+		SubGateway:                    one.SubGateway,
 		Sort:                          one.EnumKey,
 		IsSetupFinished:               isSetupFinished,
 		CurrencyExchange:              currencyExchangeList,
 		CurrencyExchangeEnabled:       currencyExchangeEnabled,
+		Archive:                       one.IsDeleted != 0,
+		PublicKeyName:                 publicKeyName,
+		PrivateSecretName:             privateSecretName,
+		SubGatewayName:                subGatewayName,
 		//SubGatewayConfigs:             subGatewayConfigs,
 	}
 }

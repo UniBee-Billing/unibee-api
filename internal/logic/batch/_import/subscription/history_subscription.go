@@ -104,7 +104,7 @@ func (t TaskHistorySubscriptionImport) ImportRow(ctx context.Context, task *enti
 	var gatewayId uint64 = 0
 	gatewayImpl := api.GatewayNameMapping[target.Gateway]
 	if gatewayImpl == nil {
-		return target, gerror.New("Error, Invalid Gateway, should be one of " + strings.Join(api.ExportGatewaySetupListKeys, "|"))
+		return target, gerror.New("Error, Invalid Gateway, should be one of " + strings.Join(api.ExportGatewaySetupListKeys(), "|"))
 	}
 	gateway := query.GetGatewayByGatewayName(ctx, task.MerchantId, target.Gateway)
 	if gateway == nil {

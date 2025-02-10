@@ -551,6 +551,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, paymentId string, gatewayPay
 func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entity.Payment, uniqueId string) error {
 	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 	payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
+	g.Log().Infof(ctx, "CreateOrUpdatePaymentTimelineForPayment %s", payment.PaymentId)
 
 	var status = 0
 	if payment.Status == consts.PaymentSuccess {

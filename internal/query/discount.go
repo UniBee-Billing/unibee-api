@@ -23,7 +23,8 @@ func GetDiscountByCode(ctx context.Context, merchantId uint64, code string) (one
 	}
 	err := dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
-		Where(dao.MerchantDiscountCode.Columns().Code, code).
+		//Where(dao.MerchantDiscountCode.Columns().Code, code).
+		Where("LOWER(code) = LOWER(?)", code). // case_insensitive
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

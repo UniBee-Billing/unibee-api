@@ -77,6 +77,7 @@ type InvoiceDetail struct {
 	PromoCreditDiscountAmount      int64                       `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`
 	PromoCreditTransaction         *bean.CreditTransaction     `json:"promoCreditTransaction"               description:"promo credit transaction"`
 	PartialCreditPaidAmount        int64                       `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
+	Message                        string                      `json:"message"                      description:""`
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -110,8 +111,12 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 	payment := bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId))
 	refund := bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId))
 	var originalPaymentInvoice *bean.Invoice
+	message := ""
 	if refund != nil {
 		originalPaymentInvoice = bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId))
+		if invoice.Status == consts.InvoiceStatusFailed {
+			message = refund.RefundCommentExplain
+		}
 	}
 
 	return &InvoiceDetail{
@@ -175,5 +180,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		PromoCreditDiscountAmount:      invoice.PromoCreditDiscountAmount,
 		PromoCreditTransaction:         bean.SimplifyCreditTransaction(ctx, query.GetPromoCreditTransactionByInvoiceId(ctx, invoice.UserId, invoice.InvoiceId)),
 		PartialCreditPaidAmount:        invoice.PartialCreditPaidAmount,
+		Message:                        message,
 	}
 }

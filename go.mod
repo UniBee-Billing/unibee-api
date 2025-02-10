@@ -1,8 +1,11 @@
 module unibee
 
-go 1.21.3
+go 1.22.5
+
+toolchain go1.22.7
 
 require (
+	github.com/alipay/global-open-sdk-go v1.2.10
 	github.com/creasty/defaults v1.7.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-pdf/fpdf v0.9.0
@@ -12,11 +15,12 @@ require (
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.5.6
 	github.com/gogf/gf/v2 v2.6.4
 	github.com/golang-jwt/jwt/v5 v5.2.0
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jackyang-hk/go-redismq v1.1.6
 	github.com/leekchan/accounting v1.0.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
+	github.com/redis/go-redis/v9 v9.6.1
 	github.com/segmentio/analytics-go/v3 v3.3.0
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/shopspring/decimal v1.3.1
@@ -62,7 +66,6 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect

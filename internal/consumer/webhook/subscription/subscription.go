@@ -9,7 +9,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/consumer/webhook/message"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service/detail"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -30,7 +30,7 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft
 				return
 			}
 		}()
-		subDetailRes, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
+		subDetailRes, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 		utility.AssertError(err, "SendMerchantSubscriptionWebhookBackground SubscriptionDetail Error")
 		if dayLeft == -10000 {
 			subDetailRes.DayLeft = int((subDetailRes.Subscription.CurrentPeriodEnd - utility.MaxInt64(gtime.Now().Timestamp(), subDetailRes.Subscription.TestClock) + 7200) / 86400)

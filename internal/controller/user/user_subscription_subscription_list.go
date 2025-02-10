@@ -5,7 +5,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	_interface "unibee/internal/interface/context"
-	"unibee/internal/logic/subscription/service"
+	detail2 "unibee/internal/logic/subscription/service/detail"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -18,7 +18,7 @@ func (c *ControllerSubscription) List(ctx context.Context, req *subscription.Lis
 	subs := query.GetLatestActiveOrIncompleteOrCreateSubscriptionsByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx))
 	for _, sub := range subs {
 		if sub != nil {
-			subDetailRes, err := service.SubscriptionDetail(ctx, sub.SubscriptionId)
+			subDetailRes, err := detail2.SubscriptionDetail(ctx, sub.SubscriptionId)
 			if err == nil {
 				var addonParams []*bean.PlanAddonParam
 				_ = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)

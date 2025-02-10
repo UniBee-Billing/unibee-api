@@ -10,8 +10,5 @@ import (
 
 func (c *ControllerVat) CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error) {
 	list, _ := vat_gateway.MerchantCountryRateList(ctx, _interface.GetMerchantId(ctx))
-	//if err != nil {
-	//	return nil, err
-	//}
 	return &vat.CountryListRes{VatCountryList: list}, nil
 }

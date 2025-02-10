@@ -8,17 +8,38 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+var GatewayCurrencyExchangeKey = "GatewayCurrencyExchange"
+
+type GatewayCurrencyExchange struct {
+	FromCurrency string  `json:"from_currency" description:"the currency of gateway exchange from"`
+	ToCurrency   string  `json:"to_currency" description:"the currency of gateway exchange to"`
+	ExchangeRate float64 `json:"exchange_rate"  description:"the exchange rate of gateway, set to 0 if using https://app.exchangerate-api.com/ instead of fixed exchange rate"`
+}
+
 type GatewayNewPaymentReq struct {
-	CheckoutMode         bool                    `json:"checkoutMode"`
-	Pay                  *entity.Payment         `json:"pay"`
-	Gateway              *entity.MerchantGateway `json:"gateway"`
-	ExternalUserId       string                  `json:"externalUserId"`
-	Email                string                  `json:"email"`
-	Metadata             map[string]interface{}  `json:"metadata"`
-	Invoice              *bean.Invoice           `json:"invoice"`
-	DaysUtilDue          int                     `json:"daysUtilDue"`
-	GatewayPaymentMethod string                  `json:"gatewayPaymentMethod"`
-	PayImmediate         bool                    `json:"payImmediate"`
+	Merchant                *entity.Merchant         `json:"merchant"`
+	CheckoutMode            bool                     `json:"checkoutMode"`
+	Pay                     *entity.Payment          `json:"pay"`
+	Gateway                 *entity.MerchantGateway  `json:"gateway"`
+	ExternalUserId          string                   `json:"externalUserId"`
+	Email                   string                   `json:"email"`
+	Metadata                map[string]interface{}   `json:"metadata"`
+	Invoice                 *bean.Invoice            `json:"invoice"`
+	DaysUtilDue             int                      `json:"daysUtilDue"`
+	GatewayPaymentMethod    string                   `json:"gatewayPaymentMethod"`
+	PayImmediate            bool                     `json:"payImmediate"`
+	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"`
+	ExchangeAmount          int64                    `json:"exchangeAmount"           description:"exchange_amount, cent"`
+	ExchangeCurrency        string                   `json:"exchangeCurrency"         description:"exchange_currency"`
+}
+
+type GatewayNewPaymentRefundReq struct {
+	Payment                 *entity.Payment          `json:"payment"`
+	Refund                  *entity.Refund           `json:"refund"`
+	Gateway                 *entity.MerchantGateway  `json:"gateway"`
+	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"`
+	ExchangeRefundAmount    int64                    `json:"exchangeRefundAmount"           description:"exchange_refund_amount, cent"`
+	ExchangeRefundCurrency  string                   `json:"exchangeRefundCurrency"         description:"exchange_refund_currency"`
 }
 
 type GatewayNewPaymentResp struct {

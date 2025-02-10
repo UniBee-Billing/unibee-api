@@ -12,6 +12,8 @@ import (
 	config2 "unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/webhook/event"
+	subscription3 "unibee/internal/consumer/webhook/subscription"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/email"
@@ -234,6 +236,8 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	sub.CancelAtPeriodEnd = 1
+	subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_END_OF_THIS_CYCLE, nil)
 	return nil
 }
 
@@ -291,6 +295,8 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	sub.CancelAtPeriodEnd = 0
+	subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_RESUME_END_OF_THIS_CYCLE, nil)
 	return nil
 }
 

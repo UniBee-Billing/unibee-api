@@ -30,6 +30,7 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"unitpay":         &UnitPay{},
 	"payssion":        &Payssion{},
 	"cryptadium":      &Cryptadium{},
+	"alipay":          &Alipay{},
 	"credit":          &credit.Credit{},
 }
 
@@ -46,17 +47,27 @@ var GatewayShortNameMapping = map[string]string{
 	"payssion":        "PS",
 	"cryptadium":      "CTD",
 	"credit":          "CR",
+	"alipay":          "ALI",
 }
 
-var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion"}
+// var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion", "wire_transfer"}
 
 var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
-	"stripe":    Stripe{}.GatewayInfo(context.Background()),
-	"changelly": Changelly{}.GatewayInfo(context.Background()),
-	"paypal":    Paypal{}.GatewayInfo(context.Background()),
-	"unitpay":   UnitPay{}.GatewayInfo(context.Background()),
-	"payssion":  Payssion{}.GatewayInfo(context.Background()),
+	"stripe":        Stripe{}.GatewayInfo(context.Background()),
+	"changelly":     Changelly{}.GatewayInfo(context.Background()),
+	"paypal":        Paypal{}.GatewayInfo(context.Background()),
+	"unitpay":       UnitPay{}.GatewayInfo(context.Background()),
+	"payssion":      Payssion{}.GatewayInfo(context.Background()),
+	"wire_transfer": Wire{}.GatewayInfo(context.Background()),
 	//"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
+}
+
+func ExportGatewaySetupListKeys() []string {
+	var keys []string
+	for key := range ExportGatewaySetupList {
+		keys = append(keys, key)
+	}
+	return keys
 }
 
 type GatewayProxy struct {
@@ -116,7 +127,7 @@ func (p GatewayProxy) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayNameMapping[p.GatewayName]
-	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be "+strings.Join(ExportGatewaySetupListKeys, "|"))
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be "+strings.Join(ExportGatewaySetupListKeys(), "|"))
 	return
 }
 
@@ -142,7 +153,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 	return res, err
 }
 
-func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -154,7 +165,7 @@ func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string
 			return
 		}
 	}()
-	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
+	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret, subGateway)
 	return icon, gatewayType, err
 }
 
@@ -397,7 +408,7 @@ func (p GatewayProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.
 	return res, err
 }
 
-func (p GatewayProxy) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p GatewayProxy) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -410,7 +421,7 @@ func (p GatewayProxy) GatewayRefund(ctx context.Context, gateway *entity.Merchan
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayRefund(ctx, gateway, pay, refund)
+	res, err = p.getRemoteGateway().GatewayRefund(ctx, gateway, createPaymentRefundContext)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefund cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())

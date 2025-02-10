@@ -130,6 +130,19 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				user = &entity.UserAccount{}
 			}
 
+			var exchangeCurrency = ""
+			var exchangeAmount = ""
+			var exchangeRate = ""
+			if one.Refund == nil && one.Payment != nil && one.Payment.GatewayCurrencyExchange != nil {
+				exchangeCurrency = one.Payment.GatewayCurrencyExchange.ToCurrency
+				exchangeAmount = utility.ConvertCentToDollarStr(one.Payment.GatewayCurrencyExchange.ExchangeAmount, one.Payment.GatewayCurrencyExchange.ToCurrency)
+				exchangeRate = fmt.Sprintf("%.2f", one.Payment.GatewayCurrencyExchange.ExchangeRate)
+			} else if one.Refund != nil && one.Refund.GatewayCurrencyExchange != nil {
+				exchangeCurrency = one.Refund.GatewayCurrencyExchange.ToCurrency
+				exchangeAmount = utility.ConvertCentToDollarStr(one.Refund.GatewayCurrencyExchange.ExchangeAmount, one.Refund.GatewayCurrencyExchange.ToCurrency)
+				exchangeRate = fmt.Sprintf("%.2f", one.Refund.GatewayCurrencyExchange.ExchangeRate)
+			}
+
 			mainList = append(mainList, &ExportTransactionEntity{
 				TransactionId:         one.TransactionId,
 				UserId:                fmt.Sprintf("%v", user.Id),
@@ -151,6 +164,9 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				FullRefund:            fullRefund,
 				ExternalTransactionId: one.ExternalTransactionId,
 				TimeZone:              timeZoneStr,
+				ExchangeAmount:        exchangeAmount,
+				ExchangeCurrency:      exchangeCurrency,
+				ExchangeRate:          exchangeRate,
 			})
 		}
 	}
@@ -178,4 +194,7 @@ type ExportTransactionEntity struct {
 	RefundId              string      `json:"RefundId"       comment:""`
 	FullRefund            string      `json:"FullRefund"      comment:""`
 	TimeZone              string      `json:"TimeZone"         comment:""`
+	ExchangeCurrency      string      `json:"ExchangeCurrency" comment:"The exchange currency of transaction" group:"Transaction"`
+	ExchangeAmount        string      `json:"ExchangeAmount" comment:"The exchange amount of transaction" group:"Transaction"`
+	ExchangeRate          string      `json:"ExchangeRate" comment:"The exchange rate of transaction" group:"Transaction"`
 }

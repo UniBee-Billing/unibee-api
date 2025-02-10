@@ -5,6 +5,7 @@ import (
 	"unibee/api/merchant/vat"
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/vat_gateway/setup"
+	"unibee/utility"
 )
 
 func (c *ControllerVat) SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error) {
@@ -18,5 +19,5 @@ func (c *ControllerVat) SetupGateway(ctx context.Context, req *vat.SetupGatewayR
 			return nil, err
 		}
 	}
-	return &vat.SetupGatewayRes{}, nil
+	return &vat.SetupGatewayRes{Data: utility.HideStar(req.Data)}, nil
 }

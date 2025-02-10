@@ -56,7 +56,7 @@ func (a AutoTestCrypto) GatewayUserCreateAndBindPaymentMethod(ctx context.Contex
 	}}, nil
 }
 
-func (a AutoTestCrypto) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (a AutoTestCrypto) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	return "http://autotest_crypto.unibee.com", consts.GatewayTypeCrypto, nil
 }
 
@@ -167,9 +167,9 @@ func (a AutoTestCrypto) GatewayCancel(ctx context.Context, gateway *entity.Merch
 	}, nil
 }
 
-func (a AutoTestCrypto) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, pay *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (a AutoTestCrypto) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: refund.RefundId,
+		GatewayRefundId: createPaymentRefundContext.Refund.RefundId,
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil

@@ -79,7 +79,7 @@ func CreateMemberPortalToken(ctx context.Context, tokenType model.TokenType, mer
 }
 
 func GetMemberPermissionKey(ctx context.Context, one *entity.MerchantMember) string {
-	isOwner, permission := detail.ConvertMemberPermissions(ctx, one)
+	isOwner, permission, _ := detail.ConvertMemberPermissions(ctx, one)
 	permissionKey := fmt.Sprintf("%v_%s", isOwner, utility.MD5(utility.MarshalToJsonString(permission)))
 	return permissionKey
 }

@@ -2,12 +2,10 @@ package service
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
-	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -29,39 +27,6 @@ type SubscriptionListInternalReq struct {
 	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
-}
-
-func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.SubscriptionDetail, error) {
-	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	utility.Assert(one != nil, "subscription not found")
-	{
-		one.Data = ""
-		one.ResponseData = ""
-	}
-	user := query.GetUserAccountById(ctx, one.UserId)
-	var addonParams []*bean.PlanAddonParam
-	if len(one.AddonData) > 0 {
-		err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
-		if err != nil {
-			g.Log().Errorf(ctx, "SubscriptionDetail parse addon param:%s", err.Error())
-		}
-	}
-	latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId))
-	if latestInvoiceOne != nil {
-		latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, latestInvoiceOne.DiscountCode))
-		latestInvoiceOne.PromoCreditTransaction = bean.SimplifyCreditTransaction(ctx, query.GetPromoCreditTransactionByInvoiceId(ctx, latestInvoiceOne.UserId, latestInvoiceOne.InvoiceId))
-	}
-	return &detail.SubscriptionDetail{
-		User:                                bean.SimplifyUserAccount(user),
-		Subscription:                        bean.SimplifySubscription(ctx, one),
-		Gateway:                             detail.ConvertGatewayDetail(ctx, query.GetGatewayById(ctx, one.GatewayId)),
-		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
-		AddonParams:                         addonParams,
-		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-		LatestInvoice:                       latestInvoiceOne,
-		Discount:                            bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, one.DiscountCode)),
-		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx, one.PendingUpdateId),
-	}, nil
 }
 
 func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*detail.SubscriptionDetail, total int) {

@@ -48,6 +48,7 @@ type NewReq struct {
 	CycleLimit         int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"`                                                                                                                                                                                        // the count limitation of subscription cycle , 0-no limit
 	StartTime          *int64                 `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                                                                                                                                                                                                                     // start of discount available utc time
 	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
@@ -74,6 +75,7 @@ type EditReq struct {
 	CycleLimit         int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"`
 	StartTime          *int64                 `json:"startTime"         dc:"The start time of discount code can effect, editable after activate, utc time"`
 	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, editable after activate, utc time"`
+	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
 	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1

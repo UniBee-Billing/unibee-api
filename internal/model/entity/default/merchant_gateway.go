@@ -18,7 +18,7 @@ type MerchantGateway struct {
 	Name                  string      `json:"name"                  description:"name"`                                            // name
 	SubGateway            string      `json:"subGateway"            description:"sub_gateway_enum"`                                // sub_gateway_enum
 	BrandData             string      `json:"brandData"             description:""`                                                //
-	Logo                  string      `json:"logo"                  description:"gateway logo"`                                    // gateway logo
+	Logo                  string      `json:"logo"                  description:""`                                                //
 	Host                  string      `json:"host"                  description:"pay host"`                                        // pay host
 	GatewayAccountId      string      `json:"gatewayAccountId"      description:"gateway account id"`                              // gateway account id
 	GatewayKey            string      `json:"gatewayKey"            description:""`                                                //

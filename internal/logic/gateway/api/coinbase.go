@@ -31,7 +31,7 @@ func (c Coinbase) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	}
 }
 
-func (c Coinbase) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (c Coinbase) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	urlPath := "/charges/"
 	param := map[string]interface{}{
 		"pricing_type": "fixed_price",
@@ -155,9 +155,9 @@ func (c Coinbase) GatewayRefundDetail(ctx context.Context, gateway *entity.Merch
 	return nil, gerror.New("Not Support")
 }
 
-func (c Coinbase) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Coinbase) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: refund.RefundId,
+		GatewayRefundId: createPaymentRefundContext.Refund.RefundId,
 		Status:          consts.RefundSuccess,
 		Type:            consts.RefundTypeMarked,
 	}, nil

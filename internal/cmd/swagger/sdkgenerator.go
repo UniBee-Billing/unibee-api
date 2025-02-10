@@ -98,10 +98,12 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 				continue
 			}
 		}
-		err = api.Set("info#description#$ref", "description.md")
-		if err != nil {
-			r.Exit()
-			return
+		if r.Get("hideDescription") != nil {
+			err = api.Set("info#description#$ref", "description.md")
+			if err != nil {
+				r.Exit()
+				return
+			}
 		}
 		apiYaml, err := yaml.JSONToYAML([]byte(api.String()))
 		if err != nil {

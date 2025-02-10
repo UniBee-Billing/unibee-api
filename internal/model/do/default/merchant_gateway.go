@@ -20,7 +20,7 @@ type MerchantGateway struct {
 	Name                  interface{} // name
 	SubGateway            interface{} // sub_gateway_enum
 	BrandData             interface{} //
-	Logo                  interface{} // gateway logo
+	Logo                  interface{} //
 	Host                  interface{} // pay host
 	GatewayAccountId      interface{} // gateway account id
 	GatewayKey            interface{} //

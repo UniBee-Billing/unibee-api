@@ -36,14 +36,14 @@ type Changelly struct {
 func (c Changelly) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
 		Name:                          "Changelly",
-		Description:                   "Use public and private keys to secure the crypto payment.",
+		Description:                   "Use API Key and Private key to secure the crypto payment.",
 		DisplayName:                   "Crypto",
-		GatewayWebsiteLink:            "https://pay.changelly.com/",
+		GatewayWebsiteLink:            "https://app.pay.changelly.com/",
 		GatewayWebhookIntegrationLink: "https://app.pay.changelly.com/integrations",
 		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q3bqzdzofqxyjxl.png",
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
 		GatewayType:                   consts.GatewayTypeCrypto,
-		Sort:                          5,
+		Sort:                          80,
 	}
 }
 
@@ -90,7 +90,7 @@ func (c Changelly) GatewayGetCurrency(ctx context.Context, key string, secret st
 	return responseJson, err
 }
 
-func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (c Changelly) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/payment/v1/payments"
 	param := map[string]interface{}{
 		"nominal_currency": "BNB",
@@ -246,9 +246,9 @@ func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.Merc
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Changelly) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: refund.RefundId,
+		GatewayRefundId: createPaymentRefundContext.Refund.RefundId,
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil

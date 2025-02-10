@@ -23,7 +23,7 @@ type MerchantDiscountCodeColumns struct {
 	Id                 string // ID
 	MerchantId         string // merchantId
 	Name               string // name
-	Code               string // code
+	Code               string //
 	Status             string // status, 1-editable, 2-active, 3-deactive, 4-expire
 	BillingType        string // billing_type, 1-one-time, 2-recurring
 	DiscountType       string // discount_type, 1-percentage, 2-fixed_amount
@@ -47,6 +47,7 @@ type MerchantDiscountCodeColumns struct {
 	UserScope          string // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
 	UpgradeOnly        string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
+	PlanApplyType      string // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -78,6 +79,7 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	UserScope:          "user_scope",
 	UpgradeOnly:        "upgrade_only",
 	UpgradeLongerOnly:  "upgrade_longer_only",
+	PlanApplyType:      "plan_apply_type",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

@@ -12,6 +12,7 @@ import (
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
+	detail2 "unibee/internal/logic/subscription/service/detail"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -118,7 +119,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		if one != nil {
 			gateway := query.GetGatewayById(ctx, one.GatewayId)
 			if gateway.GatewayType == consts.GatewayTypeCrypto {
-				pendingCryptoSub, _ = service.SubscriptionDetail(ctx, one.SubscriptionId)
+				pendingCryptoSub, _ = detail2.SubscriptionDetail(ctx, one.SubscriptionId)
 			}
 		}
 	}

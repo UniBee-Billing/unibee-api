@@ -23,6 +23,7 @@ func (c PayssionWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gatew
 }
 
 func (c PayssionWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
+	_ = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, gateway.GatewaySecret)
 	return nil
 }
 

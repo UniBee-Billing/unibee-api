@@ -36,6 +36,7 @@ type IMerchantAuth interface {
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
 	PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error)
+	PasswordSetupOtp(ctx context.Context, req *auth.PasswordSetupOtpReq) (res *auth.PasswordSetupOtpRes, err error)
 	PasswordForgetOtpVerify(ctx context.Context, req *auth.PasswordForgetOtpVerifyReq) (res *auth.PasswordForgetOtpVerifyRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
@@ -84,6 +85,7 @@ type IMerchantEmail interface {
 }
 
 type IMerchantGateway interface {
+	EditSort(ctx context.Context, req *gateway.EditSortReq) (res *gateway.EditSortRes, err error)
 	SetupList(ctx context.Context, req *gateway.SetupListReq) (res *gateway.SetupListRes, err error)
 	Detail(ctx context.Context, req *gateway.DetailReq) (res *gateway.DetailRes, err error)
 	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)

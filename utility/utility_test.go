@@ -12,3 +12,7 @@ func TestMergeMetadata(t *testing.T) {
 		fmt.Println(MergeMetadata(oldOne, &newOne))
 	})
 }
+
+func TestConvertCentToDollarFloat(t *testing.T) {
+	ConvertDollarStrToCent("2000.00", "RUB")
+}

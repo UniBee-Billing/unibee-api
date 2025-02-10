@@ -8,9 +8,6 @@ import (
 	"unibee/internal/logic/merchant_config/update"
 	"unibee/utility"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-
 	"unibee/api/merchant/gateway"
 )
 
@@ -24,5 +21,5 @@ func (c *ControllerGateway) SetupExchangeApi(ctx context.Context, req *gateway.S
 			return nil, err
 		}
 	}
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	return &gateway.SetupExchangeApiRes{Data: utility.HideStar(req.ExchangeRateApiKey)}, nil
 }

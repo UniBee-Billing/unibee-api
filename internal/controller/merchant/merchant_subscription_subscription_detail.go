@@ -3,14 +3,14 @@ package merchant
 import (
 	"context"
 	_interface "unibee/internal/interface/context"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service/detail"
 	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error) {
-	detail, err := service.SubscriptionDetail(ctx, req.SubscriptionId)
+	detail, err := detail.SubscriptionDetail(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err
 	}

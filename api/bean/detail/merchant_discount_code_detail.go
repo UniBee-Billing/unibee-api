@@ -29,6 +29,7 @@ type MerchantDiscountCodeDetail struct {
 	StartTime          int64                  `json:"startTime"          description:"start of discount available utc time"`                                       // start of discount available utc time
 	EndTime            int64                  `json:"endTime"            description:"end of discount available utc time, 0-invalid"`                              // end of discount available utc time
 	CreateTime         int64                  `json:"createTime"         description:"create utc time"`                                                            // create utc time
+	PlanApplyType      int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
 	PlanIds            []int64                `json:"planIds"  description:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Plans              []*bean.Plan           `json:"plans"         description:"plans which discount code can effect, default effect all plans if not set"` // create utc time
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
@@ -70,6 +71,9 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 	if one.IsDeleted > 0 {
 		one.Status = consts.DiscountStatusArchived
 	}
+	if len(planIds) > 0 && one.PlanApplyType == 0 {
+		one.PlanApplyType = 1
+	}
 	return &MerchantDiscountCodeDetail{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
@@ -85,6 +89,7 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 		StartTime:          one.StartTime,
 		EndTime:            one.EndTime,
 		CreateTime:         one.CreateTime,
+		PlanApplyType:      one.PlanApplyType,
 		PlanIds:            planIds,
 		Plans:              bean.SimplifyPlanList(query.GetPlansByIds(ctx, planIds)),
 		Metadata:           metadata,

@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"unibee/internal/consts"
 	_interface "unibee/internal/interface/context"
 	gateway2 "unibee/internal/logic/gateway"
+	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -16,8 +16,10 @@ func (c *ControllerGateway) SetupWebhook(ctx context.Context, req *gateway.Setup
 	one := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "merchant not match")
+	gatewayInfo := api.GetGatewayServiceProvider(ctx, one.Id).GatewayInfo(ctx)
+	utility.Assert(gatewayInfo != nil, "gateway not ready")
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
-	if one.GatewayType == consts.GatewayTypeCrypto && len(req.WebhookSecret) > 0 {
+	if len(gatewayInfo.GatewayWebhookIntegrationLink) > 0 && len(req.WebhookSecret) > 0 {
 		err = query.UpdateGatewayWebhookSecret(ctx, one.Id, req.WebhookSecret)
 		if err != nil {
 			return nil, err

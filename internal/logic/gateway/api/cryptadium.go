@@ -51,7 +51,7 @@ func (c Cryptadium) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_be
 	}, nil
 }
 
-func (c Cryptadium) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (c Cryptadium) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/v1/payment/pages/fiat"
 	param := map[string]interface{}{
 		"FiatCurrency": "USD",
@@ -191,9 +191,9 @@ func (c Cryptadium) GatewayRefundDetail(ctx context.Context, gateway *entity.Mer
 	return nil, gerror.New("Not Support")
 }
 
-func (c Cryptadium) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Cryptadium) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: refund.RefundId,
+		GatewayRefundId: createPaymentRefundContext.Refund.RefundId,
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil

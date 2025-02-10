@@ -11,6 +11,7 @@ import (
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/subscription/service"
+	detail2 "unibee/internal/logic/subscription/service/detail"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -95,7 +96,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		if one != nil {
 			gateway := query.GetGatewayById(ctx, one.GatewayId)
 			if gateway.GatewayType == consts.GatewayTypeCrypto {
-				pendingCryptoSub, _ = service.SubscriptionDetail(ctx, one.SubscriptionId)
+				pendingCryptoSub, _ = detail2.SubscriptionDetail(ctx, one.SubscriptionId)
 			}
 		}
 	}

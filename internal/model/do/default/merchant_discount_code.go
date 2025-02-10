@@ -15,7 +15,7 @@ type MerchantDiscountCode struct {
 	Id                 interface{} // ID
 	MerchantId         interface{} // merchantId
 	Name               interface{} // name
-	Code               interface{} // code
+	Code               interface{} //
 	Status             interface{} // status, 1-editable, 2-active, 3-deactive, 4-expire
 	BillingType        interface{} // billing_type, 1-one-time, 2-recurring
 	DiscountType       interface{} // discount_type, 1-percentage, 2-fixed_amount
@@ -39,4 +39,5 @@ type MerchantDiscountCode struct {
 	UserScope          interface{} // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
 	UpgradeOnly        interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
+	PlanApplyType      interface{} // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
 }

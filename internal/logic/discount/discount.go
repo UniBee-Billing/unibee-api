@@ -34,6 +34,7 @@ type CreateDiscountCodeInternalReq struct {
 	StartTime          *int64                 `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
 	EndTime            *int64                 `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
 	Quantity           *uint64                `json:"quantity"           description:"Quantity of code"`
+	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"` // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
 	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
@@ -99,6 +100,13 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		upgradeLongerOnly = 0
 	}
 	utility.Assert(upgradeOnly+upgradeLongerOnly <= 1, "invalid UpgradeOnly and UpgradeLongerOnly, You can only choose one of two")
+	planApplyType := 0
+	if req.PlanApplyType != nil {
+		planApplyType = *req.PlanApplyType
+	}
+	if len(req.PlanIds) > 0 && planApplyType == 0 {
+		planApplyType = 1
+	}
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
@@ -116,6 +124,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		EndTime:            *req.EndTime,
 		Quantity:           quantity,
 		MetaData:           utility.MarshalToJsonString(req.Metadata),
+		PlanApplyType:      planApplyType,
 		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
 		Advance:            advance,
@@ -169,6 +178,9 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		upgradeLongerOnly = 0
 	}
 	utility.Assert(upgradeOnly+upgradeLongerOnly <= 1, "invalid UpgradeOnly and UpgradeLongerOnly, You can only choose one of two")
+	if len(req.PlanIds) > 0 && req.PlanApplyType != nil && *req.PlanApplyType == 0 && one.PlanApplyType == 0 {
+		req.PlanApplyType = unibee.Int(1)
+	}
 	//edit after activate
 	if one.Status > consts.DiscountStatusEditable {
 		utility.Assert((req.StartTime != nil && req.EndTime != nil) || req.PlanIds != nil, "startTime&endTime or planIds should not be nil")
@@ -184,6 +196,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 			dao.MerchantDiscountCode.Columns().UpgradeLongerOnly: upgradeLongerOnly,
 			dao.MerchantDiscountCode.Columns().StartTime:         req.StartTime,
 			dao.MerchantDiscountCode.Columns().EndTime:           req.EndTime,
+			dao.MerchantDiscountCode.Columns().PlanApplyType:     req.PlanApplyType,
 			dao.MerchantDiscountCode.Columns().PlanIds:           planIdsStr,
 			dao.MerchantDiscountCode.Columns().MetaData:          utility.MarshalToJsonString(utility.MergeMetadata(one.MetaData, &req.Metadata)),
 			dao.MerchantDiscountCode.Columns().GmtModify:         gtime.Now(),
@@ -241,6 +254,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,
 		dao.MerchantDiscountCode.Columns().Quantity:           req.Quantity,
+		dao.MerchantDiscountCode.Columns().PlanApplyType:      req.PlanApplyType,
 		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
 		dao.MerchantDiscountCode.Columns().MetaData:           utility.MarshalToJsonString(req.Metadata),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),

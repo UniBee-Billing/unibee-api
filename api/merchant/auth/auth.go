@@ -43,6 +43,16 @@ type PasswordForgetOtpReq struct {
 type PasswordForgetOtpRes struct {
 }
 
+type PasswordSetupOtpReq struct {
+	g.Meta      `path:"/sso/passwordSetup" tags:"Member Authentication" method:"post" summary:"Password Setup" dc:"Member Password Setup"`
+	Email       string `json:"email" dc:"The merchant member email address" v:"required"`
+	SetupToken  string `json:"setupToken" dc:"The merchant member password setup token" v:"required"`
+	NewPassword string `json:"newPassword" dc:"The new password" v:"required"`
+}
+
+type PasswordSetupOtpRes struct {
+}
+
 type PasswordForgetOtpVerifyReq struct {
 	g.Meta           `path:"/sso/passwordForgetOTPVerify" tags:"Member Authentication" method:"post" summary:"OTP Password Forget Code Verification" dc:"Password forget OTP process, verify OTP code"`
 	Email            string `json:"email" dc:"The merchant member email address" v:"required"`

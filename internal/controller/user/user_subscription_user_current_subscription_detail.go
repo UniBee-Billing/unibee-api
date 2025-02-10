@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	_interface "unibee/internal/interface/context"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service/detail"
 	"unibee/internal/query"
 
 	"unibee/api/user/subscription"
@@ -13,7 +13,7 @@ func (c *ControllerSubscription) UserCurrentSubscriptionDetail(ctx context.Conte
 	user := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
 	if one != nil {
-		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
+		detail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err != nil {
 			return nil, err
 		}

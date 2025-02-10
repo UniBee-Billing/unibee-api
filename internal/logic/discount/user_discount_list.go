@@ -83,7 +83,8 @@ func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInte
 	q = q.
 		Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
 		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
-		Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+		//Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+		Where("LOWER(code) = LOWER(?)", one.Code). // case_insensitive
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count)
 	if req.SkipTotal {
@@ -96,8 +97,8 @@ func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInte
 		g.Log().Errorf(ctx, "MerchantUserDiscountCodeList err:%s", err.Error())
 		return mainList, total
 	}
-	for _, one := range list {
-		mainList = append(mainList, detail.ConvertMerchantUserDiscountCodeDetail(ctx, one))
+	for _, o := range list {
+		mainList = append(mainList, detail.ConvertMerchantUserDiscountCodeDetail(ctx, o))
 	}
 
 	return mainList, total

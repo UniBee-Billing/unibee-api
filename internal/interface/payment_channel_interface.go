@@ -7,6 +7,8 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+var KEY_MERCHANT_GATEWAY_SORT string = "KEY_MERCHANT_GATEWAY_SORT"
+
 type SubGatewayConfig struct {
 	Name        string `json:"name"`
 	SubGateway  string `json:"subGateway"`
@@ -25,11 +27,15 @@ type GatewayInfo struct {
 	CurrencyExchangeEnabled       bool
 	QueueForRefund                bool
 	SubGatewayConfigs             []*SubGatewayConfig
+	IsStaging                     bool
+	PublicKeyName                 string
+	PrivateSecretName             string
+	SubGatewayName                string
 }
 
 type GatewayInterface interface {
 	GatewayInfo(ctx context.Context) *GatewayInfo
-	GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error)
+	GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error)
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error)
 	// Balance
@@ -48,7 +54,7 @@ type GatewayInterface interface {
 	GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error)
 	GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error)
 	GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error)
-	GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error)
+	GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error)
 	GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error)
 }
 

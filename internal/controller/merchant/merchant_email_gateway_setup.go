@@ -5,6 +5,7 @@ import (
 	"unibee/api/merchant/email"
 	_interface "unibee/internal/interface/context"
 	email2 "unibee/internal/logic/email"
+	"unibee/utility"
 )
 
 func (c *ControllerEmail) GatewaySetup(ctx context.Context, req *email.GatewaySetupReq) (res *email.GatewaySetupRes, err error) {
@@ -12,5 +13,5 @@ func (c *ControllerEmail) GatewaySetup(ctx context.Context, req *email.GatewaySe
 	if err != nil {
 		return nil, err
 	}
-	return &email.GatewaySetupRes{}, nil
+	return &email.GatewaySetupRes{Data: utility.HideStar(req.Data)}, nil
 }

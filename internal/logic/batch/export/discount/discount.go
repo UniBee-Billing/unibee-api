@@ -89,7 +89,8 @@ func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, t
 		for _, one := range result {
 			totalUsed, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 				Where(dao.MerchantUserDiscountCode.Columns().MerchantId, one.MerchantId).
-				Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+				//Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+				Where("LOWER(code) = LOWER(?)", one.Code). // case_insensitive
 				Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 				Count()
 			if err != nil {

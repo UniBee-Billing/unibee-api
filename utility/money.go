@@ -24,10 +24,19 @@ func ConvertCentToDollarStr(cents int64, currency string) string {
 	return strings.Replace(fmt.Sprintf("%.2f", dollars), ".00", "", -1)
 }
 
+func ExchangeCurrencyConvert(from int64, fromCurrency string, toCurrency string, exchangeRate float64) int64 {
+	if IsNoCentCurrency(strings.ToUpper(fromCurrency)) && !IsNoCentCurrency(strings.ToUpper(toCurrency)) {
+		return int64(float64(from*100) * exchangeRate)
+	} else if !IsNoCentCurrency(strings.ToUpper(fromCurrency)) && IsNoCentCurrency(strings.ToUpper(toCurrency)) {
+		return int64(float64(from/100) * exchangeRate)
+	}
+	return int64(float64(from) * exchangeRate)
+}
+
 func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 	dollars, err := strconv.ParseFloat(dollarStr, 64)
 	if err != nil {
-		panic(fmt.Sprintf("ConvertDollarStrToCent panic:%s", dollarStr))
+		panic(fmt.Sprintf("ConvertDollarStrToCent panic dollarStr:%s currency:%s err:%s", dollarStr, currency, err.Error()))
 	}
 	if IsNoCentCurrency(currency) {
 		return int64(dollars)

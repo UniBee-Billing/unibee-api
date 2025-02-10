@@ -10,6 +10,7 @@ type GatewaySetupReq struct {
 }
 
 type GatewaySetupRes struct {
+	Data string `json:"data" dc:"Data" dc:"The hide star data"`
 }
 
 type SendTemplateEmailToUserReq struct {

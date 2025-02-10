@@ -183,6 +183,18 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				transactionId = one.RefundId
 				externalTransactionId = one.Refund.GatewayRefundId
 			}
+			var exchangeCurrency = ""
+			var exchangeAmount = ""
+			var exchangeRate = ""
+			if one.Refund == nil && one.Payment != nil && one.Payment.GatewayCurrencyExchange != nil {
+				exchangeCurrency = one.Payment.GatewayCurrencyExchange.ToCurrency
+				exchangeAmount = utility.ConvertCentToDollarStr(one.Payment.GatewayCurrencyExchange.ExchangeAmount, one.Payment.GatewayCurrencyExchange.ToCurrency)
+				exchangeRate = fmt.Sprintf("%.2f", one.Payment.GatewayCurrencyExchange.ExchangeRate)
+			} else if one.Refund != nil && one.Refund.GatewayCurrencyExchange != nil {
+				exchangeCurrency = one.Refund.GatewayCurrencyExchange.ToCurrency
+				exchangeAmount = utility.ConvertCentToDollarStr(one.Refund.GatewayCurrencyExchange.ExchangeAmount, one.Refund.GatewayCurrencyExchange.ToCurrency)
+				exchangeRate = fmt.Sprintf("%.2f", one.Refund.GatewayCurrencyExchange.ExchangeRate)
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
@@ -237,6 +249,9 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				TransactionId:                  transactionId,
 				ExternalTransactionId:          externalTransactionId,
 				TimeZone:                       timeZoneStr,
+				ExchangeAmount:                 exchangeAmount,
+				ExchangeCurrency:               exchangeCurrency,
+				ExchangeRate:                   exchangeRate,
 			})
 		}
 	}
@@ -298,4 +313,7 @@ type ExportInvoiceEntity struct {
 	TransactionId                  string      `json:"TransactionId"       comment:"" group:"Transaction"`
 	ExternalTransactionId          string      `json:"ExternalTransactionId"   comment:"" group:"Transaction"`
 	TimeZone                       string      `json:"TimeZone"         comment:"" group:"Transaction"`
+	ExchangeCurrency               string      `json:"ExchangeCurrency" comment:"The exchange currency of invoice" group:"Transaction"`
+	ExchangeAmount                 string      `json:"ExchangeAmount" comment:"The exchange amount of invoice" group:"Transaction"`
+	ExchangeRate                   string      `json:"ExchangeRate" comment:"The exchange rate of invoice" group:"Transaction"`
 }

@@ -20,13 +20,14 @@ func (w Wire) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		Description:        "Use this method to receive payment from bank transfer",
 		DisplayName:        "Wire Transfer",
 		GatewayWebsiteLink: "",
-		GatewayLogo:        "https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg",
+		GatewayLogo:        "https://api.unibee.top/oss/file/d79g2m15ygg5x3dvul.png",
 		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg"},
 		GatewayType:        consts.GatewayTypeWireTransfer,
+		Sort:               10,
 	}
 }
 
-func (w Wire) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (w Wire) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	return "https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg", consts.GatewayTypeWireTransfer, gerror.New("Please setup by wire transfer setup api")
 }
 
@@ -118,9 +119,9 @@ func (w Wire) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantG
 	}, nil
 }
 
-func (w Wire) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (w Wire) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
-		GatewayRefundId: refund.RefundId,
+		GatewayRefundId: createPaymentRefundContext.Refund.RefundId,
 		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil

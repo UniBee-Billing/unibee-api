@@ -20,12 +20,18 @@ import (
 )
 
 const (
-	KeyMerchantVatName = "KEY_MERCHANT_DEFAULT_VAT_NAME"
+	KeyMerchantVatName          = "KEY_MERCHANT_DEFAULT_VAT_NAME"
+	KeyMerchantVatGeneralConfig = "KEY_MERCHANT_DEFAULT_GENERAL_CONFIG"
 )
 
 const (
 	VAT_IMPLEMENT_NAMES = "vatsense|github|vatstack"
 )
+
+type VATGeneralConfig struct {
+	ValidForNonEU     bool     `json:"valid_non_eu" dc:" valid for non eu"`
+	ValidCountryCodes []string `json:"valid_country_codes" dc:"valid for all if empty list and blank"`
+}
 
 func GetDefaultVatGateway(ctx context.Context, merchantId uint64) VATGateway {
 	vatName, vatData := GetDefaultMerchantVatConfig(ctx, merchantId)
@@ -46,6 +52,19 @@ func GetDefaultVatGateway(ctx context.Context, merchantId uint64) VATGateway {
 		return one
 	}
 	return nil
+}
+
+func GetMerchantVATGeneralConfig(ctx context.Context, merchantId uint64) *VATGeneralConfig {
+	generalConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantVatGeneralConfig)
+	if generalConfig != nil && len(generalConfig.ConfigValue) > 0 {
+		var one *VATGeneralConfig
+		_ = utility.UnmarshalFromJsonString(generalConfig.ConfigValue, &one)
+		return one
+	}
+	return &VATGeneralConfig{
+		ValidForNonEU:     false,
+		ValidCountryCodes: make([]string, 0),
+	}
 }
 
 func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatName string, data string) {
@@ -134,6 +153,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 	if err != nil {
 		return nil, err
 	}
+	generalConfig := GetMerchantVATGeneralConfig(ctx, merchantId)
 	var list []*bean.VatCountryRate
 	for _, countryRate := range countryRateList {
 		var vatSupport = false
@@ -144,8 +164,15 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 		}
 		// disable tax for non-eu country
 		var standardTaxPercentage = countryRate.StandardTaxPercentage
-		if countryRate.Eu != 1 {
-			standardTaxPercentage = 0
+		if !generalConfig.ValidForNonEU {
+			if countryRate.Eu != 1 {
+				standardTaxPercentage = 0
+			}
+		}
+		if len(generalConfig.ValidCountryCodes) > 0 {
+			if !utility.IsStringInArray(generalConfig.ValidCountryCodes, countryRate.CountryCode) {
+				standardTaxPercentage = 0
+			}
 		}
 		list = append(list, &bean.VatCountryRate{
 			CountryCode:           countryRate.CountryCode,
@@ -182,9 +209,19 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	} else {
 		vatSupport = false
 	}
+	generalConfig := GetMerchantVATGeneralConfig(ctx, merchantId)
 	// disable tax for non-eu country
 	var standardTaxPercentage = one.StandardTaxPercentage
-
+	if !generalConfig.ValidForNonEU {
+		if one.Eu != 1 {
+			standardTaxPercentage = 0
+		}
+	}
+	if len(generalConfig.ValidCountryCodes) > 0 {
+		if !utility.IsStringInArray(generalConfig.ValidCountryCodes, one.CountryCode) {
+			standardTaxPercentage = 0
+		}
+	}
 	return &bean.VatCountryRate{
 		Id:                    one.Id,
 		Gateway:               one.Gateway,

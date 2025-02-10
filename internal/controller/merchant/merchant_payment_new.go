@@ -201,7 +201,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		Metadata:       req.Metadata,
 		Invoice:        invoice,
 	})
-	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
+	utility.AssertError(err, "Create Gateway Payment Error:")
 	res = &payment.NewRes{
 		Status:            consts.PaymentCreated,
 		PaymentId:         resp.Payment.PaymentId,

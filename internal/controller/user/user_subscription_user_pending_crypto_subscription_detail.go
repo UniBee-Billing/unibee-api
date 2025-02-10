@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface/context"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service/detail"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -18,7 +18,7 @@ func (c *ControllerSubscription) UserPendingCryptoSubscriptionDetail(ctx context
 	if one != nil {
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		if gateway.GatewayType == consts.GatewayTypeCrypto {
-			detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
+			detail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 			if err == nil {
 				return &subscription.UserPendingCryptoSubscriptionDetailRes{
 					Subscription: detail,

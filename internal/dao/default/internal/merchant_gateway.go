@@ -28,7 +28,7 @@ type MerchantGatewayColumns struct {
 	Name                  string // name
 	SubGateway            string // sub_gateway_enum
 	BrandData             string //
-	Logo                  string // gateway logo
+	Logo                  string //
 	Host                  string // pay host
 	GatewayAccountId      string // gateway account id
 	GatewayKey            string //

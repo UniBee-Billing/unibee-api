@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/log"
@@ -45,6 +46,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
 	utility.Assert(createPayContext.Invoice != nil, "invoice is nil")
+	createPayContext.Merchant = query.GetMerchantById(ctx, createPayContext.Pay.MerchantId)
 	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
 	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
@@ -58,7 +60,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	}
 	createPayContext.Metadata["PaymentId"] = createPayContext.Pay.PaymentId
 	createPayContext.Metadata["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
-	createPayContext.Pay.MetaData = utility.MarshalToJsonString(createPayContext.Metadata)
+
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-externalPaymentId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.ExternalPaymentId)
 	isDuplicatedInvoke := false
 
@@ -71,6 +73,50 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.ExternalPaymentId)
+	}
+
+	// currency exchange
+	if len(createPayContext.Gateway.Custom) > 0 && createPayContext.Gateway.GatewayType != consts.GatewayTypeCrypto {
+		var currencyExchanges []*detail.GatewayCurrencyExchange
+		_ = utility.UnmarshalFromJsonString(createPayContext.Gateway.Custom, &currencyExchanges)
+		if currencyExchanges != nil && len(currencyExchanges) > 0 {
+			for _, exchange := range currencyExchanges {
+				if strings.ToUpper(exchange.FromCurrency) == createPayContext.Pay.Currency && exchange.ExchangeRate >= 0 {
+					if exchange.ExchangeRate > 0 {
+						//createPayContext.ExchangeAmount = int64(float64(createPayContext.Pay.TotalAmount) * exchange.ExchangeRate)
+						createPayContext.ExchangeAmount = utility.ExchangeCurrencyConvert(createPayContext.Pay.TotalAmount, exchange.FromCurrency, exchange.ToCurrency, exchange.ExchangeRate)
+						createPayContext.ExchangeCurrency = strings.ToUpper(exchange.ToCurrency)
+						createPayContext.Pay.CryptoAmount = createPayContext.ExchangeAmount
+						createPayContext.Pay.CryptoCurrency = createPayContext.ExchangeCurrency
+						createPayContext.GatewayCurrencyExchange = &gateway_bean.GatewayCurrencyExchange{
+							FromCurrency: strings.ToUpper(exchange.FromCurrency),
+							ToCurrency:   strings.ToUpper(exchange.ToCurrency),
+							ExchangeRate: exchange.ExchangeRate,
+						}
+						createPayContext.Metadata[gateway_bean.GatewayCurrencyExchangeKey] = utility.MarshalToJsonString(createPayContext.GatewayCurrencyExchange)
+					} else if exchange.ExchangeRate == 0 {
+						exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, fiat_exchange.FiatExchangeApiKey)
+						utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi not setup")
+						rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						utility.AssertError(err, "transfer currency exchange error")
+						utility.Assert(rate != nil, "transfer currency error, exchange rate is nil")
+						exchange.ExchangeRate = *rate
+						//createPayContext.ExchangeAmount = int64(float64(createPayContext.Pay.TotalAmount) * *rate)
+						createPayContext.ExchangeAmount = utility.ExchangeCurrencyConvert(createPayContext.Pay.TotalAmount, exchange.FromCurrency, exchange.ToCurrency, exchange.ExchangeRate)
+						createPayContext.ExchangeCurrency = strings.ToUpper(exchange.ToCurrency)
+						createPayContext.Pay.CryptoAmount = createPayContext.ExchangeAmount
+						createPayContext.Pay.CryptoCurrency = createPayContext.ExchangeCurrency
+						createPayContext.GatewayCurrencyExchange = &gateway_bean.GatewayCurrencyExchange{
+							FromCurrency: strings.ToUpper(exchange.FromCurrency),
+							ToCurrency:   strings.ToUpper(exchange.ToCurrency),
+							ExchangeRate: exchange.ExchangeRate,
+						}
+						createPayContext.Metadata[gateway_bean.GatewayCurrencyExchangeKey] = utility.MarshalToJsonString(createPayContext.GatewayCurrencyExchange)
+					}
+					break
+				}
+			}
+		}
 	}
 
 	if createPayContext.Gateway.GatewayType == consts.GatewayTypeCrypto {
@@ -117,6 +163,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		createPayContext.Pay.InvoiceId = utility.CreateInvoiceId()
 	}
 
+	createPayContext.Pay.MetaData = utility.MarshalToJsonString(createPayContext.Metadata)
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway payment

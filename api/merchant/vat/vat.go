@@ -12,6 +12,7 @@ type SetupGatewayReq struct {
 	IsDefault   bool   `json:"IsDefault" d:"true" dc:"IsDefault, default is true" `
 }
 type SetupGatewayRes struct {
+	Data string `json:"data" dc:"Data" dc:"The hide star data"`
 }
 
 type InitDefaultGatewayReq struct {

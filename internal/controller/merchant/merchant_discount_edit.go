@@ -24,6 +24,7 @@ func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (r
 		StartTime:         req.StartTime,
 		EndTime:           req.EndTime,
 		Metadata:          req.Metadata,
+		PlanApplyType:     req.PlanApplyType,
 		PlanIds:           req.PlanIds,
 		Quantity:          req.Quantity,
 		Advance:           req.Advance,

@@ -53,7 +53,7 @@ func fetchSubGateway(ctx context.Context) []*_interface.SubGatewayConfig {
 func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
 		Name:                          "Payssion",
-		Description:                   "Need to replace Use ClientId and Secret to secure the payment",
+		Description:                   "Use App Key and Secret Key to secure the payment",
 		DisplayName:                   "Payssion",
 		GatewayWebsiteLink:            "https://payssion.com",
 		GatewayWebhookIntegrationLink: "https://www.payssion.com/account/app",
@@ -62,6 +62,10 @@ func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayType:                   consts.GatewayTypeCard,
 		QueueForRefund:                true,
 		SubGatewayConfigs:             fetchSubGateway(ctx),
+		//IsStaging:                     true,
+		CurrencyExchangeEnabled: true,
+		Sort:                    60,
+		SubGatewayName:          "Payment Type",
 	}
 }
 
@@ -69,9 +73,12 @@ func (c Payssion) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean
 	return nil, gerror.New("not support")
 }
 
-func (c Payssion) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (c Payssion) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/v1/payments"
 	pmID := "payssion_test"
+	if config.GetConfigInstance().IsProd() {
+		pmID = subGateway
+	}
 	param := map[string]interface{}{
 		"currency":    "EUR",
 		"pm_id":       pmID,
@@ -123,13 +130,12 @@ func (c Payssion) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 func (c Payssion) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api/v1/payments"
 	//var name = ""
-	var description = ""
+	var description = createPayContext.Invoice.ProductName
 	if len(createPayContext.Invoice.Lines) > 0 {
 		var line = createPayContext.Invoice.Lines[0]
-		if len(line.Name) == 0 {
-			//name = line.Description
-		} else {
-			//name = line.Name
+		if len(line.Name) > 0 {
+			description = line.Name
+		} else if len(line.Description) > 0 {
 			description = line.Description
 		}
 	}
@@ -137,9 +143,18 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, gateway *entity.Merchan
 	if len(gateway.SubGateway) > 0 {
 		pmID = gateway.SubGateway
 	}
+	var currency = createPayContext.Pay.Currency
+	var totalAmount = createPayContext.Pay.TotalAmount
+	{
+		// Currency Exchange
+		if createPayContext.GatewayCurrencyExchange != nil && createPayContext.ExchangeAmount > 0 && len(createPayContext.ExchangeCurrency) > 0 {
+			currency = createPayContext.ExchangeCurrency
+			totalAmount = createPayContext.ExchangeAmount
+		}
+	}
 	param := map[string]interface{}{
-		"currency": createPayContext.Pay.Currency,
-		"amount":   utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+		"currency": currency,
+		"amount":   utility.ConvertCentToDollarStr(totalAmount, currency),
 		"pm_id":    pmID,
 		//"title":               name,
 		"description": description,
@@ -250,11 +265,11 @@ func (c Payssion) GatewayRefundDetail(ctx context.Context, gateway *entity.Merch
 	}
 }
 
-func (c Payssion) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	detail, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
+func (c Payssion) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	detail, err := c.GatewayPaymentDetail(ctx, gateway, createPaymentRefundContext.Payment.GatewayPaymentId, createPaymentRefundContext.Payment)
 	if err != nil {
 		return &gateway_bean.GatewayPaymentRefundResp{
-			GatewayRefundId: payment.GatewayPaymentId,
+			GatewayRefundId: createPaymentRefundContext.Payment.GatewayPaymentId,
 			Status:          consts.RefundFailed,
 			Type:            consts.RefundTypeGateway,
 			Reason:          fmt.Sprintf("Get Gateway Refund Sequence Failed:%s", err.Error()),
@@ -263,11 +278,16 @@ func (c Payssion) GatewayRefund(ctx context.Context, gateway *entity.MerchantGat
 
 	urlPath := "/api/v1/refunds"
 	param := map[string]interface{}{}
-	param["transaction_id"] = payment.GatewayPaymentId
-	param["amount"] = utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency)
-	param["currency"] = strings.ToUpper(refund.Currency)
-	param["track_id"] = refund.RefundId
-	param["description"] = refund.RefundComment
+	param["transaction_id"] = createPaymentRefundContext.Payment.GatewayPaymentId
+	if createPaymentRefundContext.GatewayCurrencyExchange != nil && createPaymentRefundContext.ExchangeRefundAmount > 0 && len(createPaymentRefundContext.ExchangeRefundCurrency) > 0 {
+		param["amount"] = utility.ConvertCentToDollarStr(createPaymentRefundContext.ExchangeRefundAmount, createPaymentRefundContext.ExchangeRefundCurrency)
+		param["currency"] = strings.ToUpper(createPaymentRefundContext.ExchangeRefundCurrency)
+	} else {
+		param["amount"] = utility.ConvertCentToDollarStr(createPaymentRefundContext.Refund.RefundAmount, createPaymentRefundContext.Refund.Currency)
+		param["currency"] = strings.ToUpper(createPaymentRefundContext.Refund.Currency)
+	}
+	param["track_id"] = createPaymentRefundContext.Refund.RefundId
+	param["description"] = createPaymentRefundContext.Refund.RefundComment
 	param["api_key"] = gateway.GatewayKey
 	param["api_sig"] = utility.MD5(fmt.Sprintf("%v|%v|%v|%v|%v", param["api_key"], param["transaction_id"], param["amount"], param["currency"], gateway.GatewaySecret))
 	responseJson, err := SendPayssionPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)
@@ -277,18 +297,18 @@ func (c Payssion) GatewayRefund(ctx context.Context, gateway *entity.MerchantGat
 	}
 	if !responseJson.Contains("result_code") || responseJson.Get("result_code").Int() != 200 {
 		return &gateway_bean.GatewayPaymentRefundResp{
-			GatewayRefundId: payment.GatewayPaymentId,
+			GatewayRefundId: createPaymentRefundContext.Payment.GatewayPaymentId,
 			Status:          consts.RefundFailed,
 			Type:            consts.RefundTypeGateway,
-			Reason:          "invalid request, result_code is nil or not 200",
+			Reason:          fmt.Sprintf("invalid request, %s", responseJson.Get("description").String()),
 		}, nil
 	}
 	if !responseJson.Contains("refund") {
 		return &gateway_bean.GatewayPaymentRefundResp{
-			GatewayRefundId: payment.GatewayPaymentId,
+			GatewayRefundId: createPaymentRefundContext.Payment.GatewayPaymentId,
 			Status:          consts.RefundFailed,
 			Type:            consts.RefundTypeGateway,
-			Reason:          "invalid request, refund is nil",
+			Reason:          fmt.Sprintf("invalid request, %s", responseJson.Get("description").String()),
 		}, nil
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())

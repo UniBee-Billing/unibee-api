@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean/detail"
 	_interface "unibee/internal/interface/context"
 	gateway2 "unibee/internal/logic/gateway/service"
 
@@ -9,11 +10,14 @@ import (
 )
 
 func (c *ControllerGateway) WireTransferSetup(ctx context.Context, req *gateway.WireTransferSetupReq) (res *gateway.WireTransferSetupRes, err error) {
-	gateway2.SetupWireTransferGateway(ctx, &gateway2.WireTransferSetupReq{
+	one := gateway2.SetupWireTransferGateway(ctx, &gateway2.WireTransferSetupReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
 		Currency:      req.Currency,
 		MinimumAmount: req.MinimumAmount,
 		Bank:          req.Bank,
+		DisplayName:   req.DisplayName,
+		GatewayIcon:   req.GatewayIcons,
+		Sort:          req.Sort,
 	})
-	return &gateway.WireTransferSetupRes{}, nil
+	return &gateway.WireTransferSetupRes{Gateway: detail.ConvertGatewayDetail(ctx, one)}, nil
 }

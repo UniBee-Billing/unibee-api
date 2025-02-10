@@ -36,7 +36,7 @@ func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gate
 	panic("implement me")
 }
 
-func (i Invalid) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
+func (i Invalid) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -106,7 +106,7 @@ func (i Invalid) GatewayCancel(ctx context.Context, gateway *entity.MerchantGate
 	panic("implement me")
 }
 
-func (i Invalid) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (i Invalid) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

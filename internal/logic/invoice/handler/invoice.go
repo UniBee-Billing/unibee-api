@@ -126,7 +126,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		PeriodEnd:                      invoice.PeriodEnd,
 		PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
 		PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
-		Currency:                       payment.Currency,
+		Currency:                       invoice.Currency,
 		CryptoCurrency:                 payment.CryptoCurrency,
 		GatewayId:                      payment.GatewayId,
 		Status:                         consts.InvoiceStatusProcessing,
@@ -336,12 +336,12 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		Currency:                       refund.Currency,
 		CryptoCurrency:                 payment.CryptoCurrency,
+		CryptoAmount:                   payment.CryptoAmount,
 		GatewayId:                      refund.GatewayId,
 		Status:                         consts.InvoiceStatusProcessing,
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      sendEmail,
 		TotalAmount:                    invoice.TotalAmount,
-		CryptoAmount:                   payment.CryptoAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		TaxAmount:                      invoice.TaxAmount,
 		CountryCode:                    invoice.CountryCode,
@@ -453,21 +453,6 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	if one.TotalAmount != 0 {
 		return nil, gerror.New("invoice totalAmount not zero, InvoiceId:" + invoiceId)
 	}
-	//if len(one.DiscountCode) > 0 {
-	//	_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-	//		MerchantId:     one.MerchantId,
-	//		UserId:         one.UserId,
-	//		DiscountCode:   one.DiscountCode,
-	//		SubscriptionId: one.SubscriptionId,
-	//		PaymentId:      "",
-	//		InvoiceId:      one.InvoiceId,
-	//		ApplyAmount:    one.DiscountAmount,
-	//		Currency:       one.Currency,
-	//	})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:    consts.InvoiceStatusPaid,
@@ -479,18 +464,17 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	one.Status = consts.InvoiceStatusPaid
-	go func() {
-		time.Sleep(1 * time.Second)
-		if utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {
+	if utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {
+		go func() {
+			time.Sleep(2 * time.Second)
 			_, _ = redismq.Send(&redismq.Message{
-				Topic:                     redismq2.TopicInvoicePaid.Topic,
-				Tag:                       redismq2.TopicInvoicePaid.Tag,
-				ConsumerDelayMilliSeconds: 500,
-				Body:                      one.InvoiceId,
-				CustomData:                map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+				Topic:      redismq2.TopicInvoicePaid.Topic,
+				Tag:        redismq2.TopicInvoicePaid.Tag,
+				Body:       one.InvoiceId,
+				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 			})
-		}
-	}()
+		}()
+	}
 
 	return one, nil
 }

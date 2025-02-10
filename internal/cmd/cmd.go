@@ -45,7 +45,7 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			openapi := s.GetOpenApi()
-			openapi.Info.Description = "This is UniBee Api Server"
+			openapi.Info.Description = "UniBee Api Server"
 			openapi.Info.Title = "OpenAPI UniBee"
 			openapi.Info.License = &goai.License{
 				Name: "Apache-2.0",

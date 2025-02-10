@@ -37,15 +37,19 @@ func GetGatewayById(ctx context.Context, id uint64) (one *entity.MerchantGateway
 	return
 }
 
-func GetValidMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*entity.MerchantGateway) {
+func GetMerchantGatewayList(ctx context.Context, merchantId uint64, archive *bool) (list []*entity.MerchantGateway) {
 	var data []*entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).
-		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
-		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
-		OrderDesc(dao.MerchantGateway.Columns().EnumKey).
+	q := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId)
+	if archive != nil && *archive {
+		q = q.WhereGT(dao.MerchantGateway.Columns().IsDeleted, 0)
+	} else if archive != nil && !*archive {
+		q = q.Where(dao.MerchantGateway.Columns().IsDeleted, 0)
+	}
+	err := q.Order("is_deleted asc, enum_key desc").
 		Scan(&data)
 	if err != nil {
-		g.Log().Errorf(ctx, "GetValidMerchantGatewayList error:%s", err)
+		g.Log().Errorf(ctx, "GetMerchantGatewayList error:%s", err)
 		return nil
 	}
 	var validGateways []*entity.MerchantGateway

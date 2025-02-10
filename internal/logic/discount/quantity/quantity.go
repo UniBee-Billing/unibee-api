@@ -36,7 +36,8 @@ func getDiscountQuantityUsedCountFromDatabase(ctx context.Context, one *entity.M
 		return count
 	}
 	count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-		Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+		//Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
+		Where("LOWER(code) = LOWER(?)", one.Code). // case_insensitive
 		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 		Where(dao.MerchantUserDiscountCode.Columns().Recurring, 0).
 		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).

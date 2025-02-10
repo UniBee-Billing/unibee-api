@@ -5,6 +5,15 @@ import (
 	"unibee/api/bean/detail"
 )
 
+type EditSortReq struct {
+	g.Meta       `path:"/edit_sort" tags:"Gateway" method:"post" summary:"Edit Payment Gateway Sort"`
+	GatewaySorts []*detail.GatewaySort `json:"gatewaySorts" dc:"structure gateway sort"`
+}
+
+type EditSortRes struct {
+	Gateways []*detail.Gateway `json:"gateways" dc:"Payment Gateway Setup Object List"`
+}
+
 type SetupListReq struct {
 	g.Meta `path:"/setup_list" tags:"Gateway" method:"get" summary:"Get Payment Gateway Setup List"`
 }
@@ -22,7 +31,8 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Gateway" method:"get" summary:"Get Payment Gateway List"`
+	g.Meta  `path:"/list" tags:"Gateway" method:"get" summary:"Get Payment Gateway List"`
+	Archive *bool `json:"archive" dc:"Filter archive gateway or not, default all"`
 }
 type ListRes struct {
 	Gateways []*detail.Gateway `json:"gateways" dc:"Payment Gateway Object List"`
@@ -36,6 +46,7 @@ type SetupReq struct {
 	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
 	GatewayKey       string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret    string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
+	SubGateway       string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `
 	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 }
 type SetupRes struct {
@@ -50,6 +61,7 @@ type EditReq struct {
 	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
 	GatewayKey       *string                           `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret    *string                           `json:"gatewaySecret"  dc:"The secret of payment gateway" `
+	SubGateway       *string                           `json:"subGateway"  dc:"The sub gateway of payment gateway" `
 	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 }
 type EditRes struct {
@@ -83,21 +95,29 @@ type SetupWebhookRes struct {
 
 type WireTransferSetupReq struct {
 	g.Meta        `path:"/wire_transfer_setup" tags:"Gateway" method:"post" summary:"Wire Transfer Setup" dc:"Setup the wire transfer"`
+	DisplayName   *string             `json:"displayName"  dc:"The displayName of payment gateway"`
+	GatewayIcons  *[]string           `json:"gatewayIcons"  dc:"The icons of payment gateway"`
+	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
 	Currency      string              `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64               `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
 	Bank          *detail.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer" v:"required"`
 }
 type WireTransferSetupRes struct {
+	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type WireTransferEditReq struct {
 	g.Meta        `path:"/wire_transfer_edit" tags:"Gateway" method:"post" summary:"Wire Transfer Edit" dc:"Edit the wire transfer"`
 	GatewayId     uint64              `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	DisplayName   *string             `json:"displayName"  dc:"The displayName of payment gateway"`
+	GatewayIcons  *[]string           `json:"gatewayIcons"  dc:"The icons of payment gateway"`
+	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
 	Currency      string              `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64               `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
 	Bank          *detail.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer" v:"required"`
 }
 type WireTransferEditRes struct {
+	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type SetupExchangeApiReq struct {
@@ -105,4 +125,5 @@ type SetupExchangeApiReq struct {
 	ExchangeRateApiKey string `json:"exchangeRateApiKey"  dc:"The key of exchange rate api"`
 }
 type SetupExchangeApiRes struct {
+	Data string `json:"data"  dc:"The hide star key of exchange rate api"`
 }
