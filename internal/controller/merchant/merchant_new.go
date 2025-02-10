@@ -73,7 +73,6 @@ type ControllerGateway struct{}
 func NewGateway() merchant.IMerchantGateway {
 	return &ControllerGateway{}
 }
-
 type ControllerEmail struct{}
 
 func NewEmail() merchant.IMerchantEmail {
@@ -139,3 +138,4 @@ type ControllerCredit struct{}
 func NewCredit() merchant.IMerchantCredit {
 	return &ControllerCredit{}
 }
+

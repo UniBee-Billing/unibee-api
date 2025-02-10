@@ -38,6 +38,20 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 				if _, ok := sortMap[gatewayName]; ok {
 					gatewaySort = sortMap[gatewayName]
 				}
+				var publicKeyName = "Public Key"
+				var privateSecretName = "Private Key"
+				var subGatewayName = ""
+
+				if len(info.PublicKeyName) > 0 {
+					publicKeyName = info.PublicKeyName
+				}
+				if len(info.PrivateSecretName) > 0 {
+					privateSecretName = info.PrivateSecretName
+				}
+				if len(info.SubGatewayName) > 0 {
+					subGatewayName = info.SubGatewayName
+				}
+
 				list = append(list, &detail.Gateway{
 					Id:                            0,
 					Name:                          info.Name,
@@ -61,6 +75,9 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 					IsSetupFinished:               false,
 					CurrencyExchangeEnabled:       info.CurrencyExchangeEnabled,
 					SubGatewayConfigs:             info.SubGatewayConfigs,
+					PublicKeyName:                 publicKeyName,
+					PrivateSecretName:             privateSecretName,
+					SubGatewayName:                subGatewayName,
 				})
 			}
 		}

@@ -1,5 +1,5 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
 package system
@@ -49,3 +49,4 @@ type ControllerAuth struct{}
 func NewAuth() system.ISystemAuth {
 	return &ControllerAuth{}
 }
+

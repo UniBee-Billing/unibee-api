@@ -26,17 +26,17 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 		}
 	}
 	renewRes, err := service.SubscriptionRenew(ctx, &service.RenewInternalReq{
-		MerchantId:             _interface.GetMerchantId(ctx),
-		SubscriptionId:         req.SubscriptionId,
-		GatewayId:              req.GatewayId,
-		TaxPercentage:          req.TaxPercentage,
-		DiscountCode:           req.DiscountCode,
-		Discount:               req.Discount,
-		ManualPayment:          req.ManualPayment,
-		ReturnUrl:              req.ReturnUrl,
-		CancelUrl:              req.CancelUrl,
-		ProductData:            req.ProductData,
-		Metadata:               req.Metadata,
+		MerchantId:     _interface.GetMerchantId(ctx),
+		SubscriptionId: req.SubscriptionId,
+		GatewayId:      req.GatewayId,
+		TaxPercentage:  req.TaxPercentage,
+		DiscountCode:   req.DiscountCode,
+		Discount:       req.Discount,
+		ManualPayment:  req.ManualPayment,
+		ReturnUrl:      req.ReturnUrl,
+		CancelUrl:      req.CancelUrl,
+		ProductData:    req.ProductData,
+		Metadata:       req.Metadata,
 		ApplyPromoCredit:       req.ApplyPromoCredit,
 		ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 	})

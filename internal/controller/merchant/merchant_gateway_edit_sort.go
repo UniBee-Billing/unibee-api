@@ -17,6 +17,7 @@ func (c *ControllerGateway) EditSort(ctx context.Context, req *gateway.EditSortR
 	sortConfig := merchant_config.GetMerchantConfig(ctx, _interface.GetMerchantId(ctx), _interface2.KEY_MERCHANT_GATEWAY_SORT)
 	if sortConfig == nil {
 		var data map[string]int64
+		data = make(map[string]int64)
 		for _, v := range req.GatewaySorts {
 			if v.Id > 0 {
 				service.UpdateGatewaySort(ctx, _interface.GetMerchantId(ctx), v.Id, v.Sort)
@@ -30,6 +31,9 @@ func (c *ControllerGateway) EditSort(ctx context.Context, req *gateway.EditSortR
 		var data map[string]int64
 		err = utility.UnmarshalFromJsonString(sortConfig.ConfigValue, &data)
 		utility.AssertError(err, "Update sort failed")
+		if data == nil {
+			data = make(map[string]int64)
+		}
 		for _, v := range req.GatewaySorts {
 			if v.Id > 0 {
 				service.UpdateGatewaySort(ctx, _interface.GetMerchantId(ctx), v.Id, v.Sort)

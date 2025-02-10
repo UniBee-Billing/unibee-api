@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
 package system
 
 import (
 	"context"
-
+	
 	"unibee/api/system/auth"
 	"unibee/api/system/information"
 	"unibee/api/system/invoice"
@@ -46,3 +46,5 @@ type ISystemRefund interface {
 type ISystemSubscription interface {
 	TestClockWalk(ctx context.Context, req *subscription.TestClockWalkReq) (res *subscription.TestClockWalkRes, err error)
 }
+
+

@@ -20,6 +20,10 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 		json := strings.Replace(string(request), "uint64", "int64", -1)
 		api := gjson.New(json)
 		api.SetSplitChar('#')
+		if r.Get("hideSecurity") != nil {
+			_ = api.Remove("security")
+			_ = api.Remove("components#securitySchemes")
+		}
 		for key, path := range api.GetJsonMap("components#schemas") {
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if strings.HasPrefix(key, "unibee.api.user") {
@@ -68,6 +72,10 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 		json := strings.Replace(string(request), "uint64", "int64", -1)
 		api := gjson.New(json)
 		api.SetSplitChar('#')
+		if r.Get("hideSecurity") != nil {
+			_ = api.Remove("security")
+			_ = api.Remove("components#securitySchemes")
+		}
 		for key, path := range api.GetJsonMap("components#schemas") {
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if strings.HasPrefix(key, "unibee.api.user") {
