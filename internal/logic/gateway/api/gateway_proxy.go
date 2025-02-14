@@ -59,6 +59,7 @@ var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
 	"unitpay":       UnitPay{}.GatewayInfo(context.Background()),
 	"payssion":      Payssion{}.GatewayInfo(context.Background()),
 	"wire_transfer": Wire{}.GatewayInfo(context.Background()),
+	"alipay":        Alipay{}.GatewayInfo(context.Background()),
 	//"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
 }
 

@@ -65,7 +65,7 @@ func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		//IsStaging:                     true,
 		CurrencyExchangeEnabled: true,
 		Sort:                    60,
-		SubGatewayName:          "Payment Type",
+		SubGatewayName:          "PM ID",
 	}
 }
 

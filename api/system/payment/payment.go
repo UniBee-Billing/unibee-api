@@ -21,3 +21,11 @@ type PaymentGatewayDetailReq struct {
 type PaymentGatewayDetailRes struct {
 	PaymentDetail *gjson.Json `json:"paymentDetail"`
 }
+
+type PaymentGatewayCheckReq struct {
+	g.Meta    `path:"/payment_gateway_checker" tags:"System-Admin" method:"post" summary:"Admin Trigger Payment Checker"`
+	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required#Require paymentId"`
+}
+
+type PaymentGatewayCheckRes struct {
+}

@@ -39,15 +39,18 @@ type Alipay struct {
 
 func (c Alipay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
-		Name:                          "alipay",
+		Name:                          "Alipay",
 		Description:                   "Use public and private keys to secure the Alipay payment.",
-		DisplayName:                   "alipay",
+		DisplayName:                   "Alipay",
 		GatewayWebsiteLink:            "https://global.alipay.com/platform/site/ihome",
 		GatewayWebhookIntegrationLink: "",
+		Sort:                          91,
 		GatewayLogo:                   "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png",
-		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d6yhnz0wty7w6m7zhd.svg", "https://api.unibee.top/oss/file/d6yho8slal03ywl65c.svg", "https://api.unibee.top/oss/file/d6yhoilcikizou9ztk.svg", "https://api.unibee.top/oss/file/d6yhotsmefitw0cav1.svg"},
+		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png"},
 		GatewayType:                   consts.GatewayTypeCard,
-		SubGatewayName:                "Alipay Merchant Id",
+		SubGatewayName:                "Client Id",
+		PublicKeyName:                 "Alipay Public Key",
+		PrivateSecretName:             "Merchant Private Key",
 	}
 }
 

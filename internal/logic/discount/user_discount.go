@@ -82,23 +82,53 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			if discountCode.EndTime != 0 && discountCode.EndTime < req.TimeNow {
 				return false, false, "Code expired"
 			}
-			if len(discountCode.PlanIds) > 0 {
-				if req.PLanId <= 0 {
-					return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+			{
+				if len(discountCode.PlanIds) > 0 && discountCode.PlanApplyType == 0 {
+					discountCode.PlanApplyType = 1
 				}
-				var match = false
-				planIds := strings.Split(discountCode.PlanIds, ",")
-				for _, s := range planIds {
-					planId, err := strconv.ParseUint(s, 10, 64)
-					if err == nil && planId == req.PLanId {
-						match = true
-						break
+				if discountCode.PlanApplyType == 0 {
+
+				} else if discountCode.PlanApplyType == 1 {
+					if len(discountCode.PlanIds) > 0 {
+						if req.PLanId <= 0 {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
+						var match = false
+						planIds := strings.Split(discountCode.PlanIds, ",")
+						for _, s := range planIds {
+							planId, err := strconv.ParseUint(s, 10, 64)
+							if err == nil && planId == req.PLanId {
+								match = true
+								break
+							}
+						}
+						if !match {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
+					} else {
+						return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+					}
+				} else if discountCode.PlanApplyType == 2 {
+					if len(discountCode.PlanIds) > 0 {
+						if req.PLanId <= 0 {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
+						var match = false
+						planIds := strings.Split(discountCode.PlanIds, ",")
+						for _, s := range planIds {
+							planId, err := strconv.ParseUint(s, 10, 64)
+							if err == nil && planId == req.PLanId {
+								match = true
+								break
+							}
+						}
+						if match {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
 					}
 				}
-				if !match {
-					return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
-				}
 			}
+
 			if discountCode.Advance == 1 {
 				if discountCode.UserScope == 1 && !req.IsNewUser {
 					return false, false, "Code only available for new user"

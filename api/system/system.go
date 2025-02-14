@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package system
 
 import (
 	"context"
-	
+
 	"unibee/api/system/auth"
 	"unibee/api/system/information"
 	"unibee/api/system/invoice"
@@ -33,6 +33,7 @@ type ISystemInvoice interface {
 type ISystemPayment interface {
 	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
 	PaymentGatewayDetail(ctx context.Context, req *payment.PaymentGatewayDetailReq) (res *payment.PaymentGatewayDetailRes, err error)
+	PaymentGatewayCheck(ctx context.Context, req *payment.PaymentGatewayCheckReq) (res *payment.PaymentGatewayCheckRes, err error)
 }
 
 type ISystemPlan interface {
@@ -46,5 +47,3 @@ type ISystemRefund interface {
 type ISystemSubscription interface {
 	TestClockWalk(ctx context.Context, req *subscription.TestClockWalkReq) (res *subscription.TestClockWalkRes, err error)
 }
-
-
