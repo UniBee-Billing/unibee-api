@@ -162,13 +162,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 		} else {
 			vatSupport = false
 		}
-		// disable tax for non-eu country
 		var standardTaxPercentage = countryRate.StandardTaxPercentage
-		if !generalConfig.ValidForNonEU {
-			if countryRate.Eu != 1 {
-				standardTaxPercentage = 0
-			}
-		}
 		if len(generalConfig.ValidCountryCodes) > 0 {
 			if !utility.IsStringInArray(generalConfig.ValidCountryCodes, countryRate.CountryCode) {
 				standardTaxPercentage = 0
@@ -209,14 +203,8 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	} else {
 		vatSupport = false
 	}
-	generalConfig := GetMerchantVATGeneralConfig(ctx, merchantId)
-	// disable tax for non-eu country
 	var standardTaxPercentage = one.StandardTaxPercentage
-	if !generalConfig.ValidForNonEU {
-		if one.Eu != 1 {
-			standardTaxPercentage = 0
-		}
-	}
+	generalConfig := GetMerchantVATGeneralConfig(ctx, merchantId)
 	if len(generalConfig.ValidCountryCodes) > 0 {
 		if !utility.IsStringInArray(generalConfig.ValidCountryCodes, one.CountryCode) {
 			standardTaxPercentage = 0
