@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
+	"golang.org/x/text/currency"
 	"strconv"
 	"strings"
 	redismqcmd "unibee/internal/cmd/redismq"
@@ -49,7 +50,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
-	utility.Assert(req.RefundAmount <= payment.TotalAmount-payment.RefundAmount, "no enough amount can refund")
+	utility.Assert(req.RefundAmount <= payment.TotalAmount-payment.RefundAmount, fmt.Sprintf("Already refunded %v%s", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(payment.Currency))), utility.ConvertCentToDollarStr(payment.RefundAmount, payment.Currency)))
 
 	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gateway.GatewayName).GatewayInfo(ctx)
 	utility.Assert(gatewayInfo != nil, "gateway information not found")

@@ -30,7 +30,7 @@ func (c Credit) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantG
 	return nil, gerror.New("Not Support")
 }
 
-func (c Credit) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (c Credit) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

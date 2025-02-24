@@ -79,30 +79,32 @@ func PlanUnPublish(ctx context.Context, planId uint64) (err error) {
 }
 
 type PlanInternalReq struct {
-	ExternalPlanId     string                                  `json:"externalPlanId" dc:"ExternalPlanId"`
-	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
-	PlanId             uint64                                  `json:"planId" dc:"PlanId" `
-	PlanName           string                                  `json:"planName" dc:"Plan Name"    `
-	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"  `
-	Currency           string                                  `json:"currency"   dc:"Plan Currency"`
-	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
-	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
-	Description        string                                  `json:"description"  dc:"Description"`
-	Type               int                                     `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan, 3-onetime plan" `
-	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
-	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
-	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
-	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
-	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
-	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
-	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period"` // price of trial period
-	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
-	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
-	CancelAtTrialEnd   int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
-	ProductId          int64                                   `json:"productId"   dc:"Id of product which plan to linked" `
+	ExternalPlanId        string                                  `json:"externalPlanId" dc:"ExternalPlanId"`
+	MerchantId            uint64                                  `json:"merchantId" dc:"MerchantId" `
+	PlanId                uint64                                  `json:"planId" dc:"PlanId" `
+	PlanName              string                                  `json:"planName" dc:"Plan Name"    `
+	Amount                int64                                   `json:"amount"   dc:"Plan CaptureAmount"  `
+	Currency              string                                  `json:"currency"   dc:"Plan Currency"`
+	IntervalUnit          string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount         int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
+	Description           string                                  `json:"description"  dc:"Description"`
+	Type                  int                                     `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan, 3-onetime plan" `
+	ProductName           string                                  `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription    string                                  `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl              string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl               string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds              []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
+	OnetimeAddonIds       []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
+	MetricLimits          []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	MetricMeteredCharge   []*bean.MetricPlanChargeBindingParam    `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
+	MetricRecurringCharge []*bean.MetricPlanChargeBindingParam    `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
+	GasPayer              string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
+	Metadata              map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	TrialAmount           int64                                   `json:"trialAmount"                description:"price of trial period"` // price of trial period
+	TrialDurationTime     int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
+	TrialDemand           string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd      int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ProductId             int64                                   `json:"productId"   dc:"Id of product which plan to linked" `
 }
 
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
@@ -200,32 +202,34 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.TrialDemand == "" || req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	one = &entity.Plan{
-		ExternalPlanId:            req.ExternalPlanId,
-		CompanyId:                 merchantInfo.CompanyId,
-		MerchantId:                req.MerchantId,
-		PlanName:                  req.PlanName,
-		Amount:                    req.Amount,
-		Currency:                  strings.ToUpper(req.Currency),
-		IntervalUnit:              strings.ToLower(req.IntervalUnit),
-		IntervalCount:             req.IntervalCount,
-		Type:                      req.Type,
-		Description:               req.Description,
-		ImageUrl:                  req.ImageUrl,
-		HomeUrl:                   req.HomeUrl,
-		BindingAddonIds:           utility.IntListToString(req.AddonIds),
-		BindingOnetimeAddonIds:    utility.IntListToString(req.OnetimeAddonIds),
-		GatewayProductName:        req.ProductName,
-		GatewayProductDescription: req.ProductDescription,
-		Status:                    consts.PlanStatusEditable,
-		CreateTime:                gtime.Now().Timestamp(),
-		MetaData:                  utility.MarshalToJsonString(req.Metadata),
-		GasPayer:                  req.GasPayer,
-		TrialDurationTime:         req.TrialDurationTime,
-		TrialAmount:               req.TrialAmount,
-		TrialDemand:               req.TrialDemand,
-		CancelAtTrialEnd:          req.CancelAtTrialEnd,
-		PublishStatus:             consts.PlanPublishStatusUnPublished,
-		ProductId:                 req.ProductId,
+		ExternalPlanId:         req.ExternalPlanId,
+		CompanyId:              merchantInfo.CompanyId,
+		MerchantId:             req.MerchantId,
+		PlanName:               req.PlanName,
+		Amount:                 req.Amount,
+		Currency:               strings.ToUpper(req.Currency),
+		IntervalUnit:           strings.ToLower(req.IntervalUnit),
+		IntervalCount:          req.IntervalCount,
+		Type:                   req.Type,
+		Description:            req.Description,
+		ImageUrl:               req.ImageUrl,
+		HomeUrl:                req.HomeUrl,
+		BindingAddonIds:        utility.IntListToString(req.AddonIds),
+		BindingOnetimeAddonIds: utility.IntListToString(req.OnetimeAddonIds),
+		Status:                 consts.PlanStatusEditable,
+		CreateTime:             gtime.Now().Timestamp(),
+		MetaData:               utility.MarshalToJsonString(req.Metadata),
+		GasPayer:               req.GasPayer,
+		TrialDurationTime:      req.TrialDurationTime,
+		TrialAmount:            req.TrialAmount,
+		TrialDemand:            req.TrialDemand,
+		CancelAtTrialEnd:       req.CancelAtTrialEnd,
+		PublishStatus:          consts.PlanPublishStatusUnPublished,
+		ProductId:              req.ProductId,
+		MetricCharge: utility.MarshalToJsonString(&bean.MetricPlanChargeEntity{
+			MetricMeteredCharge:   req.MetricRecurringCharge,
+			MetricRecurringCharge: req.MetricMeteredCharge,
+		}),
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -278,29 +282,31 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 }
 
 type EditInternalReq struct {
-	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
-	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
-	ExternalPlanId     *string                                 `json:"externalPlanId" dc:"ExternalPlanId"`
-	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
-	Currency           *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
-	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
-	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number Of IntervalUnit" `
-	Description        *string                                 `json:"description"  dc:"Description"`
-	ProductName        *string                                 `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription *string                                 `json:"productDescription" dc:"Default Copy Description" `
-	ImageUrl           *string                                 `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
-	HomeUrl            *string                                 `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
-	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
-	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
-	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           *map[string]interface{}                 `json:"metadata" dc:"Metadata，Map"`
-	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
-	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
-	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
-	CancelAtTrialEnd   *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
-	ProductId          *int64                                  `json:"productId"   dc:"Id of product which plan to linked" `
+	MerchantId            uint64                                  `json:"merchantId" dc:"MerchantId" `
+	PlanId                uint64                                  `json:"planId" dc:"PlanId" v:"required"`
+	ExternalPlanId        *string                                 `json:"externalPlanId" dc:"ExternalPlanId"`
+	PlanName              *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
+	Amount                *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Currency              *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
+	IntervalUnit          *string                                 `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount         *int                                    `json:"intervalCount"  dc:"Number Of IntervalUnit" `
+	Description           *string                                 `json:"description"  dc:"Description"`
+	ProductName           *string                                 `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription    *string                                 `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl              *string                                 `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl               *string                                 `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds              []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
+	OnetimeAddonIds       []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
+	MetricLimits          []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	MetricMeteredCharge   *[]*bean.MetricPlanChargeBindingParam   `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
+	MetricRecurringCharge *[]*bean.MetricPlanChargeBindingParam   `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
+	GasPayer              *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
+	Metadata              *map[string]interface{}                 `json:"metadata" dc:"Metadata，Map"`
+	TrialAmount           *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
+	TrialDurationTime     *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
+	TrialDemand           *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd      *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ProductId             *int64                                  `json:"productId"   dc:"Id of product which plan to linked" `
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
@@ -310,6 +316,10 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
 
+	var metricPlanCharge = &bean.MetricPlanChargeEntity{}
+	if len(one.MetricCharge) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.MetricCharge, &metricPlanCharge)
+	}
 	// product check and update
 	if req.ProductId != nil && *req.ProductId > 0 {
 		product := query.GetProductById(ctx, uint64(*req.ProductId), req.MerchantId)
@@ -426,29 +436,35 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		bindingOnetimeAddonIds = unibee.String(utility.IntListToString(req.OnetimeAddonIds))
 	}
 
+	if req.MetricMeteredCharge != nil {
+		metricPlanCharge.MetricMeteredCharge = *req.MetricMeteredCharge
+	}
+	if req.MetricRecurringCharge != nil {
+		metricPlanCharge.MetricRecurringCharge = *req.MetricRecurringCharge
+	}
+
 	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "" || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
-		dao.Plan.Columns().ExternalPlanId:            req.ExternalPlanId,
-		dao.Plan.Columns().PlanName:                  req.PlanName,
-		dao.Plan.Columns().Amount:                    req.Amount,
-		dao.Plan.Columns().Currency:                  editCurrency,
-		dao.Plan.Columns().IntervalUnit:              req.IntervalUnit,
-		dao.Plan.Columns().IntervalCount:             req.IntervalCount,
-		dao.Plan.Columns().Description:               req.Description,
-		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
-		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
-		dao.Plan.Columns().BindingAddonIds:           bindingAddonIds,
-		dao.Plan.Columns().BindingOnetimeAddonIds:    bindingOnetimeAddonIds,
-		dao.Plan.Columns().GatewayProductName:        req.ProductName,
-		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
-		dao.Plan.Columns().GasPayer:                  req.GasPayer,
-		dao.Plan.Columns().IsDeleted:                 0,
-		dao.Plan.Columns().TrialDemand:               req.TrialDemand,
-		dao.Plan.Columns().TrialDurationTime:         req.TrialDurationTime,
-		dao.Plan.Columns().TrialAmount:               req.TrialAmount,
-		dao.Plan.Columns().CancelAtTrialEnd:          req.CancelAtTrialEnd,
-		dao.Plan.Columns().ProductId:                 req.ProductId,
+		dao.Plan.Columns().ExternalPlanId:         req.ExternalPlanId,
+		dao.Plan.Columns().PlanName:               req.PlanName,
+		dao.Plan.Columns().Amount:                 req.Amount,
+		dao.Plan.Columns().Currency:               editCurrency,
+		dao.Plan.Columns().IntervalUnit:           req.IntervalUnit,
+		dao.Plan.Columns().IntervalCount:          req.IntervalCount,
+		dao.Plan.Columns().Description:            req.Description,
+		dao.Plan.Columns().ImageUrl:               req.ImageUrl,
+		dao.Plan.Columns().HomeUrl:                req.HomeUrl,
+		dao.Plan.Columns().BindingAddonIds:        bindingAddonIds,
+		dao.Plan.Columns().BindingOnetimeAddonIds: bindingOnetimeAddonIds,
+		dao.Plan.Columns().GasPayer:               req.GasPayer,
+		dao.Plan.Columns().IsDeleted:              0,
+		dao.Plan.Columns().TrialDemand:            req.TrialDemand,
+		dao.Plan.Columns().TrialDurationTime:      req.TrialDurationTime,
+		dao.Plan.Columns().TrialAmount:            req.TrialAmount,
+		dao.Plan.Columns().CancelAtTrialEnd:       req.CancelAtTrialEnd,
+		dao.Plan.Columns().ProductId:              req.ProductId,
+		dao.Plan.Columns().MetricCharge:           utility.MarshalToJsonString(metricPlanCharge),
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)
@@ -509,30 +525,28 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 	one = query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
 	one = &entity.Plan{
-		CompanyId:                 one.CompanyId,
-		MerchantId:                one.MerchantId,
-		PlanName:                  one.PlanName + "(Copy)",
-		Amount:                    one.Amount,
-		Currency:                  one.Currency,
-		IntervalUnit:              one.IntervalUnit,
-		IntervalCount:             one.IntervalCount,
-		Type:                      one.Type,
-		Description:               one.Description,
-		ImageUrl:                  one.ImageUrl,
-		HomeUrl:                   one.HomeUrl,
-		BindingAddonIds:           one.BindingAddonIds,
-		BindingOnetimeAddonIds:    one.BindingOnetimeAddonIds,
-		GatewayProductName:        one.GatewayProductName,
-		GatewayProductDescription: one.GatewayProductDescription,
-		Status:                    consts.PlanStatusEditable,
-		CreateTime:                gtime.Now().Timestamp(),
-		MetaData:                  one.MetaData,
-		GasPayer:                  one.GasPayer,
-		TrialDurationTime:         one.TrialDurationTime,
-		TrialAmount:               one.TrialAmount,
-		TrialDemand:               one.TrialDemand,
-		CancelAtTrialEnd:          one.CancelAtTrialEnd,
-		ProductId:                 one.ProductId,
+		CompanyId:              one.CompanyId,
+		MerchantId:             one.MerchantId,
+		PlanName:               one.PlanName + "(Copy)",
+		Amount:                 one.Amount,
+		Currency:               one.Currency,
+		IntervalUnit:           one.IntervalUnit,
+		IntervalCount:          one.IntervalCount,
+		Type:                   one.Type,
+		Description:            one.Description,
+		ImageUrl:               one.ImageUrl,
+		HomeUrl:                one.HomeUrl,
+		BindingAddonIds:        one.BindingAddonIds,
+		BindingOnetimeAddonIds: one.BindingOnetimeAddonIds,
+		Status:                 consts.PlanStatusEditable,
+		CreateTime:             gtime.Now().Timestamp(),
+		MetaData:               one.MetaData,
+		GasPayer:               one.GasPayer,
+		TrialDurationTime:      one.TrialDurationTime,
+		TrialAmount:            one.TrialAmount,
+		TrialDemand:            one.TrialDemand,
+		CancelAtTrialEnd:       one.CancelAtTrialEnd,
+		ProductId:              one.ProductId,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -576,6 +590,55 @@ func PlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error
 		PlanId:         one.Id,
 		DiscountCode:   "",
 	}, err)
+	return one, nil
+}
+
+func PlanArchive(ctx context.Context, planId uint64, hardArchive bool) (one *entity.Plan, err error) {
+	utility.Assert(planId > 0, "planId invalid")
+	one = query.GetPlanById(ctx, planId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
+	if !hardArchive {
+		_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+			dao.Plan.Columns().Status:    consts.PlanStatusSoftArchive,
+			dao.Plan.Columns().IsDeleted: -1,
+			dao.Plan.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Plan.Columns().Id, one.Id).Update()
+		if err != nil {
+			return nil, err
+		}
+		one.Status = consts.PlanStatusSoftArchive
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Plan(%v)", one.Id),
+			Content:        "SoftArchive",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	} else {
+		_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+			dao.Plan.Columns().Status:            consts.PlanStatusHardArchive,
+			dao.Plan.Columns().DisableAutoCharge: 1,
+			dao.Plan.Columns().IsDeleted:         -2,
+			dao.Plan.Columns().GmtModify:         gtime.Now(),
+		}).Where(dao.Plan.Columns().Id, one.Id).Update()
+		if err != nil {
+			return nil, err
+		}
+		one.Status = consts.PlanStatusHardArchive
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Plan(%v)", one.Id),
+			Content:        "HardArchive",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         one.Id,
+			DiscountCode:   "",
+		}, err)
+	}
 	return one, nil
 }
 

@@ -112,7 +112,7 @@ func (c Changelly) GatewayUserCreate(ctx context.Context, gateway *entity.Mercha
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

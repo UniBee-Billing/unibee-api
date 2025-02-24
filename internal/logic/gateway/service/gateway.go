@@ -69,6 +69,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		GatewayType:   gatewayInfo.GatewayType,
 		Name:          name,
 		Logo:          logo,
+		Host:          gatewayInfo.Host,
 		Custom:        utility.MarshalToJsonString(currencyExchange),
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)

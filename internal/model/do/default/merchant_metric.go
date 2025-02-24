@@ -17,7 +17,7 @@ type MerchantMetric struct {
 	Code                interface{} // code
 	MetricName          interface{} // metric name
 	MetricDescription   interface{} // metric description
-	Type                interface{} // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
+	Type                interface{} // 1-limit_metered，2-charge_metered,3-charge_recurring(come later)
 	AggregationType     interface{} // 1-count，2-count unique, 3-latest, 4-max, 5-sum
 	AggregationProperty interface{} // aggregation property
 	GmtCreate           *gtime.Time // create time

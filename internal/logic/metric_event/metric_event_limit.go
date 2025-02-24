@@ -125,42 +125,48 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, us
 		if met.AggregationType == metric.MetricAggregationTypeLatest {
 			useValue = 0 // type of this not need to compute from db
 			var latestOne *entity.MerchantMetricEvent
-			err := dao.MerchantMetricEvent.Ctx(ctx).
+			q := dao.MerchantMetricEvent.Ctx(ctx).
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
 				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
-				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate).
-				Scan(&latestOne)
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
+				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate)
+			if met.Type != metric.MetricTypeChargeRecurring {
+				q = q.Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+					Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd)
+			}
+			err := q.Scan(&latestOne)
 			utility.AssertError(err, "Server Error")
 			if latestOne != nil {
 				useValue = latestOne.AggregationPropertyInt
 			}
 		} else if met.AggregationType == metric.MetricAggregationTypeMax {
-			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
+			q := dao.MerchantMetricEvent.Ctx(ctx).
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
 				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
-				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
-				Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
+				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0)
+			if met.Type != metric.MetricTypeChargeRecurring {
+				q = q.Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+					Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd)
+			}
+			useValueFloat, err := q.Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "Server Error")
 			useValue = uint64(useValueFloat)
 		} else {
-			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
+			q := dao.MerchantMetricEvent.Ctx(ctx).
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
 				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
-				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
-				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
-				Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
+				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0)
+			if met.Type != metric.MetricTypeChargeRecurring {
+				q = q.Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+					Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd)
+			}
+			useValueFloat, err := q.Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "Server Error")
 			useValue = uint64(useValueFloat)
 		}

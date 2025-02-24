@@ -18,6 +18,7 @@ func (c *ControllerMetric) New(ctx context.Context, req *metric.NewReq) (res *me
 	me, err := metric2.NewMerchantMetric(ctx, &metric2.NewMerchantMetricInternalReq{
 		MerchantId:          _interface.GetMerchantId(ctx),
 		Code:                req.Code,
+		Type:                req.Type,
 		Name:                req.MetricName,
 		Description:         req.MetricDescription,
 		AggregationType:     req.AggregationType,

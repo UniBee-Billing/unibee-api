@@ -60,6 +60,9 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 	}
 
 	invoiceId := utility.CreateInvoiceId()
+	if len(simplify.InvoiceId) > 0 {
+		invoiceId = simplify.InvoiceId
+	}
 	{
 		//promo credit
 		if simplify.PromoCreditDiscountAmount > 0 && simplify.PromoCreditPayout != nil && simplify.PromoCreditAccount != nil {

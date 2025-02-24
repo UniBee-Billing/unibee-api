@@ -53,6 +53,7 @@ type NewMerchantMetricInternalReq struct {
 	MerchantId          uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	Code                string `json:"code" dc:"Code" v:"required"`
 	Name                string `json:"name" dc:"Name" v:"required"`
+	Type                *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring(come later)"`
 	Description         string `json:"description" dc:"Description"`
 	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
 	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
@@ -66,6 +67,10 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 		//check property should contain
 		utility.Assert(len(req.AggregationProperty) > 0, "aggregationProperty should be set when aggregationType not count Type")
 	}
+	var metricType = MetricTypeLimitMetered
+	if req.Type != nil {
+		metricType = *req.Type
+	}
 
 	one := query.GetMerchantMetricByCode(ctx, req.Code)
 	utility.Assert(one == nil, "metric already exist")
@@ -74,7 +79,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 		Code:                req.Code,
 		MetricName:          req.Name,
 		MetricDescription:   req.Description,
-		Type:                MetricTypeLimitMetered, // other type not support now
+		Type:                metricType,
 		AggregationType:     req.AggregationType,
 		AggregationProperty: req.AggregationProperty,
 		CreateTime:          gtime.Now().Timestamp(),
@@ -99,13 +104,14 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, name string, description string) (*bean.MerchantMetric, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, metricType *int, name string, description string) (*bean.MerchantMetric, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
 	utility.Assert(one != nil, "endpoint not found")
 	_, err := dao.MerchantMetric.Ctx(ctx).Data(g.Map{
 		dao.MerchantMetric.Columns().MetricName:        name,
+		dao.MerchantMetric.Columns().Type:              metricType,
 		dao.MerchantMetric.Columns().MetricDescription: description,
 		dao.MerchantMetric.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()

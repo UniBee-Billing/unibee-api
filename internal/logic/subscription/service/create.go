@@ -135,7 +135,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
-	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v not active", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
 	var user *entity.UserAccount = nil
 	if req.UserId > 0 || req.IsSubmit {

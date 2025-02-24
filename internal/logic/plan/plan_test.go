@@ -61,7 +61,6 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, one)
-		require.Equal(t, "ProductName", one.GatewayProductName)
 		one = query.GetPlanById(ctx, one.Id)
 		require.NotNil(t, one)
 		require.Equal(t, one.Amount, int64(200))

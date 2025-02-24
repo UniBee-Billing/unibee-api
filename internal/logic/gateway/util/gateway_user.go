@@ -10,6 +10,19 @@ import (
 	"unibee/utility"
 )
 
+func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount) {
+	if id <= 0 {
+		return nil
+	}
+	err := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().Id, id).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
 func GetGatewayUser(ctx context.Context, userId uint64, gatewayId uint64) (one *entity.GatewayUser) {
 	utility.Assert(userId > 0, "invalid userId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")

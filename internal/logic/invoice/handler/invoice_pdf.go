@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/number"
 	"os"
@@ -26,19 +27,11 @@ func GenerateInvoicePdf(ctx context.Context, one *entity.Invoice) string {
 	var savePath = fmt.Sprintf("%s.pdf", one.InvoiceId)
 
 	err := createInvoicePdf(ctx, detail.ConvertInvoiceToDetail(ctx, one), merchantInfo, user, query.GetGatewayById(ctx, one.GatewayId), savePath)
-	utility.Assert(err == nil, fmt.Sprintf("createInvoicePdf error:%v", err))
+	utility.AssertError(err, "createInvoicePdf error:")
 	return savePath
 }
 
 func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
-	//var metadata = make(map[string]interface{})
-	//if len(one.MetaData) > 0 {
-	//	err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
-	//	if err != nil {
-	//		fmt.Printf("createInvoicePdf Unmarshal Metadata error:%s", err.Error())
-	//	}
-	//}
-
 	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
 	doc, _ := generator2.New(generator2.Invoice, "/usr/share/fonts", &generator2.Options{
 		AutoPrint:      true,
@@ -108,9 +101,10 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 		utility.Assert(len(tempLogoPath) > 0, "download Logo error")
 		logoBytes, err := os.ReadFile(tempLogoPath)
 		if err != nil {
-			return err
+			g.Log().Errorf(ctx, "createInvoicePdf Reading download Logo error:%s", err.Error())
+		} else {
+			doc.SetLogo(logoBytes)
 		}
-		doc.SetLogo(logoBytes)
 	}
 
 	//Localized currency
@@ -324,12 +318,14 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 
 	pdf, err := doc.Build()
 	if err != nil {
+		g.Log().Errorf(ctx, "createInvoicePdf Build error:%s", err.Error())
 		return err
 	}
 
 	err = pdf.OutputFileAndClose(savePath)
 
 	if err != nil {
+		g.Log().Errorf(ctx, "createInvoicePdf OutputFileAndClose error:%s", err.Error())
 		return err
 	}
 	return nil

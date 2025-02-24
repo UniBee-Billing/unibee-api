@@ -372,22 +372,6 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 			//need send invoice for authorised
 			SendAuthorizedEmailBackground(invoice)
 		}
-		//if len(invoice.DiscountCode) > 0 {
-		//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-		//		MerchantId:       invoice.MerchantId,
-		//		UserId:           invoice.UserId,
-		//		DiscountCode:     invoice.DiscountCode,
-		//		SubscriptionId:   invoice.SubscriptionId,
-		//		PaymentId:        res.Payment.PaymentId,
-		//		InvoiceId:        invoice.InvoiceId,
-		//		ApplyAmount:      invoice.DiscountAmount,
-		//		Currency:         invoice.Currency,
-		//		IsRecurringApply: strings.Compare(source, "SubscriptionBillingCycle") == 0,
-		//	})
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//}
 	}
 
 	return res, err

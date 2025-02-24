@@ -26,7 +26,6 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 	utility.Assert(req.PlanId > 0, "Invalid planId")
 	plan := query.GetPlanById(ctx, uint64(req.PlanId))
 	utility.Assert(plan != nil, "Plan Not Found")
-	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
 	utility.Assert(plan.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
 	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)

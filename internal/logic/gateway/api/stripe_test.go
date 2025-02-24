@@ -153,3 +153,38 @@ func TestStripeQueryAllRefunds(t *testing.T) {
 		fmt.Println(utility.MarshalToJsonString(response))
 	})
 }
+
+//
+//func TestStripeQueryCustomerPmId(t *testing.T) {
+//	gtest.C(t, func(t *gtest.T) {
+//		var paymentMethods = make([]*gateway_bean.PaymentMethod, 0)
+//		stripe.Key = ""
+//		setUniBeeAppInfo()
+//		params := &stripe.CustomerListPaymentMethodsParams{
+//			Customer: stripe.String("cus_RlBXIJD2jHl99X"),
+//		}
+//		params.Limit = stripe.Int64(10)
+//		result := customer.ListPaymentMethods(params)
+//
+//		for _, paymentMethod := range result.PaymentMethodList().Data {
+//			// only append card type
+//			if paymentMethod.Type == stripe.PaymentMethodTypeCard {
+//				data := gjson.New(nil)
+//				_ = data.Set("brand", paymentMethod.Card.Brand)
+//				_ = data.Set("checks", paymentMethod.Card.Checks)
+//				_ = data.Set("country", paymentMethod.Card.Country)
+//				_ = data.Set("last4", paymentMethod.Card.Last4)
+//				_ = data.Set("expMonth", paymentMethod.Card.ExpMonth)
+//				_ = data.Set("expYear", paymentMethod.Card.ExpYear)
+//				_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
+//				_ = data.Set("description", paymentMethod.Card.Description)
+//				paymentMethods = append(paymentMethods, &gateway_bean.PaymentMethod{
+//					Id:   paymentMethod.ID,
+//					Type: "card",
+//					Data: data,
+//				})
+//			}
+//		}
+//		g.Log().Infof(context.Background(), "list: %v", utility.MarshalMetadataToJsonString(paymentMethods))
+//	})
+//}

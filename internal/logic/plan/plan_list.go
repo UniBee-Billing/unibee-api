@@ -62,13 +62,15 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 	}
 	return &plan.DetailRes{
 		Plan: &detail.PlanDetail{
-			Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(one.ProductId), merchantId)),
-			Plan:             bean.SimplifyPlan(one),
-			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
-			Addons:           bean.SimplifyPlanList(query.GetAddonsByIds(ctx, addonIds)),
-			AddonIds:         addonIds,
-			OnetimeAddons:    bean.SimplifyPlanList(query.GetAddonsByIds(ctx, oneTimeAddonIds)),
-			OnetimeAddonIds:  oneTimeAddonIds,
+			Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(one.ProductId), merchantId)),
+			Plan:                  bean.SimplifyPlan(one),
+			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
+			Addons:                bean.SimplifyPlanList(query.GetAddonsByIds(ctx, addonIds)),
+			AddonIds:              addonIds,
+			OnetimeAddons:         bean.SimplifyPlanList(query.GetAddonsByIds(ctx, oneTimeAddonIds)),
+			OnetimeAddonIds:       oneTimeAddonIds,
+			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(one).MetricMeteredCharge),
+			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(one).MetricRecurringCharge),
 		},
 	}, nil
 }
@@ -112,9 +114,9 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 	}
 	err := q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.Plan.Columns().Currency, strings.ToUpper(req.Currency)).
-		WhereIn(dao.Plan.Columns().IsDeleted, []int{0}).
+		WhereLTE(dao.Plan.Columns().IsDeleted, 0).
 		OmitEmpty().
-		Order(sortKey).
+		Order(fmt.Sprintf("is_deleted desc, %s, status asc", sortKey)).
 		Limit(req.Page*req.Count, req.Count).
 		ScanAndCount(&mainList, &total, true)
 	if err != nil {
@@ -125,11 +127,13 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 	for _, p := range mainList {
 		if p.Type != consts.PlanTypeMain {
 			list = append(list, &detail.PlanDetail{
-				Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
-				Plan:             bean.SimplifyPlan(p),
-				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
-				Addons:           nil,
-				AddonIds:         nil,
+				Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
+				Plan:                  bean.SimplifyPlan(p),
+				MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
+				Addons:                nil,
+				AddonIds:              nil,
+				MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricMeteredCharge),
+				MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricRecurringCharge),
 			})
 			continue
 		}
@@ -162,13 +166,15 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 			}
 		}
 		list = append(list, &detail.PlanDetail{
-			Product:          bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
-			Plan:             bean.SimplifyPlan(p),
-			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
-			Addons:           nil,
-			AddonIds:         addonIds,
-			OnetimeAddons:    nil,
-			OnetimeAddonIds:  oneTimeAddonIds,
+			Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
+			Plan:                  bean.SimplifyPlan(p),
+			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
+			Addons:                nil,
+			AddonIds:              addonIds,
+			OnetimeAddons:         nil,
+			OnetimeAddonIds:       oneTimeAddonIds,
+			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricMeteredCharge),
+			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricRecurringCharge),
 		})
 	}
 	if len(totalAddonIds) > 0 {

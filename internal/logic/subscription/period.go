@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee/internal/consts"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -15,7 +14,6 @@ func GetPeriodEndFromStart(ctx context.Context, start int64, billingCycleAnchor 
 	}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
-	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
 	var periodEnd = gtime.NewFromTimeStamp(start)
 	if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
 		periodEnd = periodEnd.AddDate(0, 0, plan.IntervalCount)
@@ -39,7 +37,6 @@ func GetDunningTimeFromEnd(ctx context.Context, end int64, planId uint64) int64 
 	}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
-	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
 	if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
 		return end - 60*60 // one hour
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
@@ -55,7 +52,6 @@ func GetDunningTimeFromEnd(ctx context.Context, end int64, planId uint64) int64 
 func GetDunningTimeCap(ctx context.Context, planId uint64) int64 {
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
-	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
 	if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
 		return 60 * 60 // one hour
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {

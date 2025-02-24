@@ -54,6 +54,7 @@ type PlanColumns struct {
 	ExternalPlanId            string // external_user_id
 	ProductId                 string // product id
 	DisableAutoCharge         string // disable auto-charge, 0-false,1-true
+	MetricCharge              string // metric charge(json)
 }
 
 // planColumns holds the columns for table plan.
@@ -92,6 +93,7 @@ var planColumns = PlanColumns{
 	ExternalPlanId:            "external_plan_id",
 	ProductId:                 "product_id",
 	DisableAutoCharge:         "disable_auto_charge",
+	MetricCharge:              "metric_charge",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.

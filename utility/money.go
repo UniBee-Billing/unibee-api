@@ -33,6 +33,14 @@ func ExchangeCurrencyConvert(from int64, fromCurrency string, toCurrency string,
 	return int64(float64(from) * exchangeRate)
 }
 
+func ConvertCentStrToCent(centStr string, currency string) int64 {
+	cents, err := strconv.ParseFloat(centStr, 64)
+	if err != nil {
+		panic(fmt.Sprintf("ConvertDollarStrToCent panic centStr:%s currency:%s err:%s", cents, currency, err.Error()))
+	}
+	return int64(cents)
+}
+
 func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 	dollars, err := strconv.ParseFloat(dollarStr, 64)
 	if err != nil {

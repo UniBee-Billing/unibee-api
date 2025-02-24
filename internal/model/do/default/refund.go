@@ -30,7 +30,7 @@ type Refund struct {
 	RefundTime            interface{} // refund success time
 	GmtCreate             *gtime.Time // create time
 	GmtModify             *gtime.Time // update time
-	GatewayRefundId       interface{} // gateway refund id
+	GatewayRefundId       interface{} //
 	AppId                 interface{} // app id
 	RefundCommentExplain  interface{} // refund comment
 	ReturnUrl             interface{} // return url after refund success

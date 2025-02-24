@@ -13,7 +13,9 @@ type PlanStatusEnum int
 const (
 	PlanStatusEditable           = 1
 	PlanStatusActive             = 2
-	PlanStatusExpired            = 3
+	PlanStatusInActive           = 3
+	PlanStatusSoftArchive        = 4
+	PlanStatusHardArchive        = 5
 	PlanPublishStatusPublished   = 2
 	PlanPublishStatusUnPublished = 1
 )
@@ -24,8 +26,10 @@ func (status PlanStatusEnum) Description() string {
 		return "PlanStatusEditable"
 	case PlanStatusActive:
 		return "PlanStatusActive"
-	case PlanStatusExpired:
-		return "PlanStatusExpired"
+	case PlanStatusSoftArchive:
+		return "PlanStatusSoftArchive"
+	case PlanStatusHardArchive:
+		return "PlanStatusHardArchive"
 	default:
 		return "PlanStatusEditable"
 	}

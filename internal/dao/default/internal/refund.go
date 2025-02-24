@@ -38,7 +38,7 @@ type RefundColumns struct {
 	RefundTime            string // refund success time
 	GmtCreate             string // create time
 	GmtModify             string // update time
-	GatewayRefundId       string // gateway refund id
+	GatewayRefundId       string //
 	AppId                 string // app id
 	RefundCommentExplain  string // refund comment
 	ReturnUrl             string // return url after refund success

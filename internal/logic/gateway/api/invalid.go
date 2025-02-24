@@ -86,7 +86,7 @@ func (i Invalid) GatewayMerchantBalancesQuery(ctx context.Context, gateway *enti
 	panic("implement me")
 }
 
-func (i Invalid) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (i Invalid) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

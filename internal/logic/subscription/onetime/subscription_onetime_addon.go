@@ -58,7 +58,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 	utility.Assert(sub.Status == consts.SubStatusActive || sub.Status == consts.SubStatusIncomplete, "sub not active")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "sub plan not found")
-	utility.Assert(plan.Status == consts.PlanStatusActive, "addon not active")
+	utility.Assert(plan.Status == consts.PlanStatusActive, "Addon not active")
 	utility.Assert(strings.Contains(plan.BindingOnetimeAddonIds, strconv.FormatUint(req.AddonId, 10)), "plan not contain this addon")
 	var gatewayId = sub.GatewayId
 	if req.GatewayId != nil {

@@ -109,13 +109,15 @@ func QueryPaymentMethodList(ctx context.Context, req *PaymentMethodListInternalR
 		}
 	}
 	var list []*bean.PaymentMethod
-	for _, one := range listQuery.PaymentMethods {
-		list = append(list, &bean.PaymentMethod{
-			Id:        one.Id,
-			Type:      one.Type,
-			IsDefault: one.IsDefault,
-			Data:      one.Data,
-		})
+	if listQuery != nil {
+		for _, one := range listQuery.PaymentMethods {
+			list = append(list, &bean.PaymentMethod{
+				Id:        one.Id,
+				Type:      one.Type,
+				IsDefault: one.IsDefault,
+				Data:      one.Data,
+			})
+		}
 	}
 	return list
 }

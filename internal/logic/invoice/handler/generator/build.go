@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/go-pdf/fpdf"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 )
 
 // Build pdf document from data provided
@@ -116,18 +118,20 @@ func (doc *Document) appendLogo() float64 {
 		// Get image format
 		_, format, _ := image.DecodeConfig(bytes.NewReader(doc.Logo))
 
-		// Register image in pdf
-		imageInfo := doc.pdf.RegisterImageOptionsReader(fileName, fpdf.ImageOptions{
-			ImageType: format,
-		}, ioReader)
+		if len(format) > 0 {
+			// Register image in pdf
+			imageInfo := doc.pdf.RegisterImageOptionsReader(fileName, fpdf.ImageOptions{
+				ImageType: format,
+			}, ioReader)
 
-		if imageInfo != nil {
-			var imageOpt fpdf.ImageOptions
-			imageOpt.ImageType = format
-			doc.pdf.ImageOptions(fileName, doc.pdf.GetX()+1, doc.pdf.GetY(), 0, 30, false, imageOpt, 0, "")
-			doc.pdf.SetY(doc.pdf.GetY() + 30)
+			if imageInfo != nil {
+				var imageOpt fpdf.ImageOptions
+				imageOpt.ImageType = format
+				doc.pdf.ImageOptions(fileName, doc.pdf.GetX()+1, doc.pdf.GetY(), 0, 30, false, imageOpt, 0, "")
+				doc.pdf.SetY(doc.pdf.GetY() + 30)
+			}
+			return 30.0
 		}
-		return 30.0
 	}
 	_, y, _, _ := doc.pdf.GetMargins()
 	return y

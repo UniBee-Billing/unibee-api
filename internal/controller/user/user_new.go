@@ -68,3 +68,8 @@ func NewProduct() user.IUserProduct {
 	return &ControllerProduct{}
 }
 
+type ControllerMetric struct{}
+
+func NewMetric() user.IUserMetric {
+	return &ControllerMetric{}
+}

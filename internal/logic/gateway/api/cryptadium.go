@@ -75,7 +75,7 @@ func (c Cryptadium) GatewayUserCreate(ctx context.Context, gateway *entity.Merch
 	return nil, gerror.New("Not Support")
 }
 
-func (c Cryptadium) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (c Cryptadium) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

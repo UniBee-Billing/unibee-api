@@ -25,7 +25,7 @@ type MerchantMetricColumns struct {
 	Code                string // code
 	MetricName          string // metric name
 	MetricDescription   string // metric description
-	Type                string // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
+	Type                string // 1-limit_metered，2-charge_metered,3-charge_recurring(come later)
 	AggregationType     string // 1-count，2-count unique, 3-latest, 4-max, 5-sum
 	AggregationProperty string // aggregation property
 	GmtCreate           string // create time

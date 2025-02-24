@@ -6,18 +6,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/stripe/stripe-go/v78"
-	"github.com/stripe/stripe-go/v78/customer"
 	"strconv"
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/gateway_bean"
-	"unibee/internal/logic/gateway/util"
 	"unibee/internal/logic/operation_log"
-	user2 "unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -48,10 +43,10 @@ func (t TaskActiveSubscriptionImport) TemplateHeader() interface{} {
 		BillingCycleAnchor:     "2024-05-13 06:19:27",
 		FirstPaidTime:          "2024-05-13 06:19:27",
 		CreateTime:             "2024-05-13 06:19:27",
-		StripeUserId:           "",
-		StripePaymentMethod:    "",
-		PaypalVaultId:          "",
-		Features:               "",
+		//StripeUserId:           "",
+		//StripePaymentMethod:    "",
+		//PaypalVaultId:          "",
+		Features: "",
 	}
 }
 
@@ -70,10 +65,10 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		BillingCycleAnchor:     fmt.Sprintf("%s", row["BillingCycleAnchor"]),
 		FirstPaidTime:          fmt.Sprintf("%s", row["FirstPaidTime"]),
 		CreateTime:             fmt.Sprintf("%s", row["CreateTime"]),
-		StripeUserId:           fmt.Sprintf("%s", row["StripeUserId(Auto-Charge Required)"]),
-		StripePaymentMethod:    fmt.Sprintf("%s", row["StripePaymentMethod(Auto-Charge Required)"]),
-		PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
-		Features:               fmt.Sprintf("%s", row["Features"]),
+		//StripeUserId:           fmt.Sprintf("%s", row["StripeUserId(Auto-Charge Required)"]),
+		//StripePaymentMethod:    fmt.Sprintf("%s", row["StripePaymentMethod(Auto-Charge Required)"]),
+		//PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
+		Features: fmt.Sprintf("%s", row["Features"]),
 	}
 	tag := fmt.Sprintf("ImportBy%v", task.MemberId)
 	if len(target.ExternalSubscriptionId) == 0 {
@@ -158,36 +153,36 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	createTime := gtime.New(target.CreateTime)
 	// check gatewayPaymentMethod
 	gatewayPaymentMethod := ""
-	if len(target.PaypalVaultId) > 0 && len(target.StripePaymentMethod) > 0 {
-		return target, gerror.New("Error, both PaypalVaultId and StripePaymentMethod provided")
-	}
-	if len(target.PaypalVaultId) > 0 && gateway.GatewayType == consts.GatewayTypePaypal {
-		gatewayPaymentMethod = target.PaypalVaultId
-		// todo mark check paypal vaultId
-	} else if len(target.StripePaymentMethod) > 0 && gateway.GatewayType == consts.GatewayTypeCard {
-		if len(target.StripeUserId) == 0 {
-			return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
-		}
-		listQuery, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
-			UserId:        user.Id,
-			GatewayUserId: target.StripeUserId,
-		})
-		if err != nil {
-			g.Log().Errorf(ctx, "Get StripePayment MethodList error:%v", err.Error())
-			return target, gerror.New("Error, can't get Stripe paymentMethod list from stripe")
-		}
-		found := false
-		for _, method := range listQuery.PaymentMethods {
-			if method.Id == target.StripePaymentMethod {
-				found = true
-			}
-		}
-		if !found {
-			return target, gerror.New("Error, can't found user's paymentMethod provided from stripe ")
-		}
-		gatewayPaymentMethod = target.StripePaymentMethod
-	}
-	stripeUserId := ""
+	//if len(target.PaypalVaultId) > 0 && len(target.StripePaymentMethod) > 0 {
+	//	return target, gerror.New("Error, both PaypalVaultId and StripePaymentMethod provided")
+	//}
+	//if len(target.PaypalVaultId) > 0 && gateway.GatewayType == consts.GatewayTypePaypal {
+	//	gatewayPaymentMethod = target.PaypalVaultId
+	//	// todo mark check paypal vaultId
+	//} else if len(target.StripePaymentMethod) > 0 && gateway.GatewayType == consts.GatewayTypeCard {
+	//	if len(target.StripeUserId) == 0 {
+	//		return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
+	//	}
+	//	listQuery, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
+	//		UserId:        user.Id,
+	//		GatewayUserId: target.StripeUserId,
+	//	})
+	//	if err != nil {
+	//		g.Log().Errorf(ctx, "Get StripePayment MethodList error:%v", err.Error())
+	//		return target, gerror.New("Error, can't get Stripe paymentMethod list from stripe")
+	//	}
+	//	found := false
+	//	for _, method := range listQuery.PaymentMethods {
+	//		if method.Id == target.StripePaymentMethod {
+	//			found = true
+	//		}
+	//	}
+	//	if !found {
+	//		return target, gerror.New("Error, can't found user's paymentMethod provided from stripe ")
+	//	}
+	//	gatewayPaymentMethod = target.StripePaymentMethod
+	//}
+	//stripeUserId := ""
 	// data verify
 	{
 		if currentPeriodStart.Timestamp() > gtime.Now().Timestamp() {
@@ -215,41 +210,41 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error,currentPeriodEnd should later then currentPeriodStart,firstPaidTime,createTime and billingCycleAnchor")
 		}
 
-		if len(target.StripeUserId) > 0 {
-			stripeUserId = target.StripeUserId
-			if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
-				return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
-			}
-			gatewayUser := util.GetGatewayUser(ctx, user.Id, gatewayId)
-			if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
-				// todo mark may delete the old one
-				return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
-			}
-			if gatewayUser == nil {
-				stripe.Key = gateway.GatewaySecret
-				stripe.SetAppInfo(&stripe.AppInfo{
-					Name:    "UniBee.api",
-					Version: "1.0.0",
-					URL:     "https://merchant.unibee.dev",
-				})
-				params := &stripe.CustomerParams{}
-				response, err := customer.Get(stripeUserId, params)
-				if err != nil {
-					g.Log().Errorf(ctx, "Get StripeUserId error:%v", err.Error())
-				}
-				if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
-					return target, gerror.New("Error, can't get StripeUserId from stripe")
-				}
-				//// todo mark verify email from stripe
-				//if response.Email != user.Email {
-				//	return target, gerror.New("Error, stripe customer email not equal user's email")
-				//}
-				gatewayUser, err = util.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
-				if err != nil {
-					return target, err
-				}
-			}
-		}
+		//if len(target.StripeUserId) > 0 {
+		//	stripeUserId = target.StripeUserId
+		//	if gateway.GatewayType != consts.GatewayTypeCard {
+		//		return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
+		//	}
+		//	gatewayUser := util.GetGatewayUser(ctx, user.Id, gatewayId)
+		//	if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
+		//		// todo mark may delete the old one
+		//		return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
+		//	}
+		//	if gatewayUser == nil {
+		//		stripe.Key = gateway.GatewaySecret
+		//		stripe.SetAppInfo(&stripe.AppInfo{
+		//			Name:    "UniBee.api",
+		//			Version: "1.0.0",
+		//			URL:     "https://merchant.unibee.dev",
+		//		})
+		//		params := &stripe.CustomerParams{}
+		//		response, err := customer.Get(stripeUserId, params)
+		//		if err != nil {
+		//			g.Log().Errorf(ctx, "Get StripeUserId error:%v", err.Error())
+		//		}
+		//		if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
+		//			return target, gerror.New("Error, can't get StripeUserId from stripe")
+		//		}
+		//		//// todo mark verify email from stripe
+		//		//if response.Email != user.Email {
+		//		//	return target, gerror.New("Error, stripe customer email not equal user's email")
+		//		//}
+		//		gatewayUser, err = util.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
+		//		if err != nil {
+		//			return target, err
+		//		}
+		//	}
+		//}
 	}
 	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
 	override := false
@@ -318,8 +313,8 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			GatewayDefaultPaymentMethod: gatewayPaymentMethod,
 		}
 		result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		id, err := result.LastInsertId()
 		utility.AssertError(err, "Save history error")
+		id, err := result.LastInsertId()
 		one.Id = uint64(id)
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			MerchantId:     one.MerchantId,
@@ -332,9 +327,9 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			DiscountCode:   "",
 		}, err)
 	}
-	if len(gatewayPaymentMethod) > 0 {
-		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
-	}
+	//if len(gatewayPaymentMethod) > 0 {
+	//	user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
+	//}
 	if err == nil && override {
 		err = gerror.New("override success")
 	}
@@ -354,8 +349,8 @@ type ImportActiveSubscriptionEntity struct {
 	BillingCycleAnchor     string `json:"BillingCycleAnchor"   comment:"Required, UTC time, The reference point that aligns future billing cycle dates. It sets the day of week for week intervals, the day of month for month and year intervals, and the month of year for year intervals, format '2006-01-02 15:04:05'"`
 	FirstPaidTime          string `json:"FirstPaidTime"   comment:"UTC time, the first payment success time of subscription, format '2006-01-02 15:04:05'"   `
 	CreateTime             string `json:"CreateTime"      comment:"Required, UTC time, the creation time of subscription, format '2006-01-02 15:04:05'"   `
-	StripeUserId           string `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
-	StripePaymentMethod    string `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
-	PaypalVaultId          string `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
-	Features               string `json:"Features"    comment:"In json format, additional features data of subscription, will join user's metric data in user api if provided'"     `
+	//StripeUserId           string `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
+	//StripePaymentMethod    string `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
+	//PaypalVaultId          string `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
+	Features string `json:"Features"    comment:"In json format, additional features data of subscription, will join user's metric data in user api if provided'"     `
 }

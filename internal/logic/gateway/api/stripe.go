@@ -41,6 +41,7 @@ func (s Stripe) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayIcons:       []string{"https://api.unibee.top/oss/file/d6yhl1qz7qmcg6zafr.svg", "https://api.unibee.top/oss/file/d6yhlf1t8n3ev3ueii.svg", "https://api.unibee.top/oss/file/d6yhlpshof3muufphd.svg"},
 		GatewayType:        consts.GatewayTypeCard,
 		Sort:               100,
+		AutoChargeEnabled:  true,
 	}
 }
 
@@ -293,13 +294,13 @@ func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entit
 	}, nil
 }
 
-func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(QueryAndCreateGatewayUserWithOutPaymentMethod(ctx, gateway, userId).GatewayUserId, params)
+	response, err := customer.Get(gatewayUserId, params)
 	if err != nil {
 		return nil, err
 	}

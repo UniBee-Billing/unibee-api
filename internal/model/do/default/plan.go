@@ -46,4 +46,5 @@ type Plan struct {
 	ExternalPlanId            interface{} // external_user_id
 	ProductId                 interface{} // product id
 	DisableAutoCharge         interface{} // disable auto-charge, 0-false,1-true
+	MetricCharge              interface{} // metric charge(json)
 }

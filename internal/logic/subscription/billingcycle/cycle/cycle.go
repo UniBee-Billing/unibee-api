@@ -260,7 +260,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					})
 				} else {
 					//generate cycle invoice from sub
-					plan := query.GetPlanById(ctx, sub.PlanId)
+					plan = query.GetPlanById(ctx, sub.PlanId)
 
 					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)

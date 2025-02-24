@@ -9,7 +9,7 @@ import (
 
 func TestForCreateNewUnitPay(t *testing.T) {
 	unitpay := &UnitPay{}
-	_, _, _ = unitpay.GatewayTest(context.Background(), "443597", "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7") // indigo unibee staging test key
+	_, _, _ = unitpay.GatewayTest(context.Background(), "443597", "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7", "") // indigo unibee staging test key
 }
 
 func TestForGetUnitPay(t *testing.T) {
@@ -19,7 +19,7 @@ func TestForGetUnitPay(t *testing.T) {
 	secret := "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7"
 	urlPath := "/api?method=getPayment"
 	param := map[string]interface{}{}
-	param["paymentId"] = 44359792787
+	param["paymentId"] = 44359757316
 	responseJson, err := SendUnitPayPaymentRequest(ctx, secret, "GET", urlPath, param, false)
 	if err != nil {
 		t.Error(err)

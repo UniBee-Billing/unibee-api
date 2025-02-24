@@ -11,6 +11,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/util"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/logic/operation_log"
@@ -62,12 +63,15 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 		return
 	}
 	var newPaymentMethodId = ""
-	if gateway.GatewayType == consts.GatewayTypeCard && len(paymentMethodId) > 0 {
-		paymentMethod := method.QueryPaymentMethod(ctx, user.MerchantId, user.Id, gatewayId, paymentMethodId)
-		utility.Assert(paymentMethod != nil, "card not found")
-		newPaymentMethodId = paymentMethodId
-	} else if gateway.GatewayType == consts.GatewayTypePaypal && len(paymentMethodId) > 0 {
-		newPaymentMethodId = paymentMethodId
+	gatewayInfo := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayInfo(ctx)
+	if gatewayInfo != nil && gatewayInfo.AutoChargeEnabled {
+		if gateway.GatewayType == consts.GatewayTypeCard && len(paymentMethodId) > 0 {
+			paymentMethod := method.QueryPaymentMethod(ctx, user.MerchantId, user.Id, gatewayId, paymentMethodId)
+			utility.Assert(paymentMethod != nil, "paymentMethod not found")
+			newPaymentMethodId = paymentMethodId
+		} else if gateway.GatewayType == consts.GatewayTypePaypal && len(paymentMethodId) > 0 {
+			newPaymentMethodId = paymentMethodId
+		}
 	}
 	gatewayUser := util.GetGatewayUser(ctx, userId, gatewayId)
 	if len(newPaymentMethodId) == 0 && gatewayUser != nil && len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {

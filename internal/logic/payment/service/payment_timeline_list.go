@@ -14,7 +14,7 @@ type PaymentTimelineListInternalReq struct {
 	UserId          uint64   `json:"userId" dc:"Filter UserId, Default All " `
 	AmountStart     *int64   `json:"amountStart" dc:"The filter start amount of timeline" `
 	AmountEnd       *int64   `json:"amountEnd" dc:"The filter end amount of timeline" `
-	Status          []int    `json:"status" dc:"The filter status, 0-pending, 1-success, 2-failure" `
+	Status          []int    `json:"status" dc:"The filter status, 0-pending, 1-success, 2-failure，3-cancel" `
 	TimelineTypes   []int    `json:"timelineTypes"   dc:"The filter timelineType, 0-pay, 1-refund"`
 	GatewayIds      []uint64 `json:"gatewayIds"      dc:"The filter ids of gateway "`
 	Currency        string   `json:"currency" dc:"Currency" `

@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/metric"
+	"unibee/internal/logic/metric_event/event_charge"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -38,7 +39,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
-	// check the only paid subscription
+	// check the only active subscription
 	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId, req.ProductId)
 	utility.Assert(sub != nil, "user has no active subscription")
 
@@ -139,8 +140,9 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 			}
 		}()
 		_, backgroundError = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
-			dao.MerchantMetricEvent.Columns().Used:      usedValue,
-			dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
+			dao.MerchantMetricEvent.Columns().Used:       usedValue,
+			dao.MerchantMetricEvent.Columns().ChargeData: utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one)),
+			dao.MerchantMetricEvent.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
 		if backgroundError != nil {
 			g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())

@@ -41,6 +41,7 @@ func (p Paypal) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		Sort:               90,
 		PublicKeyName:      "Client Id",
 		PrivateSecretName:  "Secret",
+		AutoChargeEnabled:  true,
 	}
 }
 
@@ -155,7 +156,7 @@ func (p Paypal) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entit
 	return nil, gerror.New("not support")
 }
 
-func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("not support")
 }
 

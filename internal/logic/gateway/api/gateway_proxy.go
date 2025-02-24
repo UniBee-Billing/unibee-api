@@ -283,7 +283,7 @@ func (p GatewayProxy) GatewayMerchantBalancesQuery(ctx context.Context, gateway 
 	return res, err
 }
 
-func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -296,7 +296,7 @@ func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entit
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayUserDetailQuery(ctx, gateway, userId)
+	res, err = p.getRemoteGateway().GatewayUserDetailQuery(ctx, gateway, gatewayUserId)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserDetailQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(util.GatewayError, err.Error())

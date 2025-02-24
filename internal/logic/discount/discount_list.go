@@ -72,10 +72,14 @@ func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*det
 		q = q.WhereIn(dao.MerchantDiscountCode.Columns().Currency, strings.ToUpper(req.Currency))
 	}
 	if len(req.SearchKey) > 0 {
-		q = q.Where(q.Builder().WhereOrLike(dao.MerchantDiscountCode.Columns().Code, "%"+req.SearchKey+"%").
+		q = q.Where(q.Builder().
+			//WhereOrLike(dao.MerchantDiscountCode.Columns().Code, "%"+req.SearchKey+"%").
+			WhereOr("LOWER(code) like LOWER(?)", "%"+req.SearchKey+"%").
 			WhereOrLike(dao.MerchantDiscountCode.Columns().Name, "%"+req.SearchKey+"%"))
 	} else if len(req.Code) > 0 {
-		q = q.WhereLike(dao.MerchantDiscountCode.Columns().Code, "%"+req.Code+"%")
+		q = q.
+			//WhereLike(dao.MerchantDiscountCode.Columns().Code, "%"+req.Code+"%")
+			Where("LOWER(code) like LOWER(?)", "%"+req.Code+"%")
 	}
 	if req.CreateTimeStart > 0 {
 		q = q.WhereGTE(dao.MerchantDiscountCode.Columns().CreateTime, req.CreateTimeStart)

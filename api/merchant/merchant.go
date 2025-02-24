@@ -137,6 +137,7 @@ type IMerchantMetric interface {
 	Detail(ctx context.Context, req *metric.DetailReq) (res *metric.DetailRes, err error)
 	NewEvent(ctx context.Context, req *metric.NewEventReq) (res *metric.NewEventRes, err error)
 	DeleteEvent(ctx context.Context, req *metric.DeleteEventReq) (res *metric.DeleteEventRes, err error)
+	EventList(ctx context.Context, req *metric.EventListReq) (res *metric.EventListRes, err error)
 	NewPlanLimit(ctx context.Context, req *metric.NewPlanLimitReq) (res *metric.NewPlanLimitRes, err error)
 	EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditPlanLimitRes, err error)
 	DeletePlanLimit(ctx context.Context, req *metric.DeletePlanLimitReq) (res *metric.DeletePlanLimitRes, err error)
@@ -175,7 +176,7 @@ type IMerchantPlan interface {
 	Publish(ctx context.Context, req *plan.PublishReq) (res *plan.PublishRes, err error)
 	UnPublish(ctx context.Context, req *plan.UnPublishReq) (res *plan.UnPublishRes, err error)
 	Detail(ctx context.Context, req *plan.DetailReq) (res *plan.DetailRes, err error)
-	Expire(ctx context.Context, req *plan.ExpireReq) (res *plan.ExpireRes, err error)
+	Archive(ctx context.Context, req *plan.ArchiveReq) (res *plan.ArchiveRes, err error)
 	Delete(ctx context.Context, req *plan.DeleteReq) (res *plan.DeleteRes, err error)
 }
 

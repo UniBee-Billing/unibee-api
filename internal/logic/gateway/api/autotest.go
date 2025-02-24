@@ -118,16 +118,8 @@ func (a AutoTest) GatewayMerchantBalancesQuery(ctx context.Context, gateway *ent
 	}, nil
 }
 
-func (a AutoTest) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
-	return &gateway_bean.GatewayUserDetailQueryResp{
-		GatewayUserId:        strconv.FormatUint(userId, 10),
-		DefaultPaymentMethod: "",
-		Balance:              nil,
-		CashBalance:          []*gateway_bean.GatewayBalance{},
-		InvoiceCreditBalance: []*gateway_bean.GatewayBalance{},
-		Description:          "",
-		Email:                "",
-	}, nil
+func (a AutoTest) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+	return nil, gerror.New("Not Support")
 }
 
 func (a AutoTest) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {

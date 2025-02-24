@@ -39,7 +39,7 @@ type RenewInternalReq struct {
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
-	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"`
 	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	Metadata               map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`

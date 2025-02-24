@@ -7,6 +7,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/query"
 	"unibee/test"
+	"unibee/utility/unibee"
 )
 
 func TestMerchantMetric(t *testing.T) {
@@ -37,7 +38,7 @@ func TestMerchantMetric(t *testing.T) {
 		list, _ = MerchantMetricList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, 1, len(list))
-		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, "test2", "test2")
+		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, unibee.Int(MetricTypeChargeMetered), "test2", "test2")
 		require.Nil(t, err)
 		require.NotNil(t, one)
 		require.Equal(t, "test2", one.MetricName)

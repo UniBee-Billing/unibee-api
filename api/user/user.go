@@ -11,6 +11,7 @@ import (
 	"unibee/api/user/gateway"
 	"unibee/api/user/invoice"
 	"unibee/api/user/merchant"
+	"unibee/api/user/metric"
 	"unibee/api/user/payment"
 	"unibee/api/user/plan"
 	"unibee/api/user/product"
@@ -41,6 +42,10 @@ type IUserInvoice interface {
 
 type IUserMerchant interface {
 	Get(ctx context.Context, req *merchant.GetReq) (res *merchant.GetRes, err error)
+}
+
+type IUserMetric interface {
+	EventList(ctx context.Context, req *metric.EventListReq) (res *metric.EventListRes, err error)
 }
 
 type IUserPayment interface {

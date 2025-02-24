@@ -31,6 +31,8 @@ type GatewayInfo struct {
 	PublicKeyName                 string
 	PrivateSecretName             string
 	SubGatewayName                string
+	Host                          string
+	AutoChargeEnabled             bool
 }
 
 type GatewayInterface interface {
@@ -39,7 +41,7 @@ type GatewayInterface interface {
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error)
 	// Balance
-	GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error)
+	GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error)
 	GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error)
 	// Payment
 	GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error)

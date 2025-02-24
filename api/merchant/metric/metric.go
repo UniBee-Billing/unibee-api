@@ -17,6 +17,7 @@ type ListRes struct {
 type NewReq struct {
 	g.Meta              `path:"/new" tags:"Metric" method:"post" summary:"New Merchant Metric"`
 	Code                string `json:"code" dc:"Code" v:"required"`
+	Type                *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
 	MetricName          string `json:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription   string `json:"metricDescription" dc:"MetricDescription"`
 	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
@@ -30,6 +31,7 @@ type NewRes struct {
 type EditReq struct {
 	g.Meta            `path:"/edit" tags:"Metric" method:"post" summary:"Edit Merchant Metric"`
 	MetricId          uint64 `json:"metricId" dc:"MetricId" v:"required"`
+	Type              *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
 	MetricName        string `json:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription string `json:"metricDescription" dc:"MetricDescription"`
 }

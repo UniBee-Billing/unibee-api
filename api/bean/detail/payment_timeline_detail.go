@@ -49,7 +49,7 @@ func ConvertPaymentTimeline(ctx context.Context, one *entity.PaymentTimeline) *P
 		if payment.Status == consts.PaymentCancelled {
 			//payment.FailureReason = "Cancelled"
 			payment.AuthorizeReason = "Cancelled"
-			one.Status = 3
+			one.Status = 2
 		}
 	}
 	return &PaymentTimelineDetail{

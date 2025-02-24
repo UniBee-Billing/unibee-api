@@ -260,7 +260,11 @@ var (
 						user.NewMerchantinfo(),
 					)
 				})
-
+				group.Group("/metric", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewMetric(),
+					)
+				})
 			})
 
 			s.Group("/user/vat", func(group *ghttp.RouterGroup) {
