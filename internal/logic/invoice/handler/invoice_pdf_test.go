@@ -3,9 +3,14 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/go-pdf/fpdf"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"golang.org/x/text/currency"
+	"log"
 	"math"
 	"os"
+	"strings"
 	"testing"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -59,7 +64,7 @@ func TestGenerate(t *testing.T) {
 		VatNumber:                      "xxxxxVat",
 		CountryCode:                    "EE",
 		SubscriptionAmountExcludingTax: 20000,
-		Currency:                       "USD",
+		Currency:                       "RUB",
 		Lines:                          lines,
 		Status:                         consts.InvoiceStatusPaid,
 		GmtModify:                      gtime.Now(),
@@ -72,9 +77,9 @@ func TestGenerate(t *testing.T) {
 		},
 		SendNote:   "81732871446425 (Partial Refund)",
 		CreateFrom: "Refund Requested: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		Metadata:   map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrency": "EUR", "LocalizedExchangeRate": 4.0044715544, "IssueVatNumber": " EE101775690", "IssueRegNumber": "TRN: 104167485200003", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"},
+		Metadata:   map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrency": "EUR", "LocalizedExchangeRate": 4.0044715544, "IssueVatNumber": " EE101775690", "IssueRegNumber": "TRN: 104167485200003", "IssueCompanyName": "Multilogin Software", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"},
 	}, &entity.Merchant{
-		CompanyName: "Multilogin OÜ",
+		CompanyName: "Multilogin",
 		BusinessNum: "EE101775690",
 		Name:        "UniBee",
 		Idcard:      "12660871",
@@ -110,4 +115,23 @@ func TestGenerate(t *testing.T) {
 func TestTimeFormat(t *testing.T) {
 	v := 1 - (1 / (1 + utility.ConvertTaxPercentageToInternalFloat(2000)))
 	fmt.Println(int(math.Floor(float64(-12000) * v)))
+}
+
+func TestMustParseCurrencySymbolValue(t *testing.T) {
+	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper("RUB"))))
+	g.Log().Infof(context.Background(), "%v", symbol)
+	doc := fpdf.New("P", "mm", "A4", "")
+	//doc.AddFont("ArialUnicode", "", "path/to/your/font.ttf")
+	doc.AddUTF8Font("dejavu", "", "./fonts/DejaVuSansCondensed.ttf")
+	doc.AddUTF8Font("dejavu", "B", "./fonts/DejaVuSansCondensed-Bold.ttf")
+	doc.AddUTF8Font("dejavu", "I", "./fonts/DejaVuSansCondensed-Oblique.ttf")
+	doc.AddUTF8Font("dejavu", "BI", "./fonts/DejaVuSansCondensed-BoldOblique.ttf")
+
+	doc.SetFont("dejavu", "", 16)
+	doc.AddPage()
+	doc.Cell(40, 10, "Цена: ₽1000")
+	err := doc.OutputFileAndClose("output.pdf")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

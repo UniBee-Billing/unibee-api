@@ -2,13 +2,68 @@ package generator
 
 import (
 	"bytes"
+	"context"
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/go-pdf/fpdf"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"os"
+	"path"
 )
+
+func printPanic(ctx context.Context, err error) {
+	if err != nil {
+		g.Log().Errorf(ctx, "StandaloneInit panic error:%s", err.Error())
+	} else {
+		g.Log().Errorf(ctx, "StandaloneInit panic error:%s", err)
+	}
+}
+
+func (doc *Document) LoadFonts(ctx context.Context, fontPath string) {
+	var err error
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printPanic(ctx, err)
+			doc.pdf.SetError(nil)
+			return
+		}
+	}()
+	if fontPath == "" {
+		fontPath = "."
+	}
+	_ = doc.LoadSingleFont("Arial-Unicode", "", "Arial-Unicode.ttf", fontPath)
+	_ = doc.LoadSingleFont("Arial-Unicode", "B", "Arial-Unicode.ttf", fontPath)
+	err = doc.LoadSingleFont("dejavu", "", "DejaVuSansCondensed.ttf", fontPath)
+	if err != nil {
+		doc.Options.Font = "Helvetica"
+		g.Log().Errorf(ctx, "GPDF_LoadFonts load fonts error, switch to Helvetica:%s", err.Error())
+	}
+	err = doc.LoadSingleFont("dejavu", "B", "DejaVuSansCondensed-Bold.ttf", fontPath)
+	if err != nil {
+		doc.Options.BoldFont = "Helvetica"
+		g.Log().Errorf(ctx, "GPDF_LoadFonts load fonts error, switch to Helvetica:%s", err.Error())
+	}
+	_ = doc.LoadSingleFont("dejavu", "I", "DejaVuSansCondensed-Oblique.ttf", fontPath)
+	_ = doc.LoadSingleFont("dejavu", "BI", "DejaVuSansCondensed-BoldOblique.ttf", fontPath)
+}
+
+func (doc *Document) LoadSingleFont(familyStr, styleStr, fileStr, fontPath string) error {
+	_, err := os.Stat(path.Join(fontPath, fileStr))
+	if err == nil {
+		doc.pdf.AddUTF8Font(familyStr, styleStr, fileStr)
+	}
+	return err
+}
 
 // Build pdf document from data provided
 func (doc *Document) Build() (*fpdf.Fpdf, error) {
@@ -568,7 +623,7 @@ func (doc *Document) appendTotal() {
 	doc.pdf.CellFormat(
 		40,
 		10,
-		doc.encodeString(doc.SubTotalString),
+		doc.SubTotalString,
 		"0",
 		0,
 		"L",
@@ -594,7 +649,7 @@ func (doc *Document) appendTotal() {
 		doc.pdf.CellFormat(
 			40,
 			10,
-			doc.encodeString(doc.PromoCreditString),
+			doc.PromoCreditString,
 			"0",
 			0,
 			"L",
@@ -625,7 +680,7 @@ func (doc *Document) appendTotal() {
 		doc.pdf.CellFormat(
 			40,
 			10,
-			doc.encodeString(doc.DiscountTotalString),
+			doc.DiscountTotalString,
 			"0",
 			0,
 			"L",
@@ -655,7 +710,7 @@ func (doc *Document) appendTotal() {
 	doc.pdf.CellFormat(
 		40,
 		10,
-		doc.encodeString(doc.TaxString),
+		doc.TaxString,
 		"0",
 		0,
 		"L",
@@ -674,7 +729,7 @@ func (doc *Document) appendTotal() {
 		doc.pdf.CellFormat(
 			40,
 			10,
-			doc.encodeString(doc.OriginalTaxString),
+			doc.OriginalTaxString,
 			"0",
 			0,
 			"L",
@@ -695,7 +750,7 @@ func (doc *Document) appendTotal() {
 		doc.pdf.CellFormat(
 			40,
 			10,
-			doc.encodeString(doc.ExchangeRateString),
+			doc.ExchangeRateString,
 			"0",
 			0,
 			"L",
@@ -722,7 +777,7 @@ func (doc *Document) appendTotal() {
 	doc.pdf.CellFormat(
 		40,
 		10,
-		doc.encodeString(doc.TotalString),
+		doc.TotalString,
 		"0",
 		0,
 		"L",

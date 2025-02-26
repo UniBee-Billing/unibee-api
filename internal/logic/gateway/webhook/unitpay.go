@@ -56,7 +56,8 @@ func (c UnitpayWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchan
 	var response = make(map[string]interface{})
 	if method == "check" && jsonData.Contains("account") &&
 		(strings.Contains(jsonData.Get("account").String(), "test") ||
-			query.GetPaymentByPaymentId(r.Context(), jsonData.Get("account").String()) != nil) {
+			query.GetPaymentByPaymentId(r.Context(), jsonData.Get("account").String()) != nil ||
+			(jsonData.Contains("test") && strings.Contains(jsonData.Get("test").String(), "1"))) {
 		response["result"] = map[string]interface{}{
 			"message": "success",
 		}
@@ -95,7 +96,7 @@ func (c UnitpayWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchan
 			"message": "invalid payment",
 		}
 	}
-	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+	log.SaveChannelHttpLog("GatewayWebhook", jsonData, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	r.Response.WriteHeader(responseBack)
 	r.Response.WriteJson(response)
 

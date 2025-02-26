@@ -45,8 +45,13 @@ type Options struct {
 	DarkBgColor []int `default:"[242,242,242]" json:"dark_bg_color,omitempty"`
 	DeepBgColor []int `default:"[200,200,200]" json:"deep_bg_color,omitempty"`
 
-	Font     string `default:"Helvetica"`
-	BoldFont string `default:"Helvetica"`
+	//Font     string `default:"Helvetica"`
+	//BoldFont string `default:"Helvetica"`
+	//Font     string `default:"Arial-Unicode"`
+	//BoldFont string `default:"Arial-Unicode"`
+
+	Font     string `default:"dejavu"`
+	BoldFont string `default:"dejavu"`
 
 	UnicodeTranslateFunc UnicodeTranslateFunc
 }

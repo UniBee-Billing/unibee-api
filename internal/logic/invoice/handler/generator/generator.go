@@ -2,6 +2,7 @@
 package generator
 
 import (
+	"context"
 	"errors"
 
 	"github.com/creasty/defaults"
@@ -11,7 +12,7 @@ import (
 
 var ErrInvalidDocumentType = errors.New("invalid document type")
 
-func New(docType string, fontDirStr string, options *Options) (*Document, error) {
+func New(ctx context.Context, docType string, fontDirStr string, options *Options) (*Document, error) {
 	_ = defaults.Set(options)
 
 	if docType != Invoice && docType != Quotation && docType != DeliveryNote {
@@ -25,6 +26,7 @@ func New(docType string, fontDirStr string, options *Options) (*Document, error)
 
 	// Prepare pdf
 	doc.pdf = fpdf.New("P", "mm", "A4", fontDirStr)
+	doc.LoadFonts(ctx, fontDirStr)
 	doc.Options.UnicodeTranslateFunc = doc.pdf.UnicodeTranslatorFromDescriptor("")
 
 	// Prepare accounting

@@ -180,7 +180,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 		doc.pdf.CellFormat(
 			ItemColQuantityOffset-ItemColUnitPriceOffset,
 			colHeight,
-			doc.encodeString(i.UnitCostStr),
+			i.UnitCostStr,
 			"0",
 			0,
 			"C",
@@ -197,7 +197,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 		doc.pdf.CellFormat(
 			ItemColTaxOffset-ItemColQuantityOffset,
 			colHeight,
-			doc.encodeString(i._quantity.String()),
+			i._quantity.String(),
 			"0",
 			0,
 			"C",
@@ -214,7 +214,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 		doc.pdf.CellFormat(
 			ItemColTaxOffset-ItemColTotalHTOffset,
 			colHeight,
-			doc.encodeString(doc.ac.FormatMoneyDecimal(i.TotalWithoutTaxAndWithoutDiscount())),
+			doc.ac.FormatMoneyDecimal(i.TotalWithoutTaxAndWithoutDiscount()),
 			"0",
 			0,
 			"",
@@ -267,7 +267,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 			doc.pdf.CellFormat(
 				ItemColTotalTTCOffset-ItemColDiscountOffset,
 				colHeight/2,
-				doc.encodeString(discountTitle),
+				discountTitle,
 				"0",
 				0,
 				"LB",
@@ -288,7 +288,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 			doc.pdf.CellFormat(
 				ItemColTotalTTCOffset-ItemColDiscountOffset,
 				colHeight/2,
-				doc.encodeString(discountDesc),
+				discountDesc,
 				"0",
 				0,
 				"LT",
@@ -317,7 +317,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 			doc.pdf.CellFormat(
 				ItemColDiscountOffset-ItemColTaxOffset,
 				colHeight,
-				doc.encodeString(i.TaxString),
+				i.TaxString,
 				"0",
 				0,
 				"C",
@@ -411,7 +411,7 @@ func (i *Item) appendColTo(options *Options, index int, doc *Document) {
 	doc.pdf.CellFormat(
 		190-ItemColTotalTTCOffset,
 		colHeight,
-		doc.encodeString(i.AmountString),
+		i.AmountString,
 		"0",
 		0,
 		"",

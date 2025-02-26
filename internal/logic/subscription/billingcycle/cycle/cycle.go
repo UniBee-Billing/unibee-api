@@ -235,9 +235,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice
-					plan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
+					updatePlan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
 					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
+					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						UserId:           sub.UserId,

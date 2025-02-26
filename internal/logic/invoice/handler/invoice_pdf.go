@@ -33,7 +33,7 @@ func GenerateInvoicePdf(ctx context.Context, one *entity.Invoice) string {
 
 func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
 	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
-	doc, _ := generator2.New(generator2.Invoice, "/usr/share/fonts", &generator2.Options{
+	doc, _ := generator2.New(ctx, generator2.Invoice, "/usr/share/fonts", &generator2.Options{
 		AutoPrint:      true,
 		CurrencySymbol: symbol,
 	})
