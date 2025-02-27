@@ -23,7 +23,7 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 	}
 	for _, gatewayName := range api.ExportGatewaySetupListKeys() {
 		if info, exists := api.ExportGatewaySetupList[gatewayName]; exists {
-			if !config.GetConfigInstance().IsProd() {
+			if config.GetConfigInstance().IsProd() {
 				if info.IsStaging {
 					continue
 				}
@@ -73,11 +73,13 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 					WebhookSecret:                 "",
 					Sort:                          gatewaySort,
 					IsSetupFinished:               false,
+					Archive:                       false,
 					CurrencyExchangeEnabled:       info.CurrencyExchangeEnabled,
 					SubGatewayConfigs:             info.SubGatewayConfigs,
 					PublicKeyName:                 publicKeyName,
 					PrivateSecretName:             privateSecretName,
 					SubGatewayName:                subGatewayName,
+					AutoChargeEnabled:             info.AutoChargeEnabled,
 				})
 			}
 		}

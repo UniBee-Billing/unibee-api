@@ -14,10 +14,10 @@ type MetricPlanChargeBindingParam struct {
 }
 
 type MetricPlanChargeGraduatedStep struct {
-	PerAmount  float64 `json:"perAmount" dc:"PerAmount"`
-	StartValue int64   `json:"startValue" dc:"StartValue"`
-	EndValue   int64   `json:"endValue" dc:"EndValue"`
-	FlatAmount float64 `json:"flatAmount" dc:"FlatAmount"`
+	PerAmount  int64 `json:"perAmount" dc:"PerAmount,cent"`
+	StartValue int64 `json:"startValue" dc:"StartValue"`
+	EndValue   int64 `json:"endValue" dc:"EndValue, -1 = infinity value(∞)"`
+	FlatAmount int64 `json:"flatAmount" dc:"FlatAmount,cent"`
 }
 
 type MetricPlanChargeEntity struct {
@@ -49,9 +49,11 @@ func ConvertMetricPlanChargeListFromPlan(one *entity.Plan) []*MetricPlanChargeBi
 }
 
 type EventMetricCharge struct {
-	PlanId        uint64                        `json:"planId" dc:"PlanId"`
-	CurrentValue  uint64                        `json:"currentValue" dc:"CurrentValue"`
-	ChargePricing *MetricPlanChargeBindingParam `json:"chargePricing" dc:"ChargePricing"`
-	Amount        int64                         `json:"amount" dc:"Amount"`
-	Currency      string                        `json:"currency" dc:"Currency"`
+	PlanId        uint64                         `json:"planId" dc:"PlanId"`
+	CurrentValue  uint64                         `json:"currentValue" dc:"CurrentValue"`
+	ChargePricing *MetricPlanChargeBindingParam  `json:"chargePricing" dc:"ChargePricing"`
+	UsedAmount    int64                          `json:"usedAmount" dc:"UsedAmount"`
+	UnitAmount    int64                          `json:"unitAmount" dc:"UnitAmount"`
+	GraduatedStep *MetricPlanChargeGraduatedStep `json:"graduatedStep" dc:"GraduatedStep"`
+	Currency      string                         `json:"currency" dc:"Currency"`
 }

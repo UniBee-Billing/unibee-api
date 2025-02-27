@@ -55,6 +55,7 @@ type Gateway struct {
 	PublicKeyName                 string                         `json:"publicKeyName"  dc:""`
 	PrivateSecretName             string                         `json:"privateSecretName"  dc:""`
 	SubGatewayName                string                         `json:"subGatewayName"  dc:""`
+	AutoChargeEnabled             bool                           `json:"autoChargeEnabled"  dc:""`
 }
 
 type GatewayBank struct {
@@ -130,6 +131,7 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 	var publicKeyName = "Public Key"
 	var privateSecretName = "Private Key"
 	var subGatewayName = ""
+	var autoChargeEnabled = false
 	if gatewayInfo != nil {
 		currencyExchangeEnabled = gatewayInfo.CurrencyExchangeEnabled
 		if len(gatewayInfo.PublicKeyName) > 0 {
@@ -141,6 +143,7 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		if len(gatewayInfo.SubGatewayName) > 0 {
 			subGatewayName = gatewayInfo.SubGatewayName
 		}
+		autoChargeEnabled = gatewayInfo.AutoChargeEnabled
 	}
 	var currencyExchangeList = make([]*GatewayCurrencyExchange, 0)
 	_ = utility.UnmarshalFromJsonString(one.Custom, &currencyExchangeList)
@@ -182,6 +185,7 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		PublicKeyName:                 publicKeyName,
 		PrivateSecretName:             privateSecretName,
 		SubGatewayName:                subGatewayName,
+		AutoChargeEnabled:             autoChargeEnabled,
 		//SubGatewayConfigs:             subGatewayConfigs,
 	}
 }

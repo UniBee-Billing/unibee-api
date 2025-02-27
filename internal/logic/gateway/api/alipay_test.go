@@ -18,6 +18,11 @@ func TestForAlipay(t *testing.T) {
 	_, _, _ = pay.GatewayTest(context.Background(), key, secret, subGateway)
 }
 
+func TestForAlipayPlus(t *testing.T) {
+	pay := &AlipayPlus{}
+	_, _, _ = pay.GatewayTest(context.Background(), key, secret, subGateway)
+}
+
 func TestForAlipayGetPaymentDetail(t *testing.T) {
 	pay := &Alipay{}
 	res, err := pay.GatewayPaymentDetail(context.Background(), &entity.MerchantGateway{

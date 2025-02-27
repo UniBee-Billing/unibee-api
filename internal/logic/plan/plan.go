@@ -107,6 +107,43 @@ type PlanInternalReq struct {
 	ProductId             int64                                   `json:"productId"   dc:"Id of product which plan to linked" `
 }
 
+func MetricPlanChargeValidation(metricPlanCharges []*bean.MetricPlanChargeBindingParam) error {
+	for _, metricPlanCharge := range metricPlanCharges {
+		if metricPlanCharge.MetricId <= 0 {
+			return gerror.New("metric id should not less than 0")
+		}
+		if metricPlanCharge.ChargeType != 0 && metricPlanCharge.ChargeType != 1 {
+			return gerror.New("charge type should be one of 0-standard pricing, 1-graduated pricing")
+		}
+		if metricPlanCharge.ChargeType == 0 {
+			if metricPlanCharge.StandardAmount < 0 {
+				return gerror.New("standard amount should not be negative")
+			}
+			if metricPlanCharge.StandardStartValue < 0 {
+				return gerror.New("standard start value should not be negative")
+			}
+		} else if metricPlanCharge.ChargeType == 1 {
+			var lastEnd int64 = 0
+			for _, step := range metricPlanCharge.GraduatedAmounts {
+				if step.EndValue <= lastEnd {
+					return gerror.New("end value should be greater than last end value")
+				}
+				if step.PerAmount < 0 {
+					return gerror.New("per amount should not be negative")
+				}
+				if step.FlatAmount < 0 {
+					return gerror.New("flat amount should not be negative")
+				}
+				lastEnd = step.EndValue
+			}
+			if lastEnd > 0 {
+				return gerror.New("The last EndValue should the infinity value")
+			}
+		}
+	}
+	return nil
+}
+
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
 	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	intervals := []string{"day", "month", "year", "week"}
@@ -197,6 +234,14 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 			utility.Assert(addonPlan.Currency == req.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.ProductId == req.ProductId, fmt.Sprintf("addon product not match plan's product, id:%d", addonPlan.Id))
 		}
+	}
+
+	if len(req.MetricMeteredCharge) > 0 {
+		utility.AssertError(MetricPlanChargeValidation(req.MetricMeteredCharge), "Usage-based Metered charges validation failed")
+	}
+
+	if len(req.MetricRecurringCharge) > 0 {
+		utility.AssertError(MetricPlanChargeValidation(req.MetricRecurringCharge), "Usage-based Recurring charges validation failed")
 	}
 
 	utility.Assert(req.TrialDemand == "" || req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
@@ -437,9 +482,11 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	}
 
 	if req.MetricMeteredCharge != nil {
+		utility.AssertError(MetricPlanChargeValidation(*req.MetricMeteredCharge), "Usage-based Metered charges validation failed")
 		metricPlanCharge.MetricMeteredCharge = *req.MetricMeteredCharge
 	}
 	if req.MetricRecurringCharge != nil {
+		utility.AssertError(MetricPlanChargeValidation(*req.MetricRecurringCharge), "Usage-based Recurring charges validation failed")
 		metricPlanCharge.MetricRecurringCharge = *req.MetricRecurringCharge
 	}
 
@@ -547,6 +594,7 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 		TrialDemand:            one.TrialDemand,
 		CancelAtTrialEnd:       one.CancelAtTrialEnd,
 		ProductId:              one.ProductId,
+		MetricCharge:           one.MetricCharge,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

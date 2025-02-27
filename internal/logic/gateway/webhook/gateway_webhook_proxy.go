@@ -27,6 +27,7 @@ var GatewayWebhookNameMapping = map[string]_interface.GatewayWebhookInterface{
 	"cryptadium":      &CryptadiumWebhook{},
 	"payssion":        &PayssionWebhook{},
 	"alipay":          &AlipayWebhook{},
+	"alipay+":         &AlipayPlusWebhook{},
 }
 
 type GatewayWebhookProxy struct {

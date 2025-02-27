@@ -31,6 +31,7 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"payssion":        &Payssion{},
 	"cryptadium":      &Cryptadium{},
 	"alipay":          &Alipay{},
+	"alipay+":         &AlipayPlus{},
 	"credit":          &credit.Credit{},
 }
 
@@ -48,6 +49,7 @@ var GatewayShortNameMapping = map[string]string{
 	"cryptadium":      "CTD",
 	"credit":          "CR",
 	"alipay":          "ALI",
+	"alipay+":         "ALIP",
 }
 
 // var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion", "wire_transfer"}
@@ -60,6 +62,7 @@ var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
 	"payssion":      Payssion{}.GatewayInfo(context.Background()),
 	"wire_transfer": Wire{}.GatewayInfo(context.Background()),
 	"alipay":        Alipay{}.GatewayInfo(context.Background()),
+	"alipay+":       AlipayPlus{}.GatewayInfo(context.Background()),
 	//"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
 }
 

@@ -11,7 +11,7 @@ import (
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	webhook2 "unibee/internal/logic/gateway"
-	defaultAlipayClient "unibee/internal/logic/gateway/api/alipay/api"
+	defaultAlipayPlusClient "unibee/internal/logic/gateway/api/alipay/api"
 	"unibee/internal/logic/gateway/api/alipay/api/model"
 	"unibee/internal/logic/gateway/api/alipay/api/request/pay"
 	responsePay "unibee/internal/logic/gateway/api/alipay/api/response/pay"
@@ -27,28 +27,29 @@ import (
 //https://github.com/alipay/global-open-sdk-go
 //https://docs.antom.com/ac/ams_zh-cn/api
 
-type Alipay struct {
+type AlipayPlus struct {
 }
 
-func (c Alipay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
+func (c AlipayPlus) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
-		Name:                          "Alipay",
-		Description:                   "Antom Online Payments(Card), Use public and private keys to secure the Alipay payment.",
-		DisplayName:                   "Alipay",
+		Name:                          "Alipay+",
+		Description:                   "Antom Online Payments(CONNECT_WALLET), Use public and private keys to secure the Alipay+ payment.",
+		DisplayName:                   "Alipay+",
 		GatewayWebsiteLink:            "https://global.alipay.com/platform/site/ihome",
 		GatewayWebhookIntegrationLink: "",
 		Sort:                          91,
 		GatewayLogo:                   "https://api.unibee.top/oss/file/d7xy50zqf0iae7q9s6.png",
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d7xy50zqf0iae7q9s6.png"},
-		GatewayType:                   consts.GatewayTypeCard,
+		GatewayType:                   consts.GatewayTypeAlipayPlus,
 		SubGatewayName:                "Client Id",
-		PublicKeyName:                 "Alipay Public Key",
+		PublicKeyName:                 "Alipay+ Public Key",
 		PrivateSecretName:             "Merchant Private Key",
 		Host:                          "https://open-de-global.alipay.com",
+		IsStaging:                     true,
 	}
 }
 
-func (c Alipay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
+func (c AlipayPlus) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
 	return &gateway_bean.GatewayCryptoToCurrencyAmountDetailRes{
 		Amount:         from.Amount,
 		Currency:       from.Currency,
@@ -59,16 +60,16 @@ func (c Alipay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 	}, nil
 }
 
-func (c Alipay) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (c AlipayPlus) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
 	var alipayClientId = subGateway
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		"https://open-de-global.alipay.com",
 		alipayClientId,
 		secret,
 		key, false)
 
 	payRequest, request := pay.NewAlipayPayRequest()
-	request.PaymentRequestId = fmt.Sprintf("paymentRequestId01%d", gtime.Now().Timestamp())
+	request.PaymentRequestId = fmt.Sprintf("paymentRequestId02%d", gtime.Now().Timestamp())
 	order := &model.Order{}
 	order.OrderDescription = "antom test order"
 	order.ReferenceOrderId = fmt.Sprintf("3232db07-91f7-4364-85bc-829a4c1c653f-%d", gtime.Now().Timestamp())
@@ -77,7 +78,7 @@ func (c Alipay) GatewayTest(ctx context.Context, key string, secret string, subG
 		BuyerEmail: "mail@hotmail.com",
 	}
 	request.Order = order
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
+	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CONNECT_WALLET"}
 	request.PaymentAmount = model.NewAmount("4200", "EUR")
 	request.PaymentNotifyUrl = "https://www.gaga.com/notify"
 	request.PaymentRedirectUrl = "https://www.alipay.com"
@@ -93,39 +94,39 @@ func (c Alipay) GatewayTest(ctx context.Context, key string, secret string, subG
 	g.Log().Debugf(ctx, "responseJson :%s", utility.MarshalToJsonString(response))
 	utility.Assert(len(response.NormalUrl) > 0, "invalid keys, NormalUrl is nil")
 	g.Log().Infof(ctx, "Redirect Url:%s", tools.Decode(response.NormalUrl))
-	return "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png", consts.GatewayTypeCard, nil
+	return "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png", consts.GatewayTypeAlipayPlus, nil
 }
 
-func (c Alipay) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
+func (c AlipayPlus) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (c AlipayPlus) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, gatewayUserId string) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
+func (c AlipayPlus) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
+func (c AlipayPlus) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
+func (c AlipayPlus) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
+func (c AlipayPlus) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (c AlipayPlus) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+func (c AlipayPlus) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		gateway.Host,
 		gateway.SubGateway,
 		gateway.GatewaySecret,
@@ -206,7 +207,7 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 
 		request.Order = order
 	}
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
+	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CONNECT_WALLET"}
 	request.PaymentAmount = model.NewAmount(fmt.Sprintf("%d", createPayContext.Pay.TotalAmount), createPayContext.Pay.Currency)
 	request.PaymentNotifyUrl = webhook2.GetPaymentWebhookEntranceUrl(createPayContext.Gateway.Id)
 	request.PaymentRedirectUrl = webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)
@@ -217,7 +218,7 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 	request.Env = &model.Env{ClientIp: utility.GetPublicIP(), TerminalType: model.WEB}
 
 	execute, err := client.Execute(payRequest)
-	log.SaveChannelHttpLog("GatewayNewPayment", utility.MarshalToJsonString(payRequest), utility.MarshalToJsonString(execute), err, "AlipayNewPayment", nil, gateway)
+	log.SaveChannelHttpLog("GatewayNewPayment", utility.MarshalToJsonString(payRequest), utility.MarshalToJsonString(execute), err, "AlipayPlusNewPayment", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	response := execute.(*responsePay.AlipayPayResponse)
 	g.Log().Debugf(ctx, "responseJson :%s", utility.MarshalToJsonString(response))
@@ -232,12 +233,12 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 	}, nil
 }
 
-func (c Alipay) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+func (c AlipayPlus) GatewayCapture(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+func (c AlipayPlus) GatewayCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		gateway.Host,
 		gateway.SubGateway,
 		gateway.GatewaySecret,
@@ -246,18 +247,18 @@ func (c Alipay) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 	request, cancelRequest := pay.NewAlipayPayCancelRequest()
 	cancelRequest.PaymentId = payment.GatewayPaymentId
 	execute, err := client.Execute(request)
-	log.SaveChannelHttpLog("GatewayPaymentCancel", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPaymentCancel", nil, gateway)
+	log.SaveChannelHttpLog("GatewayPaymentCancel", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPlusPaymentCancel", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 	response := execute.(*responsePay.AlipayPayCancelResponse)
-	utility.Assert(response != nil, "Alipay payment query failed, result is nil")
+	utility.Assert(response != nil, "AlipayPlus payment query failed, result is nil")
 	utility.Assert(response != nil && response.Result.ResultCode == "SUCCESS", "invalid request, result not SUCCESS")
 	detailRes, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
 	if err != nil {
 		return nil, err
 	}
-	utility.Assert(detailRes != nil, "Alipay payment query failed, result is nil")
+	utility.Assert(detailRes != nil, "AlipayPlus payment query failed, result is nil")
 	return &gateway_bean.GatewayPaymentCancelResp{
 		MerchantId:      strconv.FormatUint(payment.MerchantId, 10),
 		GatewayCancelId: response.PaymentId,
@@ -266,12 +267,12 @@ func (c Alipay) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 	}, nil
 }
 
-func (c Alipay) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
+func (c AlipayPlus) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+func (c AlipayPlus) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		gateway.Host,
 		gateway.SubGateway,
 		gateway.GatewaySecret,
@@ -284,19 +285,19 @@ func (c Alipay) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 		return nil, err
 	}
 	response := execute.(*responsePay.AlipayPayQueryResponse)
-	log.SaveChannelHttpLog("GatewayPaymentDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPaymentDetail", nil, gateway)
-	utility.Assert(response != nil, "Alipay payment query failed, result is nil")
+	log.SaveChannelHttpLog("GatewayPaymentDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPlusPaymentDetail", nil, gateway)
+	utility.Assert(response != nil, "AlipayPlus payment query failed, result is nil")
 	utility.Assert(response != nil && response.Result.ResultCode == "SUCCESS", "invalid keys, result not SUCCESS")
 
-	return parseAlipayPayment(response), nil
+	return parseAlipayPlusPayment(response), nil
 }
 
-func (c Alipay) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c AlipayPlus) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Alipay) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+func (c AlipayPlus) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		gateway.Host,
 		gateway.SubGateway,
 		gateway.GatewaySecret,
@@ -310,7 +311,7 @@ func (c Alipay) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 		return nil, err
 	}
 	response := execute.(*responsePay.AlipayInquiryRefundResponse)
-	utility.Assert(response != nil, "Alipay refund query failed, result is nil")
+	utility.Assert(response != nil, "AlipayPlus refund query failed, result is nil")
 	utility.Assert(response != nil && response.RefundId != "", "invalid keys, resultId not found")
 	var status consts.RefundStatusEnum = consts.RefundCreated
 	if response.RefundStatus == model.TransactionStatusType_SUCCESS {
@@ -332,8 +333,8 @@ func (c Alipay) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	}, nil
 }
 
-func (c Alipay) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	client := defaultAlipayClient.NewDefaultAlipayClient(
+func (c AlipayPlus) GatewayRefund(ctx context.Context, gateway *entity.MerchantGateway, createPaymentRefundContext *gateway_bean.GatewayNewPaymentRefundReq) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		gateway.Host,
 		gateway.SubGateway,
 		gateway.GatewaySecret,
@@ -346,10 +347,10 @@ func (c Alipay) GatewayRefund(ctx context.Context, gateway *entity.MerchantGatew
 	request := refundRequest.NewRequest()
 	execute, err := client.Execute(request)
 	log.SaveChannelHttpLog("GatewayRefund", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "refund", nil, gateway)
-	utility.Assert(err == nil, fmt.Sprintf("call Alipay refund error %s", err))
-	utility.Assert(execute != nil, "Alipay refund failed, result is nil")
+	utility.Assert(err == nil, fmt.Sprintf("call AlipayPlus refund error %s", err))
+	utility.Assert(execute != nil, "AlipayPlus refund failed, result is nil")
 	response := execute.(*responsePay.AlipayRefundResponse)
-	utility.Assert(response != nil, "Alipay refund failed, result is nil")
+	utility.Assert(response != nil, "AlipayPlus refund failed, result is nil")
 	if response.RefundId == "" {
 		return &gateway_bean.GatewayPaymentRefundResp{
 			GatewayRefundId: createPaymentRefundContext.Payment.GatewayPaymentId,
@@ -367,11 +368,11 @@ func (c Alipay) GatewayRefund(ctx context.Context, gateway *entity.MerchantGatew
 	}, nil
 }
 
-func (c Alipay) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c AlipayPlus) GatewayRefundCancel(ctx context.Context, gateway *entity.MerchantGateway, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("not support")
 }
 
-func parseAlipayPayment(item *responsePay.AlipayPayQueryResponse) *gateway_bean.GatewayPaymentRo {
+func parseAlipayPlusPayment(item *responsePay.AlipayPayQueryResponse) *gateway_bean.GatewayPaymentRo {
 	var status = consts.PaymentCreated
 	var authorizeStatus = consts.WaitingAuthorized
 	if item.PaymentStatus == model.TransactionStatusType_SUCCESS {
