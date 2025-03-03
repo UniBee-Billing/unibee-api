@@ -143,7 +143,7 @@ func TestStripe(t *testing.T) {
 	})
 }
 
-func TestStripeQueryAllRefunds(t *testing.T) {
+func TestStripeCheckout(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		stripe.Key = ""
 		setUniBeeAppInfo()
@@ -151,6 +151,16 @@ func TestStripeQueryAllRefunds(t *testing.T) {
 			PaymentIntent: stripe.String("pi_3QWhDnDaLWZKMs9N2ecEfXU8"),
 		})
 		fmt.Println(utility.MarshalToJsonString(response))
+	})
+}
+
+func TestStripeQueryAllRefunds(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		stripe.Key = ""
+		setUniBeeAppInfo()
+		result, err := session.Get("cs_test_a1fbXKOsYV4kZl3C9hJwel25dzkUj9OileQRhiKZohX5pMaqTfFYselg5m", &stripe.CheckoutSessionParams{})
+		fmt.Println(utility.MarshalToJsonString(err))
+		fmt.Println(utility.MarshalToJsonString(result))
 	})
 }
 

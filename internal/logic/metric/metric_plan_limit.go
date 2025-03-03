@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
@@ -28,7 +29,7 @@ type MerchantMetricPlanLimitInternalReq struct {
 	MetricLimit       uint64 `json:"metricLimit" dc:"MetricLimit" `
 }
 
-func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*bean.MerchantMetricPlanLimit, error) {
+func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*detail.MerchantMetricPlanLimitDetail, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
 	utility.Assert(req.MetricId > 0, "invalid metricId")
@@ -78,7 +79,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	return &bean.MerchantMetricPlanLimit{
+	return &detail.MerchantMetricPlanLimitDetail{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
@@ -89,7 +90,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	}, nil
 }
 
-func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*bean.MerchantMetricPlanLimit, error) {
+func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*detail.MerchantMetricPlanLimitDetail, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.MetricPlanLimitId > 0, "invalid MetricPlanLimitId")
 	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
@@ -122,7 +123,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
-	return &bean.MerchantMetricPlanLimit{
+	return &detail.MerchantMetricPlanLimitDetail{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
@@ -165,7 +166,7 @@ func HardDeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, m
 	return err
 }
 
-func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*bean.BulkMetricLimitPlanBindingParam) error {
+func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*bean.PlanMetricLimitParam) error {
 	utility.Assert(plan != nil, "invalid plan")
 	if len(params) > 0 {
 		var oldList []*entity.MerchantMetricPlanLimit

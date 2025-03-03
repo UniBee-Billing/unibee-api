@@ -77,7 +77,7 @@ func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string, sub
 	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), secret)
 	responseJson, err := SendUnitPayPaymentRequest(ctx, secret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
-	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
+	g.Log().Infof(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("result.paymentId"), "invalid keys, paymentId is nil")
 	utility.Assert(responseJson.Contains("result.redirectUrl"), "invalid keys, redirectUrl is nil")
 	redirectUrl, err := url.PathUnescape(responseJson.Get("result.redirectUrl").String())

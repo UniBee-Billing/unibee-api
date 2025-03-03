@@ -157,7 +157,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        fmt.Sprintf("Cancel(%s)", reason),
+		Content:        fmt.Sprintf("%s(%s->%s)", reason, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(nextStatus).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -361,7 +361,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        fmt.Sprintf("AddNewTrialEnd(%d)", newTrialEnd),
+		Content:        fmt.Sprintf("AddNewTrialEnd:%d(%s-%s)", newTrialEnd, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(newStatus).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -394,7 +394,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
 	utility.AssertError(err, "Subscription Active Temporarily")
 
-	err = handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
+	err = handler.MakeSubscriptionIncomplete(ctx, subscriptionId, "ActiveTemporarily")
 	if err != nil {
 		return err
 	}
@@ -428,7 +428,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        "ActiveTemporarily",
+		Content:        fmt.Sprintf("ActiveTemporarily(%s-%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusIncomplete).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -511,7 +511,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 			return err
 		}
 		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic:", utility.MarshalToJsonString(createRes))
-		err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
+		err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp(), "EndTrial")
 
 	} else {
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -535,7 +535,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
-		Content:        "EndTrial",
+		Content:        fmt.Sprintf("EndTrial(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(newStatus).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -563,9 +563,10 @@ func MarkSubscriptionProcessed(ctx context.Context, subscriptionId string) error
 		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-		MerchantId:     one.MerchantId,
-		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
-		Content:        "MarkSubscriptionProcessed",
+		MerchantId: one.MerchantId,
+		Target:     fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+		//Content:        "MarkSubscriptionProcessed",
+		Content:        fmt.Sprintf("MarkSubscriptionProcessed(%s->%s)", consts.SubStatusToEnum(one.Status).Description(), consts.SubStatusToEnum(consts.SubStatusProcessing).Description()),
 		UserId:         one.UserId,
 		SubscriptionId: one.SubscriptionId,
 		InvoiceId:      "",

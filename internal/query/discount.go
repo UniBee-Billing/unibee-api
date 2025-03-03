@@ -32,6 +32,21 @@ func GetDiscountByCode(ctx context.Context, merchantId uint64, code string) (one
 	return
 }
 
+func GetUnDeletedDiscountByCode(ctx context.Context, merchantId uint64, code string) (one *entity.MerchantDiscountCode) {
+	if len(code) <= 0 || merchantId <= 0 {
+		return nil
+	}
+	err := dao.MerchantDiscountCode.Ctx(ctx).
+		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
+		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
+		Where("LOWER(code) = LOWER(?)", code). // case_insensitive
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func GetAllMerchantDiscountIds(ctx context.Context, merchantId uint64) (ids []uint64) {
 	list := make([]*entity.MerchantDiscountCode, 0)
 	ids = make([]uint64, 0)

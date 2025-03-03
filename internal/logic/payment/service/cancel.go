@@ -35,7 +35,7 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 	if err != nil {
 		return err
 	}
-	if res.Status == consts.PaymentCancelled {
+	if res.Status == consts.PaymentCancelled || res.Status == consts.PaymentFailed {
 		err = handler.HandlePayCancel(ctx, &handler.HandlePayReq{
 			PaymentId:     payment.PaymentId,
 			PayStatusEnum: consts.PaymentCancelled,
@@ -44,6 +44,8 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 		if err != nil {
 			return err
 		}
+	} else {
+		return gerror.New("gateway cancel status failed")
 	}
 	return
 }

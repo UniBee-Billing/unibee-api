@@ -18,26 +18,27 @@ import (
 )
 
 type CalculateInvoiceReq struct {
-	UserId                 uint64                 `json:"userId"`
-	Currency               string                 `json:"currency"`
-	DiscountCode           string                 `json:"discountCode"`
-	TimeNow                int64                  `json:"TimeNow"`
-	PlanId                 uint64                 `json:"planId"`
-	Quantity               int64                  `json:"quantity"`
-	AddonJsonData          string                 `json:"addonJsonData"`
-	CountryCode            string                 `json:"CountryCode"`
-	VatNumber              string                 `json:"vatNumber"`
-	TaxPercentage          int64                  `json:"taxPercentage"`
-	PeriodStart            int64                  `json:"periodStart"`
-	PeriodEnd              int64                  `json:"periodEnd"`
-	FinishTime             int64                  `json:"finishTime"`
-	InvoiceName            string                 `json:"invoiceName"`
-	ProductData            *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
-	BillingCycleAnchor     int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
-	CreateFrom             string                 `json:"createFrom"                     description:"create from"`          // create from
-	Metadata               map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
-	ApplyPromoCredit       bool                   `json:"applyPromoCredit" dc:"apply promo credit or not"`
-	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	UserId                     uint64                                  `json:"userId"`
+	Currency                   string                                  `json:"currency"`
+	DiscountCode               string                                  `json:"discountCode"`
+	TimeNow                    int64                                   `json:"TimeNow"`
+	PlanId                     uint64                                  `json:"planId"`
+	Quantity                   int64                                   `json:"quantity"`
+	AddonJsonData              string                                  `json:"addonJsonData"`
+	CountryCode                string                                  `json:"CountryCode"`
+	VatNumber                  string                                  `json:"vatNumber"`
+	TaxPercentage              int64                                   `json:"taxPercentage"`
+	PeriodStart                int64                                   `json:"periodStart"`
+	PeriodEnd                  int64                                   `json:"periodEnd"`
+	FinishTime                 int64                                   `json:"finishTime"`
+	InvoiceName                string                                  `json:"invoiceName"`
+	ProductData                *bean.PlanProductParam                  `json:"productData"  dc:"ProductData"  `
+	BillingCycleAnchor         int64                                   `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
+	CreateFrom                 string                                  `json:"createFrom"                     description:"create from"`          // create from
+	Metadata                   map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	ApplyPromoCredit           bool                                    `json:"applyPromoCredit" dc:"apply promo credit or not"`
+	ApplyPromoCreditAmount     *int64                                  `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	UserMetricChargeForInvoice *bean.UserMetricChargeInvoiceItemEntity `json:"userMetricChargeForInvoice"`
 }
 
 func VerifyInvoiceSimplify(one *bean.Invoice) {
@@ -237,6 +238,16 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	for _, addon := range addons {
 		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 	}
+	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.MeteredChargeStats) > 0 {
+		for _, metricCharge := range req.UserMetricChargeForInvoice.MeteredChargeStats {
+			totalAmountExcludingTax = totalAmountExcludingTax + metricCharge.TotalChargeAmount
+		}
+	}
+	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.RecurringChargeStats) > 0 {
+		for _, metricCharge := range req.UserMetricChargeForInvoice.RecurringChargeStats {
+			totalAmountExcludingTax = totalAmountExcludingTax + metricCharge.TotalChargeAmount
+		}
+	}
 
 	var period = ""
 	if req.PeriodStart > 0 && req.PeriodEnd > req.PeriodStart {
@@ -284,6 +295,49 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 			Description:            fmt.Sprintf("%d * %s %s", addon.Quantity, addon.AddonPlan.PlanName, period),
 			Plan:                   addon.AddonPlan,
 		})
+	}
+
+	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.MeteredChargeStats) > 0 {
+		for _, metricCharge := range req.UserMetricChargeForInvoice.MeteredChargeStats {
+			if metricCharge.TotalChargeAmount > 0 {
+				var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
+				var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+				invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+					Currency:               req.Currency,
+					OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+					Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+					Tax:                    metricChargeTaxAmount,
+					TaxPercentage:          req.TaxPercentage,
+					AmountExcludingTax:     metricChargeAmountExcludingTax,
+					UnitAmountExcludingTax: metricChargeAmountExcludingTax / int64(metricCharge.CurrentUsedValue),
+					Quantity:               int64(metricCharge.CurrentUsedValue),
+					Name:                   metricCharge.Name,
+					Description:            metricCharge.Description,
+					MetricCharge:           metricCharge,
+				})
+			}
+		}
+	}
+	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.RecurringChargeStats) > 0 {
+		for _, metricCharge := range req.UserMetricChargeForInvoice.RecurringChargeStats {
+			if metricCharge.TotalChargeAmount > 0 {
+				var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
+				var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+				invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+					Currency:               req.Currency,
+					OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+					Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+					Tax:                    metricChargeTaxAmount,
+					TaxPercentage:          req.TaxPercentage,
+					AmountExcludingTax:     metricChargeAmountExcludingTax,
+					UnitAmountExcludingTax: metricChargeAmountExcludingTax / int64(metricCharge.CurrentUsedValue),
+					Quantity:               int64(metricCharge.CurrentUsedValue),
+					Name:                   metricCharge.Name,
+					Description:            metricCharge.Description,
+					MetricCharge:           metricCharge,
+				})
+			}
+		}
 	}
 
 	//Promo Credit

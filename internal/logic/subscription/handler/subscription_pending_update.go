@@ -12,6 +12,7 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/email"
 	metric2 "unibee/internal/logic/metric"
+	"unibee/internal/logic/operation_log"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/user/sub_update"
@@ -131,6 +132,17 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		g.Log().Errorf(ctx, "SendTemplateEmail HandlePendingUpdatePaymentSuccess:%s", err.Error())
 	}
 	if utility.TryLock(ctx, fmt.Sprintf("HandlePendingUpdatePaymentSuccess_%s", invoice.InvoiceId), 60) {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId: sub.MerchantId,
+			Target:     fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+			//Content:        "MarkSubscriptionProcessed",
+			Content:        fmt.Sprintf("Update(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description()),
+			UserId:         sub.UserId,
+			SubscriptionId: sub.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,

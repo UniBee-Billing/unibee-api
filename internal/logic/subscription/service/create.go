@@ -602,6 +602,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		} else {
 			invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 			utility.AssertError(err, "System Error")
+			sub_update.UpdateUserCountryCode(ctx, one.UserId, one.CountryCode)
 			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 				GatewaySubscriptionId: one.SubscriptionId,
 				Link:                  GetSubscriptionZeroPaymentLink(req.ReturnUrl, one.SubscriptionId),
@@ -654,7 +655,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
-		Content:        "New",
+		Content:        fmt.Sprintf("Creation(%s)", consts.SubStatusToEnum(one.Status).Description()),
 		UserId:         one.UserId,
 		SubscriptionId: one.SubscriptionId,
 		InvoiceId:      invoice.InvoiceId,

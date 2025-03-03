@@ -50,9 +50,16 @@ func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
 
 // 210 300
 func TestGenerate(t *testing.T) {
+	//text := "Ü"
+	//utf16Data, err := fpdf.Utf8ToUtf16(text)
+	//if err != nil {
+	//	fmt.Println("转换失败:", err)
+	//} else {
+	//	fmt.Println("UTF-16 数据:", utf16Data)
+	//}
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	var lines []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString("[{\"currency\":\"USD\",\"amount\":100,\"amountExcludingTax\":100,\"tax\":12,\"unitAmountExcludingTax\":100,\"description\":\"1 * Custom Luxe 3 Months (2024-09-05-2024-12-05)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":0,\"amountExcludingTax\":0,\"tax\":0,\"unitAmountExcludingTax\":0,\"description\":\"0 × 3美金Addon(测试专用) (at $3.00 / day)\",\"proration\":false,\"quantity\":0,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":350,\"amountExcludingTax\":350,\"tax\":0,\"unitAmountExcludingTax\":350,\"description\":\"Remaining Time On 1 * Year 2 plan After 2024-12-20\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916}]", &lines)
+	err := utility.UnmarshalFromJsonString("[{\"currency\":\"USD\",\"amount\":100,\"amountExcludingTax\":100,\"tax\":12,\"unitAmountExcludingTax\":100,\"description\":\"1 * Custom Luxe 3 Months (2024-09-05-2024-12-05)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":0,\"amountExcludingTax\":0,\"tax\":0,\"unitAmountExcludingTax\":0,\"description\":\"0 × 3 Dollar Addon(Test) (at $3.00 / day)\",\"proration\":false,\"quantity\":0,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":350,\"amountExcludingTax\":350,\"tax\":0,\"unitAmountExcludingTax\":350,\"description\":\"Remaining Time On 1 * Year 2 plan After 2024-12-20\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916}]", &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 	err = createInvoicePdf(context.Background(), &detail.InvoiceDetail{
 		InvoiceId:                      "81720768257606",
@@ -77,7 +84,7 @@ func TestGenerate(t *testing.T) {
 		},
 		SendNote:   "81732871446425 (Partial Refund)",
 		CreateFrom: "Refund Requested: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-		Metadata:   map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrency": "EUR", "LocalizedExchangeRate": 4.0044715544, "IssueVatNumber": " EE101775690", "IssueRegNumber": "TRN: 104167485200003", "IssueCompanyName": "Multilogin Software", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"},
+		Metadata:   map[string]interface{}{"ShowDetailItem": true, "LocalizedCurrency": "EUR", "LocalizedExchangeRate": 4.0044715544, "IssueVatNumber": " EE101775690", "IssueRegNumber": "TRN: 104167485200003", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"},
 	}, &entity.Merchant{
 		CompanyName: "Multilogin",
 		BusinessNum: "EE101775690",

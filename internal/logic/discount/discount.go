@@ -23,7 +23,7 @@ type CreateDiscountCodeInternalReq struct {
 	Type               int                    `json:"type"               description:"type, 1-external discount code"` // type, 1-external discount code
 	MerchantId         uint64                 `json:"MerchantId"        description:"MerchantId"`
 	Code               string                 `json:"Code"              description:"Code"`
-	Name               string                 `json:"name"              description:"name"`                                                                        // name
+	Name               *string                `json:"name"              description:"name"`                                                                        // name
 	BillingType        int                    `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"`                                       // billing_type, 1-one-time, 2-recurring
 	DiscountType       int                    `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"`                                 // discount_type, 1-percentage, 2-fixed_amount
 	DiscountAmount     int64                  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
@@ -110,7 +110,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
-		Name:               req.Name,
+		Name:               *req.Name,
 		Status:             consts.DiscountStatusEditable,
 		BillingType:        req.BillingType,
 		DiscountType:       req.DiscountType,
@@ -190,6 +190,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		}
 		_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 			dao.MerchantDiscountCode.Columns().Advance:           advance,
+			dao.MerchantDiscountCode.Columns().Name:              req.Name,
 			dao.MerchantDiscountCode.Columns().UserLimit:         req.UserLimit,
 			dao.MerchantDiscountCode.Columns().UserScope:         req.UserScope,
 			dao.MerchantDiscountCode.Columns().UpgradeOnly:       upgradeOnly,
@@ -453,7 +454,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 	one, err := NewMerchantDiscountCode(ctx, &CreateDiscountCodeInternalReq{
 		MerchantId:         merchantId,
 		Code:               fmt.Sprintf("excode_%d_%d_%s_%d%s", merchantId, userId, source, utility.CurrentTimeMillis(), utility.GenerateRandomAlphanumeric(8)),
-		Name:               fmt.Sprintf("excode_for_plan_%s_subscription", source),
+		Name:               unibee.String(fmt.Sprintf("excode_for_plan_%s_subscription", source)),
 		BillingType:        BillingType,
 		DiscountType:       discountType,
 		DiscountAmount:     discountAmount,

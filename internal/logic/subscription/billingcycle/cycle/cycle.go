@@ -18,6 +18,7 @@ import (
 	handler3 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	handler2 "unibee/internal/logic/invoice/service"
+	"unibee/internal/logic/metric_event"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/billingcycle/expire"
@@ -44,6 +45,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
 	if sub == nil {
 		return &BillingCycleWalkRes{Message: "Sub Not Found"}, nil
+	}
+	user := query.GetUserAccountById(ctx, sub.UserId)
+	if user == nil {
+		return &BillingCycleWalkRes{Message: "User Not Found"}, nil
 	}
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	if plan == nil {
@@ -191,7 +196,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 			// Unpaid after period end or trial end
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.Status != consts.SubStatusIncomplete {
-				err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow)
+				err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow, "OutOfPeriod")
 				if err != nil {
 					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice HandleSubscriptionIncomplete err:", err.Error())
 					return nil, err
@@ -240,23 +245,24 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						UserId:           sub.UserId,
-						Currency:         pendingUpdate.UpdateCurrency,
-						DiscountCode:     discountCode,
-						TimeNow:          timeNow,
-						PlanId:           pendingUpdate.UpdatePlanId,
-						Quantity:         pendingUpdate.UpdateQuantity,
-						AddonJsonData:    pendingUpdate.UpdateAddonData,
-						VatNumber:        vatNumber,
-						CountryCode:      countryCode,
-						TaxPercentage:    taxPercentage,
-						PeriodStart:      nextPeriodStart,
-						PeriodEnd:        nextPeriodEnd,
-						InvoiceName:      "SubscriptionDowngrade",
-						FinishTime:       timeNow,
-						CreateFrom:       consts.InvoiceAutoChargeFlag,
-						Metadata:         map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
-						ApplyPromoCredit: applyPromoCredit,
+						UserId:                     sub.UserId,
+						Currency:                   pendingUpdate.UpdateCurrency,
+						DiscountCode:               discountCode,
+						TimeNow:                    timeNow,
+						PlanId:                     pendingUpdate.UpdatePlanId,
+						Quantity:                   pendingUpdate.UpdateQuantity,
+						AddonJsonData:              pendingUpdate.UpdateAddonData,
+						VatNumber:                  vatNumber,
+						CountryCode:                countryCode,
+						TaxPercentage:              taxPercentage,
+						PeriodStart:                nextPeriodStart,
+						PeriodEnd:                  nextPeriodEnd,
+						InvoiceName:                "SubscriptionDowngrade",
+						FinishTime:                 timeNow,
+						CreateFrom:                 consts.InvoiceAutoChargeFlag,
+						Metadata:                   map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
+						ApplyPromoCredit:           applyPromoCredit,
+						UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
 					})
 				} else {
 					//generate cycle invoice from sub
@@ -266,22 +272,23 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						UserId:           sub.UserId,
-						Currency:         sub.Currency,
-						DiscountCode:     discountCode,
-						TimeNow:          timeNow,
-						PlanId:           sub.PlanId,
-						Quantity:         sub.Quantity,
-						AddonJsonData:    sub.AddonData,
-						VatNumber:        vatNumber,
-						CountryCode:      countryCode,
-						TaxPercentage:    taxPercentage,
-						PeriodStart:      nextPeriodStart,
-						PeriodEnd:        nextPeriodEnd,
-						InvoiceName:      "SubscriptionCycle",
-						FinishTime:       timeNow,
-						CreateFrom:       consts.InvoiceAutoChargeFlag,
-						ApplyPromoCredit: applyPromoCredit,
+						UserId:                     sub.UserId,
+						Currency:                   sub.Currency,
+						DiscountCode:               discountCode,
+						TimeNow:                    timeNow,
+						PlanId:                     sub.PlanId,
+						Quantity:                   sub.Quantity,
+						AddonJsonData:              sub.AddonData,
+						VatNumber:                  vatNumber,
+						CountryCode:                countryCode,
+						TaxPercentage:              taxPercentage,
+						PeriodStart:                nextPeriodStart,
+						PeriodEnd:                  nextPeriodEnd,
+						InvoiceName:                "SubscriptionCycle",
+						FinishTime:                 timeNow,
+						CreateFrom:                 consts.InvoiceAutoChargeFlag,
+						ApplyPromoCredit:           applyPromoCredit,
+						UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {

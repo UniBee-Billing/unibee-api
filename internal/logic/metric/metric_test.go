@@ -111,7 +111,7 @@ func TestMerchantMetric(t *testing.T) {
 		list := MerchantMetricPlanLimitCachedList(ctx, test.TestMerchant.Id, test.TestPlan.Id, true)
 		require.NotNil(t, list)
 		require.Equal(t, 1, len(list))
-		err = BulkMetricLimitPlanBindingReplace(ctx, test.TestPlan, []*bean.BulkMetricLimitPlanBindingParam{{
+		err = BulkMetricLimitPlanBindingReplace(ctx, test.TestPlan, []*bean.PlanMetricLimitParam{{
 			MetricId:    one.Id,
 			MetricLimit: 3,
 		}})

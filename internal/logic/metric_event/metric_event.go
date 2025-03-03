@@ -18,22 +18,25 @@ import (
 )
 
 type MerchantMetricEventInternalReq struct {
-	MerchantId       uint64      `json:"merchantId" dc:"MerchantId" v:"required"`
-	MetricCode       string      `json:"metricCode" dc:"MetricCode" v:"required"`
-	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
-	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
-	MetricProperties *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
-	ProductId        int64       `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
+	MerchantId          uint64      `json:"merchantId" dc:"MerchantId" v:"required"`
+	MetricCode          string      `json:"metricCode" dc:"MetricCode" v:"required"`
+	UserId              uint64      `json:"userId" dc:"UserId" v:"required"`
+	ExternalEventId     string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
+	MetricProperties    *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
+	AggregationValue    *uint64     `json:"aggregationValue" dc:"AggregationValue"`
+	AggregationUniqueId *string     `json:"aggregationUniqueId" dc:"AggregationUniqueId"`
+	ProductId           int64       `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
 func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) (*entity.MerchantMetricEvent, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.MetricCode) > 0, "invalid metricCode")
 	utility.Assert(len(req.ExternalEventId) > 0, "invalid externalEventId")
-	utility.Assert(len(req.ExternalUserId) > 0, "invalid externalUserId")
+	utility.Assert(req.UserId > 0, "invalid userId")
 	// user check
-	user := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
+	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.MerchantId == req.MerchantId, "invalid user merchantId")
 	// merchant check
 	// metric check
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
@@ -42,7 +45,15 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	// check the only active subscription
 	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId, req.ProductId)
 	utility.Assert(sub != nil, "user has no active subscription")
-
+	if req.MetricProperties == nil {
+		req.MetricProperties = gjson.New("")
+	}
+	if req.AggregationValue != nil {
+		_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationValue)
+	}
+	if req.AggregationUniqueId != nil {
+		_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationUniqueId)
+	}
 	// property determine
 	var aggregationPropertyString = ""
 	var aggregationPropertyInt uint64 = 1
@@ -74,13 +85,12 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		aggregationPropertyInt = req.MetricProperties.Get(met.AggregationProperty).Uint64()
 	}
 
-	var metricLimit uint64 = 0
-	var usedValue uint64 = 0
-	var check = false
+	var chargeStatus = 0
+	oldUsedValue, metricLimit, validAppend := checkMetricUsedValue(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
 	if met.Type == metric.MetricTypeLimitMetered {
-		// need check if metric limit reached and reject it
-		usedValue, metricLimit, check = checkMetricLimitReached(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
-		utility.Assert(check, fmt.Sprintf("metric limit reached, current used: %d, limit: %d", usedValue, metricLimit))
+		// check if metric limit reached and reject it
+		utility.Assert(validAppend, fmt.Sprintf("metric limit reached, current used: %d, limit: %d", oldUsedValue, metricLimit))
+		chargeStatus = 1
 	}
 
 	var one *entity.MerchantMetricEvent
@@ -104,7 +114,8 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		SubscriptionPeriodEnd:       sub.CurrentPeriodEnd,
 		CreateTime:                  gtime.Now().Timestamp(),
 		MetricLimit:                 metricLimit,
-		Used:                        usedValue,
+		Used:                        oldUsedValue,
+		ChargeStatus:                chargeStatus,
 	}
 	result, err := dao.MerchantMetricEvent.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -114,11 +125,9 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 
-	if met.Type == metric.MetricTypeLimitMetered {
-		// append the metric limit usage
-		usedValue = appendMetricLimitCachedUseValue(ctx, req.MerchantId, user, met, sub, aggregationPropertyInt)
-	}
-	one.Used = usedValue
+	// append the metric usage
+	newUsedValue := appendMetricCachedUseValue(ctx, req.MerchantId, user, met, sub, aggregationPropertyInt, one.Id)
+	one.Used = newUsedValue.UsedValue
 
 	go func() {
 		// update background
@@ -140,8 +149,8 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 			}
 		}()
 		_, backgroundError = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
-			dao.MerchantMetricEvent.Columns().Used:       usedValue,
-			dao.MerchantMetricEvent.Columns().ChargeData: utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one)),
+			dao.MerchantMetricEvent.Columns().Used:       newUsedValue,
+			dao.MerchantMetricEvent.Columns().ChargeData: utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue)),
 			dao.MerchantMetricEvent.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
 		if backgroundError != nil {
@@ -155,10 +164,11 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.MetricCode) > 0, "invalid metricCode")
 	utility.Assert(len(req.ExternalEventId) > 0, "invalid externalEventId")
-	utility.Assert(len(req.ExternalUserId) > 0, "invalid externalUserId")
+	utility.Assert(req.UserId > 0, "invalid userId")
 	// user check
-	user := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
+	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.MerchantId == req.MerchantId, "invalid user merchantId")
 	// metric check
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")

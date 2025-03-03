@@ -41,6 +41,7 @@ func StartCronJobs() {
 	_, err = gcron.Add(ctx, "@every 1m", func(ctx context.Context) {
 		discount.TaskForExpireDiscounts(ctx)
 		invoice.TaskForExpireInvoices(ctx)
+		//payment.TaskForCancelExpiredPayment(ctx)
 		batch.TaskForExpireBatchTasks(ctx)
 	}, other1MinTask)
 	if err != nil {

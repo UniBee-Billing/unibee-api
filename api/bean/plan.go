@@ -33,8 +33,9 @@ type Plan struct {
 	CancelAtTrialEnd       int                             `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ExternalPlanId         string                          `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 	ProductId              int64                           `json:"productId"                 description:"product id"`                                                                                                      // product id
-	MetricMeteredCharge    []*MetricPlanChargeBindingParam `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
-	MetricRecurringCharge  []*MetricPlanChargeBindingParam `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
+	MetricLimits           []*PlanMetricLimitParam         `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	MetricMeteredCharge    []*PlanMetricMeteredChargeParam `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
+	MetricRecurringCharge  []*PlanMetricMeteredChargeParam `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
 }
 
 func SimplifyPlan(one *entity.Plan) *Plan {
@@ -48,7 +49,7 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 			fmt.Printf("SimplifyPlan Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	var metricPlanCharge = &MetricPlanChargeEntity{}
+	var metricPlanCharge = &MetricPlanBindingEntity{}
 	if len(one.MetricCharge) > 0 {
 		_ = UnmarshalFromJsonString(one.MetricCharge, &metricPlanCharge)
 	}
@@ -79,6 +80,7 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 		CancelAtTrialEnd:       one.CancelAtTrialEnd,
 		ExternalPlanId:         one.ExternalPlanId,
 		ProductId:              one.ProductId,
+		MetricLimits:           metricPlanCharge.MetricLimits,
 		MetricMeteredCharge:    metricPlanCharge.MetricMeteredCharge,
 		MetricRecurringCharge:  metricPlanCharge.MetricRecurringCharge,
 	}

@@ -4,6 +4,8 @@ package generator
 import (
 	"context"
 	"errors"
+	"os"
+	"unibee/internal/cmd/config"
 
 	"github.com/creasty/defaults"
 	"github.com/go-pdf/fpdf"
@@ -23,7 +25,14 @@ func New(ctx context.Context, docType string, fontDirStr string, options *Option
 		Options: options,
 		Type:    docType,
 	}
-
+	if !config.GetConfigInstance().IsProd() {
+		if _, err := os.Stat(fontDirStr); err != nil && os.IsNotExist(err) {
+			localTestPath := "/Users/fuzehua/Desktop/golang/unibee-api/manifest/fonts"
+			if _, err = os.Stat(localTestPath); err == nil {
+				fontDirStr = localTestPath
+			}
+		}
+	}
 	// Prepare pdf
 	doc.pdf = fpdf.New("P", "mm", "A4", fontDirStr)
 	doc.LoadFonts(ctx, fontDirStr)

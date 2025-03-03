@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/invoice"
 	"unibee/internal/logic/discount"
+	"unibee/internal/logic/metric_event"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -40,6 +41,7 @@ func (t InvoicePaidListener) Consume(ctx context.Context, message *redismq.Messa
 			time.Sleep(300 * time.Millisecond)
 			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID, message.CustomData)
 		}()
+		metric_event.UpdateMetricEventForInvoicePaid(one)
 	}
 	return redismq.CommitMessage
 }

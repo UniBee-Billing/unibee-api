@@ -593,14 +593,18 @@ func (s Stripe) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 	if strings.HasPrefix(payment.GatewayPaymentIntentId, "in_") {
 		params := &stripe.InvoiceVoidInvoiceParams{}
 		result, err := invoice.VoidInvoice(payment.GatewayPaymentIntentId, params)
-		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "VoidInvoice", nil, gateway)
+		log.SaveChannelHttpLog("GatewayCancel", payment.GatewayPaymentIntentId, result, err, "VoidInvoice", nil, gateway)
 		if err != nil {
-			return nil, err
+			result, err = invoice.Get(payment.GatewayPaymentIntentId, &stripe.InvoiceParams{})
+			log.SaveChannelHttpLog("GatewayCancel", payment.GatewayPaymentIntentId, result, err, "GetInvoice", nil, gateway)
+			if err != nil {
+				return nil, err
+			}
 		}
 		gatewayCancelId = result.ID
-		if strings.Compare(string(result.Status), "paid") == 0 {
+		if strings.Compare(string(result.Status), string(stripe.InvoiceStatusPaid)) == 0 {
 			status = consts.PaymentSuccess
-		} else if strings.Compare(string(result.Status), "uncollectible") == 0 || strings.Compare(string(result.Status), "void") == 0 {
+		} else if strings.Compare(string(result.Status), string(stripe.InvoiceStatusUncollectible)) == 0 || strings.Compare(string(result.Status), string(stripe.InvoiceStatusVoid)) == 0 {
 			status = consts.PaymentFailed
 		}
 	} else if strings.HasPrefix(payment.GatewayPaymentIntentId, "cs_") {
@@ -609,15 +613,19 @@ func (s Stripe) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 			payment.GatewayPaymentIntentId,
 			params,
 		)
-		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "ExpireSession", nil, gateway)
+		log.SaveChannelHttpLog("GatewayCancel", payment.GatewayPaymentIntentId, result, err, "ExpireSession", nil, gateway)
 		if err != nil {
-			return nil, err
+			result, err = session.Get(payment.GatewayPaymentIntentId, &stripe.CheckoutSessionParams{})
+			log.SaveChannelHttpLog("GatewayCancel", payment.GatewayPaymentIntentId, result, err, "GetSession", nil, gateway)
+			if err != nil {
+				return nil, err
+			}
 		}
 		if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
 			status = consts.PaymentSuccess
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
-			status = consts.PaymentCancelled
+			status = consts.PaymentFailed
 		}
 		gatewayCancelId = result.ID
 	} else {
@@ -625,7 +633,10 @@ func (s Stripe) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 		result, err := paymentintent.Cancel(payment.GatewayPaymentIntentId, params)
 		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "CancelPaymentIntent", nil, gateway)
 		if err != nil {
-			return nil, err
+			result, err = paymentintent.Get(payment.GatewayPaymentIntentId, &stripe.PaymentIntentParams{})
+			if err != nil {
+				return nil, err
+			}
 		}
 		paymentDetails := s.parseStripePayment(ctx, gateway, result)
 		status = paymentDetails.Status
@@ -698,11 +709,11 @@ func parseStripeRefund(item *stripe.Refund) *gateway_bean.GatewayPaymentRefundRe
 		gatewayPaymentId = item.PaymentIntent.ID
 	}
 	var status consts.RefundStatusEnum = consts.RefundCreated
-	if strings.Compare(string(item.Status), "succeeded") == 0 {
+	if strings.Compare(string(item.Status), string(stripe.RefundStatusSucceeded)) == 0 {
 		status = consts.RefundSuccess
-	} else if strings.Compare(string(item.Status), "failed") == 0 {
+	} else if strings.Compare(string(item.Status), string(stripe.RefundStatusFailed)) == 0 {
 		status = consts.RefundFailed
-	} else if strings.Compare(string(item.Status), "canceled") == 0 {
+	} else if strings.Compare(string(item.Status), string(stripe.RefundStatusCanceled)) == 0 {
 		status = consts.RefundCancelled
 	}
 	return &gateway_bean.GatewayPaymentRefundResp{
@@ -719,20 +730,20 @@ func parseStripeRefund(item *stripe.Refund) *gateway_bean.GatewayPaymentRefundRe
 
 func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.MerchantGateway, item *stripe.PaymentIntent) *gateway_bean.GatewayPaymentRo {
 	var status = consts.PaymentCreated
-	if strings.Compare(string(item.Status), "succeeded") == 0 {
+	if strings.Compare(string(item.Status), string(stripe.PaymentIntentStatusSucceeded)) == 0 {
 		status = consts.PaymentSuccess
-	} else if strings.Compare(string(item.Status), "canceled") == 0 {
+	} else if strings.Compare(string(item.Status), string(stripe.PaymentIntentStatusCanceled)) == 0 {
 		status = consts.PaymentCancelled
 	}
 	var captureStatus = consts.Authorized
 	var authorizeReason = ""
 	var paymentData = ""
-	if strings.Compare(string(item.Status), "requires_payment_method") == 0 || strings.Compare(string(item.Status), "requires_action") == 0 {
+	if strings.Compare(string(item.Status), string(stripe.PaymentIntentStatusRequiresPaymentMethod)) == 0 || strings.Compare(string(item.Status), string(stripe.PaymentIntentStatusRequiresAction)) == 0 {
 		captureStatus = consts.WaitingAuthorized
 		if item.LastPaymentError != nil {
 			authorizeReason = item.LastPaymentError.Msg
 		}
-	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
+	} else if strings.Compare(string(item.Status), string(stripe.PaymentIntentStatusRequiresConfirmation)) == 0 {
 		captureStatus = consts.CaptureRequest
 	}
 	if item.NextAction != nil {

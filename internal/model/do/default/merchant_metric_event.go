@@ -32,4 +32,5 @@ type MerchantMetricEvent struct {
 	Used                        interface{} //
 	ChargeInvoiceId             interface{} // charge invoice id
 	ChargeData                  interface{} // charge data
+	ChargeStatus                interface{} // 0-Uncharged，1-charged
 }

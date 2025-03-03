@@ -40,6 +40,7 @@ type MerchantMetricEventColumns struct {
 	Used                        string //
 	ChargeInvoiceId             string // charge invoice id
 	ChargeData                  string // charge data
+	ChargeStatus                string // 0-Uncharged，1-charged
 }
 
 // merchantMetricEventColumns holds the columns for table merchant_metric_event.
@@ -64,6 +65,7 @@ var merchantMetricEventColumns = MerchantMetricEventColumns{
 	Used:                        "used",
 	ChargeInvoiceId:             "charge_invoice_id",
 	ChargeData:                  "charge_data",
+	ChargeStatus:                "charge_status",
 }
 
 // NewMerchantMetricEventDao creates and returns a new DAO object for table data access.

@@ -11,7 +11,8 @@ import (
 func (c *ControllerMetric) EventList(ctx context.Context, req *metric.EventListReq) (res *metric.EventListRes, err error) {
 	result, err := metric_event.EventList(ctx, &metric_event.EventListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
-		UserId:          int64(_interface.Context().Get(ctx).User.Id),
+		UserIds:         []int64{int64(_interface.Context().Get(ctx).User.Id)},
+		MetricIds:       req.MetricIds,
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		Page:            req.Page,

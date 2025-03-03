@@ -12,6 +12,7 @@ import (
 	dao "unibee/internal/dao/default"
 	email2 "unibee/internal/logic/email"
 	metric2 "unibee/internal/logic/metric"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/timeline"
@@ -96,6 +97,17 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		}
 	}
 	if utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionFirstInvoicePaid_%s", invoice.InvoiceId), 60) {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId: sub.MerchantId,
+			Target:     fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+			//Content:        "MarkSubscriptionProcessed",
+			Content:        fmt.Sprintf("Activate(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description()),
+			UserId:         sub.UserId,
+			SubscriptionId: sub.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionActive.Topic,
 			Tag:        redismq2.TopicSubscriptionActive.Tag,
@@ -177,6 +189,17 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	}
 	timeline.SubscriptionNewTimeline(ctx, invoice)
 	if utility.TryLock(ctx, fmt.Sprintf("HandleSubscriptionNextBillingCyclePaymentSuccess_%s", invoice.InvoiceId), 60) {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId: sub.MerchantId,
+			Target:     fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+			//Content:        "MarkSubscriptionProcessed",
+			Content:        fmt.Sprintf("Activate(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description()),
+			UserId:         sub.UserId,
+			SubscriptionId: sub.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
@@ -206,19 +229,19 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	return nil
 }
 
-func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, nowTimeStamp int64) error {
+func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, nowTimeStamp int64, reason string) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < nowTimeStamp, "subscription not incomplete base on time now")
-	err := MakeSubscriptionIncomplete(ctx, subscriptionId)
+	err := MakeSubscriptionIncomplete(ctx, subscriptionId, reason)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) error {
+func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string, reason string) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -229,6 +252,17 @@ func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) erro
 	if err != nil {
 		return err
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId: sub.MerchantId,
+		Target:     fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+		//Content:        "MarkSubscriptionProcessed",
+		Content:        fmt.Sprintf("IncompleteBy%s(%s->%s)", reason, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusIncomplete).Description()),
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	_, _ = redismq.Send(&redismq.Message{
 		Topic:      redismq2.TopicSubscriptionIncomplete.Topic,
 		Tag:        redismq2.TopicSubscriptionIncomplete.Tag,

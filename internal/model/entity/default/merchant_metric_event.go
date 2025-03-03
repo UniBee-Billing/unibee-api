@@ -30,4 +30,5 @@ type MerchantMetricEvent struct {
 	Used                        uint64      `json:"used"                        description:""`                                                                       //
 	ChargeInvoiceId             string      `json:"chargeInvoiceId"             description:"charge invoice id"`                                                      // charge invoice id
 	ChargeData                  string      `json:"chargeData"                  description:"charge data"`                                                            // charge data
+	ChargeStatus                int         `json:"chargeStatus"                description:"0-Uncharged，1-charged"`                                                  // 0-Uncharged，1-charged
 }

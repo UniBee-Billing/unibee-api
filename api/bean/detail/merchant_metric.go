@@ -26,7 +26,9 @@ type MerchantMetricEventDetail struct {
 	MetricLimit               uint64                  `json:"metricLimit"                 description:""`                                                                       //
 	Used                      uint64                  `json:"used"                        description:""`                                                                       //
 	ChargeInvoiceId           string                  `json:"chargeInvoiceId"             description:"charge invoice id"`                                                      // charge invoice id
+	ChargeInvoice             *bean.Invoice           `json:"chargeInvoice" dc:"chargeInvoice"`
 	EventCharge               *bean.EventMetricCharge `json:"eventCharge"                  description:"event charge"`
+	ChargeStatus              int                     `json:"chargeStatus"                description:"0-Uncharged，1-charged"` // 0-Uncharged，1-charged
 }
 
 func ConvertMerchantMetricEventDetail(ctx context.Context, one *entity.MerchantMetricEvent) *MerchantMetricEventDetail {
@@ -55,6 +57,8 @@ func ConvertMerchantMetricEventDetail(ctx context.Context, one *entity.MerchantM
 		MetricLimit:               one.MetricLimit,
 		Used:                      one.Used,
 		ChargeInvoiceId:           one.ChargeInvoiceId,
+		ChargeInvoice:             bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.ChargeInvoiceId)),
 		EventCharge:               eventCharge,
+		ChargeStatus:              one.ChargeStatus,
 	}
 }

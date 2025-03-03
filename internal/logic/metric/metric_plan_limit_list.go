@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 
-func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId uint64, reloadCache bool) []*bean.MerchantMetricPlanLimit {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId uint64, reloadCache bool) []*detail.MerchantMetricPlanLimitDetail {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
-	var list = make([]*bean.MerchantMetricPlanLimit, 0)
+	var list = make([]*detail.MerchantMetricPlanLimitDetail, 0)
 	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
@@ -34,7 +34,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &bean.MerchantMetricPlanLimit{
+				list = append(list, &detail.MerchantMetricPlanLimitDetail{
 					Id:          one.Id,
 					MerchantId:  one.MerchantId,
 					MetricId:    one.MetricId,

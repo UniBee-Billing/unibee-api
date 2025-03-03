@@ -64,13 +64,13 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 		Plan: &detail.PlanDetail{
 			Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(one.ProductId), merchantId)),
 			Plan:                  bean.SimplifyPlan(one),
-			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
 			Addons:                bean.SimplifyPlanList(query.GetAddonsByIds(ctx, addonIds)),
 			AddonIds:              addonIds,
 			OnetimeAddons:         bean.SimplifyPlanList(query.GetAddonsByIds(ctx, oneTimeAddonIds)),
 			OnetimeAddonIds:       oneTimeAddonIds,
-			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(one).MetricMeteredCharge),
-			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(one).MetricRecurringCharge),
+			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
+			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(one).MetricMeteredCharge),
+			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(one).MetricRecurringCharge),
 		},
 	}, nil
 }
@@ -132,8 +132,8 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 				MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Addons:                nil,
 				AddonIds:              nil,
-				MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricMeteredCharge),
-				MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricRecurringCharge),
+				MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(p).MetricMeteredCharge),
+				MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(p).MetricRecurringCharge),
 			})
 			continue
 		}
@@ -173,8 +173,8 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 			AddonIds:              addonIds,
 			OnetimeAddons:         nil,
 			OnetimeAddonIds:       oneTimeAddonIds,
-			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricMeteredCharge),
-			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanChargeEntityFromPlan(p).MetricRecurringCharge),
+			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(p).MetricMeteredCharge),
+			MetricRecurringCharge: detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(p).MetricRecurringCharge),
 		})
 	}
 	if len(totalAddonIds) > 0 {

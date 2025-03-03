@@ -70,7 +70,6 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 			fmt.Printf("SubscriptionExpire HandlePayCancel error:%s", err.Error())
 		}
 	}
-	//Expire Subscription UnFinished Invoice, May No Need
 	nextStatus := consts.SubStatusExpired
 	if sub.FirstPaidTime == 0 {
 		nextStatus = consts.SubStatusFailed
@@ -85,7 +84,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
-		Content:        consts.SubStatusToEnum(nextStatus).Description(),
+		Content:        fmt.Sprintf("%s(%s->%s)", reason, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(nextStatus).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -104,7 +103,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 			Body:       sub.SubscriptionId,
 			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 		})
-	} else if nextStatus == consts.SubStatusFailed {
+	} else {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic:      redismq2.TopicSubscriptionFailed.Topic,
 			Tag:        redismq2.TopicSubscriptionFailed.Tag,

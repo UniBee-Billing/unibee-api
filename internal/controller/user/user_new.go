@@ -73,3 +73,4 @@ type ControllerMetric struct{}
 func NewMetric() user.IUserMetric {
 	return &ControllerMetric{}
 }
+

@@ -7,12 +7,13 @@ import (
 
 type EventListReq struct {
 	g.Meta          `path:"/event_list" tags:"User-Metric-Event" method:"get,post" summary:"User Metric Event List"`
-	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create，Default gmt_create" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page"  dc:"Page,Start 0" `
-	Count           int    `json:"count" dc:"Count OF Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	MetricIds       []int64 `json:"metricIds" dc:"Filter MetricIds, Default All" `
+	SortField       string  `json:"sortField" dc:"Sort，user_id|gmt_create，Default gmt_create" `
+	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int     `json:"page"  dc:"Page,Start 0" `
+	Count           int     `json:"count" dc:"Count OF Page" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type EventListRes struct {

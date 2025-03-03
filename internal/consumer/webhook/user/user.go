@@ -33,7 +33,7 @@ func SendMerchantUserMetricWebhookBackground(userId uint64, sourceSubscriptionId
 		if user != nil && sub != nil {
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			if plan != nil {
-				userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user, plan.ProductId)
+				userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user, plan.ProductId, false)
 				utility.AssertError(err, "SendMerchantUserMetricWebhookBackground Error")
 				userMetric.Description = description
 

@@ -62,23 +62,24 @@ type Invoice struct {
 }
 
 type InvoiceItemSimplify struct {
-	Currency                   string `json:"currency"`
-	OriginAmount               int64  `json:"originAmount"`
-	OriginUnitAmountExcludeTax int64  `json:"originUnitAmountExcludeTax"`
-	DiscountAmount             int64  `json:"discountAmount"`
-	Amount                     int64  `json:"amount"`
-	Tax                        int64  `json:"tax"`
-	AmountExcludingTax         int64  `json:"amountExcludingTax"`
-	TaxPercentage              int64  `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
-	UnitAmountExcludingTax     int64  `json:"unitAmountExcludingTax"`
-	Name                       string `json:"name"`
-	Description                string `json:"description"`
-	PdfDescription             string `json:"pdfDescription"`
-	Proration                  bool   `json:"proration"`
-	Quantity                   int64  `json:"quantity"`
-	PeriodEnd                  int64  `json:"periodEnd"`
-	PeriodStart                int64  `json:"periodStart"`
-	Plan                       *Plan  `json:"plan"`
+	Currency                   string                       `json:"currency"`
+	OriginAmount               int64                        `json:"originAmount"`
+	OriginUnitAmountExcludeTax int64                        `json:"originUnitAmountExcludeTax"`
+	DiscountAmount             int64                        `json:"discountAmount"`
+	Amount                     int64                        `json:"amount"`
+	Tax                        int64                        `json:"tax"`
+	AmountExcludingTax         int64                        `json:"amountExcludingTax"`
+	TaxPercentage              int64                        `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
+	UnitAmountExcludingTax     int64                        `json:"unitAmountExcludingTax"`
+	Name                       string                       `json:"name"`
+	Description                string                       `json:"description"`
+	PdfDescription             string                       `json:"pdfDescription"`
+	Proration                  bool                         `json:"proration"`
+	Quantity                   int64                        `json:"quantity"`
+	PeriodEnd                  int64                        `json:"periodEnd"`
+	PeriodStart                int64                        `json:"periodStart"`
+	Plan                       *Plan                        `json:"plan"`
+	MetricCharge               *UserMetricChargeInvoiceItem `json:"metricCharge"`
 }
 
 func UnmarshalFromJsonString(target string, one interface{}) error {
