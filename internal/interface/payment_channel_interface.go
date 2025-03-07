@@ -9,10 +9,12 @@ import (
 
 var KEY_MERCHANT_GATEWAY_SORT string = "KEY_MERCHANT_GATEWAY_SORT"
 
-type SubGatewayConfig struct {
+type GatewayPaymentType struct {
 	Name        string `json:"name"`
-	SubGateway  string `json:"subGateway"`
+	PaymentType string `json:"paymentType"`
 	CountryName string `json:"countryName"`
+	AutoCharge  bool   `json:"autoCharge"`
+	Category    string `json:"category"`
 }
 type GatewayInfo struct {
 	Name                          string
@@ -26,7 +28,7 @@ type GatewayInfo struct {
 	Sort                          int64
 	CurrencyExchangeEnabled       bool
 	QueueForRefund                bool
-	SubGatewayConfigs             []*SubGatewayConfig
+	GatewayPaymentTypes           []*GatewayPaymentType
 	IsStaging                     bool
 	PublicKeyName                 string
 	PrivateSecretName             string
@@ -35,9 +37,16 @@ type GatewayInfo struct {
 	AutoChargeEnabled             bool
 }
 
+type GatewayTestReq struct {
+	Key                 string
+	Secret              string
+	SubGateway          string
+	GatewayPaymentTypes []*GatewayPaymentType
+}
+
 type GatewayInterface interface {
 	GatewayInfo(ctx context.Context) *GatewayInfo
-	GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error)
+	GatewayTest(ctx context.Context, req *GatewayTestReq) (icon string, gatewayType int64, err error)
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error)
 	// Balance

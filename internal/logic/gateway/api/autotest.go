@@ -51,7 +51,7 @@ func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 	}}, nil
 }
 
-func (a AutoTest) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (a AutoTest) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	return "http://autotest.unibee.com", consts.GatewayTypeCard, nil
 }
 

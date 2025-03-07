@@ -4,12 +4,18 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"testing"
+	_interface "unibee/internal/interface"
 	"unibee/utility"
 )
 
 func TestForCreateNewUnitPay(t *testing.T) {
 	unitpay := &UnitPay{}
-	_, _, _ = unitpay.GatewayTest(context.Background(), "443597", "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7", "") // indigo unibee staging test key
+	_, _, _ = unitpay.GatewayTest(context.Background(), &_interface.GatewayTestReq{
+		Key:                 "443597",
+		Secret:              "41AD9A1AA16-ECB837EFDC2-6C3D77F2F7",
+		SubGateway:          "",
+		GatewayPaymentTypes: nil,
+	}) // indigo staging test key
 }
 
 func TestForGetUnitPay(t *testing.T) {

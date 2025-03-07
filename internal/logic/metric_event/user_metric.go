@@ -41,8 +41,15 @@ func UpdateMetricEventForInvoicePaid(one *entity.Invoice) {
 			}
 		}()
 		invoiceDetail := detail.ConvertInvoiceToDetail(ctx, one)
-		for _, item := range invoiceDetail.Lines {
-			if item.MetricCharge != nil && item.MetricCharge.MetricId > 0 && item.MetricCharge.MaxEventId > 0 {
+		var list = make([]*bean.UserMetricChargeInvoiceItem, 0)
+		if invoiceDetail.UserMetricChargeForInvoice != nil && len(invoiceDetail.UserMetricChargeForInvoice.MeteredChargeStats) > 0 {
+			list = append(list, invoiceDetail.UserMetricChargeForInvoice.MeteredChargeStats...)
+		}
+		if invoiceDetail.UserMetricChargeForInvoice != nil && len(invoiceDetail.UserMetricChargeForInvoice.RecurringChargeStats) > 0 {
+			list = append(list, invoiceDetail.UserMetricChargeForInvoice.RecurringChargeStats...)
+		}
+		for _, item := range list {
+			if item != nil && item.MetricId > 0 && item.MaxEventId > 0 {
 				_, err = dao.MerchantMetricEvent.Ctx(ctx).Data(g.Map{
 					dao.MerchantMetricEvent.Columns().ChargeStatus:    1,
 					dao.MerchantMetricEvent.Columns().ChargeInvoiceId: one.InvoiceId,
@@ -50,12 +57,12 @@ func UpdateMetricEventForInvoicePaid(one *entity.Invoice) {
 				}).Where(dao.MerchantMetricEvent.Columns().ChargeStatus, 0).
 					Where(dao.MerchantMetricEvent.Columns().MerchantId, one.MerchantId).
 					Where(dao.MerchantMetricEvent.Columns().UserId, one.UserId).
-					Where(dao.MerchantMetricEvent.Columns().MetricId, item.MetricCharge.MetricId).
-					WhereLTE(dao.MerchantMetricEvent.Columns().Id, item.MetricCharge.MaxEventId).
-					WhereGTE(dao.MerchantMetricEvent.Columns().Id, item.MetricCharge.MinEventId).
+					Where(dao.MerchantMetricEvent.Columns().MetricId, item.MetricId).
+					WhereLTE(dao.MerchantMetricEvent.Columns().Id, item.MaxEventId).
+					WhereGTE(dao.MerchantMetricEvent.Columns().Id, item.MinEventId).
 					Update()
 				if err != nil {
-					g.Log().Errorf(ctx, "Update MetricEvent for invoice paid, invoiceId:%s metricId:%d maxEventId:%d err:%s", one.InvoiceId, item.MetricCharge.MetricId, item.MetricCharge.MaxEventId, err.Error())
+					g.Log().Errorf(ctx, "Update MetricEvent for invoice paid, invoiceId:%s metricId:%d maxEventId:%d err:%s", one.InvoiceId, item.MetricId, item.MaxEventId, err.Error())
 				}
 			}
 		}
@@ -75,7 +82,7 @@ func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint6
 			ChargePricing:     v.ChargePricing,
 			TotalChargeAmount: v.TotalChargeAmount,
 			Name:              v.Metric.MetricName,
-			Description:       fmt.Sprintf("%s(%d)", v.Metric.MetricDescription, v.CurrentUsedValue),
+			Description:       v.Metric.MetricDescription,
 		})
 	}
 	for _, v := range userMetric.RecurringChargeStats {
@@ -87,7 +94,7 @@ func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint6
 			ChargePricing:     v.ChargePricing,
 			TotalChargeAmount: v.TotalChargeAmount,
 			Name:              v.Metric.MetricName,
-			Description:       fmt.Sprintf("%s(%d)", v.Metric.MetricDescription, v.CurrentUsedValue),
+			Description:       v.Metric.MetricDescription,
 		})
 	}
 	return &bean.UserMetricChargeInvoiceItemEntity{
@@ -176,14 +183,14 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 	}
 }
 
-func checkMetricUsedValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
+func checkMetricUsedValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append int64) (int64, uint64, bool) {
 	limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, sub)
 	useValue := GetUserMetricCachedUseValue(ctx, merchantId, user.Id, met, sub, false)
 	if metricLimit, ok := limitMap[met.Id]; ok {
 		if met.AggregationType == metric.MetricAggregationTypeLatest || met.AggregationType == metric.MetricAggregationTypeMax {
-			return useValue.UsedValue, metricLimit.TotalLimit, append <= metricLimit.TotalLimit
+			return useValue.UsedValue, metricLimit.TotalLimit, append <= int64(metricLimit.TotalLimit)
 		} else {
-			return useValue.UsedValue, metricLimit.TotalLimit, useValue.UsedValue+append <= metricLimit.TotalLimit
+			return useValue.UsedValue, metricLimit.TotalLimit, useValue.UsedValue+append <= int64(metricLimit.TotalLimit)
 		}
 	} else {
 		// charge type
@@ -228,7 +235,7 @@ const (
 )
 
 type MetricUserUsedValue struct {
-	UsedValue  uint64 `json:"usedValue"`
+	UsedValue  int64  `json:"usedValue"`
 	MaxEventId uint64 `json:"maxEventId"`
 	MinEventId uint64 `json:"minEventId"`
 }
@@ -286,8 +293,8 @@ func GetUserMetricCachedUseValue(ctx context.Context, merchantId uint64, userId 
 				q = q.Where(dao.MerchantMetricEvent.Columns().ChargeStatus, 0)
 			}
 			err := q.FieldMax(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "usedValue").
-				FieldMax(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "maxEventId").
-				FieldMin(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "minEventId").
+				FieldMax(dao.MerchantMetricEvent.Columns().Id, "maxEventId").
+				FieldMin(dao.MerchantMetricEvent.Columns().Id, "minEventId").
 				Scan(&metricUserUsedValue)
 			utility.AssertError(err, "Server Error")
 		} else {
@@ -303,9 +310,9 @@ func GetUserMetricCachedUseValue(ctx context.Context, merchantId uint64, userId 
 			} else if met.Type == metric.MetricTypeChargeMetered {
 				q = q.Where(dao.MerchantMetricEvent.Columns().ChargeStatus, 0)
 			}
-			err := q.FieldSum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt).
-				FieldMax(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "maxEventId").
-				FieldMin(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "minEventId").
+			err := q.FieldSum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt, "usedValue").
+				FieldMax(dao.MerchantMetricEvent.Columns().Id, "maxEventId").
+				FieldMin(dao.MerchantMetricEvent.Columns().Id, "minEventId").
 				Scan(&metricUserUsedValue)
 			utility.AssertError(err, "Server Error")
 
@@ -322,7 +329,7 @@ func GetUserMetricCachedUseValue(ctx context.Context, merchantId uint64, userId 
 	return metricUserUsedValue
 }
 
-func appendMetricCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, sub *entity.Subscription, append uint64, maxEventId uint64) (metricUserUsedValue *MetricUserUsedValue) {
+func appendMetricCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, sub *entity.Subscription, append int64, maxEventId uint64) (metricUserUsedValue *MetricUserUsedValue) {
 	cacheKey := metricUserCacheKey(merchantId, user.Id, met, sub)
 	get, err := g.Redis().Get(ctx, cacheKey)
 	if err == nil && !get.IsNil() && !get.IsEmpty() {
@@ -333,7 +340,7 @@ func appendMetricCachedUseValue(ctx context.Context, merchantId uint64, user *en
 		if met.AggregationType == metric.MetricAggregationTypeLatest {
 			newValue = append
 		} else if met.AggregationType == metric.MetricAggregationTypeMax {
-			newValue = utility.MaxUInt64(metricUserUsedValue.UsedValue, append)
+			newValue = utility.MaxInt64(metricUserUsedValue.UsedValue, append)
 		}
 		metricUserUsedValue.UsedValue = newValue
 		metricUserUsedValue.MaxEventId = maxEventId

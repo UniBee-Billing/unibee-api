@@ -63,7 +63,7 @@ func TruncateWithEllipsis(s string, maxLength int, ellipsis string) string {
 
 func ConvertToSendgridLocalizationHtmlContent(enContent string, languageData string) string {
 	var list []*bean.EmailLocalizationTemplate
-	err := bean.UnmarshalFromJsonString(languageData, &list)
+	err := utility.UnmarshalFromJsonString(languageData, &list)
 	utility.AssertError(err, "ConvertToSendgridLocalizationHtmlContent error")
 	content := "{{#if english}}"
 	content = fmt.Sprintf("%s\n%s", content, gateway.ConvertPainToHtmlContent(enContent))

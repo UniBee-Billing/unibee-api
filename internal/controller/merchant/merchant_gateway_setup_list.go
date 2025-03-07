@@ -31,7 +31,7 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 			one := query.GetGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), gatewayName)
 			if one != nil && one.IsDeleted == 0 {
 				gatewayDetail := detail.ConvertGatewayDetail(ctx, one)
-				gatewayDetail.SubGatewayConfigs = info.SubGatewayConfigs
+				gatewayDetail.SetupGatewayPaymentTypes = info.GatewayPaymentTypes
 				list = append(list, gatewayDetail)
 			} else {
 				gatewaySort := info.Sort
@@ -75,7 +75,8 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 					IsSetupFinished:               false,
 					Archive:                       false,
 					CurrencyExchangeEnabled:       info.CurrencyExchangeEnabled,
-					SubGatewayConfigs:             info.SubGatewayConfigs,
+					SetupGatewayPaymentTypes:      info.GatewayPaymentTypes,
+					GatewayPaymentTypes:           make([]*_interface2.GatewayPaymentType, 0),
 					PublicKeyName:                 publicKeyName,
 					PrivateSecretName:             privateSecretName,
 					SubGatewayName:                subGatewayName,

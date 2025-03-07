@@ -25,6 +25,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		NewPlanId:              req.NewPlanId,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		AddonParams:            req.AddonParams,
 		ConfirmTotalAmount:     req.ConfirmTotalAmount,
 		ConfirmCurrency:        req.ConfirmCurrency,

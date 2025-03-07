@@ -31,7 +31,7 @@ func (c Coinbase) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	}
 }
 
-func (c Coinbase) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (c Coinbase) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	urlPath := "/charges/"
 	param := map[string]interface{}{
 		"pricing_type": "fixed_price",
@@ -43,7 +43,7 @@ func (c Coinbase) GatewayTest(ctx context.Context, key string, secret string, su
 			"currency": "USD",
 		},
 	}
-	responseJson, err := SendCoinbasePaymentRequest(ctx, key, secret, "POST", urlPath, param)
+	responseJson, err := SendCoinbasePaymentRequest(ctx, req.Key, req.Secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")

@@ -90,6 +90,7 @@ type CreateReq struct {
 	PlanId                 uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id" `
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -140,6 +141,7 @@ type UpdateReq struct {
 	NewPlanId              uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id" `
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `

@@ -35,6 +35,7 @@ type RenewInternalReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	//UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
 	GatewayId              *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	TaxPercentage          *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
@@ -145,11 +146,27 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// utility.Assert(user != nil, "user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, sub.PlanId, currentInvoice, sub, gateway.Id, paymentMethodId, true, timeNow)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+		PlanId:             sub.PlanId,
+		Simplify:           currentInvoice,
+		Sub:                sub,
+		GatewayId:          gateway.Id,
+		PaymentMethodId:    paymentMethodId,
+		IsSubLatestInvoice: true,
+		TimeNow:            timeNow,
+	})
 	utility.AssertError(err, "System Error")
 	var createRes *gateway_bean.GatewayNewPaymentResp
 	if invoice.TotalAmount > 0 {
-		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, req.CancelUrl, "SubscriptionRenew", 0)
+		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+			Invoice:            invoice,
+			ManualPayment:      req.ManualPayment,
+			ReturnUrl:          req.ReturnUrl,
+			CancelUrl:          req.CancelUrl,
+			Source:             "SubscriptionRenew",
+			TimeNow:            0,
+			GatewayPaymentType: req.GatewayPaymentType,
+		})
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			utility.AssertError(err, "Create Gateway Payment Error")

@@ -22,7 +22,7 @@ type MerchantMetricPlanChargeDetail struct {
 	MetricId           uint64                                `json:"metricId" dc:"MetricId" v:"required"`
 	Metric             *bean.MerchantMetric                  `json:"merchantMetric"    description:"MerchantMetric"` // metricId
 	ChargeType         int                                   `json:"chargeType" dc:"ChargeType,0-standard pricing 1-graduated pricing"`
-	StandardAmount     int64                                 `json:"standardAmount" dc:"StandardAmount, used for standard pricing"`
+	StandardAmount     int64                                 `json:"standardAmount" dc:"StandardAmount, used for standard pricing,cent"`
 	StandardStartValue int64                                 `json:"standardStartValue" dc:"StandardStartValue, used for standard pricing"`
 	GraduatedAmounts   []*bean.MetricPlanChargeGraduatedStep `json:"graduatedAmounts" dc:"GraduatedAmounts"`
 }

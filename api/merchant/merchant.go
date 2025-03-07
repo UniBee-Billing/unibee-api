@@ -217,6 +217,7 @@ type IMerchantSession interface {
 type IMerchantSubscription interface {
 	Config(ctx context.Context, req *subscription.ConfigReq) (res *subscription.ConfigRes, err error)
 	ConfigUpdate(ctx context.Context, req *subscription.ConfigUpdateReq) (res *subscription.ConfigUpdateRes, err error)
+	PreviewSubscriptionNextInvoice(ctx context.Context, req *subscription.PreviewSubscriptionNextInvoiceReq) (res *subscription.PreviewSubscriptionNextInvoiceRes, err error)
 	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
 	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
 	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)

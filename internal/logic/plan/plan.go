@@ -125,7 +125,7 @@ func MetricPlanChargeValidation(metricPlanCharges []*bean.PlanMetricMeteredCharg
 		} else if metricPlanCharge.ChargeType == 1 {
 			var lastEnd int64 = 0
 			for _, step := range metricPlanCharge.GraduatedAmounts {
-				if step.EndValue <= lastEnd {
+				if step.EndValue > 0 && step.EndValue <= lastEnd {
 					return gerror.New("end value should be greater than last end value")
 				}
 				if step.PerAmount < 0 {
@@ -275,8 +275,8 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		ProductId:              req.ProductId,
 		MetricCharge: utility.MarshalToJsonString(&bean.MetricPlanBindingEntity{
 			MetricLimits:          req.MetricLimits,
-			MetricMeteredCharge:   req.MetricRecurringCharge,
-			MetricRecurringCharge: req.MetricMeteredCharge,
+			MetricMeteredCharge:   req.MetricMeteredCharge,
+			MetricRecurringCharge: req.MetricRecurringCharge,
 		}),
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)

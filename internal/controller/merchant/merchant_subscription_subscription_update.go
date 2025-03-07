@@ -32,6 +32,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		AddonParams:            req.AddonParams,
 		EffectImmediate:        req.EffectImmediate,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		ConfirmTotalAmount:     req.ConfirmTotalAmount,
 		ConfirmCurrency:        req.ConfirmCurrency,
 		ProrationDate:          req.ProrationDate,

@@ -100,6 +100,7 @@ type CreateInternalReq struct {
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
 	Quantity               int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                     `json:"gatewayId" dc:"Id" `
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -578,7 +579,15 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.PlanId, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true, gtime.Now().Timestamp())
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+		PlanId:             req.PlanId,
+		Simplify:           prepare.Invoice,
+		Sub:                one,
+		GatewayId:          one.GatewayId,
+		PaymentMethodId:    prepare.GatewayPaymentMethodId,
+		IsSubLatestInvoice: true,
+		TimeNow:            gtime.Now().Timestamp(),
+	})
 	utility.AssertError(err, "System Error")
 	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {
@@ -610,7 +619,15 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			}
 		}
 	} else {
-		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, len(req.PaymentMethodId) == 0, req.ReturnUrl, req.CancelUrl, "SubscriptionCreate", 0)
+		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+			Invoice:            invoice,
+			ManualPayment:      len(req.PaymentMethodId) == 0,
+			ReturnUrl:          req.ReturnUrl,
+			CancelUrl:          req.CancelUrl,
+			Source:             "SubscriptionCreate",
+			TimeNow:            0,
+			GatewayPaymentType: req.GatewayPaymentType,
+		})
 		if err != nil {
 			// todo mark use method
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{

@@ -491,12 +491,27 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 		})
 		gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
-		one, err := service3.CreateProcessingInvoiceForSub(ctx, sub.PlanId, invoice, sub, gatewayId, paymentMethodId, true, gtime.Now().Timestamp())
+		one, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+			PlanId:             sub.PlanId,
+			Simplify:           invoice,
+			Sub:                sub,
+			GatewayId:          gatewayId,
+			PaymentMethodId:    paymentMethodId,
+			IsSubLatestInvoice: true,
+			TimeNow:            gtime.Now().Timestamp(),
+		})
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, false, "", "", "SubscriptionEndTrialManual", 0)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+			Invoice:       one,
+			ManualPayment: false,
+			ReturnUrl:     "",
+			CancelUrl:     "",
+			Source:        "SubscriptionEndTrialManual",
+			TimeNow:       0,
+		})
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

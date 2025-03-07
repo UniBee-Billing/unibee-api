@@ -92,8 +92,8 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	}, nil
 }
 
-func (p Paypal) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
-	c, _ := NewClient(key, secret, p.GetPaypalHost())
+func (p Paypal) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
+	c, _ := NewClient(req.Key, req.Secret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
 	if err == nil {
 		_, vaultErr := c.GetPaymentMethodTokens(ctx, "BEEB8ANDETATE")

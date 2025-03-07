@@ -228,6 +228,9 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 
 			//amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)) // remove tax
+			if line.MetricCharge != nil {
+				amountString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency))
+			}
 			//taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			taxString := ""
 			description := line.Description
@@ -255,6 +258,9 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 		for i, line := range one.Lines {
 			//amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity+line.Tax, one.Currency))
 			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)) // remove tax
+			if line.MetricCharge != nil {
+				amountString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency))
+			}
 			//taxString := fmt.Sprintf("%s %s%s", doc.TaxPercentageString, symbol, utility.ConvertCentToDollarStr(line.Tax, one.Currency))
 			taxString := ""
 			description := line.Description

@@ -59,13 +59,13 @@ func (c Alipay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 	}, nil
 }
 
-func (c Alipay) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
-	var alipayClientId = subGateway
+func (c Alipay) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
+	var alipayClientId = req.SubGateway
 	client := defaultAlipayClient.NewDefaultAlipayClient(
 		"https://open-de-global.alipay.com",
 		alipayClientId,
-		secret,
-		key, false)
+		req.Secret,
+		req.Key, false)
 
 	payRequest, request := pay.NewAlipayPayRequest()
 	request.PaymentRequestId = fmt.Sprintf("paymentRequestId01%d", gtime.Now().Timestamp())

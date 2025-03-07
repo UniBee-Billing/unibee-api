@@ -49,11 +49,11 @@ func (s Stripe) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 	return nil, gerror.New("not support")
 }
 
-func (s Stripe) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
-	stripe.Key = secret
+func (s Stripe) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
+	stripe.Key = req.Secret
 	s.setUnibeeAppInfo()
-	utility.Assert(len(secret) > 0, "invalid gatewaySecret")
-	utility.Assert(strings.HasPrefix(secret, "sk_"), "invalid gatewaySecret, should start with 'sk_'")
+	utility.Assert(len(req.Secret) > 0, "invalid gatewaySecret")
+	utility.Assert(strings.HasPrefix(req.Secret, "sk_"), "invalid gatewaySecret, should start with 'sk_'")
 
 	params := &stripe.ProductListParams{}
 	params.Limit = stripe.Int64(3)

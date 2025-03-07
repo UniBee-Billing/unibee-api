@@ -157,7 +157,14 @@ func CreateRechargePayment(ctx context.Context, req *CreditRechargeInternalReq) 
 		return nil, err
 	}
 
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, rechargeInvoice, true, req.ReturnUrl, req.CancelUrl, "Credit Recharge", 0)
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+		Invoice:       rechargeInvoice,
+		ManualPayment: true,
+		ReturnUrl:     req.ReturnUrl,
+		CancelUrl:     req.CancelUrl,
+		Source:        "Credit Recharge",
+		TimeNow:       0,
+	})
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateRechargePayment CreateSubInvoicePaymentDefaultAutomatic Credit Recharge Error:%s\n", err.Error())
 		_ = handler.HandleCreditRechargeFailed(ctx, one.RechargeId)

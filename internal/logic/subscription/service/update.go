@@ -559,6 +559,7 @@ type UpdateInternalReq struct {
 	NewPlanId              uint64                      `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity               int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                     `json:"gatewayId" dc:"GatewayId" `
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                      `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -690,9 +691,25 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.NewPlanId, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+			PlanId:             req.NewPlanId,
+			Simplify:           prepare.Invoice,
+			Sub:                prepare.Subscription,
+			GatewayId:          prepare.Gateway.Id,
+			PaymentMethodId:    prepare.PaymentMethodId,
+			IsSubLatestInvoice: false,
+			TimeNow:            prepare.ProrationDate,
+		})
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, req.CancelUrl, "SubscriptionUpdate", 0)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+			Invoice:            invoice,
+			ManualPayment:      req.ManualPayment,
+			ReturnUrl:          req.ReturnUrl,
+			CancelUrl:          req.CancelUrl,
+			Source:             "SubscriptionUpdate",
+			TimeNow:            0,
+			GatewayPaymentType: req.GatewayPaymentType,
+		})
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
 			return nil, err
@@ -707,7 +724,15 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else if prepare.EffectImmediate && prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, req.NewPlanId, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+			PlanId:             req.NewPlanId,
+			Simplify:           prepare.Invoice,
+			Sub:                prepare.Subscription,
+			GatewayId:          prepare.Gateway.Id,
+			PaymentMethodId:    prepare.PaymentMethodId,
+			IsSubLatestInvoice: false,
+			TimeNow:            prepare.ProrationDate,
+		})
 		utility.AssertError(err, "System Error")
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")

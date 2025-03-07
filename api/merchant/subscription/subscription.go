@@ -158,6 +158,7 @@ type CreateReq struct {
 	User                   *bean.NewUser               `json:"user" dc:"User Object"`
 	Quantity               int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                     `json:"gatewayId" dc:"GatewayId" `
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
 	ConfirmCurrency        string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `

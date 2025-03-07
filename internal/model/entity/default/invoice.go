@@ -68,4 +68,5 @@ type Invoice struct {
 	VatNumber                      string      `json:"vatNumber"                      description:""`                                                                       //
 	PromoCreditDiscountAmount      int64       `json:"promoCreditDiscountAmount"      description:"promo credit discount amount"`                                           // promo credit discount amount
 	PartialCreditPaidAmount        int64       `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`                                             // partial credit paid amount
+	MetricCharge                   string      `json:"metricCharge"                   description:"invoice metric charge data"`                                             // invoice metric charge data
 }

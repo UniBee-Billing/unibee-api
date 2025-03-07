@@ -305,11 +305,21 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 	return nil, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, cancelUrl string, source string, timeNow int64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
-	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
-	lastPayment, err := clearInvoicePayment(ctx, invoice)
+type CreateSubInvoicePaymentDefaultAutomaticReq struct {
+	Invoice            *entity.Invoice
+	ManualPayment      bool
+	ReturnUrl          string
+	CancelUrl          string
+	Source             string
+	TimeNow            int64
+	GatewayPaymentType string
+}
+
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSubInvoicePaymentDefaultAutomaticReq) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", req.Invoice.InvoiceId)
+	lastPayment, err := clearInvoicePayment(ctx, req.Invoice)
 	if err != nil {
-		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%s err:%s", invoice.InvoiceId, err.Error())
+		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%s err:%s", req.Invoice.InvoiceId, err.Error())
 	}
 	if lastPayment != nil {
 		err = PaymentGatewayCancel(ctx, lastPayment)
@@ -317,60 +327,62 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 			g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic CancelLastPayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
 		}
 	}
-	subUser := query.GetUserAccountById(ctx, invoice.UserId)
+	subUser := query.GetUserAccountById(ctx, req.Invoice.UserId)
 	var email = ""
 	if subUser != nil {
 		email = subUser.Email
 	}
-	gateway := query.GetGatewayById(ctx, invoice.GatewayId)
+	gateway := query.GetGatewayById(ctx, req.Invoice.GatewayId)
 	if gateway == nil {
 		//SendAuthorizedEmailBackground(invoice)
 		return nil, gerror.New("CreateSubInvoicePaymentDefaultAutomatic gateway not found")
 	}
 
-	merchant := query.GetMerchantById(ctx, invoice.MerchantId)
+	merchant := query.GetMerchantById(ctx, req.Invoice.MerchantId)
 	if merchant == nil {
 		return nil, gerror.New("CreateSubInvoicePaymentDefaultAutomatic merchantInfo not found")
 	}
-	invoice.Currency = strings.ToUpper(invoice.Currency)
+	req.Invoice.Currency = strings.ToUpper(req.Invoice.Currency)
 	var automatic = 1
-	if manualPayment {
+	if req.ManualPayment {
 		automatic = 0
 	}
 	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-		PayImmediate: !manualPayment,
-		CheckoutMode: manualPayment,
+		PayImmediate: !req.ManualPayment,
+		CheckoutMode: req.ManualPayment,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
-			SubscriptionId:    invoice.SubscriptionId,
-			BizType:           invoice.BizType,
-			ExternalPaymentId: invoice.InvoiceId,
+			SubscriptionId:    req.Invoice.SubscriptionId,
+			BizType:           req.Invoice.BizType,
+			ExternalPaymentId: req.Invoice.InvoiceId,
 			AuthorizeStatus:   consts.Authorized,
-			UserId:            invoice.UserId,
+			UserId:            req.Invoice.UserId,
 			GatewayId:         gateway.Id,
-			TotalAmount:       invoice.TotalAmount,
-			Currency:          strings.ToUpper(invoice.Currency),
-			CryptoAmount:      invoice.CryptoAmount,
-			CryptoCurrency:    invoice.CryptoCurrency,
-			CountryCode:       invoice.CountryCode,
-			MerchantId:        invoice.MerchantId,
+			TotalAmount:       req.Invoice.TotalAmount,
+			Currency:          strings.ToUpper(req.Invoice.Currency),
+			CryptoAmount:      req.Invoice.CryptoAmount,
+			CryptoCurrency:    req.Invoice.CryptoCurrency,
+			CountryCode:       req.Invoice.CountryCode,
+			MerchantId:        req.Invoice.MerchantId,
 			CompanyId:         merchant.CompanyId,
+			GatewayEdition:    req.GatewayPaymentType,
 			Automatic:         automatic,
-			BillingReason:     invoice.InvoiceName,
-			ReturnUrl:         returnUrl,
-			CreateTime:        timeNow,
+			BillingReason:     req.Invoice.InvoiceName,
+			ReturnUrl:         req.ReturnUrl,
+			CreateTime:        req.TimeNow,
 		},
-		ExternalUserId:       strconv.FormatUint(invoice.UserId, 10),
+		ExternalUserId:       strconv.FormatUint(req.Invoice.UserId, 10),
 		Email:                email,
-		Invoice:              bean.SimplifyInvoice(invoice),
-		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment, "CancelUrl": cancelUrl},
-		GatewayPaymentMethod: invoice.GatewayPaymentMethod,
+		Invoice:              bean.SimplifyInvoice(req.Invoice),
+		Metadata:             map[string]interface{}{"BillingReason": req.Invoice.InvoiceName, "Source": req.Source, "manualPayment": req.ManualPayment, "CancelUrl": req.CancelUrl},
+		GatewayPaymentMethod: req.Invoice.GatewayPaymentMethod,
+		GatewayPaymentType:   req.GatewayPaymentType,
 	})
 
 	if err == nil && res.Payment != nil {
-		if res.Status != consts.PaymentSuccess && !manualPayment {
+		if res.Status != consts.PaymentSuccess && !req.ManualPayment {
 			//need send invoice for authorised
-			SendAuthorizedEmailBackground(invoice)
+			SendAuthorizedEmailBackground(req.Invoice)
 		}
 	}
 

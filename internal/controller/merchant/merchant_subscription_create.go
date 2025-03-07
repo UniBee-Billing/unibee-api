@@ -82,6 +82,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		UserId:                 req.UserId,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		AddonParams:            req.AddonParams,
 		ConfirmTotalAmount:     req.ConfirmTotalAmount,
 		ConfirmCurrency:        req.ConfirmCurrency,

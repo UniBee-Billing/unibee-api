@@ -35,6 +35,7 @@ type RenewReq struct {
 	UserId                 uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription or latest cancel|expire subscription will renew if userId provide instead of subscriptionId"`
 	ProductId              int64                       `json:"productId" dc:"Id of product" dc:"default product will use if not specified"`
 	GatewayId              *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	TaxPercentage          *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
@@ -86,6 +87,7 @@ type UpdateReq struct {
 	NewPlanId              uint64                      `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity               int64                       `json:"quantity" dc:"Quantity"  v:"required"`
 	GatewayId              *uint64                     `json:"gatewayId" dc:"Id of gateway" `
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	EffectImmediate        int                         `json:"effectImmediate" dc:"Force Effect Immediate，1-Immediate，2-Next Period, this api will check upgrade|downgrade automatically" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"          `

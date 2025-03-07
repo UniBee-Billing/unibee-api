@@ -16,7 +16,7 @@ type MerchantMetricEventDetail struct {
 	ExternalEventId           string                  `json:"externalEventId"             description:"external_event_id, should be unique"` // external_event_id, should be unique
 	UserId                    int64                   `json:"userId"                      description:"user_id"`                             // user_id
 	User                      *bean.UserAccount       `json:"user" dc:"user"`
-	AggregationPropertyInt    uint64                  `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
+	AggregationPropertyInt    int64                   `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString string                  `json:"aggregationPropertyString"   description:"aggregation property string, use for metric of count|count_unique type"` // aggregation property string, use for metric of count|count_unique type
 	CreateTime                int64                   `json:"createTime"                  description:"create utc time"`                                                        // create utc time
 	AggregationPropertyData   string                  `json:"aggregationPropertyData"     description:"aggregation property data (Json)"`                                       // aggregation property data (Json)
@@ -24,7 +24,7 @@ type MerchantMetricEventDetail struct {
 	SubscriptionPeriodStart   int64                   `json:"subscriptionPeriodStart"     description:"matched subscription's current_period_start"`                            // matched subscription's current_period_start
 	SubscriptionPeriodEnd     int64                   `json:"subscriptionPeriodEnd"       description:"matched subscription's current_period_end"`                              // matched subscription's current_period_end
 	MetricLimit               uint64                  `json:"metricLimit"                 description:""`                                                                       //
-	Used                      uint64                  `json:"used"                        description:""`                                                                       //
+	Used                      int64                   `json:"used"                        description:""`                                                                       //
 	ChargeInvoiceId           string                  `json:"chargeInvoiceId"             description:"charge invoice id"`                                                      // charge invoice id
 	ChargeInvoice             *bean.Invoice           `json:"chargeInvoice" dc:"chargeInvoice"`
 	EventCharge               *bean.EventMetricCharge `json:"eventCharge"                  description:"event charge"`

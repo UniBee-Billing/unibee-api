@@ -9,6 +9,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
 	"unibee/internal/logic/operation_log"
@@ -18,20 +19,25 @@ import (
 	"unibee/utility/unibee"
 )
 
-func JoinGatewayIcon(gatewayIcon *[]string) *string {
-	if gatewayIcon == nil {
-		return nil
-	} else {
-		return unibee.String(strings.Join(*gatewayIcon, "|"))
-	}
-}
-
-func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, subGateway string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
+func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, subGateway string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
 	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
 	utility.Assert(gatewayInfo != nil, "gateway not ready")
 	if len(gatewayKey) > 0 || len(gatewaySecret) > 0 {
-		_, _, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret, subGateway)
+		var gatewayPaymentTypes = make([]*_interface.GatewayPaymentType, 0)
+		for _, paymentTypeStr := range paymentTypes {
+			for _, infoPaymentType := range gatewayInfo.GatewayPaymentTypes {
+				if paymentTypeStr == infoPaymentType.PaymentType {
+					gatewayPaymentTypes = append(gatewayPaymentTypes, infoPaymentType)
+				}
+			}
+		}
+		_, _, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, &_interface.GatewayTestReq{
+			Key:                 gatewayKey,
+			Secret:              gatewaySecret,
+			SubGateway:          subGateway,
+			GatewayPaymentTypes: gatewayPaymentTypes,
+		})
 		utility.AssertError(err, "gateway test error, key or secret invalid")
 	}
 	utility.Assert(gatewayName != "wire_transfer", "gateway should not wire transfer type")
@@ -51,7 +57,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	}
 	var logo = ""
 	if gatewayIcon != nil {
-		logo = unibee.StringValue(JoinGatewayIcon(gatewayIcon))
+		logo = unibee.StringValue(utility.ArrayPointJoinToStringPoint(gatewayIcon))
 	}
 	var gatewaySort int64 = 0
 	if sort != nil {
@@ -71,6 +77,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		Logo:          logo,
 		Host:          gatewayInfo.Host,
 		Custom:        utility.MarshalToJsonString(currencyExchange),
+		BankData:      unibee.StringValue(utility.JoinToStringPoint(paymentTypes)),
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "system error")
@@ -106,11 +113,13 @@ func UpdateGatewaySort(ctx context.Context, merchantId uint64, gatewayId uint64,
 	utility.AssertError(err, "system error")
 }
 
-func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targetGatewayKey *string, targetGatewaySecret *string, targetSubGateway *string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
+func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targetGatewayKey *string, targetGatewaySecret *string, targetSubGateway *string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == merchantId, "merchant not match")
+	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, one.GatewayName).GatewayInfo(ctx)
+	utility.Assert(gatewayInfo != nil, "gateway not ready")
 
 	if targetGatewayKey != nil || targetGatewaySecret != nil {
 		utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "gateway should not wire transfer type")
@@ -126,7 +135,20 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 		if targetSubGateway != nil {
 			subGateway = *targetSubGateway
 		}
-		_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret, subGateway)
+		var gatewayPaymentTypes = make([]*_interface.GatewayPaymentType, 0)
+		for _, paymentTypeStr := range paymentTypes {
+			for _, infoPaymentType := range gatewayInfo.GatewayPaymentTypes {
+				if paymentTypeStr == infoPaymentType.PaymentType {
+					gatewayPaymentTypes = append(gatewayPaymentTypes, infoPaymentType)
+				}
+			}
+		}
+		_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, &_interface.GatewayTestReq{
+			Key:                 gatewayKey,
+			Secret:              gatewaySecret,
+			SubGateway:          subGateway,
+			GatewayPaymentTypes: gatewayPaymentTypes,
+		})
 		utility.AssertError(err, "gateway test error, key or secret invalid")
 		_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
 			dao.MerchantGateway.Columns().GatewaySecret: gatewaySecret,
@@ -137,8 +159,9 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 	}
 
 	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
-		dao.MerchantGateway.Columns().Logo:       JoinGatewayIcon(gatewayIcon),
+		dao.MerchantGateway.Columns().Logo:       utility.ArrayPointJoinToStringPoint(gatewayIcon),
 		dao.MerchantGateway.Columns().Name:       displayName,
+		dao.MerchantGateway.Columns().BrandData:  utility.JoinToStringPoint(paymentTypes),
 		dao.MerchantGateway.Columns().EnumKey:    sort,
 		dao.MerchantGateway.Columns().SubGateway: targetSubGateway,
 		dao.MerchantGateway.Columns().Custom:     utility.MarshalMetadataToJsonString(currencyExchange),
@@ -262,7 +285,7 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *e
 	}
 	var logo = ""
 	if req.GatewayIcon != nil {
-		logo = unibee.StringValue(JoinGatewayIcon(req.GatewayIcon))
+		logo = unibee.StringValue(utility.ArrayPointJoinToStringPoint(req.GatewayIcon))
 	}
 	var gatewaySort int64 = 0
 	if req.Sort != nil {
@@ -306,7 +329,7 @@ func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *en
 	utility.Assert(one.MerchantId == req.MerchantId, "merchant not match")
 
 	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
-		dao.MerchantGateway.Columns().Logo:          JoinGatewayIcon(req.GatewayIcon),
+		dao.MerchantGateway.Columns().Logo:          utility.ArrayPointJoinToStringPoint(req.GatewayIcon),
 		dao.MerchantGateway.Columns().Name:          req.DisplayName,
 		dao.MerchantGateway.Columns().EnumKey:       req.Sort,
 		dao.MerchantGateway.Columns().BankData:      utility.MarshalToJsonString(req.Bank),

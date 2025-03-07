@@ -37,7 +37,7 @@ type MerchantMetricEventColumns struct {
 	SubscriptionPeriodStart     string // matched subscription's current_period_start
 	SubscriptionPeriodEnd       string // matched subscription's current_period_end
 	MetricLimit                 string //
-	Used                        string //
+	Used                        string // used value
 	ChargeInvoiceId             string // charge invoice id
 	ChargeData                  string // charge data
 	ChargeStatus                string // 0-Uncharged，1-charged

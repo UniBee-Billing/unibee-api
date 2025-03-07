@@ -70,4 +70,5 @@ type Invoice struct {
 	VatNumber                      interface{} //
 	PromoCreditDiscountAmount      interface{} // promo credit discount amount
 	PartialCreditPaidAmount        interface{} // partial credit paid amount
+	MetricCharge                   interface{} // invoice metric charge data
 }

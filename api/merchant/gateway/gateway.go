@@ -39,30 +39,32 @@ type ListRes struct {
 }
 
 type SetupReq struct {
-	g.Meta           `path:"/setup" tags:"Gateway" method:"post" summary:"Payment Gateway Setup" dc:"Setup Payment gateway"`
-	GatewayName      string                            `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly|unitpay|payssion|cryptadium" v:"required"`
-	DisplayName      *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
-	GatewayIcons     *[]string                         `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
-	GatewayKey       string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
-	GatewaySecret    string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
-	SubGateway       string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `
-	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
+	g.Meta              `path:"/setup" tags:"Gateway" method:"post" summary:"Payment Gateway Setup" dc:"Setup Payment gateway"`
+	GatewayName         string                            `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly|unitpay|payssion|cryptadium" v:"required"`
+	DisplayName         *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
+	GatewayIcons        *[]string                         `json:"gatewayIcons"  dc:"The icons of payment gateway"`
+	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	GatewayKey          string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
+	GatewaySecret       string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
+	SubGateway          string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `
+	CurrencyExchange    []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
+	GatewayPaymentTypes []string                          `json:"gatewayPaymentTypes"  dc:"Selected gateway payment types"`
 }
 type SetupRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type EditReq struct {
-	g.Meta           `path:"/edit" tags:"Gateway" method:"post" summary:"Payment Gateway Edit" dc:"Edit the exist payment gateway"`
-	GatewayId        uint64                            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
-	DisplayName      *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
-	GatewayLogo      *[]string                         `json:"gatewayLogo"  dc:"The logo of payment gateway"`
-	Sort             *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
-	GatewayKey       *string                           `json:"gatewayKey"  dc:"The key of payment gateway" `
-	GatewaySecret    *string                           `json:"gatewaySecret"  dc:"The secret of payment gateway" `
-	SubGateway       *string                           `json:"subGateway"  dc:"The sub gateway of payment gateway" `
-	CurrencyExchange []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
+	g.Meta              `path:"/edit" tags:"Gateway" method:"post" summary:"Payment Gateway Edit" dc:"Edit the exist payment gateway"`
+	GatewayId           uint64                            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	DisplayName         *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
+	GatewayLogo         *[]string                         `json:"gatewayLogo"  dc:"The logo of payment gateway"`
+	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	GatewayKey          *string                           `json:"gatewayKey"  dc:"The key of payment gateway" `
+	GatewaySecret       *string                           `json:"gatewaySecret"  dc:"The secret of payment gateway" `
+	SubGateway          *string                           `json:"subGateway"  dc:"The sub gateway of payment gateway" `
+	CurrencyExchange    []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
+	GatewayPaymentTypes []string                          `json:"gatewayPaymentTypes"  dc:"Selected gateway payment types"`
 }
 type EditRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`

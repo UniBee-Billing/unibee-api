@@ -57,15 +57,15 @@ func (c UnitPay) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.
 	return nil, gerror.New("not support")
 }
 
-func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
-	utility.Assert(!strings.Contains(key, "-"), "Please using unitpay 'ProjectId' instead 'publicKey'")
+func (c UnitPay) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
+	utility.Assert(!strings.Contains(req.Key, "-"), "Please using unitpay 'ProjectId' instead 'publicKey'")
 	urlPath := "/api?method=initPayment"
 	param := map[string]interface{}{
 		"currency":    "RUB",
 		"sum":         "100",
 		"paymentType": "card",
 		"desc":        "test_payment_description",
-		"projectId":   key,
+		"projectId":   req.Key,
 		//"account":     "test_unitpay",
 		"account": "test",
 		//"subscriptionId": 1,
@@ -74,8 +74,8 @@ func (c UnitPay) GatewayTest(ctx context.Context, key string, secret string, sub
 		//"preauth":     0,
 		//"ip": "15155-ae12d",
 	}
-	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), secret)
-	responseJson, err := SendUnitPayPaymentRequest(ctx, secret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
+	param["signature"] = getUnitPayFormSignature(fmt.Sprintf("%v", param["account"]), fmt.Sprintf("%v", param["currency"]), fmt.Sprintf("%v", param["desc"]), fmt.Sprintf("%v", param["sum"]), req.Secret)
+	responseJson, err := SendUnitPayPaymentRequest(ctx, req.Secret, "GET", urlPath, param, config.GetConfigInstance().IsProd())
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Infof(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("result.paymentId"), "invalid keys, paymentId is nil")

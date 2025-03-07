@@ -33,14 +33,15 @@ type Payment struct {
 	AuthorizeReason         string                   `json:"authorizeReason"        description:""`                                                                       //
 	GatewayId               uint64                   `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
 	GatewayPaymentId        string                   `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
-	CreateTime              int64                    `json:"createTime"             description:"create time, utc time"`                                                  // create time, utc time
-	CancelTime              int64                    `json:"cancelTime"             description:"cancel time, utc time"`                                                  // cancel time, utc time
-	PaidTime                int64                    `json:"paidTime"               description:"paid time, utc time"`                                                    // paid time, utc time
-	InvoiceId               string                   `json:"invoiceId"              description:"invoice id"`                                                             // invoice id
-	ReturnUrl               string                   `json:"returnUrl"              description:"return url"`                                                             // return url
-	Automatic               int                      `json:"automatic"              description:""`                                                                       //
-	FailureReason           string                   `json:"failureReason"          description:""`                                                                       //
-	BillingReason           string                   `json:"billingReason"          description:""`                                                                       //
+	GatewayPaymentType      string                   `json:"gatewayPaymentType"       description:"gateway_payment_type"`
+	CreateTime              int64                    `json:"createTime"             description:"create time, utc time"` // create time, utc time
+	CancelTime              int64                    `json:"cancelTime"             description:"cancel time, utc time"` // cancel time, utc time
+	PaidTime                int64                    `json:"paidTime"               description:"paid time, utc time"`   // paid time, utc time
+	InvoiceId               string                   `json:"invoiceId"              description:"invoice id"`            // invoice id
+	ReturnUrl               string                   `json:"returnUrl"              description:"return url"`            // return url
+	Automatic               int                      `json:"automatic"              description:""`                      //
+	FailureReason           string                   `json:"failureReason"          description:""`                      //
+	BillingReason           string                   `json:"billingReason"          description:""`                      //
 	Link                    string                   `json:"link"                   description:""`
 	Metadata                map[string]interface{}   `json:"metadata"               description:""`
 	GasPayer                string                   `json:"gasPayer"               description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
@@ -95,6 +96,7 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 		AuthorizeReason:         lastErr,
 		GatewayId:               one.GatewayId,
 		GatewayPaymentId:        one.GatewayPaymentId,
+		GatewayPaymentType:      one.GatewayEdition,
 		CreateTime:              one.CreateTime,
 		CancelTime:              one.CancelTime,
 		PaidTime:                one.PaidTime,

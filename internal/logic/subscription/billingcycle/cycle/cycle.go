@@ -204,96 +204,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					return &BillingCycleWalkRes{WalkUnfinished: true, Message: "HandleSubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
 				}
 			}
-			var taxPercentage = sub.TaxPercentage
-			percentage, countryCode, vatNumber, err := vat.GetUserTaxPercentage(ctx, sub.UserId)
-			if err == nil {
-				taxPercentage = percentage
-			}
 
 			if needInvoiceGenerate {
-				var invoice *bean.Invoice
-				var discountCode = ""
-				canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-					MerchantId:         sub.MerchantId,
-					UserId:             sub.UserId,
-					DiscountCode:       sub.DiscountCode,
-					Currency:           sub.Currency,
-					SubscriptionId:     sub.SubscriptionId,
-					PLanId:             sub.PlanId,
-					TimeNow:            timeNow,
-					IsRecurringApply:   true,
-					IsUpgrade:          false,
-					IsChangeToLongPlan: false,
-					IsRenew:            false,
-					IsNewUser:          false,
-				})
-				if canApply && isRecurring {
-					discountCode = sub.DiscountCode
-				}
-				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-				if pendingUpdate != nil && pendingUpdate.EffectImmediate == 1 {
-					pendingUpdate = nil
-				}
-				applyPromoCredit := config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency)
-				if config3.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency) && len(discountCode) > 0 {
-					applyPromoCredit = false
-				}
-				if pendingUpdate != nil {
-					//generate PendingUpdate cycle invoice
-					updatePlan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
-					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
-
-					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						UserId:                     sub.UserId,
-						Currency:                   pendingUpdate.UpdateCurrency,
-						DiscountCode:               discountCode,
-						TimeNow:                    timeNow,
-						PlanId:                     pendingUpdate.UpdatePlanId,
-						Quantity:                   pendingUpdate.UpdateQuantity,
-						AddonJsonData:              pendingUpdate.UpdateAddonData,
-						VatNumber:                  vatNumber,
-						CountryCode:                countryCode,
-						TaxPercentage:              taxPercentage,
-						PeriodStart:                nextPeriodStart,
-						PeriodEnd:                  nextPeriodEnd,
-						InvoiceName:                "SubscriptionDowngrade",
-						FinishTime:                 timeNow,
-						CreateFrom:                 consts.InvoiceAutoChargeFlag,
-						Metadata:                   map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
-						ApplyPromoCredit:           applyPromoCredit,
-						UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
-					})
-				} else {
-					//generate cycle invoice from sub
-					plan = query.GetPlanById(ctx, sub.PlanId)
-
-					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
-
-					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-						UserId:                     sub.UserId,
-						Currency:                   sub.Currency,
-						DiscountCode:               discountCode,
-						TimeNow:                    timeNow,
-						PlanId:                     sub.PlanId,
-						Quantity:                   sub.Quantity,
-						AddonJsonData:              sub.AddonData,
-						VatNumber:                  vatNumber,
-						CountryCode:                countryCode,
-						TaxPercentage:              taxPercentage,
-						PeriodStart:                nextPeriodStart,
-						PeriodEnd:                  nextPeriodEnd,
-						InvoiceName:                "SubscriptionCycle",
-						FinishTime:                 timeNow,
-						CreateFrom:                 consts.InvoiceAutoChargeFlag,
-						ApplyPromoCredit:           applyPromoCredit,
-						UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
-					})
-				}
-				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
-					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
-				}
+				invoice, pendingUpdate := PreviewSubscriptionNextInvoice(ctx, sub, timeNow)
 				gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 				if gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -304,7 +217,15 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					sub.GatewayId = gatewayId
 					sub.GatewayDefaultPaymentMethod = paymentMethodId
 				}
-				one, err := handler2.CreateProcessingInvoiceForSub(ctx, sub.PlanId, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true, timeNow)
+				one, err := handler2.CreateProcessingInvoiceForSub(ctx, &handler2.CreateProcessingInvoiceForSubReq{
+					PlanId:             sub.PlanId,
+					Simplify:           invoice,
+					Sub:                sub,
+					GatewayId:          sub.GatewayId,
+					PaymentMethodId:    sub.GatewayDefaultPaymentMethod,
+					IsSubLatestInvoice: true,
+					TimeNow:            timeNow,
+				})
 				if err != nil {
 					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:%s", err.Error())
 					return nil, err
@@ -345,7 +266,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Finish Zero Invoice Payment Result:%s", utility.MarshalToJsonString(paidInvoice))}, nil
 					} else {
 						// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-						createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "", "SubscriptionBillingCycle", timeNow)
+						createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
+							Invoice:       latestInvoice,
+							ManualPayment: false,
+							ReturnUrl:     "",
+							CancelUrl:     "",
+							Source:        "SubscriptionBillingCycle",
+							TimeNow:       timeNow,
+						})
 						if err != nil {
 							g.Log().Errorf(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
 							return nil, err
@@ -367,6 +295,102 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		g.Log().Debugf(ctx, source, "GetLock Failure", key)
 		return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Sub Get Lock Failure"}, nil
 	}
+}
+
+func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscription, timeNow int64) (*bean.Invoice, *entity.SubscriptionPendingUpdate) {
+	user := query.GetUserAccountById(ctx, sub.UserId)
+	utility.Assert(user != nil, "user not found")
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	utility.Assert(plan != nil, "plan not found")
+	var taxPercentage = sub.TaxPercentage
+	percentage, countryCode, vatNumber, err := vat.GetUserTaxPercentage(ctx, sub.UserId)
+	if err == nil {
+		taxPercentage = percentage
+	}
+	var invoice *bean.Invoice
+	var discountCode = ""
+	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+		MerchantId:         sub.MerchantId,
+		UserId:             sub.UserId,
+		DiscountCode:       sub.DiscountCode,
+		Currency:           sub.Currency,
+		SubscriptionId:     sub.SubscriptionId,
+		PLanId:             sub.PlanId,
+		TimeNow:            timeNow,
+		IsRecurringApply:   true,
+		IsUpgrade:          false,
+		IsChangeToLongPlan: false,
+		IsRenew:            false,
+		IsNewUser:          false,
+	})
+	if canApply && isRecurring {
+		discountCode = sub.DiscountCode
+	}
+	pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+	if pendingUpdate != nil && pendingUpdate.EffectImmediate == 1 {
+		pendingUpdate = nil
+	}
+	applyPromoCredit := config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency)
+	if config3.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency) && len(discountCode) > 0 {
+		applyPromoCredit = false
+	}
+	if pendingUpdate != nil {
+		//generate PendingUpdate cycle invoice
+		updatePlan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
+		var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
+		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
+
+		invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			UserId:                     sub.UserId,
+			Currency:                   pendingUpdate.UpdateCurrency,
+			DiscountCode:               discountCode,
+			TimeNow:                    timeNow,
+			PlanId:                     pendingUpdate.UpdatePlanId,
+			Quantity:                   pendingUpdate.UpdateQuantity,
+			AddonJsonData:              pendingUpdate.UpdateAddonData,
+			VatNumber:                  vatNumber,
+			CountryCode:                countryCode,
+			TaxPercentage:              taxPercentage,
+			PeriodStart:                nextPeriodStart,
+			PeriodEnd:                  nextPeriodEnd,
+			InvoiceName:                "SubscriptionDowngrade",
+			FinishTime:                 timeNow,
+			CreateFrom:                 consts.InvoiceAutoChargeFlag,
+			Metadata:                   map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
+			ApplyPromoCredit:           applyPromoCredit,
+			UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
+		})
+	} else {
+		//generate cycle invoice from sub
+		plan = query.GetPlanById(ctx, sub.PlanId)
+
+		var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
+		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
+
+		invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			UserId:                     sub.UserId,
+			Currency:                   sub.Currency,
+			DiscountCode:               discountCode,
+			TimeNow:                    timeNow,
+			PlanId:                     sub.PlanId,
+			Quantity:                   sub.Quantity,
+			AddonJsonData:              sub.AddonData,
+			VatNumber:                  vatNumber,
+			CountryCode:                countryCode,
+			TaxPercentage:              taxPercentage,
+			PeriodStart:                nextPeriodStart,
+			PeriodEnd:                  nextPeriodEnd,
+			InvoiceName:                "SubscriptionCycle",
+			FinishTime:                 timeNow,
+			CreateFrom:                 consts.InvoiceAutoChargeFlag,
+			ApplyPromoCredit:           applyPromoCredit,
+			UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
+		})
+	}
+	if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
+		invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
+	}
+	return invoice, pendingUpdate
 }
 
 func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.Subscription, timeNow int64) {

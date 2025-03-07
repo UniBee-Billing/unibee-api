@@ -3,7 +3,6 @@ package detail
 import (
 	"context"
 	"strings"
-	"unibee/api/bean"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	gateway2 "unibee/internal/logic/gateway"
@@ -26,36 +25,37 @@ type GatewayCurrencyExchange struct {
 }
 
 type Gateway struct {
-	Id                            uint64                         `json:"gatewayId"`
-	Name                          string                         `json:"name" description:"The name of gateway"`
-	Description                   string                         `json:"description" description:"The description of gateway"`
-	GatewayName                   string                         `json:"gatewayName" description:"The gateway name, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
-	DisplayName                   string                         `json:"displayName" description:"The gateway display name, used at user portal"`
-	GatewayIcons                  []string                       `json:"gatewayIcons"  description:"The gateway display name, used at user portal"`
-	GatewayWebsiteLink            string                         `json:"gatewayWebsiteLink" description:"The gateway website link"`
-	GatewayWebhookIntegrationLink string                         `json:"gatewayWebhookIntegrationLink" description:"The gateway webhook integration guide link, gateway webhook need setup if not blank"`
-	GatewayLogo                   string                         `json:"gatewayLogo"`
-	GatewayKey                    string                         `json:"gatewayKey"            description:""`
-	GatewaySecret                 string                         `json:"gatewaySecret"            description:""`
-	SubGateway                    string                         `json:"subGateway"            description:""`
-	GatewayType                   int64                          `json:"gatewayType"           description:"gateway type，1-Bank Card ｜ 2-Crypto | 3 - Wire Transfer"`
-	CountryConfig                 map[string]bool                `json:"countryConfig"`
-	CreateTime                    int64                          `json:"createTime"            description:"create utc time"` // create utc time
-	MinimumAmount                 int64                          `json:"minimumAmount"   description:"The minimum amount of wire transfer" `
-	Currency                      string                         `json:"currency"   description:"The currency of wire transfer " `
-	Bank                          *GatewayBank                   `json:"bank"   dc:"The receiving bank of wire transfer" `
-	WebhookEndpointUrl            string                         `json:"webhookEndpointUrl"   description:"The endpoint url of gateway webhook " `
-	WebhookSecret                 string                         `json:"webhookSecret"  dc:"The secret of gateway webhook"`
-	Sort                          int64                          `json:"sort"               description:"The sort value of payment gateway, The bigger, the closer to the front"`
-	IsSetupFinished               bool                           `json:"IsSetupFinished"  dc:"Whether the gateway finished setup process" `
-	CurrencyExchange              []*GatewayCurrencyExchange     `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
-	CurrencyExchangeEnabled       bool                           `json:"currencyExchangeEnabled"            description:"whether to enable currency exchange"`
-	SubGatewayConfigs             []*_interface.SubGatewayConfig `json:"subGatewayConfigs"  dc:""`
-	Archive                       bool                           `json:"archive"  dc:""`
-	PublicKeyName                 string                         `json:"publicKeyName"  dc:""`
-	PrivateSecretName             string                         `json:"privateSecretName"  dc:""`
-	SubGatewayName                string                         `json:"subGatewayName"  dc:""`
-	AutoChargeEnabled             bool                           `json:"autoChargeEnabled"  dc:""`
+	Id                            uint64                           `json:"gatewayId"`
+	Name                          string                           `json:"name" description:"The name of gateway"`
+	Description                   string                           `json:"description" description:"The description of gateway"`
+	GatewayName                   string                           `json:"gatewayName" description:"The gateway name, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
+	DisplayName                   string                           `json:"displayName" description:"The gateway display name, used at user portal"`
+	GatewayIcons                  []string                         `json:"gatewayIcons"  description:"The gateway display name, used at user portal"`
+	GatewayWebsiteLink            string                           `json:"gatewayWebsiteLink" description:"The gateway website link"`
+	GatewayWebhookIntegrationLink string                           `json:"gatewayWebhookIntegrationLink" description:"The gateway webhook integration guide link, gateway webhook need setup if not blank"`
+	GatewayLogo                   string                           `json:"gatewayLogo"`
+	GatewayKey                    string                           `json:"gatewayKey"            description:""`
+	GatewaySecret                 string                           `json:"gatewaySecret"            description:""`
+	SubGateway                    string                           `json:"subGateway"            description:""`
+	GatewayType                   int64                            `json:"gatewayType"           description:"gateway type，1-Bank Card ｜ 2-Crypto | 3 - Wire Transfer"`
+	CountryConfig                 map[string]bool                  `json:"countryConfig"`
+	CreateTime                    int64                            `json:"createTime"            description:"create utc time"` // create utc time
+	MinimumAmount                 int64                            `json:"minimumAmount"   description:"The minimum amount of wire transfer" `
+	Currency                      string                           `json:"currency"   description:"The currency of wire transfer " `
+	Bank                          *GatewayBank                     `json:"bank"   dc:"The receiving bank of wire transfer" `
+	WebhookEndpointUrl            string                           `json:"webhookEndpointUrl"   description:"The endpoint url of gateway webhook " `
+	WebhookSecret                 string                           `json:"webhookSecret"  dc:"The secret of gateway webhook"`
+	Sort                          int64                            `json:"sort"               description:"The sort value of payment gateway, The bigger, the closer to the front"`
+	IsSetupFinished               bool                             `json:"IsSetupFinished"  dc:"Whether the gateway finished setup process" `
+	CurrencyExchange              []*GatewayCurrencyExchange       `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
+	CurrencyExchangeEnabled       bool                             `json:"currencyExchangeEnabled"            description:"whether to enable currency exchange"`
+	GatewayPaymentTypes           []*_interface.GatewayPaymentType `json:"gatewayPaymentTypes" dc:"gatewayPaymentTypes"`
+	SetupGatewayPaymentTypes      []*_interface.GatewayPaymentType `json:"setupGatewayPaymentTypes"  dc:"The total list of gateway payment types, used for setup"`
+	Archive                       bool                             `json:"archive"  dc:""`
+	PublicKeyName                 string                           `json:"publicKeyName"  dc:""`
+	PrivateSecretName             string                           `json:"privateSecretName"  dc:""`
+	SubGatewayName                string                           `json:"subGatewayName"  dc:""`
+	AutoChargeEnabled             bool                             `json:"autoChargeEnabled"  dc:""`
 }
 
 type GatewayBank struct {
@@ -70,9 +70,9 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		return nil
 	}
 	var countryConfig map[string]bool
-	_ = bean.UnmarshalFromJsonString(one.CountryConfig, &countryConfig)
+	_ = utility.UnmarshalFromJsonString(one.CountryConfig, &countryConfig)
 	var bank *GatewayBank
-	_ = bean.UnmarshalFromJsonString(one.BankData, &bank)
+	_ = utility.UnmarshalFromJsonString(one.BankData, &bank)
 	var webhookEndpointUrl = ""
 	if one.GatewayType != consts.GatewayTypeWireTransfer {
 		webhookEndpointUrl = gateway2.GetPaymentWebhookEntranceUrl(one.Id)
@@ -132,6 +132,7 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 	var privateSecretName = "Private Key"
 	var subGatewayName = ""
 	var autoChargeEnabled = false
+	var gatewayPaymentTypes = make([]*_interface.GatewayPaymentType, 0)
 	if gatewayInfo != nil {
 		currencyExchangeEnabled = gatewayInfo.CurrencyExchangeEnabled
 		if len(gatewayInfo.PublicKeyName) > 0 {
@@ -144,14 +145,19 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 			subGatewayName = gatewayInfo.SubGatewayName
 		}
 		autoChargeEnabled = gatewayInfo.AutoChargeEnabled
+		if len(one.BankData) > 0 {
+			for _, paymentTypeStr := range utility.SplitToArray(one.BankData) {
+				for _, infoPaymentType := range gatewayInfo.GatewayPaymentTypes {
+					if paymentTypeStr == infoPaymentType.PaymentType {
+						gatewayPaymentTypes = append(gatewayPaymentTypes, infoPaymentType)
+					}
+				}
+			}
+		}
 	}
 	var currencyExchangeList = make([]*GatewayCurrencyExchange, 0)
 	_ = utility.UnmarshalFromJsonString(one.Custom, &currencyExchangeList)
 
-	//subGatewayConfigs := make([]*_interface.SubGatewayConfig, 0)
-	//if gatewayInfo != nil {
-	//	subGatewayConfigs = gatewayInfo.SubGatewayConfigs
-	//}
 	if one.EnumKey <= 0 && gatewayInfo != nil {
 		one.EnumKey = gatewayInfo.Sort
 	}
@@ -186,7 +192,7 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		PrivateSecretName:             privateSecretName,
 		SubGatewayName:                subGatewayName,
 		AutoChargeEnabled:             autoChargeEnabled,
-		//SubGatewayConfigs:             subGatewayConfigs,
+		GatewayPaymentTypes:           gatewayPaymentTypes,
 	}
 }
 

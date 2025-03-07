@@ -27,6 +27,7 @@ import (
 	discount2 "unibee/internal/logic/invoice/discount"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/subscription/config"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -155,6 +156,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		CreateFrom:                     invoice.CreateFrom,
 		PromoCreditDiscountAmount:      invoice.PromoCreditDiscountAmount,
 		PartialCreditPaidAmount:        invoice.PartialCreditPaidAmount,
+		MetricCharge:                   utility.MarshalToJsonString(invoice.UserMetricChargeForInvoice),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -260,14 +262,6 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return one, err
 	}
 	if one.Status != status {
-		//if len(one.DiscountCode) > 0 {
-		//	if status == consts.InvoiceStatusCancelled || status == consts.InvoiceStatusFailed {
-		//		err = discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, one.InvoiceId)
-		//		if err != nil {
-		//			g.Log().Errorf(ctx, "UpdateInvoiceFromPayment InvoiceRollbackAllDiscountsFromInvoice invoiceId:%s err:%s", one.InvoiceId, err.Error())
-		//		}
-		//	}
-		//}
 		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
@@ -465,7 +459,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	if err != nil {
 		return nil, err
 	}
-
+	sub_update.UpdateUserCountryCode(ctx, one.UserId, one.CountryCode)
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	one.Status = consts.InvoiceStatusPaid
 	if utility.TryLock(ctx, fmt.Sprintf("MarkInvoiceAsPaidForZeroPayment_%s", one.InvoiceId), 60) {

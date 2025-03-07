@@ -27,6 +27,7 @@ type GatewayNewPaymentReq struct {
 	Invoice                 *bean.Invoice            `json:"invoice"`
 	DaysUtilDue             int                      `json:"daysUtilDue"`
 	GatewayPaymentMethod    string                   `json:"gatewayPaymentMethod"`
+	GatewayPaymentType      string                   `json:"gatewayPaymentType"`
 	PayImmediate            bool                     `json:"payImmediate"`
 	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"`
 	ExchangeAmount          int64                    `json:"exchangeAmount"           description:"exchange_amount, cent"`

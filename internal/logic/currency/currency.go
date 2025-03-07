@@ -27,6 +27,76 @@ func GetMerchantCurrencies() []*bean.Currency {
 		Symbol:   "¥",
 		Scale:    1,
 	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "GBP",
+		Symbol:   "£",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "CHF",
+		Symbol:   "CHF",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "SEK",
+		Symbol:   "kr",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "NOK",
+		Symbol:   "kr",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "INR",
+		Symbol:   "₹",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "CNY",
+		Symbol:   "¥",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "SGD",
+		Symbol:   "$",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "HKD",
+		Symbol:   "$",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "THB",
+		Symbol:   "฿",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "VND",
+		Symbol:   "₫",
+		Scale:    1,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "MXN",
+		Symbol:   "$",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "BRL",
+		Symbol:   "R$",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "CAD",
+		Symbol:   "$",
+		Scale:    100,
+	})
+	supportCurrency = append(supportCurrency, &bean.Currency{
+		Currency: "AUD",
+		Symbol:   "$",
+		Scale:    100,
+	})
 	return supportCurrency
 }
 

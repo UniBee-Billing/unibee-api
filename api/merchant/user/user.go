@@ -115,11 +115,12 @@ type UpdateRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta          `path:"/change_gateway" tags:"User" method:"post" summary:"Change User Default Gateway" `
-	UserId          uint64 `json:"userId" dc:"User Id" v:"required"`
-	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
-	GatewayUserId   string `json:"gatewayUserId" dc:"GatewayUserId, verify and save GatewayUserId via gateway"`
-	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
+	g.Meta             `path:"/change_gateway" tags:"User" method:"post" summary:"Change User Default Gateway" `
+	UserId             uint64 `json:"userId" dc:"User Id" v:"required"`
+	GatewayId          uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+	GatewayUserId      string `json:"gatewayUserId" dc:"GatewayUserId, verify and save GatewayUserId via gateway"`
+	PaymentMethodId    string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
+	GatewayPaymentType string `json:"gatewayPaymentType" dc:"GatewayPaymentType"`
 }
 type ChangeGatewayRes struct {
 }

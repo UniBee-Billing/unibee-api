@@ -414,7 +414,7 @@ func toLocalizationTitle(languageData string, defaultTitle string, lang string) 
 		return title
 	}
 	var list []*bean.EmailLocalizationTemplate
-	err := bean.UnmarshalFromJsonString(languageData, &list)
+	err := utility.UnmarshalFromJsonString(languageData, &list)
 	if err == nil {
 		for _, one := range list {
 			if one.Language == lang {

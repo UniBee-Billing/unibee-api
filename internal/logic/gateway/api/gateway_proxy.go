@@ -157,7 +157,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 	return res, err
 }
 
-func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (p GatewayProxy) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -169,7 +169,7 @@ func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string
 			return
 		}
 	}()
-	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret, subGateway)
+	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, req)
 	return icon, gatewayType, err
 }
 

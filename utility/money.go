@@ -7,7 +7,7 @@ import (
 )
 
 func IsNoCentCurrency(currency string) bool {
-	NOCentCurrencies := []string{"JPY", "KRW"}
+	NOCentCurrencies := []string{"JPY", "KRW", "VND"}
 	for _, element := range NOCentCurrencies {
 		if strings.ToUpper(currency) == element {
 			return true

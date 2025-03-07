@@ -23,13 +23,23 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify *bean.Invoice, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool, timeNow int64) (*entity.Invoice, error) {
-	utility.Assert(simplify != nil, "invoice data is nil")
-	utility.Assert(sub != nil, "sub is nil")
-	user := query.GetUserAccountById(ctx, sub.UserId)
+type CreateProcessingInvoiceForSubReq struct {
+	PlanId             uint64
+	Simplify           *bean.Invoice
+	Sub                *entity.Subscription
+	GatewayId          uint64
+	PaymentMethodId    string
+	IsSubLatestInvoice bool
+	TimeNow            int64
+}
+
+func CreateProcessingInvoiceForSub(ctx context.Context, req *CreateProcessingInvoiceForSubReq) (*entity.Invoice, error) {
+	utility.Assert(req.Simplify != nil, "invoice data is nil")
+	utility.Assert(req.Sub != nil, "sub is nil")
+	user := query.GetUserAccountById(ctx, req.Sub.UserId)
 	//Try cancel current sub processing invoice
-	if isSubLatestInvoice {
-		TryCancelSubscriptionLatestInvoice(ctx, sub)
+	if req.IsSubLatestInvoice {
+		TryCancelSubscriptionLatestInvoice(ctx, req.Sub)
 	}
 	var sendEmail = ""
 	var userSnapshot *entity.UserAccount
@@ -55,25 +65,25 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 		}
 	}
 	var currentTime = gtime.Now().Timestamp()
-	if timeNow > currentTime {
-		currentTime = timeNow
+	if req.TimeNow > currentTime {
+		currentTime = req.TimeNow
 	}
 
 	invoiceId := utility.CreateInvoiceId()
-	if len(simplify.InvoiceId) > 0 {
-		invoiceId = simplify.InvoiceId
+	if len(req.Simplify.InvoiceId) > 0 {
+		invoiceId = req.Simplify.InvoiceId
 	}
 	{
 		//promo credit
-		if simplify.PromoCreditDiscountAmount > 0 && simplify.PromoCreditPayout != nil && simplify.PromoCreditAccount != nil {
+		if req.Simplify.PromoCreditDiscountAmount > 0 && req.Simplify.PromoCreditPayout != nil && req.Simplify.PromoCreditAccount != nil {
 			_, err := payment.NewCreditPayment(ctx, &payment.CreditPaymentInternalReq{
-				UserId:                  sub.UserId,
-				MerchantId:              sub.MerchantId,
+				UserId:                  req.Sub.UserId,
+				MerchantId:              req.Sub.MerchantId,
 				ExternalCreditPaymentId: invoiceId,
 				InvoiceId:               invoiceId,
-				CurrencyAmount:          simplify.PromoCreditDiscountAmount,
-				Currency:                simplify.Currency,
-				CreditType:              simplify.PromoCreditAccount.Type,
+				CurrencyAmount:          req.Simplify.PromoCreditDiscountAmount,
+				Currency:                req.Simplify.Currency,
+				CreditType:              req.Simplify.PromoCreditAccount.Type,
 				Name:                    "InvoicePromoCreditDiscount",
 				Description:             "Subscription Invoice Promo Credit Discount",
 			})
@@ -82,21 +92,21 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 			}
 		}
 	}
-	if len(simplify.DiscountCode) > 0 {
+	if len(req.Simplify.DiscountCode) > 0 {
 		_, err := discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:       sub.MerchantId,
-			UserId:           sub.UserId,
-			DiscountCode:     simplify.DiscountCode,
-			SubscriptionId:   sub.SubscriptionId,
-			PLanId:           planId,
+			MerchantId:       req.Sub.MerchantId,
+			UserId:           req.Sub.UserId,
+			DiscountCode:     req.Simplify.DiscountCode,
+			SubscriptionId:   req.Sub.SubscriptionId,
+			PLanId:           req.PlanId,
 			PaymentId:        "",
 			InvoiceId:        invoiceId,
-			ApplyAmount:      simplify.DiscountAmount,
-			Currency:         simplify.Currency,
-			IsRecurringApply: strings.Compare(simplify.CreateFrom, consts.InvoiceAutoChargeFlag) == 0,
+			ApplyAmount:      req.Simplify.DiscountAmount,
+			Currency:         req.Simplify.Currency,
+			IsRecurringApply: strings.Compare(req.Simplify.CreateFrom, consts.InvoiceAutoChargeFlag) == 0,
 		})
 		if err != nil {
-			_ = payment.RollbackCreditPayment(ctx, sub.MerchantId, invoiceId)
+			_ = payment.RollbackCreditPayment(ctx, req.Sub.MerchantId, invoiceId)
 			return nil, err
 		}
 	}
@@ -104,67 +114,68 @@ func CreateProcessingInvoiceForSub(ctx context.Context, planId uint64, simplify 
 	status := consts.InvoiceStatusProcessing
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
-		SubscriptionId:                 sub.SubscriptionId,
+		SubscriptionId:                 req.Sub.SubscriptionId,
 		BizType:                        consts.BizTypeSubscription,
-		UserId:                         sub.UserId,
-		MerchantId:                     sub.MerchantId,
-		InvoiceName:                    simplify.InvoiceName,
-		ProductName:                    simplify.ProductName,
+		UserId:                         req.Sub.UserId,
+		MerchantId:                     req.Sub.MerchantId,
+		InvoiceName:                    req.Simplify.InvoiceName,
+		ProductName:                    req.Simplify.ProductName,
 		InvoiceId:                      invoiceId,
-		PeriodStart:                    simplify.PeriodStart,
-		PeriodEnd:                      simplify.PeriodEnd,
-		PeriodStartTime:                gtime.NewFromTimeStamp(simplify.PeriodStart),
-		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
-		Currency:                       sub.Currency,
-		GatewayId:                      gatewayId,
-		GatewayPaymentMethod:           paymentMethodId,
+		PeriodStart:                    req.Simplify.PeriodStart,
+		PeriodEnd:                      req.Simplify.PeriodEnd,
+		PeriodStartTime:                gtime.NewFromTimeStamp(req.Simplify.PeriodStart),
+		PeriodEndTime:                  gtime.NewFromTimeStamp(req.Simplify.PeriodEnd),
+		Currency:                       req.Sub.Currency,
+		GatewayId:                      req.GatewayId,
+		GatewayPaymentMethod:           req.PaymentMethodId,
 		Status:                         status,
-		SendNote:                       simplify.SendNote,
-		SendStatus:                     simplify.SendStatus,
+		SendNote:                       req.Simplify.SendNote,
+		SendStatus:                     req.Simplify.SendStatus,
 		SendEmail:                      sendEmail,
 		UniqueId:                       invoiceId,
 		SendTerms:                      st,
-		TotalAmount:                    simplify.TotalAmount,
-		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
-		TaxAmount:                      simplify.TaxAmount,
-		CountryCode:                    simplify.CountryCode,
-		VatNumber:                      simplify.VatNumber,
-		TaxPercentage:                  simplify.TaxPercentage,
-		SubscriptionAmount:             simplify.SubscriptionAmount,
-		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
-		Lines:                          utility.MarshalToJsonString(simplify.Lines),
+		TotalAmount:                    req.Simplify.TotalAmount,
+		TotalAmountExcludingTax:        req.Simplify.TotalAmountExcludingTax,
+		TaxAmount:                      req.Simplify.TaxAmount,
+		CountryCode:                    req.Simplify.CountryCode,
+		VatNumber:                      req.Simplify.VatNumber,
+		TaxPercentage:                  req.Simplify.TaxPercentage,
+		SubscriptionAmount:             req.Simplify.SubscriptionAmount,
+		SubscriptionAmountExcludingTax: req.Simplify.SubscriptionAmountExcludingTax,
+		Lines:                          utility.MarshalToJsonString(req.Simplify.Lines),
 		Link:                           link.GetInvoiceLink(invoiceId, st),
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     currentTime,
-		DayUtilDue:                     simplify.DayUtilDue,
-		DiscountAmount:                 simplify.DiscountAmount,
-		DiscountCode:                   simplify.DiscountCode,
-		TrialEnd:                       simplify.TrialEnd,
-		BillingCycleAnchor:             simplify.BillingCycleAnchor,
+		DayUtilDue:                     req.Simplify.DayUtilDue,
+		DiscountAmount:                 req.Simplify.DiscountAmount,
+		DiscountCode:                   req.Simplify.DiscountCode,
+		TrialEnd:                       req.Simplify.TrialEnd,
+		BillingCycleAnchor:             req.Simplify.BillingCycleAnchor,
 		Data:                           utility.MarshalToJsonString(userSnapshot),
-		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
-		CreateFrom:                     simplify.CreateFrom,
-		PromoCreditDiscountAmount:      simplify.PromoCreditDiscountAmount,
-		PartialCreditPaidAmount:        simplify.PartialCreditPaidAmount,
+		MetaData:                       utility.MarshalToJsonString(req.Simplify.Metadata),
+		CreateFrom:                     req.Simplify.CreateFrom,
+		PromoCreditDiscountAmount:      req.Simplify.PromoCreditDiscountAmount,
+		PartialCreditPaidAmount:        req.Simplify.PartialCreditPaidAmount,
+		MetricCharge:                   utility.MarshalToJsonString(req.Simplify.UserMetricChargeForInvoice),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		g.Log().Infof(ctx, "CreateProcessingInvoiceForSub Create Invoice failed subId:%s err:%s", sub.SubscriptionId, err.Error())
+		g.Log().Infof(ctx, "CreateProcessingInvoiceForSub Create Invoice failed subId:%s err:%s", req.Sub.SubscriptionId, err.Error())
 		err = gerror.Newf(`CreateProcessingInvoiceForSub record insert failure %s`, err.Error())
 		// should roll back discount usage
 		rollbackErr := discount2.InvoiceRollbackAllDiscountsFromInvoice(ctx, invoiceId)
 		if rollbackErr != nil {
-			g.Log().Infof(ctx, "CreateProcessingInvoiceForSub InvoiceRollbackAllDiscountsFromInvoice rollback failed subId:%s err:%s", sub.SubscriptionId, rollbackErr.Error())
+			g.Log().Infof(ctx, "CreateProcessingInvoiceForSub InvoiceRollbackAllDiscountsFromInvoice rollback failed subId:%s err:%s", req.Sub.SubscriptionId, rollbackErr.Error())
 		}
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	if isSubLatestInvoice {
+	if req.IsSubLatestInvoice {
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().LatestInvoiceId: invoiceId,
-		}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+		}).Where(dao.Subscription.Columns().SubscriptionId, req.Sub.SubscriptionId).OmitNil().Update()
 		if err != nil {
 			utility.AssertError(err, "CreateProcessingInvoiceForSub")
 		}

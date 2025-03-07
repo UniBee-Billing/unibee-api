@@ -90,7 +90,7 @@ func (c Changelly) GatewayGetCurrency(ctx context.Context, key string, secret st
 	return responseJson, err
 }
 
-func (c Changelly) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (c Changelly) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/payment/v1/payments"
 	param := map[string]interface{}{
 		"nominal_currency": "BNB",
@@ -101,7 +101,7 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string, s
 		"customer_id":      "17",
 		"customer_email":   "jack.fu@wowow.io",
 	}
-	responseJson, err := SendChangellyPaymentRequest(ctx, key, secret, "POST", urlPath, param)
+	responseJson, err := SendChangellyPaymentRequest(ctx, req.Key, req.Secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")

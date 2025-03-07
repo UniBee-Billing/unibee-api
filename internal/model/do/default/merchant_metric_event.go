@@ -29,7 +29,7 @@ type MerchantMetricEvent struct {
 	SubscriptionPeriodStart     interface{} // matched subscription's current_period_start
 	SubscriptionPeriodEnd       interface{} // matched subscription's current_period_end
 	MetricLimit                 interface{} //
-	Used                        interface{} //
+	Used                        interface{} // used value
 	ChargeInvoiceId             interface{} // charge invoice id
 	ChargeData                  interface{} // charge data
 	ChargeStatus                interface{} // 0-Uncharged，1-charged

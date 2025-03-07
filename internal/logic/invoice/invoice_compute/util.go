@@ -309,10 +309,10 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 					Tax:                    metricChargeTaxAmount,
 					TaxPercentage:          req.TaxPercentage,
 					AmountExcludingTax:     metricChargeAmountExcludingTax,
-					UnitAmountExcludingTax: metricChargeAmountExcludingTax / int64(metricCharge.CurrentUsedValue),
-					Quantity:               int64(metricCharge.CurrentUsedValue),
+					UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
+					Quantity:               metricCharge.CurrentUsedValue,
 					Name:                   metricCharge.Name,
-					Description:            metricCharge.Description,
+					Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
 					MetricCharge:           metricCharge,
 				})
 			}
@@ -330,10 +330,10 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 					Tax:                    metricChargeTaxAmount,
 					TaxPercentage:          req.TaxPercentage,
 					AmountExcludingTax:     metricChargeAmountExcludingTax,
-					UnitAmountExcludingTax: metricChargeAmountExcludingTax / int64(metricCharge.CurrentUsedValue),
-					Quantity:               int64(metricCharge.CurrentUsedValue),
+					UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
+					Quantity:               metricCharge.CurrentUsedValue,
 					Name:                   metricCharge.Name,
-					Description:            metricCharge.Description,
+					Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
 					MetricCharge:           metricCharge,
 				})
 			}
@@ -387,6 +387,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
 		CreateFrom:                     req.CreateFrom,
+		UserMetricChargeForInvoice:     req.UserMetricChargeForInvoice,
 	}
 }
 

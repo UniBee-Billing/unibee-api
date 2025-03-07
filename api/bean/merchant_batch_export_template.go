@@ -2,6 +2,7 @@ package bean
 
 import (
 	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
 )
 
 type MerchantBatchExportTemplate struct {
@@ -21,10 +22,10 @@ func SimplifyMerchantBatchExportTemplate(one *entity.MerchantBatchExportTemplate
 		return nil
 	}
 	var payload map[string]interface{}
-	_ = UnmarshalFromJsonString(one.Payload, &payload)
+	_ = utility.UnmarshalFromJsonString(one.Payload, &payload)
 
 	var exportColumns []string
-	_ = UnmarshalFromJsonString(one.ExportColumns, &exportColumns)
+	_ = utility.UnmarshalFromJsonString(one.ExportColumns, &exportColumns)
 	return &MerchantBatchExportTemplate{
 		TemplateId:    one.Id,
 		Name:          one.Name,

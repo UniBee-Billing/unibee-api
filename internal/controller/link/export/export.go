@@ -67,7 +67,7 @@ func LinkExportEntry(r *ghttp.Request) {
 
 	fileName := utility.DownloadFile(one.DownloadUrl)
 	if len(fileName) == 0 {
-		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
+		g.Log().Errorf(r.Context(), "LinkEntry file download or generate error")
 		r.Response.WriteHeader(http.StatusBadRequest)
 		r.Response.Writeln("Bad request")
 		return

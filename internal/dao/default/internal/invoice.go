@@ -78,6 +78,7 @@ type InvoiceColumns struct {
 	VatNumber                      string //
 	PromoCreditDiscountAmount      string // promo credit discount amount
 	PartialCreditPaidAmount        string // partial credit paid amount
+	MetricCharge                   string // invoice metric charge data
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -140,6 +141,7 @@ var invoiceColumns = InvoiceColumns{
 	VatNumber:                      "vat_number",
 	PromoCreditDiscountAmount:      "promo_credit_discount_amount",
 	PartialCreditPaidAmount:        "partial_credit_paid_amount",
+	MetricCharge:                   "metric_charge",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

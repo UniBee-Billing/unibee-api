@@ -145,7 +145,7 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 	if len(user.GatewayId) > 0 {
 		userDefaultGatewayId, err = strconv.ParseUint(user.GatewayId, 10, 64)
 		if err != nil {
-			g.Log().Errorf(ctx, "ParseUserDefaultMethod:%d", user.GatewayId)
+			g.Log().Errorf(ctx, "ParseUserDefaultMethod:%v", user.GatewayId)
 			return
 		}
 	}

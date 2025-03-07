@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"testing"
+	_interface "unibee/internal/interface"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -15,12 +16,22 @@ var subGateway = "SANDBOX_5YES442ZS5S203863"
 
 func TestForAlipay(t *testing.T) {
 	pay := &Alipay{}
-	_, _, _ = pay.GatewayTest(context.Background(), key, secret, subGateway)
+	_, _, _ = pay.GatewayTest(context.Background(), &_interface.GatewayTestReq{
+		Key:                 key,
+		Secret:              secret,
+		SubGateway:          subGateway,
+		GatewayPaymentTypes: nil,
+	})
 }
 
 func TestForAlipayPlus(t *testing.T) {
 	pay := &AlipayPlus{}
-	_, _, _ = pay.GatewayTest(context.Background(), key, secret, subGateway)
+	_, _, _ = pay.GatewayTest(context.Background(), &_interface.GatewayTestReq{
+		Key:                 key,
+		Secret:              secret,
+		SubGateway:          subGateway,
+		GatewayPaymentTypes: nil,
+	})
 }
 
 func TestForAlipayGetPaymentDetail(t *testing.T) {
@@ -38,4 +49,8 @@ func TestForAlipayGetPaymentDetail(t *testing.T) {
 	} else {
 		fmt.Printf("%s", utility.MarshalToJsonString(res))
 	}
+}
+
+func TestForPaymentTypes(t *testing.T) {
+	fmt.Printf("%s", utility.MarshalToJsonString(fetchAlipayPlusPaymentTypes(context.Background())))
 }

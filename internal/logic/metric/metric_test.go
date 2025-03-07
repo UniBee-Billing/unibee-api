@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/query"
 	"unibee/test"
 	"unibee/utility/unibee"
@@ -13,10 +14,12 @@ import (
 func TestMerchantMetric(t *testing.T) {
 	ctx := context.Background()
 	var one *bean.MerchantMetric
-	var limit *bean.MerchantMetricPlanLimit
+	var limit *detail.MerchantMetricPlanLimitDetail
 	var err error
 	t.Run("Test for merchant metric New|Get|Detail|Edit|Delete|List", func(t *testing.T) {
-		list, _ := MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ := MerchantMetricList(ctx, &ListInternalReq{
+			MerchantId: test.TestMerchant.Id,
+		})
 		require.NotNil(t, list)
 		require.Equal(t, 0, len(list))
 		one, err = NewMerchantMetric(ctx, &NewMerchantMetricInternalReq{
@@ -35,7 +38,9 @@ func TestMerchantMetric(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, "test", one.MetricName)
 		require.Equal(t, "test", one.MetricDescription)
-		list, _ = MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ = MerchantMetricList(ctx, &ListInternalReq{
+			MerchantId: test.TestMerchant.Id,
+		})
 		require.NotNil(t, list)
 		require.Equal(t, 1, len(list))
 		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, unibee.Int(MetricTypeChargeMetered), "test2", "test2")
@@ -45,7 +50,9 @@ func TestMerchantMetric(t *testing.T) {
 		require.Equal(t, "test2", one.MetricDescription)
 		err = DeleteMerchantMetric(ctx, test.TestMerchant.Id, one.Id)
 		require.Nil(t, err)
-		list, _ = MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ = MerchantMetricList(ctx, &ListInternalReq{
+			MerchantId: test.TestMerchant.Id,
+		})
 		require.NotNil(t, list)
 		require.Equal(t, 0, len(list))
 		oldOne := one

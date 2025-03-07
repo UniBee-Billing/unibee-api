@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
 )
 
 type Plan struct {
@@ -51,7 +52,7 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 	}
 	var metricPlanCharge = &MetricPlanBindingEntity{}
 	if len(one.MetricCharge) > 0 {
-		_ = UnmarshalFromJsonString(one.MetricCharge, &metricPlanCharge)
+		_ = utility.UnmarshalFromJsonString(one.MetricCharge, &metricPlanCharge)
 	}
 	return &Plan{
 		Id:                     one.Id,

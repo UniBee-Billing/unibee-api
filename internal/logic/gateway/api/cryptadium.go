@@ -51,7 +51,7 @@ func (c Cryptadium) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_be
 	}, nil
 }
 
-func (c Cryptadium) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (c Cryptadium) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/v1/payment/pages/fiat"
 	param := map[string]interface{}{
 		"FiatCurrency": "USD",
@@ -64,7 +64,7 @@ func (c Cryptadium) GatewayTest(ctx context.Context, key string, secret string, 
 		"ClientId":     "201",
 		"Email":        "mail@hotmail.com",
 	}
-	responseJson, err := SendCryptadiumPaymentRequest(ctx, key, secret, "POST", urlPath, param)
+	responseJson, err := SendCryptadiumPaymentRequest(ctx, req.Key, req.Secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")

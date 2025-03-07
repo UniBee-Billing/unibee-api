@@ -9,5 +9,5 @@ import (
 )
 
 func (c *ControllerGateway) Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error) {
-	return &gateway.SetupRes{Gateway: gateway3.ConvertGatewayDetail(ctx, gateway2.SetupGateway(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.DisplayName, req.GatewayIcons, req.Sort, req.CurrencyExchange))}, nil
+	return &gateway.SetupRes{Gateway: gateway3.ConvertGatewayDetail(ctx, gateway2.SetupGateway(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.GatewayPaymentTypes, req.DisplayName, req.GatewayIcons, req.Sort, req.CurrencyExchange))}, nil
 }

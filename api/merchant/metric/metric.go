@@ -6,7 +6,13 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Metric" method:"get" summary:"Get Merchant Metric list"`
+	g.Meta          `path:"/list" tags:"Metric" method:"get,post" summary:"Get Merchant Metric list"`
+	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create，Default gmt_create" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page"  dc:"Page,Start 0" `
+	Count           int    `json:"count" dc:"Count OF Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type ListRes struct {

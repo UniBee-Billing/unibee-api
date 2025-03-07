@@ -59,10 +59,10 @@ func EventList(ctx context.Context, req *EventListInternalReq) (res *EventListIn
 		q = q.WhereIn(dao.MerchantMetricEvent.Columns().MetricId, req.MetricIds)
 	}
 	if req.CreateTimeStart > 0 {
-		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+		q = q.WhereGTE(dao.MerchantMetricEvent.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
-		q = q.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
+		q = q.WhereLTE(dao.MerchantMetricEvent.Columns().CreateTime, req.CreateTimeEnd)
 	}
 	q = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).

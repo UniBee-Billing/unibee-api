@@ -3,7 +3,32 @@ package utility
 import (
 	"strconv"
 	"strings"
+	"unibee/utility/unibee"
 )
+
+func ArrayPointJoinToStringPoint(array *[]string) *string {
+	if array == nil {
+		return nil
+	} else {
+		return unibee.String(strings.Join(*array, "|"))
+	}
+}
+
+func JoinToStringPoint(array []string) *string {
+	if array == nil {
+		return nil
+	} else {
+		return unibee.String(strings.Join(array, "|"))
+	}
+}
+
+func SplitToArray(source string) []string {
+	if source == "" {
+		return make([]string, 0)
+	} else {
+		return strings.Split(source, "|")
+	}
+}
 
 func MergeInt64Arrays(arr1, arr2 []int64) []int64 {
 	seen := make(map[int64]bool)

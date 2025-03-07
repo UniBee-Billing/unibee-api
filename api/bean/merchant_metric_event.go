@@ -1,6 +1,9 @@
 package bean
 
-import entity "unibee/internal/model/entity/default"
+import (
+	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
+)
 
 type MerchantMetricEvent struct {
 	Id                        uint64             `json:"id"                          description:"Id"`                                                                     // Id
@@ -8,7 +11,7 @@ type MerchantMetricEvent struct {
 	MetricId                  uint64             `json:"metricId"                    description:"metric_id"`                                                              // metric_id
 	ExternalEventId           string             `json:"externalEventId"             description:"external_event_id, should be unique"`                                    // external_event_id, should be unique
 	UserId                    int64              `json:"userId"                      description:"user_id"`                                                                // user_id
-	AggregationPropertyInt    uint64             `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
+	AggregationPropertyInt    int64              `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString string             `json:"aggregationPropertyString"   description:"aggregation property string, use for metric of count|count_unique type"` // aggregation property string, use for metric of count|count_unique type
 	CreateTime                int64              `json:"createTime"                  description:"create utc time"`                                                        // create utc time
 	AggregationPropertyData   string             `json:"aggregationPropertyData"     description:"aggregation property data (Json)"`                                       // aggregation property data (Json)
@@ -16,7 +19,7 @@ type MerchantMetricEvent struct {
 	SubscriptionPeriodStart   int64              `json:"subscriptionPeriodStart"     description:"matched subscription's current_period_start"`                            // matched subscription's current_period_start
 	SubscriptionPeriodEnd     int64              `json:"subscriptionPeriodEnd"       description:"matched subscription's current_period_end"`                              // matched subscription's current_period_end
 	MetricLimit               uint64             `json:"metricLimit"                 description:""`                                                                       //
-	Used                      uint64             `json:"used"                        description:""`                                                                       //
+	Used                      int64              `json:"used"                        description:""`                                                                       //
 	ChargeInvoiceId           string             `json:"chargeInvoiceId"             description:"charge invoice id"`                                                      // charge invoice id
 	EventCharge               *EventMetricCharge `json:"eventCharge"                  description:"event charge"`
 }
@@ -27,7 +30,7 @@ func SimplifyMerchantMetricEvent(one *entity.MerchantMetricEvent) *MerchantMetri
 	}
 	eventCharge := &EventMetricCharge{}
 	if len(one.ChargeData) > 0 {
-		_ = UnmarshalFromJsonString(one.ChargeData, &eventCharge)
+		_ = utility.UnmarshalFromJsonString(one.ChargeData, &eventCharge)
 	}
 	return &MerchantMetricEvent{
 		Id:                        one.Id,

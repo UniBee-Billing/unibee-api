@@ -15,7 +15,7 @@ type MerchantMetricEvent struct {
 	MetricId                    uint64      `json:"metricId"                    description:"metric_id"`                                                              // metric_id
 	ExternalEventId             string      `json:"externalEventId"             description:"external_event_id, should be unique"`                                    // external_event_id, should be unique
 	UserId                      int64       `json:"userId"                      description:"user_id"`                                                                // user_id
-	AggregationPropertyInt      uint64      `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
+	AggregationPropertyInt      int64       `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   string      `json:"aggregationPropertyString"   description:"aggregation property string, use for metric of count|count_unique type"` // aggregation property string, use for metric of count|count_unique type
 	GmtCreate                   *gtime.Time `json:"gmtCreate"                   description:"create time"`                                                            // create time
 	GmtModify                   *gtime.Time `json:"gmtModify"                   description:"update time"`                                                            // update time
@@ -27,7 +27,7 @@ type MerchantMetricEvent struct {
 	SubscriptionPeriodStart     int64       `json:"subscriptionPeriodStart"     description:"matched subscription's current_period_start"`                            // matched subscription's current_period_start
 	SubscriptionPeriodEnd       int64       `json:"subscriptionPeriodEnd"       description:"matched subscription's current_period_end"`                              // matched subscription's current_period_end
 	MetricLimit                 uint64      `json:"metricLimit"                 description:""`                                                                       //
-	Used                        uint64      `json:"used"                        description:""`                                                                       //
+	Used                        int64       `json:"used"                        description:"used value"`                                                             // used value
 	ChargeInvoiceId             string      `json:"chargeInvoiceId"             description:"charge invoice id"`                                                      // charge invoice id
 	ChargeData                  string      `json:"chargeData"                  description:"charge data"`                                                            // charge data
 	ChargeStatus                int         `json:"chargeStatus"                description:"0-Uncharged，1-charged"`                                                  // 0-Uncharged，1-charged

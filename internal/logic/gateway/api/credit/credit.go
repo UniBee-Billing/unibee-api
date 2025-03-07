@@ -22,7 +22,7 @@ func (c Credit) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	}
 }
 
-func (c Credit) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (c Credit) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	return "https://unibee.dev/wp-content/uploads/2024/05/logo-white.svg?ver=1718007070", consts.GatewayTypeCredit, nil
 }
 

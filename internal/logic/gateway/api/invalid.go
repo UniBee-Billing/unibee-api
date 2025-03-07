@@ -36,7 +36,7 @@ func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gate
 	panic("implement me")
 }
 
-func (i Invalid) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (i Invalid) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }

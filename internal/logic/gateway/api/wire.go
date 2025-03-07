@@ -27,7 +27,7 @@ func (w Wire) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	}
 }
 
-func (w Wire) GatewayTest(ctx context.Context, key string, secret string, subGateway string) (icon string, gatewayType int64, err error) {
+func (w Wire) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	return "https://api.unibee.top/oss/file/d6y8q1dfe2owqjnayq.svg", consts.GatewayTypeWireTransfer, gerror.New("Please setup by wire transfer setup api")
 }
 

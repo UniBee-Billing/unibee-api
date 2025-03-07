@@ -2,6 +2,7 @@ package metric_event
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -48,20 +49,17 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	if req.MetricProperties == nil {
 		req.MetricProperties = gjson.New("")
 	}
-	if req.AggregationValue != nil {
-		_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationValue)
-	}
-	if req.AggregationUniqueId != nil {
-		_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationUniqueId)
-	}
 	// property determine
 	var aggregationPropertyString = ""
-	var aggregationPropertyInt uint64 = 1
+	var aggregationPropertyInt int64 = 1
 	aggregationPropertyUniqueId := fmt.Sprintf("%d_%d_%d_%s", req.MerchantId, user.Id, met.Id, req.ExternalEventId)
 	if met.AggregationType == metric.MetricAggregationTypeCount {
 		// use aggregationPropertyInt, check properties
 		aggregationPropertyInt = 1
 	} else if met.AggregationType == metric.MetricAggregationTypeCountUnique {
+		if req.AggregationUniqueId != nil {
+			_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationUniqueId)
+		}
 		// use aggregationPropertyString, check properties
 		utility.Assert(req.MetricProperties.Contains(met.AggregationProperty), fmt.Sprintf("property named '%s' not found in metricProperties json", met.AggregationProperty))
 		// check value should be string
@@ -78,11 +76,17 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		// count unique should replace uniqueId eventId with unique property
 		aggregationPropertyUniqueId = fmt.Sprintf("%d_%d_%d_%s", req.MerchantId, met.Id, user.Id, aggregationPropertyString)
 	} else {
+		if req.AggregationValue != nil {
+			_ = req.MetricProperties.Set(met.AggregationProperty, *req.AggregationValue)
+		}
 		// use aggregationPropertyInt, check properties
 		utility.Assert(req.MetricProperties.Contains(met.AggregationProperty), fmt.Sprintf("property named '%s' not found in metricProperties json", met.AggregationProperty))
 		// check value should be int
-		utility.Assert(req.MetricProperties.Get(met.AggregationProperty).IsUint(), fmt.Sprintf("property named '%s' is not Uint type", met.AggregationProperty))
-		aggregationPropertyInt = req.MetricProperties.Get(met.AggregationProperty).Uint64()
+		utility.Assert(IsJsonNumberType(req.MetricProperties.Get(met.AggregationProperty).Val()), fmt.Sprintf("property named '%s' is not Number type", met.AggregationProperty))
+		//utility.Assert(req.MetricProperties.Get(met.AggregationProperty).IsUint(), fmt.Sprintf("property named '%s' is not Uint type", met.AggregationProperty))
+		value := req.MetricProperties.Get(met.AggregationProperty).Int64()
+		//utility.Assert(value >= 0, fmt.Sprintf("property named '%s' is not positive value", met.AggregationProperty))
+		aggregationPropertyInt = value
 	}
 
 	var chargeStatus = 0
@@ -128,36 +132,58 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	// append the metric usage
 	newUsedValue := appendMetricCachedUseValue(ctx, req.MerchantId, user, met, sub, aggregationPropertyInt, one.Id)
 	one.Used = newUsedValue.UsedValue
+	one.ChargeData = utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue))
 
-	go func() {
-		// update background
-		backgroundCtx := context.Background()
-		var backgroundError error
-		defer func() {
-			if exception := recover(); exception != nil {
-				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					backgroundError = v
-				} else {
-					backgroundError = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-				}
-				if backgroundError != nil {
-					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err.Error())
-				} else {
-					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err)
-				}
-				return
-			}
-		}()
-		_, backgroundError = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
-			dao.MerchantMetricEvent.Columns().Used:       newUsedValue,
-			dao.MerchantMetricEvent.Columns().ChargeData: utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue)),
-			dao.MerchantMetricEvent.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
-		if backgroundError != nil {
-			g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())
-		}
-	}()
+	_, err = dao.MerchantMetricEvent.Ctx(ctx).Data(g.Map{
+		dao.MerchantMetricEvent.Columns().Used:       one.Used,
+		dao.MerchantMetricEvent.Columns().ChargeData: one.ChargeData,
+		dao.MerchantMetricEvent.Columns().GmtModify:  gtime.Now(),
+	}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(ctx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())
+	}
+
+	//go func() {
+	//	// update background
+	//	backgroundCtx := context.Background()
+	//	var backgroundError error
+	//	defer func() {
+	//		if exception := recover(); exception != nil {
+	//			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+	//				backgroundError = v
+	//			} else {
+	//				backgroundError = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+	//			}
+	//			if backgroundError != nil {
+	//				g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", backgroundError.Error())
+	//			} else {
+	//				g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err)
+	//			}
+	//			return
+	//		}
+	//	}()
+	//	_, backgroundError = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
+	//		dao.MerchantMetricEvent.Columns().Used:       newUsedValue,
+	//		dao.MerchantMetricEvent.Columns().ChargeData: utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue)),
+	//		dao.MerchantMetricEvent.Columns().GmtModify:  gtime.Now(),
+	//	}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
+	//	if backgroundError != nil {
+	//		g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", backgroundError.Error())
+	//	}
+	//}()
 	return one, nil
+}
+
+func IsJsonNumberType(value interface{}) bool {
+	switch vType := value.(type) {
+	case json.Number:
+		fmt.Println("is json.Number:", vType)
+		return true
+	case interface{}:
+		return false
+	default:
+		return false
+	}
 }
 
 func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) error {
