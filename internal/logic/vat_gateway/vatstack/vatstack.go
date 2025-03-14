@@ -18,6 +18,10 @@ type VatStack struct {
 	Name    string
 }
 
+func (v VatStack) VatRatesEnabled() bool {
+	return true
+}
+
 func fetchVatSense(url string, publicKey string) (*gjson.Json, error) {
 
 	// Create HTTP Request

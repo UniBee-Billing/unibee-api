@@ -28,6 +28,7 @@ type CreateProcessingInvoiceForSubReq struct {
 	Simplify           *bean.Invoice
 	Sub                *entity.Subscription
 	GatewayId          uint64
+	GatewayPaymentType string
 	PaymentMethodId    string
 	IsSubLatestInvoice bool
 	TimeNow            int64
@@ -127,6 +128,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, req *CreateProcessingInv
 		PeriodEndTime:                  gtime.NewFromTimeStamp(req.Simplify.PeriodEnd),
 		Currency:                       req.Sub.Currency,
 		GatewayId:                      req.GatewayId,
+		GatewayInvoiceId:               req.GatewayPaymentType,
 		GatewayPaymentMethod:           req.PaymentMethodId,
 		Status:                         status,
 		SendNote:                       req.Simplify.SendNote,

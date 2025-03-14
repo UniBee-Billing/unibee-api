@@ -80,7 +80,7 @@ func (c UnitpayWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchan
 						//update gateway payment method
 						payment := query.GetPaymentByPaymentId(backgroundCtx, jsonData.Get("account").String())
 						if payment != nil {
-							sub_update.UpdateUserDefaultGatewayPaymentMethod(backgroundCtx, payment.UserId, payment.GatewayId, paymentMethod)
+							sub_update.UpdateUserDefaultGatewayPaymentMethod(backgroundCtx, payment.UserId, payment.GatewayId, paymentMethod, "")
 						}
 					}()
 				}

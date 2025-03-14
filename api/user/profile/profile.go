@@ -41,6 +41,7 @@ type UpdateReq struct {
 	CountryName        *string `json:"countryName" dc:"Country Name"`
 	Type               *int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
 	GatewayId          *uint64 `json:"gatewayId" dc:"GatewayId"`
+	GatewayPaymentType *string `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	PaymentMethodId    *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 	City               string  `json:"city" dc:"city"`
 	ZipCode            string  `json:"zipCode" dc:"zip_code"`
@@ -62,9 +63,10 @@ type PasswordResetRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta          `path:"/change_gateway" tags:"User-Profile" method:"post" summary:"ChangeUserDefaultGateway" `
-	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
-	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
+	g.Meta             `path:"/change_gateway" tags:"User-Profile" method:"post" summary:"ChangeUserDefaultGateway" `
+	GatewayId          uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+	GatewayPaymentType string `json:"gatewayPaymentType" dc:"GatewayPaymentType"`
+	PaymentMethodId    string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 }
 type ChangeGatewayRes struct {
 }

@@ -56,6 +56,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(user != nil, "user not found")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "plan not found")
+	utility.Assert(plan.Type == consts.PlanTypeMain, "plan not main type")
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan.DisableAutoCharge == 0, "plan's auto-charge is disabled")
 	// todo mark renew for all status
@@ -75,7 +76,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
 	}
-	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
+	gatewayId, paymentType, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.GatewayPaymentType, "", sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	var timeNow = gtime.Now().Timestamp()
 	if sub.TestClock > timeNow && !config2.GetConfigInstance().IsProd() {
@@ -151,6 +152,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		Simplify:           currentInvoice,
 		Sub:                sub,
 		GatewayId:          gateway.Id,
+		GatewayPaymentType: paymentType,
 		PaymentMethodId:    paymentMethodId,
 		IsSubLatestInvoice: true,
 		TimeNow:            timeNow,
@@ -159,13 +161,12 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	var createRes *gateway_bean.GatewayNewPaymentResp
 	if invoice.TotalAmount > 0 {
 		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
-			Invoice:            invoice,
-			ManualPayment:      req.ManualPayment,
-			ReturnUrl:          req.ReturnUrl,
-			CancelUrl:          req.CancelUrl,
-			Source:             "SubscriptionRenew",
-			TimeNow:            0,
-			GatewayPaymentType: req.GatewayPaymentType,
+			Invoice:       invoice,
+			ManualPayment: req.ManualPayment,
+			ReturnUrl:     req.ReturnUrl,
+			CancelUrl:     req.CancelUrl,
+			Source:        "SubscriptionRenew",
+			TimeNow:       0,
 		})
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())

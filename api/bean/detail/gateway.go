@@ -145,8 +145,8 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 			subGatewayName = gatewayInfo.SubGatewayName
 		}
 		autoChargeEnabled = gatewayInfo.AutoChargeEnabled
-		if len(one.BankData) > 0 {
-			for _, paymentTypeStr := range utility.SplitToArray(one.BankData) {
+		if len(one.BrandData) > 0 {
+			for _, paymentTypeStr := range utility.SplitToArray(one.BrandData) {
 				for _, infoPaymentType := range gatewayInfo.GatewayPaymentTypes {
 					if paymentTypeStr == infoPaymentType.PaymentType {
 						gatewayPaymentTypes = append(gatewayPaymentTypes, infoPaymentType)

@@ -119,6 +119,7 @@ type IMerchantInvoice interface {
 
 type IMerchantMember interface {
 	Profile(ctx context.Context, req *member.ProfileReq) (res *member.ProfileRes, err error)
+	Update(ctx context.Context, req *member.UpdateReq) (res *member.UpdateRes, err error)
 	Logout(ctx context.Context, req *member.LogoutReq) (res *member.LogoutRes, err error)
 	PasswordReset(ctx context.Context, req *member.PasswordResetReq) (res *member.PasswordResetRes, err error)
 	List(ctx context.Context, req *member.ListReq) (res *member.ListRes, err error)
@@ -142,6 +143,7 @@ type IMerchantMetric interface {
 	EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditPlanLimitRes, err error)
 	DeletePlanLimit(ctx context.Context, req *metric.DeletePlanLimitReq) (res *metric.DeletePlanLimitRes, err error)
 	UserMetric(ctx context.Context, req *metric.UserMetricReq) (res *metric.UserMetricRes, err error)
+	UserSubscriptionMetric(ctx context.Context, req *metric.UserSubscriptionMetricReq) (res *metric.UserSubscriptionMetricRes, err error)
 }
 
 type IMerchantOss interface {

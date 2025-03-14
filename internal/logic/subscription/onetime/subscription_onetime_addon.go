@@ -51,7 +51,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 	addon := query.GetPlanById(ctx, req.AddonId)
 	utility.Assert(addon != nil, "addon not found")
 	utility.Assert(addon.Status == consts.PlanStatusActive, "addon not active")
-	utility.Assert(addon.Type == consts.PlanTypeOnetimeAddon, "addon not onetime type")
+	utility.Assert(addon.Type == consts.PlanTypeOnetime, "addon not onetime type")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub.Currency == addon.Currency, "Server error: currency not match")
 	utility.Assert(sub != nil, "sub not found")

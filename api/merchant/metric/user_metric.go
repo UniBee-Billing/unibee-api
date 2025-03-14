@@ -2,7 +2,6 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
 	"unibee/api/bean/detail"
 )
 
@@ -14,18 +13,14 @@ type UserMetricReq struct {
 }
 
 type UserMetricRes struct {
-	UserMetric *UserMetric `json:"userMetric" dc:"UserMetric"`
+	UserMetric *detail.UserMetric `json:"userMetric" dc:"UserMetric"`
 }
 
-type UserMetric struct {
-	IsPaid               bool                                   `json:"isPaid" dc:"IsPaid"`
-	Product              *bean.Product                          `json:"product" dc:"Product"`
-	User                 *bean.UserAccount                      `json:"user" dc:"user"`
-	Subscription         *bean.Subscription                     `json:"subscription" dc:"Subscription"`
-	Plan                 *bean.Plan                             `json:"plan" dc:"Plan"`
-	Addons               []*bean.PlanAddonDetail                `json:"addons" dc:"Addon"`
-	LimitStats           []*detail.UserMerchantMetricLimitStat  `json:"limitStats" dc:"LimitStats"`
-	MeteredChargeStats   []*detail.UserMerchantMetricChargeStat `json:"meteredChargeStats" dc:"MeteredChargeStats"`
-	RecurringChargeStats []*detail.UserMerchantMetricChargeStat `json:"recurringChargeStats" dc:"RecurringChargeStats"`
-	Description          string                                 `json:"description" dc:"description"`
+type UserSubscriptionMetricReq struct {
+	g.Meta         `path:"/user/sub/metric" tags:"User Metric" method:"get" summary:"Query User Metric By Subscription"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId"`
+}
+
+type UserSubscriptionMetricRes struct {
+	UserMetric *detail.UserMetric `json:"userMetric" dc:"UserMetric"`
 }

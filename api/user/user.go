@@ -45,6 +45,8 @@ type IUserMerchant interface {
 }
 
 type IUserMetric interface {
+	UserMetric(ctx context.Context, req *metric.UserMetricReq) (res *metric.UserMetricRes, err error)
+	UserSubscriptionMetric(ctx context.Context, req *metric.UserSubscriptionMetricReq) (res *metric.UserSubscriptionMetricRes, err error)
 	EventList(ctx context.Context, req *metric.EventListReq) (res *metric.EventListRes, err error)
 }
 

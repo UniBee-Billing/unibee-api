@@ -48,13 +48,17 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		if req.PaymentMethodId != nil {
 			paymentMethodId = *req.PaymentMethodId
 		}
-		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId)
+		var paymentType = ""
+		if req.GatewayPaymentType != nil {
+			paymentType = *req.GatewayPaymentType
+		}
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId, paymentType)
 	}
 	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	var vatNumber = one.VATNumber
 	if req.VATNumber != nil {
 		if len(*req.VATNumber) > 0 {
-			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
+			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)).VatRatesEnabled(), "Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", *req.VATNumber))
@@ -70,14 +74,13 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if req.CountryCode != nil && len(*req.CountryCode) > 0 {
 		if len(vatNumber) > 0 {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
-			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+			utility.Assert(gateway.VatRatesEnabled(), "Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, i18n.LocalizationFormat(ctx, "{#VatValidateError}", vatNumber))
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
 		}
 		if one.CountryCode != *req.CountryCode {
-			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 			sub_update.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
 		}
 	}
@@ -86,24 +89,25 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-organization")
 	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-		dao.UserAccount.Columns().Type:               req.Type,
-		dao.UserAccount.Columns().LastName:           req.LastName,
-		dao.UserAccount.Columns().FirstName:          req.FirstName,
-		dao.UserAccount.Columns().Address:            req.Address,
-		dao.UserAccount.Columns().CompanyName:        req.CompanyName,
-		dao.UserAccount.Columns().VATNumber:          req.VATNumber,
-		dao.UserAccount.Columns().Phone:              req.Phone,
-		dao.UserAccount.Columns().Telegram:           req.Telegram,
-		dao.UserAccount.Columns().WhatsAPP:           req.WhatsApp,
-		dao.UserAccount.Columns().WeChat:             req.WeChat,
-		dao.UserAccount.Columns().LinkedIn:           req.LinkedIn,
-		dao.UserAccount.Columns().Facebook:           req.Facebook,
-		dao.UserAccount.Columns().TikTok:             req.TikTok,
-		dao.UserAccount.Columns().OtherSocialInfo:    req.OtherSocialInfo,
-		dao.UserAccount.Columns().TimeZone:           req.TimeZone,
-		dao.UserAccount.Columns().City:               req.City,
-		dao.UserAccount.Columns().Language:           req.Language,
-		dao.UserAccount.Columns().ZipCode:            req.ZipCode,
+		dao.UserAccount.Columns().Type:            req.Type,
+		dao.UserAccount.Columns().LastName:        req.LastName,
+		dao.UserAccount.Columns().FirstName:       req.FirstName,
+		dao.UserAccount.Columns().Address:         req.Address,
+		dao.UserAccount.Columns().CompanyName:     req.CompanyName,
+		dao.UserAccount.Columns().VATNumber:       req.VATNumber,
+		dao.UserAccount.Columns().Phone:           req.Phone,
+		dao.UserAccount.Columns().Telegram:        req.Telegram,
+		dao.UserAccount.Columns().WhatsAPP:        req.WhatsApp,
+		dao.UserAccount.Columns().WeChat:          req.WeChat,
+		dao.UserAccount.Columns().LinkedIn:        req.LinkedIn,
+		dao.UserAccount.Columns().Facebook:        req.Facebook,
+		dao.UserAccount.Columns().TikTok:          req.TikTok,
+		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
+		dao.UserAccount.Columns().TimeZone:        req.TimeZone,
+		dao.UserAccount.Columns().City:            req.City,
+		dao.UserAccount.Columns().Language:        req.Language,
+		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
+		//dao.UserAccount.Columns().ReMark:             req.GatewayPaymentType,
 		dao.UserAccount.Columns().RegistrationNumber: req.RegistrationNumber,
 		dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, _interface.Context().Get(ctx).User.Id).OmitNil().Update()

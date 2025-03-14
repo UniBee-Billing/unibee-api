@@ -148,7 +148,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
-	utility.Assert(req.Amount > 0, "amount value should > 0")
+	utility.Assert(req.Amount >= 0, "amount value should >= 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
 	// product check and update
@@ -191,8 +191,8 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		req.HomeUrl = merchantInfo.HomeUrl
 	}
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(req.Type == consts.PlanTypeMain || req.Type == consts.PlanTypeRecurringAddon || req.Type == consts.PlanTypeOnetimeAddon, "type should be 1|2｜3")
-	if req.Type != consts.PlanTypeOnetimeAddon {
+	utility.Assert(req.Type == consts.PlanTypeMain || req.Type == consts.PlanTypeRecurringAddon || req.Type == consts.PlanTypeOnetime, "type should be 1|2｜3")
+	if req.Type != consts.PlanTypeOnetime {
 		utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 		utility.Assert(req.IntervalCount > 0, "IntervalCount should > 0")
 		if strings.ToLower(req.IntervalUnit) == "day" {
@@ -231,7 +231,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetime, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Currency == req.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.ProductId == req.ProductId, fmt.Sprintf("addon product not match plan's product, id:%d", addonPlan.Id))
@@ -385,7 +385,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		utility.Assert(req.IntervalCount == nil, "IntervalCount is not editable as plan is active")
 	} else {
 		if req.Amount != nil {
-			utility.Assert(*req.Amount > 0, "Amount value should > 0")
+			utility.Assert(*req.Amount >= 0, "Amount value should >= 0")
 		}
 		if req.Currency != nil && len(*req.Currency) > 0 {
 			utility.Assert(currency.IsFiatCurrencySupport(*req.Currency), "Currency not support")
@@ -396,7 +396,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 			req.IntervalCount = unibee.Int(1)
 		}
 
-		if one.Type != consts.PlanTypeOnetimeAddon {
+		if one.Type != consts.PlanTypeOnetime {
 			if req.IntervalUnit != nil {
 				intervals := []string{"day", "month", "year", "week"}
 				utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(*req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
@@ -467,7 +467,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetime, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("addon not published status, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Currency == one.Currency, fmt.Sprintf("addon currency not match plan's currency, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.ProductId == one.ProductId, fmt.Sprintf("addon product not match plan's product, id:%d", addonPlan.Id))
@@ -597,6 +597,7 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 		Status:                 consts.PlanStatusEditable,
 		CreateTime:             gtime.Now().Timestamp(),
 		MetaData:               one.MetaData,
+		PublishStatus:          consts.PlanPublishStatusUnPublished,
 		GasPayer:               one.GasPayer,
 		TrialDurationTime:      one.TrialDurationTime,
 		TrialAmount:            one.TrialAmount,
@@ -762,7 +763,7 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not addon onetime type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetime, fmt.Sprintf("plan not addon onetime type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("addon not published status, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Currency == one.Currency, fmt.Sprintf("addon currency not match plan's currency, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.ProductId == one.ProductId, fmt.Sprintf("addon product not match plan's product, id:%d", addonPlan.Id))

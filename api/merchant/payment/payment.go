@@ -7,25 +7,26 @@ import (
 )
 
 type NewReq struct {
-	g.Meta            `path:"/new" tags:"Payment" method:"post" summary:"New Payment"`
-	ExternalPaymentId string                 `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
-	ExternalUserId    string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
-	Email             string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
-	UserId            uint64                 `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
-	Currency          string                 `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
-	TotalAmount       int64                  `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
-	PlanId            uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
-	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
-	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
-	CancelUrl         string                 `json:"cancelUrl" dc:"CancelUrl"`
-	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
-	Name              string                 `json:"name" dc:"Name"`
-	Description       string                 `json:"description" dc:"Description"`
-	Items             []*Item                `json:"items" dc:"Items"`
-	Metadata          map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
-	GasPayer          string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
-	SendInvoice       bool                   `json:"sendInvoice" d:"false" dc:"Whether sen invoice email to customer or not，default false"`
-	PaymentType       string                 `json:"paymentType" dc:"Payment Type"`
+	g.Meta             `path:"/new" tags:"Payment" method:"post" summary:"New Payment"`
+	ExternalPaymentId  string                 `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
+	ExternalUserId     string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email              string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId             uint64                 `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
+	Currency           string                 `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
+	TotalAmount        int64                  `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
+	PlanId             uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
+	GatewayId          uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	GatewayPaymentType string                 `json:"gatewayPaymentType" dc:"GatewayPaymentType"`
+	RedirectUrl        string                 `json:"redirectUrl" dc:"Redirect Url"`
+	CancelUrl          string                 `json:"cancelUrl" dc:"CancelUrl"`
+	CountryCode        string                 `json:"countryCode" dc:"CountryCode"`
+	Name               string                 `json:"name" dc:"Name"`
+	Description        string                 `json:"description" dc:"Description"`
+	Items              []*Item                `json:"items" dc:"Items"`
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	GasPayer           string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	SendInvoice        bool                   `json:"sendInvoice" d:"false" dc:"Whether sen invoice email to customer or not，default false"`
+	PaymentType        string                 `json:"paymentType" dc:"Payment Type"`
 }
 
 type NewRes struct {

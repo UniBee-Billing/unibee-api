@@ -9,7 +9,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
-	metric2 "unibee/api/merchant/metric"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
@@ -69,7 +68,16 @@ func UpdateMetricEventForInvoicePaid(one *entity.Invoice) {
 	}()
 }
 
-func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, reloadCache bool) *bean.UserMetricChargeInvoiceItemEntity {
+func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, reloadCache bool) (entity *bean.UserMetricChargeInvoiceItemEntity) {
+	entity = &bean.UserMetricChargeInvoiceItemEntity{
+		MeteredChargeStats:   make([]*bean.UserMetricChargeInvoiceItem, 0),
+		RecurringChargeStats: make([]*bean.UserMetricChargeInvoiceItem, 0),
+	}
+	defer func() {
+		if exception := recover(); exception != nil {
+			return
+		}
+	}()
 	userMetric := GetUserSubscriptionMetricStat(ctx, merchantId, user, sub, reloadCache)
 	meteredChargeStats := make([]*bean.UserMetricChargeInvoiceItem, 0)
 	recurringChargeStats := make([]*bean.UserMetricChargeInvoiceItem, 0)
@@ -103,7 +111,7 @@ func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint6
 	}
 }
 
-func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, productId int64, reloadCache bool) *metric2.UserMetric {
+func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, productId int64, reloadCache bool) *detail.UserMetric {
 	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, user.MerchantId, productId)
 	if sub == nil {
 		sub = query.GetLatestSubscriptionByUserId(ctx, user.Id, user.MerchantId, productId)
@@ -111,7 +119,7 @@ func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.User
 	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub, reloadCache)
 }
 
-func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription, reloadCache bool) *metric2.UserMetric {
+func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription, reloadCache bool) *detail.UserMetric {
 	var list = make([]*detail.UserMerchantMetricLimitStat, 0)
 	var meteredChargeStats = make([]*detail.UserMerchantMetricChargeStat, 0)
 	var recurringChargeStats = make([]*detail.UserMerchantMetricChargeStat, 0)
@@ -157,7 +165,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 				GraduatedStep:     graduateStep,
 			})
 		}
-		return &metric2.UserMetric{
+		return &detail.UserMetric{
 			IsPaid:               one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete,
 			Product:              bean.SimplifyProduct(query.GetProductById(ctx, uint64(query.GetPlanById(ctx, one.PlanId).ProductId), merchantId)),
 			User:                 bean.SimplifyUserAccount(user),
@@ -169,7 +177,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 			RecurringChargeStats: recurringChargeStats,
 		}
 	} else {
-		return &metric2.UserMetric{
+		return &detail.UserMetric{
 			IsPaid:               false,
 			User:                 bean.SimplifyUserAccount(user),
 			Product:              nil,
@@ -206,21 +214,23 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uin
 		for _, subPlan := range userSubPlans {
 			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, false)
 			for _, planLimit := range list {
-				if _, ok := limitMap[planLimit.MetricId]; ok {
-					limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
-					limitMap[planLimit.MetricId].PlanLimits = append(limitMap[planLimit.MetricId].PlanLimits, planLimit)
-				} else {
-					limitMap[planLimit.MetricId] = &detail.PlanMetricLimitDetail{
-						MerchantId:          merchantId,
-						UserId:              userId,
-						MetricId:            planLimit.MetricId,
-						Code:                planLimit.Metric.Code,
-						MetricName:          planLimit.Metric.MetricName,
-						Type:                planLimit.Metric.Type,
-						AggregationType:     planLimit.Metric.AggregationType,
-						AggregationProperty: planLimit.Metric.AggregationProperty,
-						TotalLimit:          planLimit.MetricLimit,
-						PlanLimits:          []*detail.MerchantMetricPlanLimitDetail{planLimit},
+				if planLimit.Metric != nil {
+					if _, ok := limitMap[planLimit.MetricId]; ok {
+						limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
+						limitMap[planLimit.MetricId].PlanLimits = append(limitMap[planLimit.MetricId].PlanLimits, planLimit)
+					} else {
+						limitMap[planLimit.MetricId] = &detail.PlanMetricLimitDetail{
+							MerchantId:          merchantId,
+							UserId:              userId,
+							MetricId:            planLimit.MetricId,
+							Code:                planLimit.Metric.Code,
+							MetricName:          planLimit.Metric.MetricName,
+							Type:                planLimit.Metric.Type,
+							AggregationType:     planLimit.Metric.AggregationType,
+							AggregationProperty: planLimit.Metric.AggregationProperty,
+							TotalLimit:          planLimit.MetricLimit,
+							PlanLimits:          []*detail.MerchantMetricPlanLimitDetail{planLimit},
+						}
 					}
 				}
 			}

@@ -4,8 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/google/uuid"
 	"testing"
 	_interface "unibee/internal/interface"
+	defaultAlipayClient "unibee/internal/logic/gateway/api/alipay/api"
+	"unibee/internal/logic/gateway/api/alipay/api/model"
+	"unibee/internal/logic/gateway/api/alipay/api/request/auth"
+	responseAuth "unibee/internal/logic/gateway/api/alipay/api/response/auth"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -27,10 +32,16 @@ func TestForAlipay(t *testing.T) {
 func TestForAlipayPlus(t *testing.T) {
 	pay := &AlipayPlus{}
 	_, _, _ = pay.GatewayTest(context.Background(), &_interface.GatewayTestReq{
-		Key:                 key,
-		Secret:              secret,
-		SubGateway:          subGateway,
-		GatewayPaymentTypes: nil,
+		Key:        key,
+		Secret:     secret,
+		SubGateway: subGateway,
+		GatewayPaymentTypes: []*_interface.GatewayPaymentType{&_interface.GatewayPaymentType{
+			Name:        "",
+			PaymentType: "ALIPAY_CN",
+			CountryName: "",
+			AutoCharge:  false,
+			Category:    "",
+		}},
 	})
 }
 
@@ -53,4 +64,28 @@ func TestForAlipayGetPaymentDetail(t *testing.T) {
 
 func TestForPaymentTypes(t *testing.T) {
 	fmt.Printf("%s", utility.MarshalToJsonString(fetchAlipayPlusPaymentTypes(context.Background())))
+}
+
+func TestAutochargeAudit(t *testing.T) {
+	client := defaultAlipayClient.NewDefaultAlipayClient(
+		"https://open-de-global.alipay.com",
+		subGateway,
+		secret,
+		key, false)
+	request, authConsultRequest := auth.NewAlipayAuthConsultRequest()
+	authConsultRequest.CustomerBelongsTo = model.ALIPAY_CN
+	authConsultRequest.AuthRedirectUrl = "https://www.yourRedirectUrl.com"
+	authConsultRequest.Scopes = []model.ScopeType{model.ScopeTypeAgreementPay}
+	authConsultRequest.AuthState = uuid.NewString()
+	authConsultRequest.TerminalType = model.WEB
+
+	execute, err := client.Execute(request)
+	if err != nil {
+		print(err.Error())
+		return
+	}
+	response := execute.(*responseAuth.AlipayAuthConsultResponse)
+	fmt.Println("response: ", utility.MarshalToJsonString(response))
+	fmt.Println("NormalUrl: ", response.NormalUrl)
+	//https://www.yourredirecturl.com/?authCode=281001139369360449491196&authState=6f9c3c7b-8619-4a7a-aa63-96db0239c47d
 }

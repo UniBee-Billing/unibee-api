@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package system
 
 import (
 	"context"
-	
+
 	"unibee/api/system/auth"
 	"unibee/api/system/information"
 	"unibee/api/system/invoice"
@@ -42,10 +42,9 @@ type ISystemPlan interface {
 
 type ISystemRefund interface {
 	BulkChannelSync(ctx context.Context, req *refund.BulkChannelSyncReq) (res *refund.BulkChannelSyncRes, err error)
+	GatewayDetail(ctx context.Context, req *refund.GatewayDetailReq) (res *refund.GatewayDetailRes, err error)
 }
 
 type ISystemSubscription interface {
 	TestClockWalk(ctx context.Context, req *subscription.TestClockWalkReq) (res *subscription.TestClockWalkRes, err error)
 }
-
-

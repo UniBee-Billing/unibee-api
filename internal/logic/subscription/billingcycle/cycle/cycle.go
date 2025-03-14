@@ -111,7 +111,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			needInvoiceGenerate = false
 			needTryInvoiceAutomaticPayment = false
 		}
-		if plan.DisableAutoCharge > 0 {
+		if plan.DisableAutoCharge > 0 || plan.Type != consts.PlanTypeMain || plan.Amount == 0 {
 			needInvoiceGenerate = false
 			needTryInvoiceAutomaticPayment = false
 		}
@@ -207,7 +207,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 			if needInvoiceGenerate {
 				invoice, pendingUpdate := PreviewSubscriptionNextInvoice(ctx, sub, timeNow)
-				gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+				gatewayId, paymentType, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", "", sub.SubscriptionId)
 				if gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
 						dao.Subscription.Columns().GmtModify:                   gtime.Now(),
@@ -222,6 +222,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					Simplify:           invoice,
 					Sub:                sub,
 					GatewayId:          sub.GatewayId,
+					GatewayPaymentType: paymentType,
 					PaymentMethodId:    sub.GatewayDefaultPaymentMethod,
 					IsSubLatestInvoice: true,
 					TimeNow:            timeNow,

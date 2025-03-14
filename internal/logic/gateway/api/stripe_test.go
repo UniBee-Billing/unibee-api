@@ -6,6 +6,7 @@ import (
 	"github.com/stripe/stripe-go/v78"
 	"github.com/stripe/stripe-go/v78/checkout/session"
 	"github.com/stripe/stripe-go/v78/customer"
+	"github.com/stripe/stripe-go/v78/dispute"
 	"github.com/stripe/stripe-go/v78/paymentmethod"
 	"github.com/stripe/stripe-go/v78/refund"
 	"strings"
@@ -198,3 +199,15 @@ func TestStripeQueryAllRefunds(t *testing.T) {
 //		g.Log().Infof(context.Background(), "list: %v", utility.MarshalMetadataToJsonString(paymentMethods))
 //	})
 //}
+
+func TestStripeDisuteGet(t *testing.T) {
+	stripe.Key = ""
+	params := &stripe.DisputeListParams{
+		PaymentIntent: stripe.String("pi_3QxfkNDaLWZKMs9N2ShDtrVd"),
+	}
+	result := dispute.List(params)
+	fmt.Println(utility.MarshalToJsonString(result.DisputeList().Data[0]))
+	//params := &stripe.DisputeParams{}
+	//result, _ := dispute.Get("du_1R0NQ5DaLWZKMs9NNyZGafGl", params)
+	//fmt.Println(utility.MarshalToJsonString(result))
+}

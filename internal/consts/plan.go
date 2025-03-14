@@ -5,7 +5,7 @@ type PlanType int
 const (
 	PlanTypeMain           = 1
 	PlanTypeRecurringAddon = 2
-	PlanTypeOnetimeAddon   = 3
+	PlanTypeOnetime        = 3
 )
 
 type PlanStatusEnum int

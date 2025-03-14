@@ -37,6 +37,6 @@ func (c *ControllerUser) ChangeGateway(ctx context.Context, req *user.ChangeGate
 			utility.AssertError(err, "CreateOrUpdateGatewayUser failed")
 		}
 	}
-	user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId)
+	user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, req.GatewayPaymentType)
 	return &user.ChangeGatewayRes{}, nil
 }

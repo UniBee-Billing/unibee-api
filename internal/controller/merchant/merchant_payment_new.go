@@ -187,6 +187,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			BizType:           consts.BizTypeOneTime,
 			UserId:            user.Id,
 			GatewayId:         gateway.Id,
+			GatewayEdition:    req.GatewayPaymentType,
 			TotalAmount:       req.TotalAmount,
 			Currency:          req.Currency,
 			CountryCode:       req.CountryCode,
@@ -196,10 +197,11 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			GasPayer:          req.GasPayer,
 			UniqueId:          uniqueId,
 		},
-		ExternalUserId: req.ExternalUserId,
-		Email:          req.Email,
-		Metadata:       req.Metadata,
-		Invoice:        invoice,
+		ExternalUserId:     req.ExternalUserId,
+		Email:              req.Email,
+		Metadata:           req.Metadata,
+		Invoice:            invoice,
+		GatewayPaymentType: req.GatewayPaymentType,
 	})
 	utility.AssertError(err, "Create Gateway Payment Error:")
 	res = &payment.NewRes{

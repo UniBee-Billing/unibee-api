@@ -31,36 +31,43 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 		return
 	}
 	if len(countryCode) > 0 && strings.Compare(user.CountryCode, countryCode) != 0 {
-		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
-			gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
-			taxPercentage, countryName := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, countryCode, gatewayId, user.VATNumber)
-			_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
-				dao.UserAccount.Columns().CountryCode:   countryCode,
-				dao.UserAccount.Columns().CountryName:   countryName,
-				dao.UserAccount.Columns().TaxPercentage: taxPercentage,
-				dao.UserAccount.Columns().GmtModify:     gtime.Now(),
-			}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
-			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-				MerchantId:     user.MerchantId,
-				Target:         fmt.Sprintf("User(%v)", user.Id),
-				Content:        fmt.Sprintf("UpdateCountryCode(%s-%v)", countryCode, taxPercentage),
-				UserId:         user.Id,
-				SubscriptionId: "",
-				InvoiceId:      "",
-				PlanId:         0,
-				DiscountCode:   "",
-			}, nil)
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicUserAccountUpdate.Topic,
-				Tag:        redismq2.TopicUserAccountUpdate.Tag,
-				Body:       fmt.Sprintf("%d", user.Id),
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-			if err != nil {
-				g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, error:%s", userId, countryCode, err.Error())
-			} else {
-				g.Log().Infof(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
+		taxPercentage := user.TaxPercentage
+		countryName := user.CountryName
+		gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
+		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId).VatRatesEnabled() {
+			taxPercentage, countryName = vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, countryCode, gatewayId, user.VATNumber)
+		} else {
+			countryOne, _ := vat_gateway.QueryVatCountryRateByMerchant(ctx, user.MerchantId, countryCode)
+			if countryOne != nil {
+				countryName = countryOne.CountryName
 			}
+		}
+		_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().CountryCode:   countryCode,
+			dao.UserAccount.Columns().CountryName:   countryName,
+			dao.UserAccount.Columns().TaxPercentage: taxPercentage,
+			dao.UserAccount.Columns().GmtModify:     gtime.Now(),
+		}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     user.MerchantId,
+			Target:         fmt.Sprintf("User(%v)", user.Id),
+			Content:        fmt.Sprintf("UpdateCountryCode(%s-%v)", countryCode, taxPercentage),
+			UserId:         user.Id,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, nil)
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicUserAccountUpdate.Topic,
+			Tag:        redismq2.TopicUserAccountUpdate.Tag,
+			Body:       fmt.Sprintf("%d", user.Id),
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+		if err != nil {
+			g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, error:%s", userId, countryCode, err.Error())
+		} else {
+			g.Log().Infof(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
 		}
 	}
 }

@@ -16,7 +16,6 @@ import (
 	"unibee/internal/logic/gateway/api/alipay/api/model"
 	"unibee/internal/logic/gateway/api/alipay/api/request/pay"
 	responsePay "unibee/internal/logic/gateway/api/alipay/api/response/pay"
-	"unibee/internal/logic/gateway/api/alipay/api/tools"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
@@ -39,7 +38,7 @@ func fetchAlipayPlusPaymentTypes(ctx context.Context) []*_interface.GatewayPayme
 	//}
 	//
 	//jsonString := string(data)
-	jsonString := "[\n  {\"name\": \"Alipay+\", \"paymentType\": \"CONNECT_WALLET\", \"countryName\": \"Global\", \"autoCharge\": false, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"EPS\", \"paymentType\": \"EPS\", \"countryName\": \"Austria\", \"autoCharge\": false, \"category\": \"Online banking\"},\n  {\"name\": \"Bancontact\", \"paymentType\": \"BANCONTACT\", \"countryName\": \"Belgium\", \"autoCharge\": false, \"category\": \"Online banking\"},\n  {\"name\": \"Pix\", \"paymentType\": \"PIX\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Mercado Pago\", \"paymentType\": \"MERCADOPAGO_BR\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Pagaleve\", \"paymentType\": \"PAGALEVE\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"BNPL\"},\n  {\"name\": \"Mercado Pago\", \"paymentType\": \"MERCADOPAGO_CL\", \"countryName\": \"Chile\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Alipay\", \"paymentType\": \"ALIPAY_CN\", \"countryName\": \"China\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"JKOPay\", \"paymentType\": \"JKOPAY\", \"countryName\": \"China\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"AlipayHK\", \"paymentType\": \"ALIPAY_HK\", \"countryName\": \"Hong Kong (China)\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"BANCOMAT Pay\", \"paymentType\": \"BANCOMATPAY\", \"countryName\": \"Italy\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"DANA\", \"paymentType\": \"DANA\", \"countryName\": \"Indonesia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Kredivo\", \"paymentType\": \"KREDIVO_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"OVO\", \"paymentType\": \"OVO\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"GoPay\", \"paymentType\": \"GOPAY_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Maybank\", \"paymentType\": \"BANKTRANSFER_MAYBANK\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"BNI\", \"paymentType\": \"BANKTRANSFER_BNI\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Permata\", \"paymentType\": \"BANKTRANSFER_PERMATA\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"CIMB Niaga VA\", \"paymentType\": \"CIMBNIAGA\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"BSI\", \"paymentType\": \"BANKTRANSFER_BSI\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"ATM Bersama/Prima/Alto\", \"paymentType\": \"ATMTRANSFER_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"QRIS\", \"paymentType\": \"QRIS\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"ShopeePay\", \"paymentType\": \"SHOPEEPAY_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"PayPay\", \"paymentType\": \"PAYPAY\", \"countryName\": \"Japan\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Konbini\", \"paymentType\": \"KONBINI\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"OTC\"},\n  {\"name\": \"Konbini\", \"paymentType\": \"SEVENELEVEN\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"OTC\"},\n  {\"name\": \"Pay-easy\", \"paymentType\": \"BANKTRANSFER_PAYEASY\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Boost\", \"paymentType\": \"BOOST\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Touch'n Go eWallet\", \"paymentType\": \"TNG\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_MY\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Easypaisa\", \"paymentType\": \"EASYPAISA\", \"countryName\": \"Pakistan\", \"autoCharge\": true, \"category\": \"\"},\n  {\"name\": \"GCash\", \"paymentType\": \"GCASH\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Maya\", \"paymentType\": \"MAYA\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_PH\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_SG\", \"countryName\": \"Singapore\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Kakao Pay\", \"paymentType\": \"KAKAOPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"NAVER Pay\", \"paymentType\": \"NAVERPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Toss Pay\", \"paymentType\": \"TOSSPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"LINE Pay\", \"paymentType\": \"RABBIT_LINE_PAY\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"TrueMoney\", \"paymentType\": \"TRUEMONEY\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"K PLUS\", \"paymentType\": \"KPLUS\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"ZaloPay\", \"paymentType\": \"ZALOPAY\", \"countryName\": \"Vietnam\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"MoMo\", \"paymentType\": \"MOMO\", \"countryName\": \"Vietnam\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"One click payment\", \"paymentType\": \"DIRECTDEBIT_YAPILY\", \"countryName\": \"The United Kingdom\", \"autoCharge\": true, \"category\": \"\"}\n]"
+	jsonString := "[\n  {\"name\": \"EPS\", \"paymentType\": \"EPS\", \"countryName\": \"Austria\", \"autoCharge\": false, \"category\": \"Online banking\"},\n  {\"name\": \"Bancontact\", \"paymentType\": \"BANCONTACT\", \"countryName\": \"Belgium\", \"autoCharge\": false, \"category\": \"Online banking\"},\n  {\"name\": \"Pix\", \"paymentType\": \"PIX\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Mercado Pago\", \"paymentType\": \"MERCADOPAGO_BR\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Pagaleve\", \"paymentType\": \"PAGALEVE\", \"countryName\": \"Brazil\", \"autoCharge\": false, \"category\": \"BNPL\"},\n  {\"name\": \"Mercado Pago\", \"paymentType\": \"MERCADOPAGO_CL\", \"countryName\": \"Chile\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Alipay\", \"paymentType\": \"ALIPAY_CN\", \"countryName\": \"China\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"JKOPay\", \"paymentType\": \"JKOPAY\", \"countryName\": \"China\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"AlipayHK\", \"paymentType\": \"ALIPAY_HK\", \"countryName\": \"Hong Kong (China)\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"BANCOMAT Pay\", \"paymentType\": \"BANCOMATPAY\", \"countryName\": \"Italy\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"DANA\", \"paymentType\": \"DANA\", \"countryName\": \"Indonesia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Kredivo\", \"paymentType\": \"KREDIVO_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"OVO\", \"paymentType\": \"OVO\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"GoPay\", \"paymentType\": \"GOPAY_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"Maybank\", \"paymentType\": \"BANKTRANSFER_MAYBANK\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"BNI\", \"paymentType\": \"BANKTRANSFER_BNI\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Permata\", \"paymentType\": \"BANKTRANSFER_PERMATA\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"CIMB Niaga VA\", \"paymentType\": \"CIMBNIAGA\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"BSI\", \"paymentType\": \"BANKTRANSFER_BSI\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"ATM Bersama/Prima/Alto\", \"paymentType\": \"ATMTRANSFER_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"QRIS\", \"paymentType\": \"QRIS\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"ShopeePay\", \"paymentType\": \"SHOPEEPAY_ID\", \"countryName\": \"Indonesia\", \"autoCharge\": false, \"category\": \"Wallet\"},\n  {\"name\": \"PayPay\", \"paymentType\": \"PAYPAY\", \"countryName\": \"Japan\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Konbini\", \"paymentType\": \"KONBINI\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"OTC\"},\n  {\"name\": \"Konbini\", \"paymentType\": \"SEVENELEVEN\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"OTC\"},\n  {\"name\": \"Pay-easy\", \"paymentType\": \"BANKTRANSFER_PAYEASY\", \"countryName\": \"Japan\", \"autoCharge\": false, \"category\": \"Bank transfer\"},\n  {\"name\": \"Boost\", \"paymentType\": \"BOOST\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Touch'n Go eWallet\", \"paymentType\": \"TNG\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_MY\", \"countryName\": \"Malaysia\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Easypaisa\", \"paymentType\": \"EASYPAISA\", \"countryName\": \"Pakistan\", \"autoCharge\": true, \"category\": \"\"},\n  {\"name\": \"GCash\", \"paymentType\": \"GCASH\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Maya\", \"paymentType\": \"MAYA\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_PH\", \"countryName\": \"Philippines\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"Grabpay\", \"paymentType\": \"GRABPAY_SG\", \"countryName\": \"Singapore\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Kakao Pay\", \"paymentType\": \"KAKAOPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"NAVER Pay\", \"paymentType\": \"NAVERPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"Toss Pay\", \"paymentType\": \"TOSSPAY\", \"countryName\": \"South Korea\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"LINE Pay\", \"paymentType\": \"RABBIT_LINE_PAY\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"TrueMoney\", \"paymentType\": \"TRUEMONEY\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"K PLUS\", \"paymentType\": \"KPLUS\", \"countryName\": \"Thailand\", \"autoCharge\": true, \"category\": \"Alipay+ payment method\"},\n  {\"name\": \"ZaloPay\", \"paymentType\": \"ZALOPAY\", \"countryName\": \"Vietnam\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"MoMo\", \"paymentType\": \"MOMO\", \"countryName\": \"Vietnam\", \"autoCharge\": true, \"category\": \"Wallet\"},\n  {\"name\": \"One click payment\", \"paymentType\": \"DIRECTDEBIT_YAPILY\", \"countryName\": \"The United Kingdom\", \"autoCharge\": true, \"category\": \"\"}\n]"
 	if !gjson.Valid(jsonString) {
 		g.Log().Errorf(ctx, "Parse payment type file error, invalid json file")
 	}
@@ -56,7 +55,7 @@ func fetchAlipayPlusPaymentTypes(ctx context.Context) []*_interface.GatewayPayme
 func (c AlipayPlus) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
 		Name:                          "Alipay+",
-		Description:                   "Antom Online Payments(CONNECT_WALLET), Use public and private keys to secure the Alipay+ payment.",
+		Description:                   "Antom Online Payments(Predefined Payment Method Types), Use public and private keys to secure the Alipay+ payment.",
 		DisplayName:                   "Alipay+",
 		GatewayWebsiteLink:            "https://global.alipay.com/platform/site/ihome",
 		GatewayWebhookIntegrationLink: "",
@@ -65,7 +64,7 @@ func (c AlipayPlus) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d7xy50zqf0iae7q9s6.png"},
 		GatewayType:                   consts.GatewayTypeAlipayPlus,
 		GatewayPaymentTypes:           fetchAlipayPlusPaymentTypes(ctx),
-		SubGatewayName:                "Client Id",
+		SubGatewayName:                "Client ID",
 		PublicKeyName:                 "Alipay+ Public Key",
 		PrivateSecretName:             "Merchant Private Key",
 		Host:                          "https://open-de-global.alipay.com",
@@ -102,7 +101,9 @@ func (c AlipayPlus) GatewayTest(ctx context.Context, req *_interface.GatewayTest
 		BuyerEmail: "mail@hotmail.com",
 	}
 	request.Order = order
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CONNECT_WALLET"}
+	utility.Assert(req.GatewayPaymentTypes != nil && len(req.GatewayPaymentTypes) > 0, "Payment Type is empty")
+	paymentType := req.GatewayPaymentTypes[0].PaymentType
+	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: paymentType}
 	request.PaymentAmount = model.NewAmount("4200", "EUR")
 	request.PaymentNotifyUrl = "https://www.gaga.com/notify"
 	request.PaymentRedirectUrl = "https://www.alipay.com"
@@ -117,7 +118,7 @@ func (c AlipayPlus) GatewayTest(ctx context.Context, req *_interface.GatewayTest
 	response := execute.(*responsePay.AlipayPayResponse)
 	g.Log().Debugf(ctx, "responseJson :%s", utility.MarshalToJsonString(response))
 	utility.Assert(len(response.NormalUrl) > 0, "invalid keys, NormalUrl is nil")
-	g.Log().Infof(ctx, "Redirect Url:%s", tools.Decode(response.NormalUrl))
+	g.Log().Infof(ctx, "Redirect Url:%s", response.NormalUrl)
 	return "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png", consts.GatewayTypeAlipayPlus, nil
 }
 
@@ -231,7 +232,15 @@ func (c AlipayPlus) GatewayNewPayment(ctx context.Context, gateway *entity.Merch
 
 		request.Order = order
 	}
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CONNECT_WALLET"}
+	if len(createPayContext.Gateway.BrandData) > 0 {
+		gatewayPaymentTypes := utility.SplitToArray(createPayContext.Gateway.BrandData)
+		if gatewayPaymentTypes != nil && len(gatewayPaymentTypes) == 1 {
+			createPayContext.GatewayPaymentType = gatewayPaymentTypes[0]
+		}
+	}
+	utility.Assert(len(createPayContext.GatewayPaymentType) > 0, "invalid Gateway PaymentType")
+	var paymentType = createPayContext.GatewayPaymentType
+	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: paymentType}
 	request.PaymentAmount = model.NewAmount(fmt.Sprintf("%d", createPayContext.Pay.TotalAmount), createPayContext.Pay.Currency)
 	request.PaymentNotifyUrl = webhook2.GetPaymentWebhookEntranceUrl(createPayContext.Gateway.Id)
 	request.PaymentRedirectUrl = webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)
@@ -253,7 +262,7 @@ func (c AlipayPlus) GatewayNewPayment(ctx context.Context, gateway *entity.Merch
 		Status:                 status,
 		GatewayPaymentId:       gatewayPaymentId,
 		GatewayPaymentIntentId: gatewayPaymentId,
-		Link:                   tools.Decode(response.NormalUrl),
+		Link:                   response.NormalUrl,
 	}, nil
 }
 
@@ -302,7 +311,8 @@ func (c AlipayPlus) GatewayPaymentDetail(ctx context.Context, gateway *entity.Me
 		gateway.GatewaySecret,
 		gateway.GatewayKey, false)
 	queryRequest := pay.AlipayPayQueryRequest{}
-	queryRequest.PaymentId = gatewayPaymentId
+	//queryRequest.PaymentId = gatewayPaymentId
+	queryRequest.PaymentRequestId = payment.PaymentId
 	request := queryRequest.NewRequest()
 	execute, err := client.Execute(request)
 	if err != nil {

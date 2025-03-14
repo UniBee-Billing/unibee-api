@@ -157,7 +157,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			}
 			countryName := ""
 			IsEu := ""
-			if vat_gateway.GetDefaultVatGateway(ctx, one.MerchantId) != nil {
+			if vat_gateway.GetDefaultVatGateway(ctx, one.MerchantId).VatRatesEnabled() {
 				vatCountryRate, _ := vat_gateway.QueryVatCountryRateByMerchant(ctx, one.MerchantId, one.CountryCode)
 				if vatCountryRate != nil {
 					countryName = vatCountryRate.CountryName

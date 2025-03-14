@@ -13,6 +13,17 @@ type ProfileRes struct {
 	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Member Object"`
 }
 
+type UpdateReq struct {
+	g.Meta    `path:"/update" tags:"Admin Member" method:"post" summary:"Update Member Profile"`
+	FirstName string `json:"firstName"     description:"The firstName of member"`
+	LastName  string `json:"lastName"      description:"The lastName of member"`
+	Mobile    string `json:"mobile"     description:"mobile"`
+}
+
+type UpdateRes struct {
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Member Object"`
+}
+
 type LogoutReq struct {
 	g.Meta `path:"/logout" tags:"Admin Member" method:"post" summary:"Logout"`
 }

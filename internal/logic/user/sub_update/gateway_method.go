@@ -39,26 +39,33 @@ func ClearUserDefaultGatewayMethodForAutoCharge(ctx context.Context, userId uint
 	}
 }
 
-func UpdateUserDefaultGatewayForCheckout(ctx context.Context, userId uint64, gatewayId uint64) {
+func UpdateUserDefaultGatewayForCheckout(ctx context.Context, userId uint64, gatewayId uint64, paymentType string) {
 	if userId > 0 && gatewayId > 0 {
 		user := query.GetUserAccountById(ctx, userId)
 		if user != nil && len(user.GatewayId) == 0 {
 			_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().GatewayId: gatewayId,
+				dao.UserAccount.Columns().ReMark:    paymentType,
 				dao.UserAccount.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
 		}
 	}
 }
 
-func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, gatewayId uint64, paymentMethodId string) {
-	g.Log().Infof(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%v gatewayId:%s paymentMethod:%s", userId, gatewayId, paymentMethodId)
+func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, gatewayId uint64, paymentMethodId string, paymentType string) {
+	g.Log().Infof(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%v gatewayId:%d paymentMethod:%s gatewayPaymentType:%s", userId, gatewayId, paymentMethodId, paymentType)
 	utility.Assert(userId > 0, "userId is nil")
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, "UpdateUserDefaultGatewayPaymentMethod user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == user.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
+	if len(paymentType) > 0 {
+		_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().ReMark:    paymentType,
+			dao.UserAccount.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+	}
 	if user.GatewayId == fmt.Sprintf("%v", gatewayId) && user.PaymentMethod == paymentMethodId {
 		return
 	}
@@ -79,13 +86,14 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	}
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().GatewayId:     gatewayId,
+		dao.UserAccount.Columns().ReMark:        paymentType,
 		dao.UserAccount.Columns().PaymentMethod: newPaymentMethodId,
 		dao.UserAccount.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
 	if err != nil {
-		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s error:%s", userId, gatewayId, paymentMethodId, err.Error())
+		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s gatewayPaymentType:%s error:%s", userId, gatewayId, paymentMethodId, paymentType, err.Error())
 	} else {
-		g.Log().Infof(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s success", userId, gatewayId, paymentMethodId)
+		g.Log().Debugf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s gatewayPaymentType:%s success", userId, gatewayId, paymentMethodId, paymentType)
 	}
 	var oldGatewayId uint64 = 0
 	if len(user.GatewayId) > 0 {
@@ -137,10 +145,11 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	})
 }
 
-func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId *uint64, reqPaymentMethodId string, subscriptionId string) (gatewayId uint64, paymentMethodId string) {
+func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId *uint64, reqPaymentType string, reqPaymentMethodId string, subscriptionId string) (gatewayId uint64, paymentType string, paymentMethodId string) {
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, fmt.Sprintf("user not found:%d", userId))
 	var userDefaultGatewayId uint64 = 0
+	var userDefaultGatewayPaymentType = ""
 	var err error = nil
 	if len(user.GatewayId) > 0 {
 		userDefaultGatewayId, err = strconv.ParseUint(user.GatewayId, 10, 64)
@@ -148,12 +157,14 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 			g.Log().Errorf(ctx, "ParseUserDefaultMethod:%v", user.GatewayId)
 			return
 		}
+		userDefaultGatewayPaymentType = user.ReMark
 	}
 	if len(reqPaymentMethodId) > 0 {
 		utility.Assert(reqGatewayId != nil, "gateway need specified while payment method not empty")
 	}
 	if reqGatewayId != nil {
 		gatewayId = *reqGatewayId
+		paymentType = reqPaymentType
 		if gatewayId == userDefaultGatewayId && len(reqPaymentMethodId) == 0 {
 			paymentMethodId = user.PaymentMethod
 		} else {
@@ -161,6 +172,7 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 		}
 	} else if userDefaultGatewayId > 0 {
 		gatewayId = userDefaultGatewayId
+		paymentType = userDefaultGatewayPaymentType
 		paymentMethodId = user.PaymentMethod
 	}
 	if gatewayId <= 0 && len(subscriptionId) > 0 {
@@ -168,7 +180,7 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 		if sub != nil {
 			gatewayId = sub.GatewayId
 			paymentMethodId = sub.GatewayDefaultPaymentMethod
-			UpdateUserDefaultGatewayForCheckout(ctx, userId, gatewayId)
+			UpdateUserDefaultGatewayForCheckout(ctx, userId, gatewayId, "")
 		}
 	}
 

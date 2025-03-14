@@ -39,7 +39,7 @@ func LinkCheck(ctx context.Context, paymentId string, time int64) *LinkCheckRes 
 	} else if len(one.GatewayLink) > 0 {
 		res.Link = one.GatewayLink
 	} else if strings.Contains(one.Link, "unibee.top") {
-		res.Message = "Server Error"
+		res.Message = "Payment Link Error"
 	} else {
 		res.Link = one.Link // old version
 	}

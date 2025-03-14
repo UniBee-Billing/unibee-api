@@ -52,7 +52,10 @@ func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId stri
 
 func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscription, pendingUpdateId string, invoice *entity.Invoice) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
-	utility.Assert(one != nil, "HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:"+pendingUpdateId)
+	//utility.Assert(one != nil, "HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:"+pendingUpdateId)
+	if one == nil {
+		return false, gerror.New("HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:" + pendingUpdateId)
+	}
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
@@ -112,7 +115,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	}
 
 	{
-		if vat_gateway.GetDefaultVatGateway(ctx, one.MerchantId) == nil {
+		if !vat_gateway.GetDefaultVatGateway(ctx, one.MerchantId).VatRatesEnabled() {
 			sub_update.UpdateUserTaxPercentageOnly(ctx, one.UserId, one.TaxPercentage)
 		}
 	}
@@ -136,7 +139,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 			MerchantId: sub.MerchantId,
 			Target:     fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
 			//Content:        "MarkSubscriptionProcessed",
-			Content:        fmt.Sprintf("Update(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description()),
+			Content:        fmt.Sprintf("Update(%s->%s)(%d->%d)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description(), one.PlanId, one.UpdatePlanId),
 			UserId:         sub.UserId,
 			SubscriptionId: sub.SubscriptionId,
 			InvoiceId:      "",

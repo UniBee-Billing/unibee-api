@@ -65,6 +65,9 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 	} else if plan.Amount > oldPlan.Amount || plan.Amount*quantity > oldPlan.Amount*sub.Quantity {
 		isUpgrade = true
 		changed = true
+	} else if plan.Amount == oldPlan.Amount && plan.Amount*quantity == oldPlan.Amount*sub.Quantity && GetPlanIntervalLength(plan) == GetPlanIntervalLength(oldPlan) && plan.Id != oldPlan.Id {
+		isUpgrade = true
+		changed = true
 	} else if plan.Amount < oldPlan.Amount || plan.Amount*quantity < oldPlan.Amount*sub.Quantity {
 		isUpgrade = false
 		changed = true
@@ -125,6 +128,7 @@ type UpdatePreviewInternalReq struct {
 	NewPlanId              uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id" `
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"GatewayPaymentType" `
 	EffectImmediate        int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode           string                 `json:"discountCode"        dc:"DiscountCode"`
@@ -162,8 +166,9 @@ type UpdatePreviewInternalRes struct {
 	RecurringDiscountCode string                     `json:"recurringDiscountCode" `
 	Discount              *bean.MerchantDiscountCode `json:"discount" `
 	DiscountMessage       string                     `json:"discountMessage" `
-	PaymentMethodId       string
-	ApplyPromoCredit      bool `json:"applyPromoCredit" dc:"apply promo credit or not"`
+	PaymentMethodId       string                     `json:"paymentMethodId" `
+	GatewayPaymentType    string                     `json:"gatewayPaymentType" `
+	ApplyPromoCredit      bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -176,8 +181,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Active", plan.Id))
-	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
+	utility.Assert(plan.Type != consts.PlanTypeRecurringAddon, fmt.Sprintf("Plan Id:%v Is Addon Type", plan.Id))
+	gatewayId, paymentType, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.GatewayPaymentType, req.PaymentMethodId, sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -520,7 +525,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		ApplyPromoCredit:   config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
 	})
 
-	if currentInvoice.TotalAmount <= 0 {
+	if currentInvoice.TotalAmount <= 0 && !isUpgrade {
 		effectImmediate = config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately
 	}
 
@@ -550,6 +555,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		DiscountMessage:       discountMessage,
 		Discount:              bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, currentInvoice.DiscountCode)),
 		PaymentMethodId:       paymentMethodId,
+		GatewayPaymentType:    paymentType,
 		ApplyPromoCredit:      *req.ApplyPromoCredit,
 	}, nil
 }
@@ -631,8 +637,8 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	if len(req.ConfirmCurrency) > 0 {
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 	}
-	if prepare.Invoice.TotalAmount <= 0 {
-		utility.Assert(prepare.EffectImmediate == config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately, "System Error, Cannot Effect Immediate With Negative CaptureAmount")
+	if prepare.Invoice.TotalAmount <= 0 && !prepare.IsUpgrade {
+		utility.Assert(prepare.EffectImmediate == config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately, "System Error, Cannot Effect Immediate With Negative Amount")
 	}
 
 	var effectImmediate = 0
@@ -696,19 +702,19 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 			Simplify:           prepare.Invoice,
 			Sub:                prepare.Subscription,
 			GatewayId:          prepare.Gateway.Id,
+			GatewayPaymentType: prepare.GatewayPaymentType,
 			PaymentMethodId:    prepare.PaymentMethodId,
 			IsSubLatestInvoice: false,
 			TimeNow:            prepare.ProrationDate,
 		})
 		utility.AssertError(err, "System Error")
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
-			Invoice:            invoice,
-			ManualPayment:      req.ManualPayment,
-			ReturnUrl:          req.ReturnUrl,
-			CancelUrl:          req.CancelUrl,
-			Source:             "SubscriptionUpdate",
-			TimeNow:            0,
-			GatewayPaymentType: req.GatewayPaymentType,
+			Invoice:       invoice,
+			ManualPayment: req.ManualPayment,
+			ReturnUrl:     req.ReturnUrl,
+			CancelUrl:     req.CancelUrl,
+			Source:        "SubscriptionUpdate",
+			TimeNow:       0,
 		})
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
@@ -729,6 +735,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 			Simplify:           prepare.Invoice,
 			Sub:                prepare.Subscription,
 			GatewayId:          prepare.Gateway.Id,
+			GatewayPaymentType: prepare.GatewayPaymentType,
 			PaymentMethodId:    prepare.PaymentMethodId,
 			IsSubLatestInvoice: false,
 			TimeNow:            prepare.ProrationDate,
@@ -836,7 +843,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		operation_log.AppendOptLog(backgroundCtx, &operation_log.OptLogRequest{
 			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
-			Content:        content,
+			Content:        fmt.Sprintf("%s(%d->%d)", content, one.PlanId, one.UpdatePlanId),
 			UserId:         one.UserId,
 			SubscriptionId: one.SubscriptionId,
 			InvoiceId:      subUpdateRes.GatewayUpdateId,

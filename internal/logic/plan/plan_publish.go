@@ -53,7 +53,7 @@ func PlanActivate(ctx context.Context, planId uint64) error {
 func PlanOrAddonIntervalVerify(ctx context.Context, planId uint64) {
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")
-	if plan.Type != consts.PlanTypeOnetimeAddon {
+	if plan.Type != consts.PlanTypeOnetime {
 
 		utility.Assert(utility.StringContainsElement(PlanIntervals, strings.ToLower(plan.IntervalUnit)), "IntervalUnit Error，Must One Of day｜month｜year｜week")
 		if strings.ToLower(plan.IntervalUnit) == "day" {

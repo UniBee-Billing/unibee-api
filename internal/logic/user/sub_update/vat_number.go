@@ -22,7 +22,7 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 		return
 	}
 	if len(vatNumber) > 0 {
-		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
+		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId).VatRatesEnabled() {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId)
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, user.MerchantId, user.Id, vatNumber, "")

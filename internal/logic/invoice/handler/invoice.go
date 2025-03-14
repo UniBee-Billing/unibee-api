@@ -248,8 +248,9 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	} else if payment.Status == consts.PaymentCancelled {
 		status = consts.InvoiceStatusCancelled
 	}
-	if payment.Status == consts.PaymentFailed && len(one.CreateFrom) > 0 && one.CreateFrom == consts.InvoiceAutoChargeFlag {
-		// Auto-charge invoice should not failure caused by gateway payment failed
+	if payment.Status == consts.PaymentFailed {
+		//&& len(one.CreateFrom) > 0 && one.CreateFrom == consts.InvoiceAutoChargeFlag {
+		// invoice should not failure caused by gateway payment failed
 		return one, nil
 	}
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{

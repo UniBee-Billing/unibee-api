@@ -15,7 +15,6 @@ import (
 	"unibee/internal/logic/gateway/api/alipay/api/model"
 	"unibee/internal/logic/gateway/api/alipay/api/request/pay"
 	responsePay "unibee/internal/logic/gateway/api/alipay/api/response/pay"
-	"unibee/internal/logic/gateway/api/alipay/api/tools"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
@@ -33,7 +32,7 @@ type Alipay struct {
 func (c Alipay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 	return &_interface.GatewayInfo{
 		Name:                          "Alipay",
-		Description:                   "Antom Online Payments(Card), Use public and private keys to secure the Alipay payment.",
+		Description:                   "Antom Online Payments(CHECKOUT_PAYMENT), Use public and private keys to secure the Alipay payment.",
 		DisplayName:                   "Alipay",
 		GatewayWebsiteLink:            "https://global.alipay.com/platform/site/ihome",
 		GatewayWebhookIntegrationLink: "",
@@ -41,7 +40,7 @@ func (c Alipay) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayLogo:                   "https://api.unibee.top/oss/file/d7xy50zqf0iae7q9s6.png",
 		GatewayIcons:                  []string{"https://api.unibee.top/oss/file/d7xy50zqf0iae7q9s6.png"},
 		GatewayType:                   consts.GatewayTypeCard,
-		SubGatewayName:                "Client Id",
+		SubGatewayName:                "Client ID",
 		PublicKeyName:                 "Alipay Public Key",
 		PrivateSecretName:             "Merchant Private Key",
 		Host:                          "https://open-de-global.alipay.com",
@@ -67,7 +66,7 @@ func (c Alipay) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq)
 		req.Secret,
 		req.Key, false)
 
-	payRequest, request := pay.NewAlipayPayRequest()
+	payRequest, request := pay.NewAlipayPaymentSessionRequest()
 	request.PaymentRequestId = fmt.Sprintf("paymentRequestId01%d", gtime.Now().Timestamp())
 	order := &model.Order{}
 	order.OrderDescription = "antom test order"
@@ -77,22 +76,23 @@ func (c Alipay) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq)
 		BuyerEmail: "mail@hotmail.com",
 	}
 	request.Order = order
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
+	//request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
 	request.PaymentAmount = model.NewAmount("4200", "EUR")
 	request.PaymentNotifyUrl = "https://www.gaga.com/notify"
 	request.PaymentRedirectUrl = "https://www.alipay.com"
 	request.PaymentFactor = &model.PaymentFactor{
 		IsAuthorization: true,
 	}
-	request.Env = &model.Env{ClientIp: utility.GetPublicIP(), TerminalType: model.WEB}
+	//request.Env = &model.Env{ClientIp: utility.GetPublicIP(), TerminalType: model.WEB}
 	request.ProductCode = model.CASHIER_PAYMENT
+	request.ProductScene = "CHECKOUT_PAYMENT"
 
 	execute, err := client.Execute(payRequest)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
-	response := execute.(*responsePay.AlipayPayResponse)
+	response := execute.(*responsePay.AlipayPaymentSessionResponse)
 	g.Log().Debugf(ctx, "responseJson :%s", utility.MarshalToJsonString(response))
 	utility.Assert(len(response.NormalUrl) > 0, "invalid keys, NormalUrl is nil")
-	g.Log().Infof(ctx, "Redirect Url:%s", tools.Decode(response.NormalUrl))
+	g.Log().Infof(ctx, "Redirect Url:%s", response.NormalUrl)
 	return "https://api.unibee.top/oss/file/d76q5bxsotbt0uzajb.png", consts.GatewayTypeCard, nil
 }
 
@@ -130,7 +130,7 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 		gateway.SubGateway,
 		gateway.GatewaySecret,
 		gateway.GatewayKey, false)
-	payRequest, request := pay.NewAlipayPayRequest()
+	payRequest, request := pay.NewAlipayPaymentSessionRequest()
 	request.PaymentRequestId = createPayContext.Pay.PaymentId
 	{
 		order := &model.Order{}
@@ -206,7 +206,7 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 
 		request.Order = order
 	}
-	request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
+	//request.PaymentMethod = &model.PaymentMethod{PaymentMethodType: "CARD"}
 	request.PaymentAmount = model.NewAmount(fmt.Sprintf("%d", createPayContext.Pay.TotalAmount), createPayContext.Pay.Currency)
 	request.PaymentNotifyUrl = webhook2.GetPaymentWebhookEntranceUrl(createPayContext.Gateway.Id)
 	request.PaymentRedirectUrl = webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)
@@ -214,21 +214,22 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 		IsAuthorization: true,
 	}
 	request.ProductCode = model.CASHIER_PAYMENT
+	request.ProductScene = "CHECKOUT_PAYMENT"
 	request.Env = &model.Env{ClientIp: utility.GetPublicIP(), TerminalType: model.WEB}
 
 	execute, err := client.Execute(payRequest)
-	log.SaveChannelHttpLog("GatewayNewPayment", utility.MarshalToJsonString(payRequest), utility.MarshalToJsonString(execute), err, "AlipayNewPayment", nil, gateway)
+	response := execute.(*responsePay.AlipayPaymentSessionResponse)
+	log.SaveChannelHttpLog("GatewayNewPayment", utility.MarshalToJsonString(payRequest), utility.MarshalToJsonString(response), err, "AlipayNewPayment", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call error %s", err))
-	response := execute.(*responsePay.AlipayPayResponse)
 	g.Log().Debugf(ctx, "responseJson :%s", utility.MarshalToJsonString(response))
 	utility.Assert(len(response.NormalUrl) > 0, fmt.Sprintf("invalid keys, NormalUrl is nil,%s %s", response.Result.ResultCode, response.Result.ResultMessage))
 	var status consts.PaymentStatusEnum = consts.PaymentCreated
-	gatewayPaymentId := response.PaymentId
+	gatewayPaymentId := response.PaymentSessionId
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 status,
 		GatewayPaymentId:       gatewayPaymentId,
 		GatewayPaymentIntentId: gatewayPaymentId,
-		Link:                   tools.Decode(response.NormalUrl),
+		Link:                   response.NormalUrl,
 	}, nil
 }
 
@@ -246,11 +247,11 @@ func (c Alipay) GatewayCancel(ctx context.Context, gateway *entity.MerchantGatew
 	request, cancelRequest := pay.NewAlipayPayCancelRequest()
 	cancelRequest.PaymentId = payment.GatewayPaymentId
 	execute, err := client.Execute(request)
-	log.SaveChannelHttpLog("GatewayPaymentCancel", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPaymentCancel", nil, gateway)
+	response := execute.(*responsePay.AlipayPayCancelResponse)
+	log.SaveChannelHttpLog("GatewayPaymentCancel", utility.MarshalToJsonString(request), utility.MarshalToJsonString(response), err, "AlipayPaymentCancel", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
-	response := execute.(*responsePay.AlipayPayCancelResponse)
 	utility.Assert(response != nil, "Alipay payment query failed, result is nil")
 	utility.Assert(response != nil && response.Result.ResultCode == "SUCCESS", "invalid request, result not SUCCESS")
 	detailRes, err := c.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
@@ -277,14 +278,15 @@ func (c Alipay) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 		gateway.GatewaySecret,
 		gateway.GatewayKey, false)
 	queryRequest := pay.AlipayPayQueryRequest{}
-	queryRequest.PaymentId = gatewayPaymentId
+	//queryRequest.PaymentId = gatewayPaymentId
+	queryRequest.PaymentRequestId = payment.PaymentId
 	request := queryRequest.NewRequest()
 	execute, err := client.Execute(request)
+	response := execute.(*responsePay.AlipayPayQueryResponse)
+	log.SaveChannelHttpLog("GatewayPaymentDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(response), err, "AlipayPaymentDetail", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
-	response := execute.(*responsePay.AlipayPayQueryResponse)
-	log.SaveChannelHttpLog("GatewayPaymentDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "AlipayPaymentDetail", nil, gateway)
 	utility.Assert(response != nil, "Alipay payment query failed, result is nil")
 	utility.Assert(response != nil && response.Result.ResultCode == "SUCCESS", "invalid keys, result not SUCCESS")
 
@@ -305,11 +307,11 @@ func (c Alipay) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	queryRefundRequest.RefundId = gatewayRefundId
 	request := queryRefundRequest.NewRequest()
 	execute, err := client.Execute(request)
-	log.SaveChannelHttpLog("GatewayRefundDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(execute), err, "", nil, gateway)
+	response := execute.(*responsePay.AlipayInquiryRefundResponse)
+	log.SaveChannelHttpLog("GatewayRefundDetail", utility.MarshalToJsonString(request), utility.MarshalToJsonString(response), err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
-	response := execute.(*responsePay.AlipayInquiryRefundResponse)
 	utility.Assert(response != nil, "Alipay refund query failed, result is nil")
 	utility.Assert(response != nil && response.RefundId != "", "invalid keys, resultId not found")
 	var status consts.RefundStatusEnum = consts.RefundCreated

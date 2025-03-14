@@ -32,7 +32,10 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 	}
 	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchant != nil, "merchant not found")
-	_, vatData := vat_gateway.GetDefaultMerchantVatConfig(ctx, merchant.Id)
+	vatGatewayName, vatGatewayKey := vat_gateway.GetDefaultMerchantVatConfig(ctx, merchant.Id)
+	if vatGatewayName != "vatsense" {
+		vatGatewayKey = ""
+	}
 	_, emailData := email.GetDefaultMerchantEmailConfig(ctx, merchant.Id)
 	var emailSender *bean.Sender
 	one := email.GetMerchantEmailSender(ctx, _interface.GetMerchantId(ctx))
@@ -59,7 +62,7 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		OpenApiKey:           utility.HideStar(merchant.ApiKey),
 		SendGridKey:          utility.HideStar(emailData),
 		EmailSender:          emailSender,
-		VatSenseKey:          utility.HideStar(vatData),
+		VatSenseKey:          utility.HideStar(vatGatewayKey),
 		SegmentServerSideKey: segment.GetMerchantSegmentServerSideConfig(ctx, merchant.Id),
 		SegmentUserPortalKey: segment.GetMerchantSegmentUserPortalConfig(ctx, merchant.Id),
 		IsOwner:              isOwner,

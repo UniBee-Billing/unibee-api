@@ -1,5 +1,4 @@
 [
-  {"name": "Alipay+", "paymentType": "CONNECT_WALLET", "countryName": "Global", "autoCharge": false, "category": "Alipay+ payment method"},
   {"name": "EPS", "paymentType": "EPS", "countryName": "Austria", "autoCharge": false, "category": "Online banking"},
   {"name": "Bancontact", "paymentType": "BANCONTACT", "countryName": "Belgium", "autoCharge": false, "category": "Online banking"},
   {"name": "Pix", "paymentType": "PIX", "countryName": "Brazil", "autoCharge": false, "category": "Bank transfer"},

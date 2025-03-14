@@ -11,6 +11,7 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/subscription/config"
+	"unibee/internal/logic/vat_gateway/default_vat_gateway"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
 	"unibee/internal/logic/vat_gateway/vatstack"
@@ -25,7 +26,8 @@ const (
 )
 
 const (
-	VAT_IMPLEMENT_NAMES = "vatsense|github|vatstack"
+	VAT_IMPLEMENT_NAMES  = "default|vatsense|github|vatstack"
+	DEFAULT_GATEWAY_NAME = "default"
 )
 
 type VATGeneralConfig struct {
@@ -36,7 +38,8 @@ type VATGeneralConfig struct {
 func GetDefaultVatGateway(ctx context.Context, merchantId uint64) VATGateway {
 	vatName, vatData := GetDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
-		return nil
+		one := &default_vat_gateway.DefaultVatGateway{Name: DEFAULT_GATEWAY_NAME}
+		return one
 	}
 	if strings.Compare(vatName, "vatsense") == 0 {
 		one := &vatsense.VatSense{Password: vatData, Name: vatName}
@@ -49,6 +52,9 @@ func GetDefaultVatGateway(ctx context.Context, merchantId uint64) VATGateway {
 			ApiData: vatData,
 			Name:    vatName,
 		}
+		return one
+	} else if strings.Compare(vatName, DEFAULT_GATEWAY_NAME) == 0 {
+		one := &default_vat_gateway.DefaultVatGateway{Name: DEFAULT_GATEWAY_NAME}
 		return one
 	}
 	return nil
@@ -73,7 +79,8 @@ func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatNam
 		vatName = nameConfig.ConfigValue
 	}
 	if len(vatName) == 0 {
-		return
+		// default vat build-in gateway
+		return DEFAULT_GATEWAY_NAME, ""
 	}
 	valueConfig := merchant_config.GetMerchantConfig(ctx, merchantId, vatName)
 	if valueConfig != nil {
@@ -182,7 +189,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		return nil, gerror.New("Default Vat Gateway Need Setup")
+		return nil, gerror.New("Vat Gateway Need Setup")
 	}
 	var one *entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
@@ -222,7 +229,7 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 }
 
 func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countryCode string, gatewayId uint64, validVatNumber string) (taxPercentage int64, countryName string) {
-	if GetDefaultVatGateway(ctx, merchantId) != nil {
+	if GetDefaultVatGateway(ctx, merchantId).VatRatesEnabled() {
 		vatCountryRate, err := QueryVatCountryRateByMerchant(ctx, merchantId, countryCode)
 		if err == nil && vatCountryRate != nil {
 			countryName = vatCountryRate.CountryName
@@ -258,7 +265,7 @@ func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countr
 			}
 		}
 	} else {
-		g.Log().Infof(ctx, "Default Vat Gateway Need Setup:"+strconv.FormatUint(merchantId, 10))
+		g.Log().Infof(ctx, "Vat Gateway Need Setup:"+strconv.FormatUint(merchantId, 10))
 	}
 	return taxPercentage, countryName
 }

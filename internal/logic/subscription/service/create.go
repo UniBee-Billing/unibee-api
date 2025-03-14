@@ -45,6 +45,7 @@ type CreatePreviewInternalReq struct {
 	Quantity               int64                  `json:"quantity" dc:"Quantity" `
 	DiscountCode           string                 `json:"discountCode"        dc:"DiscountCode"`
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id"`
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode         string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                 `json:"vatNumber" dc:"VatNumber" `
@@ -88,6 +89,7 @@ type CreatePreviewInternalRes struct {
 	DiscountMessage           string                     `json:"discountMessage" `
 	CancelAtPeriodEnd         int                        `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"` // whether cancel at period end，0-false | 1-true
 	GatewayPaymentMethodId    string
+	GatewayPaymentType        string
 	OtherActiveSubscriptionId string `json:"otherActiveSubscriptionId" description:"other active or incomplete subscription id "`
 	ApplyPromoCredit          bool   `json:"applyPromoCredit" `
 }
@@ -137,7 +139,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v not active", plan.Id))
-	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
+	utility.Assert(plan.Type != consts.PlanTypeRecurringAddon, fmt.Sprintf("Plan Id:%v is addon", plan.Id))
 	var user *entity.UserAccount = nil
 	if req.UserId > 0 || req.IsSubmit {
 		user = query.GetUserAccountById(ctx, req.UserId)
@@ -148,8 +150,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		gatewayId = *req.GatewayId
 	}
 	var paymentMethodId = req.PaymentMethodId
+	var paymentType = req.GatewayPaymentType
 	if user != nil {
-		gatewayId, paymentMethodId = sub_update.VerifyPaymentGatewayMethod(ctx, user.Id, req.GatewayId, req.PaymentMethodId, "")
+		gatewayId, paymentType, paymentMethodId = sub_update.VerifyPaymentGatewayMethod(ctx, user.Id, req.GatewayId, req.GatewayPaymentType, req.PaymentMethodId, "")
 	}
 	var gateway *entity.MerchantGateway
 	if gatewayId > 0 || req.IsSubmit {
@@ -159,7 +162,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		utility.Assert(gateway.MerchantId == req.MerchantId, "invalid gateway")
 	}
 	if !_interface.Context().Get(ctx).IsOpenApiCall && user != nil && gatewayId > 0 {
-		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId, req.GatewayPaymentType)
 	}
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -193,7 +196,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var discountMessage string
 
 	if len(req.VatNumber) > 0 {
-		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, i18n.LocalizationFormat(ctx, "{#VatGatewayNeedSetup}"))
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id).VatRatesEnabled(), i18n.LocalizationFormat(ctx, "{#VatGatewayNeedSetup}"))
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil || !vatNumberValidate.Valid {
 			if err != nil {
@@ -293,6 +296,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var currentTimeStart = gtime.Now()
 	var trialEnd = currentTimeStart.Timestamp() - 1
 	var cancelAtPeriodEnd = 0
+	utility.Assert(len(plan.IntervalUnit) > 0, "Invalid plan billing period")
 	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
 		var totalAmountExcludingTax = plan.TrialAmount * req.Quantity
 		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
@@ -461,6 +465,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountMessage:           discountMessage,
 			CancelAtPeriodEnd:         cancelAtPeriodEnd,
 			GatewayPaymentMethodId:    paymentMethodId,
+			GatewayPaymentType:        paymentType,
 			OtherActiveSubscriptionId: otherActiveSubscriptionId,
 			ApplyPromoCredit:          *req.ApplyPromoCredit,
 		}, nil
@@ -498,6 +503,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		DiscountCode:           req.DiscountCode,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		AddonParams:            req.AddonParams,
 		VatCountryCode:         req.VatCountryCode,
 		VatNumber:              req.VatNumber,
@@ -573,7 +579,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Id = uint64(uint(id))
 
 	{
-		if vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId) == nil {
+		if !vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId).VatRatesEnabled() {
 			sub_update.UpdateUserTaxPercentageOnly(ctx, prepare.UserId, one.TaxPercentage)
 		}
 	}
@@ -584,6 +590,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Simplify:           prepare.Invoice,
 		Sub:                one,
 		GatewayId:          one.GatewayId,
+		GatewayPaymentType: prepare.GatewayPaymentType,
 		PaymentMethodId:    prepare.GatewayPaymentMethodId,
 		IsSubLatestInvoice: true,
 		TimeNow:            gtime.Now().Timestamp(),
@@ -620,13 +627,12 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		}
 	} else {
 		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
-			Invoice:            invoice,
-			ManualPayment:      len(req.PaymentMethodId) == 0,
-			ReturnUrl:          req.ReturnUrl,
-			CancelUrl:          req.CancelUrl,
-			Source:             "SubscriptionCreate",
-			TimeNow:            0,
-			GatewayPaymentType: req.GatewayPaymentType,
+			Invoice:       invoice,
+			ManualPayment: len(req.PaymentMethodId) == 0,
+			ReturnUrl:     req.ReturnUrl,
+			CancelUrl:     req.CancelUrl,
+			Source:        "SubscriptionCreate",
+			TimeNow:       0,
 		})
 		if err != nil {
 			// todo mark use method
@@ -690,7 +696,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.AssertError(err, "Start Active Temporarily")
 	}
 	if req.GatewayId != nil {
-		sub_update.UpdateUserDefaultGatewayForCheckout(ctx, req.UserId, *req.GatewayId)
+		sub_update.UpdateUserDefaultGatewayForCheckout(ctx, req.UserId, *req.GatewayId, req.GatewayPaymentType)
 	}
 	return &CreateInternalRes{
 		Plan:         prepare.Plan,

@@ -74,7 +74,7 @@ func init() {
 	utility.Assert(TestRecurringAddon.MerchantId > 0, "TestRecurringAddon err")
 	TestOneTimeAddon = prepare.GetPlanByName(ctx, "autotest_one_time_addon_x")
 	if TestOneTimeAddon == nil {
-		TestOneTimeAddon, err = prepare.CreateTestAddon(ctx, TestMerchant.Id, "autotest_one_time_addon_x", consts.PlanTypeOnetimeAddon)
+		TestOneTimeAddon, err = prepare.CreateTestAddon(ctx, TestMerchant.Id, "autotest_one_time_addon_x", consts.PlanTypeOnetime)
 		utility.AssertError(err, "CreateTestAddon err")
 	}
 	utility.Assert(TestOneTimeAddon != nil, "TestOneTimeAddon err")

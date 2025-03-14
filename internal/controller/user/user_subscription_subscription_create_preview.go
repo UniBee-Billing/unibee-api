@@ -16,6 +16,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		UserId:                 _interface.Context().Get(ctx).User.Id,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		AddonParams:            req.AddonParams,
 		VatCountryCode:         req.VatCountryCode,
 		VatNumber:              req.VatNumber,

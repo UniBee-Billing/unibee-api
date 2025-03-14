@@ -163,6 +163,11 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		createPayContext.Pay.InvoiceId = utility.CreateInvoiceId()
 	}
 
+	_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().PaymentId: createPayContext.Pay.PaymentId,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Invoice.Columns().Id, createPayContext.Invoice.Id).OmitNil().Update()
+
 	createPayContext.Pay.MetaData = utility.MarshalToJsonString(createPayContext.Metadata)
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -248,6 +253,11 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
 	})
 
+	_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().PaymentLink: paymentLink,
+		dao.Invoice.Columns().GmtModify:   gtime.Now(),
+	}).Where(dao.Invoice.Columns().Id, invoice.Id).OmitNil().Update()
+
 	gatewayInternalPayResult.Link = paymentLink
 	createPayContext.Pay.Link = paymentLink
 	gatewayInternalPayResult.Invoice = invoice
@@ -306,13 +316,12 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 }
 
 type CreateSubInvoicePaymentDefaultAutomaticReq struct {
-	Invoice            *entity.Invoice
-	ManualPayment      bool
-	ReturnUrl          string
-	CancelUrl          string
-	Source             string
-	TimeNow            int64
-	GatewayPaymentType string
+	Invoice       *entity.Invoice
+	ManualPayment bool
+	ReturnUrl     string
+	CancelUrl     string
+	Source        string
+	TimeNow       int64
 }
 
 func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSubInvoicePaymentDefaultAutomaticReq) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
@@ -365,7 +374,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSub
 			CountryCode:       req.Invoice.CountryCode,
 			MerchantId:        req.Invoice.MerchantId,
 			CompanyId:         merchant.CompanyId,
-			GatewayEdition:    req.GatewayPaymentType,
+			GatewayEdition:    req.Invoice.GatewayInvoiceId,
 			Automatic:         automatic,
 			BillingReason:     req.Invoice.InvoiceName,
 			ReturnUrl:         req.ReturnUrl,
@@ -376,7 +385,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSub
 		Invoice:              bean.SimplifyInvoice(req.Invoice),
 		Metadata:             map[string]interface{}{"BillingReason": req.Invoice.InvoiceName, "Source": req.Source, "manualPayment": req.ManualPayment, "CancelUrl": req.CancelUrl},
 		GatewayPaymentMethod: req.Invoice.GatewayPaymentMethod,
-		GatewayPaymentType:   req.GatewayPaymentType,
+		GatewayPaymentType:   req.Invoice.GatewayInvoiceId,
 	})
 
 	if err == nil && res.Payment != nil {

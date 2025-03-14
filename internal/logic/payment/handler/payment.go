@@ -440,7 +440,6 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		if len(req.GatewayUserId) > 0 {
 			_, _ = util.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
 		}
-		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 		{
 			event.SaveEvent(ctx, entity.PaymentEvent{
 				BizType:   0,
@@ -461,7 +460,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			//default payment method update
 			if len(req.GatewayPaymentMethod) > 0 {
 				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
-				sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, payment.UserId, payment.GatewayId, req.GatewayPaymentMethod)
+				sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, payment.UserId, payment.GatewayId, req.GatewayPaymentMethod, payment.GatewayEdition)
 			}
 			gatewayUser := util.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
 			gateway := query.GetGatewayById(ctx, payment.GatewayId)
@@ -470,6 +469,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
 			}
 		}
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 	}
 	return err
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/metric"
 	"unibee/internal/logic/metric_event/event_charge"
@@ -81,10 +82,9 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		}
 		// use aggregationPropertyInt, check properties
 		utility.Assert(req.MetricProperties.Contains(met.AggregationProperty), fmt.Sprintf("property named '%s' not found in metricProperties json", met.AggregationProperty))
-		// check value should be int
-		utility.Assert(IsJsonNumberType(req.MetricProperties.Get(met.AggregationProperty).Val()), fmt.Sprintf("property named '%s' is not Number type", met.AggregationProperty))
 		//utility.Assert(req.MetricProperties.Get(met.AggregationProperty).IsUint(), fmt.Sprintf("property named '%s' is not Uint type", met.AggregationProperty))
-		value := req.MetricProperties.Get(met.AggregationProperty).Int64()
+		value, err := strconv.ParseInt(req.MetricProperties.Get(met.AggregationProperty).String(), 10, 64)
+		utility.Assert(err == nil, fmt.Sprintf("property named '%s' is not Number type", met.AggregationProperty))
 		//utility.Assert(value >= 0, fmt.Sprintf("property named '%s' is not positive value", met.AggregationProperty))
 		aggregationPropertyInt = value
 	}

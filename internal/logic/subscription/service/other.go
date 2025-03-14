@@ -489,13 +489,14 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 			VatNumber:          sub.VatNumber,
 			ApplyPromoCredit:   false,
 		})
-		gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		gatewayId, paymentType, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
 		one, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
 			PlanId:             sub.PlanId,
 			Simplify:           invoice,
 			Sub:                sub,
 			GatewayId:          gatewayId,
+			GatewayPaymentType: paymentType,
 			PaymentMethodId:    paymentMethodId,
 			IsSubLatestInvoice: true,
 			TimeNow:            gtime.Now().Timestamp(),

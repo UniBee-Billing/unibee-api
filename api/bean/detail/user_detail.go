@@ -21,7 +21,6 @@ type UserAccountDetail struct {
 	Email               string                 `json:"email"              description:"email"`                                     // email
 	Gender              string                 `json:"gender"             description:"gender"`                                    // gender
 	AvatarUrl           string                 `json:"avatarUrl"          description:"avator url"`                                // avator url
-	ReMark              string                 `json:"reMark"             description:"note"`                                      // note
 	IsSpecial           int                    `json:"isSpecial"          description:"is special account（0.no，1.yes）- deperated"` // is special account（0.no，1.yes）- deperated
 	Birthday            string                 `json:"birthday"           description:"brithday"`                                  // brithday
 	Profession          string                 `json:"profession"         description:"profession"`                                // profession
@@ -67,6 +66,7 @@ type UserAccountDetail struct {
 	PromoCreditAccounts []*bean.CreditAccount  `json:"promoCreditAccounts" dc:"promoCreditAccounts"`
 	CreditAccounts      []*bean.CreditAccount  `json:"creditAccounts" dc:"creditAccounts"`
 	Metadata            map[string]interface{} `json:"metadata"                  description:""`
+	GatewayPaymentType  string                 `json:"gatewayPaymentType"              description:""`
 }
 
 func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *UserAccountDetail {
@@ -99,7 +99,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		Type:                one.Type,
 		TaxPercentage:       taxPercentage,
 		AvatarUrl:           one.AvatarUrl,
-		ReMark:              one.ReMark,
+		GatewayPaymentType:  one.ReMark,
 		IsSpecial:           one.IsSpecial,
 		Birthday:            one.Birthday,
 		Profession:          one.Profession,

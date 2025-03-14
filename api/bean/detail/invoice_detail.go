@@ -21,7 +21,7 @@ type InvoiceDetail struct {
 	InvoiceName                    string                                  `json:"invoiceName"                    description:"InvoiceName"`
 	ProductName                    string                                  `json:"productName"`
 	InvoiceId                      string                                  `json:"invoiceId"                      description:"InvoiceId"`
-	GatewayInvoiceId               string                                  `json:"gatewayInvoiceId"               description:"GatewayInvoiceId"`
+	GatewayPaymentType             string                                  `json:"gatewayPaymentType"               description:"GatewayPaymentType"`
 	UniqueId                       string                                  `json:"uniqueId"                       description:"UniqueId"`
 	GmtCreate                      *gtime.Time                             `json:"gmtCreate"                      description:"GmtCreate"`
 	OriginAmount                   int64                                   `json:"originAmount"                   description:"OriginAmount,Cents"`
@@ -148,7 +148,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		IsDeleted:                      invoice.IsDeleted,
 		Link:                           link.GetInvoiceLink(invoice.InvoiceId, invoice.SendTerms),
 		GatewayStatus:                  invoice.GatewayStatus,
-		GatewayInvoiceId:               invoice.GatewayInvoiceId,
+		GatewayPaymentType:             invoice.GatewayInvoiceId,
 		GatewayInvoicePdf:              invoice.GatewayInvoicePdf,
 		TaxPercentage:                  invoice.TaxPercentage,
 		SendNote:                       invoice.SendNote,

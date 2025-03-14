@@ -33,6 +33,10 @@ type Github struct {
 	Name     string
 }
 
+func (g Github) VatRatesEnabled() bool {
+	return false
+}
+
 func (g Github) GetGatewayName() string {
 	return g.Name
 }

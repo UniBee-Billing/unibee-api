@@ -110,6 +110,7 @@ type CreatePreviewReq struct {
 	User                   *bean.NewUser          `json:"user" dc:"User Object"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"GatewayId" `
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode         string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                 `json:"vatNumber" dc:"VatNumber" `

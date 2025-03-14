@@ -16,6 +16,10 @@ type VatSense struct {
 	Name     string
 }
 
+func (c VatSense) VatRatesEnabled() bool {
+	return true
+}
+
 func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
 	// username and password
 	username := "user"

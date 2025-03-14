@@ -6,6 +6,7 @@ import (
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/merchant"
 	"unibee/internal/logic/middleware"
+	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -39,6 +40,8 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}
 
 	_, member, err := merchant.CreateMerchant(ctx, createMerchantReq)
-
+	if member != nil {
+		_ = setup.InitMerchantDefaultVatGateway(ctx, member.MerchantId)
+	}
 	return &auth.RegisterVerifyRes{MerchantMember: detail.ConvertMemberToDetail(ctx, member)}, nil
 }

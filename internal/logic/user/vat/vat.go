@@ -12,19 +12,12 @@ import (
 	"unibee/utility"
 )
 
-func GetUserCountryCode(ctx context.Context, userId uint64) (countryCode string, countryName string) {
-	utility.Assert(userId > 0, "userId is nil")
-	user := query.GetUserAccountById(ctx, userId)
-	utility.Assert(user != nil, "GetUserCountryCode user not found")
-	return user.CountryCode, user.CountryName
-}
-
 func GetUserTaxPercentage(ctx context.Context, userId uint64) (taxPercentage int64, countryCode string, vatNumber string, err error) {
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, fmt.Sprintf("GetUserCountryCode user not found:%v", userId))
 	gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
-	if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
+	if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId).VatRatesEnabled() {
 		taxPercentage, _ = vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, user.CountryCode, gatewayId, user.VATNumber)
 		if taxPercentage != user.TaxPercentage && taxPercentage > 0 {
 			_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{

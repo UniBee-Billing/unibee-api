@@ -10,8 +10,6 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/service"
-	"unibee/internal/logic/vat_gateway"
-	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -23,13 +21,6 @@ func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 			name, data := email.GetDefaultMerchantEmailConfig(ctx, consts.CloudModeManagerMerchantId)
 			if len(name) > 0 && len(data) > 0 {
 				_ = email.SetupMerchantEmailConfig(ctx, merchantId, name, data, true)
-			}
-		}
-		{
-			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, consts.CloudModeManagerMerchantId)
-			if len(name) > 0 && len(data) > 0 {
-				_ = setup.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
-				_ = setup.InitMerchantDefaultVatGateway(ctx, merchantId)
 			}
 		}
 		{

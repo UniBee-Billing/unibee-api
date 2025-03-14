@@ -77,7 +77,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		Logo:          logo,
 		Host:          gatewayInfo.Host,
 		Custom:        utility.MarshalToJsonString(currencyExchange),
-		BankData:      unibee.StringValue(utility.JoinToStringPoint(paymentTypes)),
+		BrandData:     unibee.StringValue(utility.JoinToStringPoint(paymentTypes)),
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "system error")

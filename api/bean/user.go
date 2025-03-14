@@ -33,7 +33,6 @@ type UserAccount struct {
 	Email              string                 `json:"email"              description:"email"`                                     // email
 	Gender             string                 `json:"gender"             description:"gender"`                                    // gender
 	AvatarUrl          string                 `json:"avatarUrl"          description:"avator url"`                                // avator url
-	ReMark             string                 `json:"reMark"             description:"note"`                                      // note
 	IsSpecial          int                    `json:"isSpecial"          description:"is special account（0.no，1.yes）- deperated"` // is special account（0.no，1.yes）- deperated
 	Birthday           string                 `json:"birthday"           description:"brithday"`                                  // brithday
 	Profession         string                 `json:"profession"         description:"profession"`                                // profession
@@ -75,6 +74,7 @@ type UserAccount struct {
 	Language           string                 `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
 	RegistrationNumber string                 `json:"registrationNumber" dc:"RegistrationNumber"`
 	Metadata           map[string]interface{} `json:"metadata"                  description:""`
+	GatewayPaymentType string                 `json:"gatewayPaymentType"              description:""`
 }
 
 func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
@@ -105,7 +105,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		Type:               one.Type,
 		TaxPercentage:      one.TaxPercentage,
 		AvatarUrl:          one.AvatarUrl,
-		ReMark:             one.ReMark,
+		GatewayPaymentType: one.ReMark,
 		IsSpecial:          one.IsSpecial,
 		Birthday:           one.Birthday,
 		Profession:         one.Profession,

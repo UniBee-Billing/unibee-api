@@ -78,6 +78,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		UserId:                 req.UserId,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		AddonParams:            req.AddonParams,
 		VatCountryCode:         req.VatCountryCode,
 		VatNumber:              req.VatNumber,

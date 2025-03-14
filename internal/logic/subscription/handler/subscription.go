@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
@@ -23,7 +24,7 @@ import (
 	"unibee/utility"
 )
 
-func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentMethodId string) (*entity.Subscription, error) {
+func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentType string, paymentMethodId string) (*entity.Subscription, error) {
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
@@ -46,19 +47,25 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 		return nil, err
 	} else {
 		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod subscriptionId:%d gatewayId:%d, paymentMethodId:%s success", subscriptionId, gatewayId, paymentMethodId)
-		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, sub.UserId, gatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, sub.UserId, gatewayId, paymentMethodId, paymentType)
 	}
 	return sub, nil
 }
 
 func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) error {
-	utility.Assert(invoice != nil, "HandleSubscriptionFirstInvoicePaid invoice is nil")
+	//utility.Assert(invoice != nil, "HandleSubscriptionFirstInvoicePaid invoice is nil")
+	if invoice == nil {
+		return gerror.New("HandleSubscriptionFirstInvoicePaid invoice is nil")
+	}
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
-	utility.Assert(sub != nil, "HandleSubscriptionFirstInvoicePaid sub not found")
+	//utility.Assert(sub != nil, "HandleSubscriptionFirstInvoicePaid sub not found")
+	if sub == nil {
+		return gerror.New("HandleSubscriptionFirstInvoicePaid sub is nil")
+	}
 	if sub.Status == consts.SubStatusActive {
 		return nil
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, sub.PlanId)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, invoice.TrialEnd), sub.PlanId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
@@ -135,25 +142,26 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 }
 
 func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, paymentInvoice *entity.Invoice) error {
-	utility.Assert(sub != nil, "sub is nil")
-	utility.Assert(len(paymentInvoice.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
-
+	if len(paymentInvoice.SubscriptionId) == 0 {
+		return gerror.New("UpdateSubscriptionBillingCycleWithPayment paymentInvoice subId is blank")
+	}
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
-	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
+	if sub == nil {
+		return gerror.New("UpdateSubscriptionBillingCycleWithPayment subscription not found")
+	}
 	invoice := query.GetInvoiceByInvoiceId(ctx, paymentInvoice.InvoiceId)
-	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+paymentInvoice.PaymentId)
-	utility.Assert(invoice.Status == consts.InvoiceStatusPaid || invoice.Status == consts.InvoiceStatusReversed, fmt.Sprintf("invoice not success:%v", invoice.Status))
+	//utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+paymentInvoice.PaymentId)
+	if invoice == nil {
+		return gerror.New(fmt.Sprintf("UpdateSubscriptionBillingCycleWithPayment invoice not found payment:%s" + paymentInvoice.PaymentId))
+	}
+	//utility.Assert(invoice.Status == consts.InvoiceStatusPaid || invoice.Status == consts.InvoiceStatusReversed, fmt.Sprintf("invoice not success:%v", invoice.Status))
+	if invoice.Status != consts.InvoiceStatusPaid && invoice.Status != consts.InvoiceStatusReversed {
+		return gerror.New(fmt.Sprintf("UpdateSubscriptionBillingCycleWithPayment invoice not success:%v", invoice.Status))
+	}
 	if sub.CurrentPeriodEnd > invoice.PeriodEnd && sub.Status == consts.SubStatusActive {
 		// sub cycle never go back time
 		return nil
 	}
-	//var recurringDiscountCode *string
-	//if len(invoice.DiscountCode) > 0 {
-	//	discount := query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)
-	//	if discount.BillingType == consts.DiscountBillingTypeRecurring {
-	//		recurringDiscountCode = &invoice.DiscountCode
-	//	}
-	//}
 	var billingCycleAnchor = invoice.BillingCycleAnchor
 	if billingCycleAnchor <= 0 {
 		billingCycleAnchor = sub.BillingCycleAnchor
@@ -183,7 +191,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return err
 	}
 	{
-		if vat_gateway.GetDefaultVatGateway(ctx, invoice.MerchantId) == nil {
+		if !vat_gateway.GetDefaultVatGateway(ctx, invoice.MerchantId).VatRatesEnabled() {
 			sub_update.UpdateUserTaxPercentageOnly(ctx, invoice.UserId, invoice.TaxPercentage)
 		}
 	}

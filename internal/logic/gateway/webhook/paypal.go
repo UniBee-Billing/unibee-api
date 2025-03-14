@@ -51,8 +51,8 @@ func (p PaypalWebhook) GatewayNewPaymentMethodRedirect(r *ghttp.Request, gateway
 			log.SaveChannelHttpLog("GatewayPaypalNewPaymentToken", paymentSource, result, err, "", nil, gateway)
 			utility.AssertError(err, "Server Error")
 			utility.Assert(len(result.ID) > 0, "Invalid VaultId")
-			sub_update.UpdateUserDefaultGatewayPaymentMethod(r.Context(), sub.UserId, gateway.Id, result.ID)
-			_, err = handler.ChangeSubscriptionGateway(r.Context(), sub.SubscriptionId, gateway.Id, result.ID)
+			sub_update.UpdateUserDefaultGatewayPaymentMethod(r.Context(), sub.UserId, gateway.Id, result.ID, "")
+			_, err = handler.ChangeSubscriptionGateway(r.Context(), sub.SubscriptionId, gateway.Id, "", result.ID)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Paypal Redirect GatewayNewPaymentMethodRedirect Error ChangeSubscriptionGateway:%s errpr:%s\n", gateway.GatewayName, err.Error())
 			}

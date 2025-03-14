@@ -11,6 +11,7 @@ import (
 	"github.com/stripe/stripe-go/v78/balance"
 	"github.com/stripe/stripe-go/v78/checkout/session"
 	"github.com/stripe/stripe-go/v78/customer"
+	"github.com/stripe/stripe-go/v78/dispute"
 	"github.com/stripe/stripe-go/v78/invoice"
 	"github.com/stripe/stripe-go/v78/invoiceitem"
 	"github.com/stripe/stripe-go/v78/paymentintent"
@@ -25,6 +26,7 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -668,6 +670,25 @@ func (s Stripe) GatewayRefund(ctx context.Context, gateway *entity.MerchantGatew
 	params.Metadata = utility.ConvertToStringMetadata(metadata)
 	result, err := refund.New(params)
 	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, gateway)
+	if err != nil && createPaymentRefundContext.Payment != nil && createPaymentRefundContext.Refund.RefundAmount == createPaymentRefundContext.Payment.TotalAmount {
+		disputeList := &stripe.DisputeListParams{
+			PaymentIntent: stripe.String(createPaymentRefundContext.Payment.GatewayPaymentId),
+		}
+		disputeResult := dispute.List(disputeList)
+		log.SaveChannelHttpLog("GatewayDispute", disputeList, disputeResult, nil, "searchDispute", nil, gateway)
+		if disputeResult != nil &&
+			disputeResult.DisputeList() != nil &&
+			len(disputeResult.DisputeList().Data) > 0 &&
+			disputeResult.DisputeList().Data[0] != nil &&
+			disputeResult.DisputeList().Data[0].Status == stripe.DisputeStatusLost &&
+			disputeResult.DisputeList().Data[0].Amount == createPaymentRefundContext.Refund.RefundAmount {
+			return &gateway_bean.GatewayPaymentRefundResp{
+				GatewayRefundId: disputeResult.DisputeList().Data[0].ID,
+				Status:          consts.RefundSuccess,
+				Type:            consts.RefundTypeMarked,
+			}, nil
+		}
+	}
 	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))
 	utility.Assert(result != nil, "Stripe refund failed, result is nil")
 	return &gateway_bean.GatewayPaymentRefundResp{
@@ -678,12 +699,42 @@ func (s Stripe) GatewayRefund(ctx context.Context, gateway *entity.MerchantGatew
 }
 
 func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, one *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	if len(gatewayRefundId) == 0 &&
+		one != nil &&
+		strings.Contains(one.RefundComment, "dispute") {
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+		if payment != nil {
+			disputeList := &stripe.DisputeListParams{
+				PaymentIntent: stripe.String(payment.GatewayPaymentId),
+			}
+			disputeResult := dispute.List(disputeList)
+			log.SaveChannelHttpLog("GatewayDispute", disputeList, disputeResult, nil, "searchDispute", nil, gateway)
+			if disputeResult != nil &&
+				disputeResult.DisputeList() != nil &&
+				len(disputeResult.DisputeList().Data) > 0 &&
+				disputeResult.DisputeList().Data[0] != nil &&
+				disputeResult.DisputeList().Data[0].Status == stripe.DisputeStatusLost &&
+				disputeResult.DisputeList().Data[0].Amount == one.RefundAmount {
+				return &gateway_bean.GatewayPaymentRefundResp{
+					MerchantId:       "",
+					GatewayRefundId:  disputeResult.DisputeList().Data[0].ID,
+					GatewayPaymentId: payment.GatewayPaymentId,
+					Status:           consts.RefundSuccess,
+					Type:             consts.RefundTypeMarked,
+					Reason:           "dispute at stripe side",
+					RefundAmount:     one.RefundAmount,
+					Currency:         strings.ToUpper(one.Currency),
+					RefundTime:       gtime.Now(),
+				}, nil
+			}
+		}
+	}
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.RefundParams{}
 	response, err := refund.Get(gatewayRefundId, params)
-	log.SaveChannelHttpLog("GatewayRefundDetail", params, response, err, "", nil, gateway)
+	log.SaveChannelHttpLog("GatewayRefundDetail", gatewayRefundId, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}

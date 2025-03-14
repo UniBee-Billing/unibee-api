@@ -87,12 +87,28 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		if payment.BizType == consts.BizTypeSubscription {
-			utility.Assert(invoice != nil, "payment of BizTypeSubscription invalid invoice")
-			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
+			//utility.Assert(invoice != nil, "payment of BizTypeSubscription invalid invoice")
+			if invoice == nil {
+				g.Log().Errorf(ctx, "PaymentSuccessCallback error invoice is nil paymentId:%s", payment.PaymentId)
+				return
+			}
+			//utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
+			if len(payment.SubscriptionId) == 0 {
+				g.Log().Errorf(ctx, "PaymentSuccessCallback subscriptionId is blank paymentId:%s", payment.PaymentId)
+				return
+			}
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
-			utility.Assert(sub != nil, "sub not found")
+			//utility.Assert(sub != nil, "sub not found")
+			if sub == nil {
+				g.Log().Errorf(ctx, "PaymentSuccessCallback sub not found:%s paymentId:%s", payment.SubscriptionId, payment.PaymentId)
+				return
+			}
 			gateway := query.GetGatewayById(ctx, payment.GatewayId)
-			utility.Assert(gateway != nil, "gateway not found")
+			//utility.Assert(gateway != nil, "gateway not found")
+			if gateway == nil {
+				g.Log().Errorf(ctx, "PaymentSuccessCallback gateway not found:%d paymentId:%s", payment.GatewayId, payment.PaymentId)
+				return
+			}
 			_ = handler.UpdateSubscriptionDefaultPaymentMethod(ctx, sub.SubscriptionId, payment.GatewayPaymentMethod)
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingUpdate != nil {

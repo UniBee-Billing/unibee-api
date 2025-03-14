@@ -9,6 +9,7 @@ type VATGateway interface {
 	GetGatewayName() string
 	ListAllCountries() ([]*entity.CountryRate, error)
 	ListAllRates() ([]*entity.CountryRate, error)
+	VatRatesEnabled() bool
 	ValidateVatNumber(vatNumber string, requesterVatNumber string) (*bean.ValidResult, error)
 	ValidateEoriNumber(number string) (*bean.ValidResult, error)
 }

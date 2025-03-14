@@ -226,8 +226,8 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 
 	var taxPercentage int64 = 0
 	var countryName = ""
-	if len(req.CountryCode) > 0 {
-		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId) != nil, "vat gateway need setup while countryCode is not blank")
+	if len(req.CountryCode) > 0 && vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId).VatRatesEnabled() {
+		//utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId).VatRatesEnabled(), "vat gateway need setup while countryCode is not blank")
 		if len(req.VATNumber) > 0 {
 			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, req.VATNumber, "")
 			utility.AssertError(err, "Validate vatNumber error")

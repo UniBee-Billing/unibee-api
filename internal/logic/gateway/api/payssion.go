@@ -64,7 +64,6 @@ func (c Payssion) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		GatewayPaymentTypes:           fetchPayssionPaymentTypes(ctx),
 		CurrencyExchangeEnabled:       true,
 		Sort:                          60,
-		SubGatewayName:                "PM ID",
 	}
 }
 
@@ -76,7 +75,8 @@ func (c Payssion) GatewayTest(ctx context.Context, req *_interface.GatewayTestRe
 	urlPath := "/api/v1/payments"
 	pmID := "payssion_test"
 	if config.GetConfigInstance().IsProd() {
-		pmID = req.SubGateway
+		utility.Assert(req.GatewayPaymentTypes != nil && len(req.GatewayPaymentTypes) > 0, "Payment Type is empty")
+		pmID = req.GatewayPaymentTypes[0].PaymentType
 	}
 	param := map[string]interface{}{
 		"currency":    "EUR",
@@ -138,13 +138,13 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, gateway *entity.Merchan
 			description = line.Description
 		}
 	}
-	pmID := "alipay_cn"
-	if len(gateway.SubGateway) > 0 {
-		pmID = gateway.SubGateway
+	if len(createPayContext.Gateway.BrandData) > 0 {
+		gatewayPaymentTypes := utility.SplitToArray(createPayContext.Gateway.BrandData)
+		if gatewayPaymentTypes != nil && len(gatewayPaymentTypes) == 1 {
+			createPayContext.GatewayPaymentType = gatewayPaymentTypes[0]
+		}
 	}
-	if len(createPayContext.GatewayPaymentType) > 0 {
-		pmID = createPayContext.GatewayPaymentType
-	}
+	utility.Assert(len(createPayContext.GatewayPaymentType) > 0, "invalid Gateway PaymentType")
 	var currency = createPayContext.Pay.Currency
 	var totalAmount = createPayContext.Pay.TotalAmount
 	{
@@ -157,7 +157,7 @@ func (c Payssion) GatewayNewPayment(ctx context.Context, gateway *entity.Merchan
 	param := map[string]interface{}{
 		"currency": currency,
 		"amount":   utility.ConvertCentToDollarStr(totalAmount, currency),
-		"pm_id":    pmID,
+		"pm_id":    createPayContext.GatewayPaymentType,
 		//"title":               name,
 		"description": description,
 		"order_id":    createPayContext.Pay.PaymentId,

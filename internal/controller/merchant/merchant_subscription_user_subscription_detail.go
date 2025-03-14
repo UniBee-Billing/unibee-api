@@ -30,16 +30,16 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		//Admin Portal
 		one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
 		if one != nil {
-			detail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
+			subDetail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 			if err == nil {
 				return &subscription.UserSubscriptionDetailRes{
-					User:                                detail.User,
-					Subscription:                        detail.Subscription,
-					Plan:                                detail.Plan,
-					Gateway:                             detail.Gateway,
-					Addons:                              detail.Addons,
-					LatestInvoice:                       detail.LatestInvoice,
-					UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
+					User:                                subDetail.User,
+					Subscription:                        subDetail.Subscription,
+					Plan:                                subDetail.Plan,
+					Gateway:                             subDetail.Gateway,
+					Addons:                              subDetail.Addons,
+					LatestInvoice:                       subDetail.LatestInvoice,
+					UnfinishedSubscriptionPendingUpdate: subDetail.UnfinishedSubscriptionPendingUpdate,
 				}, nil
 			}
 		}
@@ -62,16 +62,16 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 			one = query.GetLatestSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx), req.ProductId)
 		}
 		if one != nil {
-			detail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
+			subDetail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 			if err == nil {
 				return &subscription.UserSubscriptionDetailRes{
-					User:                                detail.User,
-					Subscription:                        detail.Subscription,
-					Plan:                                detail.Plan,
-					Gateway:                             detail.Gateway,
-					Addons:                              detail.Addons,
-					LatestInvoice:                       detail.LatestInvoice,
-					UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
+					User:                                subDetail.User,
+					Subscription:                        subDetail.Subscription,
+					Plan:                                subDetail.Plan,
+					Gateway:                             subDetail.Gateway,
+					Addons:                              subDetail.Addons,
+					LatestInvoice:                       subDetail.LatestInvoice,
+					UnfinishedSubscriptionPendingUpdate: subDetail.UnfinishedSubscriptionPendingUpdate,
 				}, nil
 			}
 		}
