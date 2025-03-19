@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -18,7 +17,6 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface/context"
 	config3 "unibee/internal/logic/credit/config"
 	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
@@ -228,7 +226,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	var effectImmediate = false
 
 	isUpgrade, isChangeToLongPlan, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
-	utility.Assert(changed, "subscription update should have plan or addons changed")
+	utility.Assert(changed, "Subscription is already on the specified plan; updates must include changes to the plan or addons.")
 	if req.Metadata == nil {
 		req.Metadata = make(map[string]interface{})
 	}
@@ -265,7 +263,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		}
 	}
 
-	promoCreditDiscountCodeExclusive := config3.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency)
+	promoCreditDiscountCodeExclusive := config3.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, plan.Currency)
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
 			MerchantId:                 plan.MerchantId,
@@ -279,7 +277,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			IsChangeToSameIntervalPlan: oldPlan.IntervalCount == plan.IntervalCount && oldPlan.IntervalUnit == plan.IntervalUnit,
 			IsChangeToLongPlan:         isChangeToLongPlan,
 			IsRenew:                    false,
-			IsNewUser:                  IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
+			IsNewUser:                  IsNewSubscriptionUser(ctx, sub.MerchantId, strings.ToLower(user.Email)),
 		})
 		if canApply {
 			if isRecurring {
@@ -311,7 +309,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		if promoCreditDiscountCodeExclusive && len(req.DiscountCode) > 0 {
 			req.ApplyPromoCredit = unibee.Bool(false)
 		} else {
-			req.ApplyPromoCredit = unibee.Bool(config3.CheckCreditConfigPreviewDefaultUsed(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency))
+			req.ApplyPromoCredit = unibee.Bool(config3.CheckCreditConfigPreviewDefaultUsed(ctx, sub.MerchantId, consts.CreditAccountTypePromo, plan.Currency))
 		}
 	}
 
@@ -598,7 +596,6 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	if req.Discount != nil {
-		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
 		utility.Assert(req.NewPlanId > 0, "planId invalid")
 		utility.Assert(sub.UserId > 0, "UserId invalid")
@@ -776,84 +773,86 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	// need cancel payment、 invoice and send invoice email
 	pending_update_cancel.CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.PendingUpdateId, "CancelByNewUpdate-"+one.PendingUpdateId)
 
-	go func() {
-		backgroundCtx := context.Background()
-		var backgroundErr error
-		defer func() {
-			if exception := recover(); exception != nil {
-				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					backgroundErr = v
-				} else {
-					backgroundErr = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-				}
-				g.Log().Errorf(backgroundCtx, "UpdatePendingUpdateIdAfterCreateSubInvoicePaymentDefaultAutomatic Panic Error:%s", backgroundErr.Error())
-				return
-			}
-		}()
-		// bing to subscription
-		_, err = dao.Subscription.Ctx(backgroundCtx).Data(g.Map{
-			dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
-			dao.Subscription.Columns().GmtModify:       gtime.Now(),
-		}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
+	//go func() {
+	//	backgroundCtx := context.Background()
+	backgroundCtx := ctx
+	//	var backgroundErr error
+	//	defer func() {
+	//		if exception := recover(); exception != nil {
+	//			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+	//				backgroundErr = v
+	//			} else {
+	//				backgroundErr = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+	//			}
+	//			g.Log().Errorf(backgroundCtx, "UpdatePendingUpdateIdAfterCreateSubInvoicePaymentDefaultAutomatic Panic Error:%s", backgroundErr.Error())
+	//			return
+	//		}
+	//	}()
+	// bing to subscription
+	_, err = dao.Subscription.Ctx(backgroundCtx).Data(g.Map{
+		dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
+		dao.Subscription.Columns().GmtModify:       gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(backgroundCtx, "SubscriptionUpdate UpdatePendingUpdateIdAfterCreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
+	}
+
+	_, err = dao.SubscriptionPendingUpdate.Ctx(backgroundCtx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData:    subUpdateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
+		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().InvoiceId:       subUpdateRes.GatewayUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().Note:            note,
+		dao.SubscriptionPendingUpdate.Columns().MetaData:        utility.MarshalToJsonString(prepare.Invoice.Metadata),
+		dao.SubscriptionPendingUpdate.Columns().EffectImmediate: effectImmediate,
+	}).Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, one.PendingUpdateId).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(backgroundCtx, "SubscriptionUpdate UpdateInvoiceIdAfterCreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
+	} else {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic:      redismq2.TopicSubscriptionPendingUpdateCreate.Topic,
+			Tag:        redismq2.TopicSubscriptionPendingUpdateCreate.Tag,
+			Body:       one.PendingUpdateId,
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		})
+	}
+
+	if prepare.EffectImmediate && subUpdateRes.Paid {
+		_, err = handler.HandlePendingUpdatePaymentSuccess(backgroundCtx, prepare.Subscription, one.PendingUpdateId, subUpdateRes.Invoice)
 		if err != nil {
-			g.Log().Errorf(backgroundCtx, "SubscriptionUpdate UpdatePendingUpdateIdAfterCreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
+			g.Log().Errorf(ctx, "SubscriptionUpdate HandlePendingUpdatePaymentSuccess err:%s", err.Error())
 		}
+	}
 
-		_, err = dao.SubscriptionPendingUpdate.Ctx(backgroundCtx).Data(g.Map{
-			dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
-			dao.SubscriptionPendingUpdate.Columns().ResponseData:    subUpdateRes.Data,
-			dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
-			dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
-			dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
-			dao.SubscriptionPendingUpdate.Columns().InvoiceId:       subUpdateRes.GatewayUpdateId,
-			dao.SubscriptionPendingUpdate.Columns().Note:            note,
-			dao.SubscriptionPendingUpdate.Columns().MetaData:        utility.MarshalToJsonString(prepare.Invoice.Metadata),
-			dao.SubscriptionPendingUpdate.Columns().EffectImmediate: effectImmediate,
-		}).Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, one.PendingUpdateId).OmitNil().Update()
-		if err != nil {
-			g.Log().Errorf(backgroundCtx, "SubscriptionUpdate UpdateInvoiceIdAfterCreateSubInvoicePaymentDefaultAutomatic err:%s", err.Error())
-		} else {
-			_, _ = redismq.Send(&redismq.Message{
-				Topic:      redismq2.TopicSubscriptionPendingUpdateCreate.Topic,
-				Tag:        redismq2.TopicSubscriptionPendingUpdateCreate.Tag,
-				Body:       one.PendingUpdateId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			})
-		}
+	content := "Update"
+	if prepare.IsUpgrade {
+		content = "Upgrade"
+	} else {
+		content = "Downgrade"
+	}
+	if prepare.EffectImmediate {
+		content = fmt.Sprintf("%s(EffectImmediate)", content)
+	} else {
+		content = fmt.Sprintf("%s(EffectAtPeriodEnd)", content)
+	}
 
-		if prepare.EffectImmediate && subUpdateRes.Paid {
-			_, err = handler.HandlePendingUpdatePaymentSuccess(backgroundCtx, prepare.Subscription, one.PendingUpdateId, subUpdateRes.Invoice)
-			if err != nil {
-				g.Log().Errorf(ctx, "SubscriptionUpdate HandlePendingUpdatePaymentSuccess err:%s", err.Error())
-			}
-		}
+	operation_log.AppendOptLog(backgroundCtx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+		Content:        fmt.Sprintf("%s(%d->%d)", content, one.PlanId, one.UpdatePlanId),
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      subUpdateRes.GatewayUpdateId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+	if err != nil {
+		g.Log().Errorf(backgroundCtx, "SubscriptionUpdate AppendOptLog err:%s", err.Error())
+	}
 
-		content := "Update"
-		if prepare.IsUpgrade {
-			content = "Upgrade"
-		} else {
-			content = "Downgrade"
-		}
-		if prepare.EffectImmediate {
-			content = fmt.Sprintf("%s(EffectImmediate)", content)
-		} else {
-			content = fmt.Sprintf("%s(EffectAtPeriodEnd)", content)
-		}
-
-		operation_log.AppendOptLog(backgroundCtx, &operation_log.OptLogRequest{
-			MerchantId:     one.MerchantId,
-			Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
-			Content:        fmt.Sprintf("%s(%d->%d)", content, one.PlanId, one.UpdatePlanId),
-			UserId:         one.UserId,
-			SubscriptionId: one.SubscriptionId,
-			InvoiceId:      subUpdateRes.GatewayUpdateId,
-			PlanId:         0,
-			DiscountCode:   "",
-		}, err)
-		if err != nil {
-			g.Log().Errorf(backgroundCtx, "SubscriptionUpdate AppendOptLog err:%s", err.Error())
-		}
-	}()
+	//}()
 	if prepare.EffectImmediate && subUpdateRes.Paid {
 		one.Status = consts.PendingSubStatusFinished
 	}

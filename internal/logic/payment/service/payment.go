@@ -163,10 +163,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		createPayContext.Pay.InvoiceId = utility.CreateInvoiceId()
 	}
 
-	_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().PaymentId: createPayContext.Pay.PaymentId,
-		dao.Invoice.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Invoice.Columns().Id, createPayContext.Invoice.Id).OmitNil().Update()
+	if createPayContext.Invoice.Id > 0 {
+		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().PaymentId: createPayContext.Pay.PaymentId,
+			dao.Invoice.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Invoice.Columns().Id, createPayContext.Invoice.Id).OmitNil().Update()
+	}
 
 	createPayContext.Pay.MetaData = utility.MarshalToJsonString(createPayContext.Metadata)
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
@@ -268,19 +270,35 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 	}
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
-		req := &handler2.HandlePayReq{
-			PaymentId:              createPayContext.Pay.PaymentId,
-			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
-			GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
-			GatewayPaymentMethod:   gatewayInternalPayResult.GatewayPaymentMethod,
-			PaymentCode:            gatewayInternalPayResult.PaymentCode,
-			PayStatusEnum:          consts.PaymentSuccess,
-			TotalAmount:            createPayContext.Pay.TotalAmount,
-			PaymentAmount:          createPayContext.Pay.TotalAmount,
-			PaidTime:               gtime.Now(),
-		}
-		err = handler2.HandlePaySuccess(ctx, req)
-		gatewayInternalPayResult.Invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
+		go func() {
+			backgroundCtx := context.Background()
+			var backgroundErr error
+			defer func() {
+				if exception := recover(); exception != nil {
+					if v, ok := exception.(error); ok && gerror.HasStack(v) {
+						backgroundErr = v
+					} else {
+						backgroundErr = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+					}
+					g.Log().Errorf(backgroundCtx, "GatewayPaymentCreate HandlePaySuccess Panic Error:%s", backgroundErr.Error())
+					return
+				}
+			}()
+			err = handler2.HandlePaySuccess(backgroundCtx, &handler2.HandlePayReq{
+				PaymentId:              createPayContext.Pay.PaymentId,
+				GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
+				GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
+				GatewayPaymentMethod:   gatewayInternalPayResult.GatewayPaymentMethod,
+				PaymentCode:            gatewayInternalPayResult.PaymentCode,
+				PayStatusEnum:          consts.PaymentSuccess,
+				TotalAmount:            createPayContext.Pay.TotalAmount,
+				PaymentAmount:          createPayContext.Pay.TotalAmount,
+				PaidTime:               gtime.Now(),
+			})
+		}()
+
+		//gatewayInternalPayResult.Invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
+		gatewayInternalPayResult.Invoice.Status = consts.InvoiceStatusPaid
 	}
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,

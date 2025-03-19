@@ -11,7 +11,6 @@ import (
 	config2 "unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
-	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/credit/config"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -84,7 +83,6 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	}
 
 	if req.Discount != nil {
-		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
 		utility.Assert(sub.PlanId > 0, "planId invalid")
 		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
@@ -106,17 +104,17 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			IsUpgrade:          false,
 			IsChangeToLongPlan: false,
 			IsRenew:            true,
-			IsNewUser:          IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(user.Email)),
+			IsNewUser:          IsNewSubscriptionUser(ctx, sub.MerchantId, strings.ToLower(user.Email)),
 		})
 		utility.Assert(canApply, message)
-		promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency)
+		promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency)
 		if promoCreditDiscountCodeExclusive {
 			//conflict, disable promo credit
 			req.ApplyPromoCredit = unibee.Bool(false)
 		}
 	}
 	if req.ApplyPromoCredit == nil {
-		req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, sub.Currency))
+		req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency))
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{

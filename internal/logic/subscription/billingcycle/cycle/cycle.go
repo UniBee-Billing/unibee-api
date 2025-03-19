@@ -195,7 +195,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As CancelPeriodEnd Set"}, nil
 			}
 			// Unpaid after period end or trial end
-			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.Status != consts.SubStatusIncomplete {
+			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.Status != consts.SubStatusIncomplete && config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).IncompleteExpireTime > 30 {
 				err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow, "OutOfPeriod")
 				if err != nil {
 					g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice HandleSubscriptionIncomplete err:", err.Error())
