@@ -68,7 +68,7 @@ func (c AlipayPlus) GatewayInfo(ctx context.Context) *_interface.GatewayInfo {
 		PublicKeyName:                 "Alipay+ Public Key",
 		PrivateSecretName:             "Merchant Private Key",
 		Host:                          "https://open-de-global.alipay.com",
-		IsStaging:                     true,
+		IsStaging:                     false,
 	}
 }
 
