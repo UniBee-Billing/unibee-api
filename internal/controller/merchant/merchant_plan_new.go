@@ -14,6 +14,7 @@ func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.N
 		ExternalPlanId:        req.ExternalPlanId,
 		Type:                  req.Type,
 		PlanName:              req.PlanName,
+		InternalName:          req.InternalName,
 		Amount:                req.Amount,
 		Currency:              req.Currency,
 		IntervalUnit:          req.IntervalUnit,

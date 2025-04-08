@@ -198,6 +198,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = customCtx.Token.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
+			merchantQPSLimit(customCtx.MerchantId, r)
 			lang := ""
 			if r.Get("lang") != nil {
 				lang = r.Get("lang").String()
@@ -229,6 +230,7 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 			customCtx.MerchantId = merchantInfo.Id
 			customCtx.OpenApiKey = customCtx.TokenString
 		}
+		merchantQPSLimit(customCtx.MerchantId, r)
 		lang := ""
 		if r.Get("lang") != nil {
 			lang = r.Get("lang").String()
@@ -345,6 +347,7 @@ func (s *SMiddleware) UserPortalApiHandler(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = customCtx.Token.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
+			merchantQPSLimit(customCtx.MerchantId, r)
 			//UserPortalTrack
 			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.URL.Path, nil)
 			lang := ""
@@ -383,5 +386,20 @@ func doubleRequestLimit(id string, r *ghttp.Request) {
 		if !utility.TryLock(r.Context(), md5, 2) {
 			utility.Assert(false, i18n.LocalizationFormat(r.Context(), "{#ClickTooFast}"))
 		}
+	}
+}
+
+func merchantQPSLimit(merchantId uint64, r *ghttp.Request) {
+	if config.GetConfigInstance().Mode == "cloud" {
+		maxQps := GetMerchantAPIRateLimit(r.Context(), merchantId)
+		checked, current := CheckQPSLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
+		g.Log().Infof(r.Context(), "merchantQPSLimitCheck merchantId:%d currentQps:%d maxQps:%d", merchantId, current, maxQps)
+		utility.Assert(checked, fmt.Sprintf("Reached max api qps limitation, please upgrade your plan, current qps:%d", current))
+	} else {
+		maxQps := 500
+		// todo mark move to config file
+		checked, current := CheckQPSLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
+		g.Log().Infof(r.Context(), "merchantQPSLimitCheck merchantId:%d currentQps:%d maxQps:%d", merchantId, current, maxQps)
+		utility.Assert(checked, fmt.Sprintf("Reached max api qps limitation, please upgrade your plan, current qps:%d", current))
 	}
 }

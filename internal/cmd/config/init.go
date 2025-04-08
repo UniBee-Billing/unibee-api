@@ -152,6 +152,7 @@ func SetupDefaultConfigs(ctx context.Context) {
 	setUpDefaultConfig(config, "auth", map[string]interface{}{"login": map[string]interface{}{}}, map[string]interface{}{"login": map[string]interface{}{}})
 	serverConfig := g.Cfg().MustGet(ctx, "server").Map()
 	utility.Assert(serverConfig != nil, "server config not found")
+	serverConfig["dumpRouterMap"] = false
 	setUpDefaultConfig(serverConfig, "address", serverAddress, ":8088")
 	setUpDefaultConfig(serverConfig, "domainPath", unibeeApiUrl, "http://127.0.0.1:8088")
 	setUpDefaultConfig(serverConfig, "jwtKey", serverJwtKey, "3^&secret-key-for-UniBee*1!8*")
@@ -161,10 +162,14 @@ func SetupDefaultConfigs(ctx context.Context) {
 		glog.Errorf(ctx, "server.domainPath not set")
 	}
 	redisConfig := g.Cfg().MustGet(ctx, "redis.default").Map()
+	_redisDatabaseInt := 0
+	if len(redisDatabase) > 0 {
+		_redisDatabaseInt, _ = strconv.Atoi(redisDatabase)
+	}
 	utility.Assert(redisConfig != nil, "redis config not found")
 	setUpDefaultConfig(redisConfig, "address", redisAddress, nil)
 	setUpDefaultConfig(redisConfig, "pass", redisPass, nil)
-	setUpDefaultConfig(redisConfig, "database", redisDatabase, 0)
+	setUpDefaultConfig(redisConfig, "db", _redisDatabaseInt, 0)
 	setUpDefaultConfig(redisConfig, "maxIdle", redisMaxIdle, 500)
 	setUpDefaultConfig(redisConfig, "minIdle", redisMinIdle, 10)
 	setUpDefaultConfig(redisConfig, "idleTimeout", redisIdleTimeout, "1d")

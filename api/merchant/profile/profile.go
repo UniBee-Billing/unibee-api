@@ -4,7 +4,29 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+	"unibee/internal/logic/middleware"
 )
+
+type GetLicenseReq struct {
+	g.Meta `path:"/get_license" tags:"Merchant" method:"get" summary:"Get License"`
+}
+
+type GetLicenseRes struct {
+	Merchant     *bean.Merchant      `json:"merchant" dc:"Merchant"`
+	License      *middleware.License `json:"license" description:"The merchant license" `
+	APIRateLimit int                 `json:"APIRateLimit" dc:"APIRateLimit"`
+}
+
+type GetLicenseUpdateUrlReq struct {
+	g.Meta    `path:"/get_license_update_url" tags:"Merchant" method:"get,post" summary:"Get License Update Url"`
+	PlanId    int64  `json:"planId" dc:"Id of plan to update" dc:"Id of plan to update"`
+	ReturnUrl string `json:"returnUrl"  dc:"ReturnUrl"`
+	CancelUrl string `json:"cancelUrl" dc:"CancelUrl"`
+}
+
+type GetLicenseUpdateUrlRes struct {
+	Url string `json:"url" dc:"Url"`
+}
 
 type GetReq struct {
 	g.Meta `path:"/get" tags:"Merchant" method:"get" summary:"Get Profile"`

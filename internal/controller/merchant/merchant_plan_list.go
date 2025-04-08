@@ -10,6 +10,7 @@ import (
 func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.ListRes, err error) {
 	plans, total := plan.PlanList(ctx, &plan.ListInternalReq{
 		MerchantId:    _interface.Context().Get(ctx).MerchantId,
+		PlanIds:       req.PlanIds,
 		ProductIds:    req.ProductIds,
 		Type:          req.Type,
 		Status:        req.Status,

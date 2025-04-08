@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/operation_log"
@@ -80,6 +81,11 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(url) > 0, "url is nil")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
+	if !config.GetConfigInstance().IsProd() {
+		// limit webhook sandbox to max 16
+		list := MerchantWebhookEndpointList(ctx, merchantId)
+		utility.Assert(len(list) <= 16, "You have reached the maximum of 16 sandbox webhook endpoints.")
+	}
 	// events valid check
 	for _, e := range events {
 		utility.Assert(event.WebhookEventInListeningEvents(event.WebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))

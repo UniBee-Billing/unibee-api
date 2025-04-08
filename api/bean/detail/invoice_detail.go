@@ -57,6 +57,7 @@ type InvoiceDetail struct {
 	UserAccount                    *bean.UserAccount                       `json:"userAccount"                    description:"UserAccount"`
 	UserSnapshot                   *bean.UserAccount                       `json:"userSnapshot"                   description:"UserSnapshot"`
 	Subscription                   *bean.Subscription                      `json:"subscription"                   description:"Subscription"`
+	SubscriptionPendingUpdate      *SubscriptionPendingUpdateDetail        `json:"subscriptionPendingUpdate"     description:"SubscriptionPendingUpdate"`
 	Payment                        *bean.Payment                           `json:"payment"                        description:"Payment"`
 	Refund                         *bean.Refund                            `json:"refund"                         description:"Refund"`
 	Discount                       *bean.MerchantDiscountCode              `json:"discount"                       description:"Discount"`
@@ -163,6 +164,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, invoice.UserId)),
 		UserSnapshot:                   bean.SimplifyUserAccount(userSnapShot),
 		Subscription:                   bean.SimplifySubscription(ctx, query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
+		SubscriptionPendingUpdate:      ConvertSubscriptionPendingUpdateDetailByInvoiceId(ctx, invoice.InvoiceId),
 		Payment:                        payment,
 		Refund:                         refund,
 		Discount:                       bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)),

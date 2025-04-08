@@ -5,7 +5,6 @@ go 1.22.5
 toolchain go1.22.7
 
 require (
-	github.com/alipay/global-open-sdk-go v1.2.10
 	github.com/creasty/defaults v1.7.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-pdf/fpdf v0.9.0
@@ -17,7 +16,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/jackyang-hk/go-redismq v1.1.6
+	github.com/jackyang-hk/go-redismq v1.1.8
 	github.com/leekchan/accounting v1.0.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/redis/go-redis/v9 v9.6.1

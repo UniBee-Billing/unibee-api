@@ -14,10 +14,11 @@ type GatewaySetupRes struct {
 }
 
 type SendTemplateEmailToUserReq struct {
-	g.Meta       `path:"/send_template_email_to_user" tags:"Email" method:"post" summary:"Send Template Email To User"`
-	TemplateName string                 `json:"templateName" dc:"The name of email template"       v:"required"`
-	UserId       int64                  `json:"userId" dc:"UserId" v:"required" `
-	Variables    map[string]interface{} `json:"variables" dc:"Variables，Map"`
+	g.Meta          `path:"/send_template_email_to_user" tags:"Email" method:"post" summary:"Send Template Email To User"`
+	TemplateName    string                 `json:"templateName" dc:"The name of email template"       v:"required"`
+	UserId          int64                  `json:"userId" dc:"UserId" v:"required" `
+	Variables       map[string]interface{} `json:"variables" dc:"Variables，Map"`
+	AttachInvoiceId string                 `json:"attachInvoiceId" dc:"AttachInvoiceId"`
 }
 
 type SendTemplateEmailToUserRes struct {

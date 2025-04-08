@@ -25,6 +25,7 @@ type SessionLoginRes struct {
 	User      *bean.UserAccount `json:"user" dc:"user"`
 	Token     string            `json:"token" dc:"token string"`
 	ReturnUrl string            `json:"returnUrl" dc:"ReturnUrl"`
+	CancelUrl string            `json:"cancelUrl" dc:"CancelUrl"`
 }
 
 type LoginOtpReq struct {

@@ -82,7 +82,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	if one.EffectImmediate == 1 {
 		periodEnd = invoice.PeriodEnd
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, periodEnd, sub.PlanId)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, periodEnd, one.UpdatePlanId)
 
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,

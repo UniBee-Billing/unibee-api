@@ -19,3 +19,11 @@ type GetRes struct {
 	SupportCurrency []*bean.Currency  `json:"supportCurrency" description:"Support Currency List" `
 	Gateway         []*detail.Gateway `json:"gateway" description:"Support Currency List" `
 }
+
+type SendMockMQReq struct {
+	g.Meta  `path:"/send_mock_mq" tags:"System-Information" method:"get" summary:"Send Mock MQ Message"`
+	Message string `json:"message" description:"Send Mock MQ Message"`
+}
+
+type SendMockMQRes struct {
+}

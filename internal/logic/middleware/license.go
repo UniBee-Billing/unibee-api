@@ -6,11 +6,58 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	go_redismq "github.com/jackyang-hk/go-redismq"
+	"strconv"
+	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	context2 "unibee/internal/interface/context"
 	"unibee/utility"
 )
+
+func GetMerchantAPIRateLimit(ctx context.Context, merchantId uint64) int {
+	var defaultRateLimit = 50
+	if !config.GetConfigInstance().IsProd() {
+		defaultRateLimit = 10
+	}
+	cache, err := g.Redis().Get(ctx, fmt.Sprintf("UniBee#Cloud#MerchantAPIRateLimit#%d", merchantId))
+	if err == nil && cache != nil {
+		if !cache.IsEmpty() {
+			g.Log().Infof(ctx, "GetMerchantAPIRateLimit Cache hint:%d data:%s", merchantId, cache)
+			qps := cache.Int()
+			if qps > defaultRateLimit {
+				return qps
+			}
+		}
+	}
+	license := GetMerchantLicense(ctx, merchantId)
+	if license != nil && license.IsPaid && license.Plan != nil && license.Plan.Metadata != nil {
+		if license.Plan.Metadata["QPSLimit"] != nil {
+			if v, ok := license.Plan.Metadata["QPSLimit"].(float64); ok {
+				qps := int(v)
+				if qps > defaultRateLimit {
+					_, _ = g.Redis().Set(ctx, fmt.Sprintf("UniBee#Cloud#MerchantAPIRateLimit#%d", merchantId), qps)
+					_, _ = g.Redis().Expire(ctx, fmt.Sprintf("UniBee#Cloud#MerchantAPIRateLimit#%d", merchantId), 60)
+					return qps
+				}
+			}
+		}
+	}
+	return defaultRateLimit
+}
+
+func GetMerchantMemberLimit(ctx context.Context, merchantId uint64) int {
+	var defaultMemberLimit = -1
+	license := GetMerchantLicense(ctx, merchantId)
+	if license != nil && license.IsPaid && license.Plan != nil && license.Plan.Metadata != nil {
+		if license.Plan.Metadata["MemberCount"] != nil {
+			memberCount, err := strconv.Atoi(fmt.Sprintf("%s", license.Plan.Metadata["MemberCount"]))
+			if err == nil && memberCount != 0 {
+				return memberCount
+			}
+		}
+	}
+	return defaultMemberLimit
+}
 
 func GetMerchantLicense(ctx context.Context, merchantId uint64) (one *License) {
 	if merchantId <= 0 {
@@ -164,7 +211,10 @@ type MerchantVersion struct {
 }
 
 type License struct {
-	OwnerEmail string           `json:"ownerEmail" dc:"OwnerEmail"`
-	Version    *MerchantVersion `json:"version" dc:"Version Info"`
-	License    string           `json:"license" dc:"License, Premium Version will contain License"`
+	IsPaid       bool               `json:"isPaid,omitempty"`
+	OwnerEmail   string             `json:"ownerEmail" dc:"OwnerEmail"`
+	Version      *MerchantVersion   `json:"version" dc:"Version Info"`
+	License      string             `json:"license" dc:"License, Premium Version will contain License"`
+	Plan         *bean.Plan         `json:"plan,omitempty"`
+	Subscription *bean.Subscription `json:"subscription,omitempty"`
 }

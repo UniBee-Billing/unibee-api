@@ -15,6 +15,7 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 		PlanId:                req.PlanId,
 		ExternalPlanId:        req.ExternalPlanId,
 		PlanName:              req.PlanName,
+		InternalName:          req.InternalName,
 		Amount:                req.Amount,
 		Currency:              req.Currency,
 		IntervalUnit:          req.IntervalUnit,

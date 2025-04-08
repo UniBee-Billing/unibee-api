@@ -111,6 +111,59 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	return &UserListInternalRes{UserAccounts: resultList, Total: total}, nil
 }
 
+func UserCount(ctx context.Context, req *UserListInternalReq) (total int, err error) {
+	if req.Count <= 0 {
+		req.Count = 20
+	}
+	if req.Page < 0 {
+		req.Page = 0
+	}
+
+	var isDeletes = []int{0}
+	if req.DeleteInclude {
+		isDeletes = append(isDeletes, 1)
+	}
+	utility.Assert(req.MerchantId > 0, "merchantId not found")
+	q := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().MerchantId, req.MerchantId).
+		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes)
+	if req.UserId > 0 {
+		q = q.Where(dao.UserAccount.Columns().Id, req.UserId)
+	}
+	if len(req.SubscriptionId) > 0 {
+		q = q.Where(dao.UserAccount.Columns().SubscriptionId, req.SubscriptionId)
+	}
+	if len(req.Email) > 0 {
+		q = q.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
+	}
+	if len(req.FirstName) > 0 {
+		q = q.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+	}
+	if len(req.LastName) > 0 {
+		q = q.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+	}
+	if req.SubStatus != nil && len(req.SubStatus) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().SubscriptionStatus, req.SubStatus)
+	}
+	if req.Status != nil && len(req.Status) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)
+	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().PlanId, req.PlanIds)
+	}
+	if req.CreateTimeStart > 0 {
+		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+	}
+	if req.CreateTimeEnd > 0 {
+		q = q.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
+	}
+	total, err = q.OmitEmpty().Count()
+	if err != nil {
+		return total, err
+	}
+	return total, nil
+}
+
 func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*detail.UserAccountDetail, err error) {
 	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
 	var mainList = make([]*entity.UserAccount, 0)

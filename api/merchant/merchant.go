@@ -33,6 +33,7 @@ import (
 
 type IMerchantAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
+	Session(ctx context.Context, req *auth.SessionReq) (res *auth.SessionRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
 	PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error)
@@ -194,6 +195,8 @@ type IMerchantProduct interface {
 }
 
 type IMerchantProfile interface {
+	GetLicense(ctx context.Context, req *profile.GetLicenseReq) (res *profile.GetLicenseRes, err error)
+	GetLicenseUpdateUrl(ctx context.Context, req *profile.GetLicenseUpdateUrlReq) (res *profile.GetLicenseUpdateUrlRes, err error)
 	Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error)
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	CountryConfigList(ctx context.Context, req *profile.CountryConfigListReq) (res *profile.CountryConfigListRes, err error)
@@ -214,6 +217,7 @@ type IMerchantSearch interface {
 
 type IMerchantSession interface {
 	New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error)
+	NewSubUpdatePage(ctx context.Context, req *session.NewSubUpdatePageReq) (res *session.NewSubUpdatePageRes, err error)
 }
 
 type IMerchantSubscription interface {
@@ -263,6 +267,7 @@ type IMerchantTrack interface {
 type IMerchantUser interface {
 	New(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error)
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
+	Count(ctx context.Context, req *user.CountReq) (res *user.CountRes, err error)
 	Get(ctx context.Context, req *user.GetReq) (res *user.GetRes, err error)
 	Frozen(ctx context.Context, req *user.FrozenReq) (res *user.FrozenRes, err error)
 	Release(ctx context.Context, req *user.ReleaseReq) (res *user.ReleaseRes, err error)

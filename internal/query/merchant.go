@@ -32,6 +32,21 @@ func GetMerchantById(ctx context.Context, id uint64) (one *entity.Merchant) {
 	return one
 }
 
+func GetMerchantByOwnerEmail(ctx context.Context, email string) (one *entity.Merchant) {
+	if len(email) == 0 {
+		return nil
+	}
+	var member *entity.MerchantMember
+	err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().Email, email).
+		Where(dao.MerchantMember.Columns().Role, "Owner").
+		Scan(&member)
+	if err != nil || member == nil {
+		return nil
+	}
+	return GetMerchantById(ctx, member.MerchantId)
+}
+
 func GetMerchantByHost(ctx context.Context, host string) (one *entity.Merchant) {
 	if len(host) <= 0 {
 		return nil

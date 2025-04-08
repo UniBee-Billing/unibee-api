@@ -45,4 +45,5 @@ type Plan struct {
 	ProductId                 int64       `json:"productId"                 description:"product id"`                                                                                                      // product id
 	DisableAutoCharge         int         `json:"disableAutoCharge"         description:"disable auto-charge, 0-false,1-true"`                                                                             // disable auto-charge, 0-false,1-true
 	MetricCharge              string      `json:"metricCharge"              description:"metric charge(json)"`                                                                                             // metric charge(json)
+	InternalName              string      `json:"internalName"              description:""`                                                                                                                //
 }

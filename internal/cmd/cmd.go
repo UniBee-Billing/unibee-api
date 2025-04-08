@@ -11,6 +11,7 @@ import (
 	"unibee/internal/cmd/swagger"
 	"unibee/internal/consumer/websocket"
 	"unibee/internal/controller"
+	"unibee/internal/controller/checkout"
 	"unibee/internal/controller/gateway_webhook_entry"
 	"unibee/internal/controller/link/_import"
 	"unibee/internal/controller/link/export"
@@ -293,6 +294,33 @@ var (
 				})
 			})
 
+			s.Group("/checkout", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				group.Group("/ip", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewIp(),
+					)
+				})
+				group.Group("/vat", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewVat(),
+					)
+				})
+				group.Group("/gateway", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewGateway(),
+					)
+				})
+				group.Group("/subscription", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewSubscription(),
+					)
+				})
+			})
+
 			s.Group("/system", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
@@ -321,6 +349,11 @@ var (
 				group.Group("/invoice", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						system.NewInvoice(),
+					)
+				})
+				group.Group("/user", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewUser(),
 					)
 				})
 				if !config.GetConfigInstance().IsProd() {
@@ -398,12 +431,14 @@ var (
 			}
 
 			{
-				redismq.RegisterRedisMqConfig(&redismq.RedisMqConfig{
+				config := &redismq.RedisMqConfig{
 					Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
 					Password: config.GetConfigInstance().RedisConfig.Default.Pass,
 					Database: config.GetConfigInstance().RedisConfig.Default.DB,
 					Group:    "GID_UniBee_Recurring",
-				})
+				}
+				redismq.RegisterRedisMqConfig(config)
+				g.Log().Infof(ctx, "Redismq register success with config：%s", utility.MarshalToJsonString(config))
 				redismq.StartRedisMqConsumer()
 			}
 			{

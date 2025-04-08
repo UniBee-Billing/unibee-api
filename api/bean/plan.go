@@ -3,6 +3,7 @@ package bean
 import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"unibee/internal/cmd/config"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -11,6 +12,7 @@ type Plan struct {
 	Id                     uint64                          `json:"id"                        description:""`
 	MerchantId             uint64                          `json:"merchantId"                description:"merchant id"`                     // merchant id
 	PlanName               string                          `json:"planName"                  description:"PlanName"`                        // PlanName
+	InternalName           string                          `json:"internalName"              description:"PlanInternalName"`                //
 	Amount                 int64                           `json:"amount"                    description:"amount, cent, without tax"`       // amount, cent, without tax
 	Currency               string                          `json:"currency"                  description:"currency"`                        // currency
 	IntervalUnit           string                          `json:"intervalUnit"              description:"period unit,day|month|year|week"` // period unit,day|month|year|week
@@ -34,9 +36,11 @@ type Plan struct {
 	CancelAtTrialEnd       int                             `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ExternalPlanId         string                          `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 	ProductId              int64                           `json:"productId"                 description:"product id"`                                                                                                      // product id
+	DisableAutoCharge      int                             `json:"disableAutoCharge"         description:"disable auto-charge, 0-false,1-true"`                                                                             // disable auto-charge, 0-false,1-true
 	MetricLimits           []*PlanMetricLimitParam         `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	MetricMeteredCharge    []*PlanMetricMeteredChargeParam `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
 	MetricRecurringCharge  []*PlanMetricMeteredChargeParam `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
+	CheckoutUrl            string                          `json:"checkoutUrl"                 description:"CheckoutUrl"`
 }
 
 func SimplifyPlan(one *entity.Plan) *Plan {
@@ -58,6 +62,7 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 		Id:                     one.Id,
 		MerchantId:             one.MerchantId,
 		PlanName:               one.PlanName,
+		InternalName:           one.InternalName,
 		Amount:                 one.Amount,
 		Currency:               one.Currency,
 		IntervalUnit:           one.IntervalUnit,
@@ -81,9 +86,11 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 		CancelAtTrialEnd:       one.CancelAtTrialEnd,
 		ExternalPlanId:         one.ExternalPlanId,
 		ProductId:              one.ProductId,
+		DisableAutoCharge:      one.DisableAutoCharge,
 		MetricLimits:           metricPlanCharge.MetricLimits,
 		MetricMeteredCharge:    metricPlanCharge.MetricMeteredCharge,
 		MetricRecurringCharge:  metricPlanCharge.MetricRecurringCharge,
+		CheckoutUrl:            fmt.Sprintf("%s/hosted/checkout?planId=%d", config.GetConfigInstance().Server.GetServerPath(), one.Id),
 	}
 }
 

@@ -18,7 +18,6 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
 	payment2 "unibee/internal/logic/credit/payment"
-	"unibee/internal/logic/currency"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/fiat_exchange"
@@ -538,7 +537,27 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 			}
 			return err
 		} else {
-			rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", one.Currency)
+			rate, err := fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", one.Currency)
+			if err != nil {
+				return err
+			}
+			if rate != nil {
+				cryptoCurrency = "USD"
+				cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
+			}
+		}
+	} else if config2.GetConfigInstance().Mode == "cloud" {
+		if one.Currency == "USD" {
+			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+				dao.Invoice.Columns().CryptoCurrency: "USD",
+				dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
+			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+			if err != nil {
+				fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
+			}
+			return err
+		} else {
+			rate, err := fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, "USD", one.Currency)
 			if err != nil {
 				return err
 			}
@@ -581,7 +600,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 	utility.Assert(one.UserId > 0, "invoice userId not found")
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
-	_, emailKey := email.GetDefaultMerchantEmailConfig(ctx, one.MerchantId)
+	_, emailKey := email.GetDefaultMerchantEmailConfigWithClusterCloud(ctx, one.MerchantId)
 	if len(emailKey) == 0 {
 		return gerror.New("Email gateway not setup")
 	}

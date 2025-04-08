@@ -23,7 +23,7 @@ func (t TestMessageListener) GetTag() string {
 func (t TestMessageListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Infof(ctx, "TestMessageListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "TestMessageListener Receive Message:%s", message.Body)
 	return redismq.CommitMessage
 }
 

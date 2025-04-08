@@ -150,6 +150,8 @@ type UpdateReq struct {
 	EffectImmediate        int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	Metadata               map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode           string                 `json:"discountCode"        dc:"DiscountCode"`
+	ReturnUrl              string                 `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl              string                 `json:"cancelUrl" dc:"CancelUrl"`
 	ApplyPromoCredit       bool                   `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
 }
@@ -268,4 +270,28 @@ type UserPendingCryptoSubscriptionDetailReq struct {
 
 type UserPendingCryptoSubscriptionDetailRes struct {
 	Subscription *detail.SubscriptionDetail `json:"subscription" dc:"Subscription"`
+}
+
+type RenewReq struct {
+	g.Meta                 `path:"/renew" tags:"User-Subscription" method:"post" summary:"Renew Subscription" dc:"renew an exist subscription "`
+	SubscriptionId         string                      `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription or latest subscription will renew if userId provide instead of subscriptionId"`
+	ProductId              int64                       `json:"productId" dc:"Id of product" dc:"default product will use if not specified"`
+	GatewayId              *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	GatewayPaymentType     string                      `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
+	TaxPercentage          *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
+	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	Metadata               map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	ApplyPromoCredit       *bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
+	ApplyPromoCreditAmount *int64                      `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+}
+
+type RenewRes struct {
+	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	Paid         bool               `json:"paid"`
+	Link         string             `json:"link"`
 }

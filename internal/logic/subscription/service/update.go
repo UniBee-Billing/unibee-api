@@ -167,6 +167,7 @@ type UpdatePreviewInternalRes struct {
 	PaymentMethodId       string                     `json:"paymentMethodId" `
 	GatewayPaymentType    string                     `json:"gatewayPaymentType" `
 	ApplyPromoCredit      bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
+	ProrationAmount       int64                      `json:"prorationAmount" `
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -312,7 +313,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			req.ApplyPromoCredit = unibee.Bool(config3.CheckCreditConfigPreviewDefaultUsed(ctx, sub.MerchantId, consts.CreditAccountTypePromo, plan.Currency))
 		}
 	}
-
+	var prorationAmount int64
 	if effectImmediate {
 		if sub.Status != consts.SubStatusActive || !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
@@ -443,6 +444,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					ApplyPromoCredit:       *req.ApplyPromoCredit,
 					ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 				})
+				prorationAmount = currentInvoice.TotalAmount
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 					UserId:                 sub.UserId,
@@ -467,6 +469,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					ApplyPromoCredit:       *req.ApplyPromoCredit,
 					ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 				})
+				prorationAmount = currentInvoice.TotalAmount
 			}
 		}
 		prorationDate = currentInvoice.ProrationDate
@@ -555,6 +558,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		PaymentMethodId:       paymentMethodId,
 		GatewayPaymentType:    paymentType,
 		ApplyPromoCredit:      *req.ApplyPromoCredit,
+		ProrationAmount:       prorationAmount,
 	}, nil
 }
 
@@ -659,7 +663,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		Quantity:         prepare.Subscription.Quantity,
 		AddonData:        prepare.Subscription.AddonData,
 		UpdateAmount:     prepare.NextPeriodInvoice.TotalAmount,
-		ProrationAmount:  prepare.Invoice.TotalAmount,
+		ProrationAmount:  prepare.ProrationAmount,
 		UpdateCurrency:   prepare.Currency,
 		UpdatePlanId:     prepare.Plan.Id,
 		UpdateQuantity:   prepare.Quantity,

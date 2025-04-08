@@ -18,6 +18,7 @@ import (
 
 type ListInternalReq struct {
 	MerchantId    uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
+	PlanIds       []int64 `json:"planIds"  dc:"filter id list of plan, default all" `
 	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
 	Type          []int   `json:"type" dc:"Default All，,1-main plan，2-recurring addon, 3-one time addon" `
 	Status        []int   `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
@@ -101,6 +102,9 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		} else {
 			q = q.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
 		}
+	}
+	if len(req.PlanIds) > 0 {
+		q = q.WhereIn(dao.Plan.Columns().Id, req.PlanIds)
 	}
 	if len(req.Type) > 0 {
 		q = q.WhereIn(dao.Plan.Columns().Type, req.Type)

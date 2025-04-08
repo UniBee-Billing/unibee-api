@@ -83,6 +83,7 @@ type PlanInternalReq struct {
 	MerchantId            uint64                               `json:"merchantId" dc:"MerchantId" `
 	PlanId                uint64                               `json:"planId" dc:"PlanId" `
 	PlanName              string                               `json:"planName" dc:"Plan Name"    `
+	InternalName          string                               `json:"internalName"              description:""` //
 	Amount                int64                                `json:"amount"   dc:"Plan CaptureAmount"  `
 	Currency              string                               `json:"currency"   dc:"Plan Currency"`
 	IntervalUnit          string                               `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
@@ -166,9 +167,11 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	}
 
 	if req.Type != consts.PlanTypeMain {
-		utility.Assert(req.TrialDurationTime == 0, "Trail not available for addon")
-		utility.Assert(req.TrialAmount == 0, "Trail not available for addon")
-		utility.Assert(req.TrialDemand == "", "Trail not available for addon")
+		if req.Type == consts.PlanTypeRecurringAddon {
+			utility.Assert(req.TrialDurationTime == 0, "Trial not available for addon")
+			utility.Assert(req.TrialAmount == 0, "Trial not available for addon")
+			utility.Assert(req.TrialDemand == "", "Trial not available for addon")
+		}
 		utility.Assert(len(req.MetricMeteredCharge) == 0, "Metric metered charge not available for addon")
 		utility.Assert(len(req.MetricRecurringCharge) == 0, "Metric recurring charge not available for addon")
 	}
@@ -253,6 +256,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		CompanyId:              merchantInfo.CompanyId,
 		MerchantId:             req.MerchantId,
 		PlanName:               req.PlanName,
+		InternalName:           req.InternalName,
 		Amount:                 req.Amount,
 		Currency:               strings.ToUpper(req.Currency),
 		IntervalUnit:           strings.ToLower(req.IntervalUnit),
@@ -334,6 +338,7 @@ type EditInternalReq struct {
 	PlanId                uint64                                `json:"planId" dc:"PlanId" v:"required"`
 	ExternalPlanId        *string                               `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName              *string                               `json:"planName" dc:"Plan Name"   v:"required" `
+	InternalName          *string                               `json:"internalName"              description:""` //
 	Amount                *int64                                `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency              *string                               `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit          *string                               `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
@@ -419,11 +424,13 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	}
 
 	if one.Type != consts.PlanTypeMain {
-		utility.Assert(req.TrialDurationTime == nil, "Trail not available for addon")
-		utility.Assert(req.TrialAmount == nil, "Trail not available for addon")
-		utility.Assert(req.TrialDemand == nil, "Trail not available for addon")
-		utility.Assert(req.MetricMeteredCharge == nil, "Metric metered charge not available for addon")
-		utility.Assert(req.MetricRecurringCharge == nil, "Metric recurring charge not available for addon")
+		if one.Type == consts.PlanTypeRecurringAddon {
+			utility.Assert(req.TrialDurationTime == nil, "Trial not available for addon")
+			utility.Assert(req.TrialAmount == nil, "Trial not available for addon")
+			utility.Assert(req.TrialDemand == nil, "Trial not available for addon")
+		}
+		utility.Assert(req.MetricMeteredCharge == nil || len(*req.MetricMeteredCharge) == 0, "Metric metered charge not available for addon")
+		utility.Assert(req.MetricRecurringCharge == nil || len(*req.MetricRecurringCharge) == 0, "Metric recurring charge not available for addon")
 	}
 
 	if req.PlanName != nil {
@@ -504,6 +511,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().ExternalPlanId:         req.ExternalPlanId,
 		dao.Plan.Columns().PlanName:               req.PlanName,
+		dao.Plan.Columns().InternalName:           req.InternalName,
 		dao.Plan.Columns().Amount:                 req.Amount,
 		dao.Plan.Columns().Currency:               editCurrency,
 		dao.Plan.Columns().IntervalUnit:           req.IntervalUnit,
@@ -584,6 +592,7 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 		CompanyId:              one.CompanyId,
 		MerchantId:             one.MerchantId,
 		PlanName:               one.PlanName + "(Copy)",
+		InternalName:           one.InternalName,
 		Amount:                 one.Amount,
 		Currency:               one.Currency,
 		IntervalUnit:           one.IntervalUnit,

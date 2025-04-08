@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+	"unibee/internal/cmd/config"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/log"
@@ -96,8 +97,15 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 						createPayContext.Metadata[gateway_bean.GatewayCurrencyExchangeKey] = utility.MarshalToJsonString(createPayContext.GatewayCurrencyExchange)
 					} else if exchange.ExchangeRate == 0 {
 						exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, fiat_exchange.FiatExchangeApiKey)
-						utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi not setup")
-						rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						var rate *float64
+						if config.GetConfigInstance().Mode != "cloud" {
+							utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi Need Setup")
+						}
+						if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+							rate, err = fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						} else {
+							rate, err = fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						}
 						utility.AssertError(err, "transfer currency exchange error")
 						utility.Assert(rate != nil, "transfer currency error, exchange rate is nil")
 						exchange.ExchangeRate = *rate
@@ -132,7 +140,18 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 				createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
 				createPayContext.Pay.CryptoCurrency = "USD"
 			} else {
-				rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", createPayContext.Pay.Currency)
+				rate, err := fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", createPayContext.Pay.Currency)
+				utility.AssertError(err, "transfer crypto currency error")
+				utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
+				createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
+				createPayContext.Pay.CryptoCurrency = "USD"
+			}
+		} else if config.GetConfigInstance().Mode == "cloud" {
+			if createPayContext.Pay.Currency == "USD" {
+				createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
+				createPayContext.Pay.CryptoCurrency = "USD"
+			} else {
+				rate, err := fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, "USD", createPayContext.Pay.Currency)
 				utility.AssertError(err, "transfer crypto currency error")
 				utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
 				createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)

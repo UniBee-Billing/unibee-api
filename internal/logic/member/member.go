@@ -17,6 +17,45 @@ import (
 	"unibee/utility"
 )
 
+func NewSession(ctx context.Context, memberId int64, returnUrl string) (session string, err error) {
+	utility.Assert(memberId > 0, "Invalid member id")
+	one := query.GetMerchantMemberById(ctx, uint64(memberId))
+	utility.Assert(one != nil, "Invalid Session, Member Not Found")
+	utility.Assert(one.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
+	// create user session
+	session = utility.GenerateRandomAlphanumeric(40)
+	_, err = g.Redis().Set(ctx, fmt.Sprintf("MemberSessionKey:%s", session), one.Id)
+	utility.AssertError(err, "Server Error")
+	_, err = g.Redis().Expire(ctx, fmt.Sprintf("MemberSessionKey:%s", session), config.GetConfigInstance().Auth.Login.Expire*60)
+	utility.AssertError(err, "Server Error")
+	if len(returnUrl) > 0 {
+		_, err = g.Redis().Set(ctx, fmt.Sprintf("MemberSessionReturnUrlKey:%s", session), returnUrl)
+		utility.AssertError(err, "Server Error")
+		_, err = g.Redis().Expire(ctx, fmt.Sprintf("MemberSessionReturnUrlKey:%s", session), config.GetConfigInstance().Auth.Login.Expire*60)
+		utility.AssertError(err, "Server Error")
+	}
+	return session, nil
+}
+
+func SessionTransfer(ctx context.Context, session string) (*entity.MerchantMember, string) {
+	utility.Assert(len(session) > 0, "Session Is Nil")
+	id, err := g.Redis().Get(ctx, fmt.Sprintf("MemberSessionKey:%s", session))
+	utility.AssertError(err, "System Error")
+	utility.Assert(id != nil && !id.IsNil() && !id.IsEmpty(), "Session Expired")
+	utility.Assert(len(id.String()) > 0, "Invalid Session")
+	memberId, err := strconv.Atoi(id.String())
+	utility.AssertError(err, "System Error")
+	one := query.GetMerchantMemberById(ctx, uint64(memberId))
+	utility.Assert(one != nil, "Invalid Session, Member Not Found")
+	utility.Assert(one.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
+	var returnUrl = ""
+	returnData, err := g.Redis().Get(ctx, fmt.Sprintf("MemberSessionReturnUrlKey:%s", session))
+	if err == nil {
+		returnUrl = returnData.String()
+	}
+	return one, returnUrl
+}
+
 func PasswordLogin(ctx context.Context, email string, password string) (one *entity.MerchantMember, token string) {
 	one = query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one != nil, "Email Not Found")

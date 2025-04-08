@@ -46,6 +46,15 @@ type ListRes struct {
 	Total        int                         `json:"total" dc:"Total"`
 }
 
+type CountReq struct {
+	g.Meta          `path:"/count" tags:"User" method:"get" summary:"User Count"`
+	CreateTimeStart int64 `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64 `json:"createTimeEnd" dc:"CreateTimeEnd" `
+}
+
+type CountRes struct {
+	Total int `json:"total" dc:"Total"`
+}
 type GetReq struct {
 	g.Meta `path:"/get" tags:"User" method:"get" summary:"Get User Profile"`
 	UserId int64 `json:"userId" dc:"UserId" `

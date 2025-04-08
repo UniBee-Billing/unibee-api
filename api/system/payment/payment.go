@@ -29,3 +29,13 @@ type PaymentGatewayCheckReq struct {
 
 type PaymentGatewayCheckRes struct {
 }
+
+type GetPaymentExchangeRateReq struct {
+	g.Meta       `path:"/get_payment_exchange_rate" tags:"System-Admin" method:"get,post" summary:"Get Cloud Exchange Rate"`
+	FromCurrency string `json:"fromCurrency" dc:"From Currency"`
+	ToCurrency   string `json:"toCurrency" dc:"To Currency"`
+}
+
+type GetPaymentExchangeRateRes struct {
+	ExchangeRate float64 `json:"exchangeRate"`
+}

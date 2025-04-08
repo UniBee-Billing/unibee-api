@@ -16,6 +16,17 @@ type LoginRes struct {
 	Token          string                       `json:"token" dc:"Access token of admin portal"`
 }
 
+type SessionReq struct {
+	g.Meta  `path:"/session_login" tags:"Member Authentication" method:"post" summary:"Session Login" dc:"Session login"`
+	Session string `json:"session" dc:"The session" v:"required"`
+}
+
+type SessionRes struct {
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Merchant Member Object"`
+	Token          string                       `json:"token" dc:"Access token of admin portal"`
+	ReturnUrl      string                       `json:"return_url" dc:"Return URL"`
+}
+
 type LoginOtpReq struct {
 	g.Meta `path:"/sso/loginOTP" tags:"Member Authentication" method:"post" summary:"OTP Login" dc:"Send email to member with OTP code"`
 	Email  string `json:"email" dc:"The merchant member email address" v:"required"`

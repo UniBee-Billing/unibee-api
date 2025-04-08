@@ -1,4 +1,4 @@
-package currency
+package fiat_exchange
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
 	"strings"
 	"unibee/utility"
@@ -52,4 +53,36 @@ func GetExchangeConversionRates(ctx context.Context, key string, currency string
 	} else {
 		return nil, gerror.New(responseJson.String())
 	}
+}
+
+func GetExchangeConversionRateFromClusterCloud(ctx context.Context, currency string, to string) (*float64, error) {
+	exchangeRes := redismq.Invoke(ctx, &redismq.InvoiceRequest{
+		Group:  "GID_UniBee_Cloud",
+		Method: "GetExchangeRate",
+		Request: utility.MarshalToJsonString(&CloudExchangeRateReq{
+			FromCurrency: currency,
+			ToCurrency:   to,
+		}),
+	}, 15)
+	if exchangeRes == nil {
+		return nil, gerror.New("Server Error")
+	}
+	if !exchangeRes.Status {
+		return nil, gerror.New(fmt.Sprintf("%v", exchangeRes.Response))
+	}
+	if exchangeRes.Response == nil {
+		return nil, gerror.New("Rate not found")
+	}
+	if rate, ok := exchangeRes.Response.(float64); ok {
+		if rate <= 0 {
+			return nil, gerror.New("Rate invalid")
+		}
+		return &rate, nil
+	}
+	return nil, gerror.New("Get Exchange Rate Error")
+}
+
+type CloudExchangeRateReq struct {
+	FromCurrency string `json:"fromCurrency" dc:"From Currency"`
+	ToCurrency   string `json:"toCurrency" dc:"To Currency"`
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func (c *ControllerAuth) SessionLogin(ctx context.Context, req *auth.SessionLoginReq) (res *auth.SessionLoginRes, err error) {
-	one, returnUrl := auth2.UserSessionTransfer(ctx, req.Session)
+	one, returnUrl, cancelUrl := auth2.UserSessionTransfer(ctx, req.Session)
 	utility.Assert(one != nil, "Login Failed")
 
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, one.Email, one.Language)
@@ -22,5 +22,5 @@ func (c *ControllerAuth) SessionLogin(ctx context.Context, req *auth.SessionLogi
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)
 	jwt.AppendRequestCookieWithToken(ctx, token)
-	return &auth.SessionLoginRes{User: bean.SimplifyUserAccount(one), Token: token, ReturnUrl: returnUrl}, nil
+	return &auth.SessionLoginRes{User: bean.SimplifyUserAccount(one), Token: token, ReturnUrl: returnUrl, CancelUrl: cancelUrl}, nil
 }

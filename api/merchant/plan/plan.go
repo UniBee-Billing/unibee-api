@@ -10,6 +10,7 @@ type NewReq struct {
 	g.Meta                `path:"/new" tags:"Plan" method:"post" summary:"Create Plan"`
 	ExternalPlanId        string                               `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName              string                               `json:"planName" dc:"Plan Name"   v:"required" `
+	InternalName          string                               `json:"internalName"              description:""`
 	Amount                int64                                `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency              string                               `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit          string                               `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
@@ -42,6 +43,7 @@ type EditReq struct {
 	PlanId                uint64                                `json:"planId" dc:"Id of plan" v:"required"`
 	ExternalPlanId        *string                               `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName              *string                               `json:"planName" dc:"Name of plan" `
+	InternalName          *string                               `json:"internalName"              description:""`
 	Amount                *int64                                `json:"amount"   dc:"CaptureAmount of plan, not editable when plan is active" `
 	Currency              *string                               `json:"currency"   dc:"Currency of plan, not editable when plan is active"`
 	IntervalUnit          *string                               `json:"intervalUnit" dc:"Interval unit of plan，em: day|month|year|week, not editable when plan is active"`
@@ -81,8 +83,9 @@ type AddonsBindingRes struct {
 
 type ListReq struct {
 	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"Get Plan List"`
+	PlanIds       []int64 `json:"planIds"  dc:"filter id list of plan, default all" `
 	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
-	Type          []int   `json:"type"  dc:"1-main plan，2-addon plan" `
+	Type          []int   `json:"type"  dc:"1-main plan，2-addon plan,3-onetime" `
 	Status        []int   `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-SoftArchive, 5-HardArchive" `
 	PublishStatus int     `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
 	Currency      string  `json:"currency" dc:"Filter Currency"  `

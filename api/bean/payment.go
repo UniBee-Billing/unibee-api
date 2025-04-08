@@ -31,6 +31,7 @@ type Payment struct {
 	CountryCode             string                   `json:"countryCode"            description:"country code"`                                                           // country code
 	AuthorizeStatus         int                      `json:"authorizeStatus"        description:"authorize status，0-waiting authorize，1-authorized，2-authorized_request"` // authorize status，0-waiting authorize，1-authorized，2-authorized_request
 	AuthorizeReason         string                   `json:"authorizeReason"        description:""`                                                                       //
+	AuthorizeComment        string                   `json:"authorizeComment"        description:""`                                                                      //
 	GatewayId               uint64                   `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
 	GatewayPaymentId        string                   `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	GatewayPaymentType      string                   `json:"gatewayPaymentType"       description:"gateway_payment_type"`
@@ -47,6 +48,7 @@ type Payment struct {
 	GasPayer                string                   `json:"gasPayer"               description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 	AutoCharge              bool                     `json:"autoCharge"             description:""`
 	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"  description:"gateway currency exchange"`
+	LastError               string                   `json:"lastError"              description:"last error"` // last error
 }
 
 func SimplifyPayment(one *entity.Payment) *Payment {
@@ -94,6 +96,8 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 		CountryCode:             one.CountryCode,
 		AuthorizeStatus:         one.AuthorizeStatus,
 		AuthorizeReason:         lastErr,
+		AuthorizeComment:        one.AuthorizeReason,
+		LastError:               lastErr,
 		GatewayId:               one.GatewayId,
 		GatewayPaymentId:        one.GatewayPaymentId,
 		GatewayPaymentType:      one.GatewayEdition,

@@ -14,6 +14,7 @@ import (
 	"unibee/api/system/plan"
 	"unibee/api/system/refund"
 	"unibee/api/system/subscription"
+	"unibee/api/system/user"
 )
 
 type ISystemAuth interface {
@@ -22,6 +23,7 @@ type ISystemAuth interface {
 
 type ISystemInformation interface {
 	Get(ctx context.Context, req *information.GetReq) (res *information.GetRes, err error)
+	SendMockMQ(ctx context.Context, req *information.SendMockMQReq) (res *information.SendMockMQRes, err error)
 }
 
 type ISystemInvoice interface {
@@ -34,6 +36,7 @@ type ISystemPayment interface {
 	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
 	PaymentGatewayDetail(ctx context.Context, req *payment.PaymentGatewayDetailReq) (res *payment.PaymentGatewayDetailRes, err error)
 	PaymentGatewayCheck(ctx context.Context, req *payment.PaymentGatewayCheckReq) (res *payment.PaymentGatewayCheckRes, err error)
+	GetPaymentExchangeRate(ctx context.Context, req *payment.GetPaymentExchangeRateReq) (res *payment.GetPaymentExchangeRateRes, err error)
 }
 
 type ISystemPlan interface {
@@ -47,4 +50,9 @@ type ISystemRefund interface {
 
 type ISystemSubscription interface {
 	TestClockWalk(ctx context.Context, req *subscription.TestClockWalkReq) (res *subscription.TestClockWalkRes, err error)
+	InternalWebhookSync(ctx context.Context, req *subscription.InternalWebhookSyncReq) (res *subscription.InternalWebhookSyncRes, err error)
+}
+
+type ISystemUser interface {
+	InternalWebhookSync(ctx context.Context, req *user.InternalWebhookSyncReq) (res *user.InternalWebhookSyncRes, err error)
 }

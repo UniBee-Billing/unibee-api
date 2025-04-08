@@ -85,6 +85,7 @@ func (c AlipayPlus) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_be
 
 func (c AlipayPlus) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq) (icon string, gatewayType int64, err error) {
 	var alipayClientId = req.SubGateway
+	utility.Assert(len(alipayClientId) > 0, "Client ID should not be empty")
 	client := defaultAlipayPlusClient.NewDefaultAlipayClient(
 		"https://open-de-global.alipay.com",
 		alipayClientId,

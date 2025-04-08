@@ -6,9 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	"time"
 	"unibee/api/bean"
+	"unibee/internal/cmd/config"
 	log2 "unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/email/gateway"
@@ -66,6 +68,45 @@ func GetDefaultMerchantEmailConfig(ctx context.Context, merchantId uint64) (name
 		data = valueConfig.ConfigValue
 	}
 	return
+}
+
+func GetDefaultMerchantEmailConfigWithClusterCloud(ctx context.Context, merchantId uint64) (name string, data string) {
+	nameConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantEmailName)
+	if nameConfig != nil {
+		name = nameConfig.ConfigValue
+	}
+	valueConfig := merchant_config.GetMerchantConfig(ctx, merchantId, name)
+	if valueConfig != nil {
+		data = valueConfig.ConfigValue
+	}
+	if config.GetConfigInstance().Mode == "cloud" && len(data) == 0 {
+		data, _ = getDefaultMerchantEmailConfigFromClusterCloud(ctx, merchantId)
+	}
+	return
+}
+
+func getDefaultMerchantEmailConfigFromClusterCloud(ctx context.Context, merchantId uint64) (string, error) {
+	sendgridRes := redismq.Invoke(ctx, &redismq.InvoiceRequest{
+		Group:   "GID_UniBee_Cloud",
+		Method:  "GetSendgridKey",
+		Request: merchantId,
+	}, 0)
+	if sendgridRes == nil {
+		return "", gerror.New("Server Error")
+	}
+	if !sendgridRes.Status {
+		return "", gerror.New(fmt.Sprintf("%v", sendgridRes.Response))
+	}
+	if sendgridRes.Response == nil {
+		return "", gerror.New("sendgrid key not found")
+	}
+	if key, ok := sendgridRes.Response.(string); ok {
+		if len(key) == 0 {
+			return "", gerror.New("sendgrid invalid")
+		}
+		return key, nil
+	}
+	return "", gerror.New("Get Sendgrid Key Error")
 }
 
 func GetMerchantEmailSender(ctx context.Context, merchantId uint64) *sender.Sender {
@@ -148,7 +189,7 @@ type TemplateVariable struct {
 
 func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, variableMap map[string]interface{}) (err error) {
 	mailTo = strings.ToLower(mailTo)
-	_, emailGatewayKey := GetDefaultMerchantEmailConfig(ctx, merchantId)
+	_, emailGatewayKey := GetDefaultMerchantEmailConfigWithClusterCloud(ctx, merchantId)
 	if len(emailGatewayKey) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
 			utility.Assert(false, "Default Email Gateway Need Setup")
@@ -202,7 +243,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 		}
 	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
-		attachName = "invoice"
+		attachName = fmt.Sprintf("invoice_%s", time.Now().Format("20060102"))
 	}
 	var response string
 	if len(pdfFilePath) > 0 {
@@ -243,7 +284,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	mailTo = strings.ToLower(mailTo)
-	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)
+	_, emailGatewayKey := GetDefaultMerchantEmailConfigWithClusterCloud(superCtx, merchantId)
 	if len(emailGatewayKey) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
 			utility.Assert(false, "Default Email Gateway Need Setup")

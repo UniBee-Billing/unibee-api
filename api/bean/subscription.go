@@ -65,7 +65,8 @@ type Subscription struct {
 	Metadata               map[string]interface{} `json:"metadata" description:""`
 	GasPayer               string                 `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 	DefaultPaymentMethodId string                 `json:"defaultPaymentMethodId"    description:""`
-	ProductId              int64                  `json:"productId"                 description:"product id"` // product id
+	ProductId              int64                  `json:"productId"                 description:"product id"`                                                         // product id
+	CurrentPeriodPaid      int64                  `json:"currentPeriodPaid"           description:"current period paid or not, 1-paid, other-the utc time to expire"` // current period paid or not, 1-paid, other-the utc time to expire
 }
 
 func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscription {
@@ -154,6 +155,7 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		DefaultPaymentMethodId: one.GatewayDefaultPaymentMethod,
 		ProductId:              productId,
 		CancelOrExpireTime:     cancelOrExpireTime,
+		CurrentPeriodPaid:      one.CurrentPeriodPaid,
 	}
 }
 

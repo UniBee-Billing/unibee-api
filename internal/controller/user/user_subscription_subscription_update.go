@@ -65,6 +65,8 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 			DiscountCode:           req.DiscountCode,
 			ApplyPromoCredit:       req.ApplyPromoCredit,
 			ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
+			ReturnUrl:              req.ReturnUrl,
+			CancelUrl:              req.CancelUrl,
 		}, 0)
 	}()
 	wg.Wait()

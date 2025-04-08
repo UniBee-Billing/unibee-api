@@ -6,7 +6,9 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"unibee/internal/cmd/config"
+	redismq2 "unibee/internal/cmd/redismq"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/member"
 	"unibee/internal/logic/operation_log"
@@ -69,6 +71,35 @@ func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 	return apiKey
 }
 
+func QueryOrCreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entity.Merchant, *entity.MerchantMember, error) {
+	one := query.GetMerchantMemberByEmail(ctx, req.Email)
+	if one == nil {
+		return CreateMerchant(ctx, req)
+	} else {
+		merchant := query.GetMerchantById(ctx, one.MerchantId)
+		utility.Assert(merchant != nil, "Merchant Not Found")
+		if one.Role == "Owner" {
+			_, err := dao.Merchant.Ctx(ctx).Data(g.Map{
+				dao.Merchant.Columns().Phone:     req.Phone,
+				dao.Merchant.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.Merchant.Columns().Id, one.MerchantId).OmitEmpty().Update()
+			if err != nil {
+				g.Log().Errorf(ctx, "QueryOrCreateMerchant UpdateMerchant error:%s", err.Error())
+			}
+		}
+		_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
+			dao.MerchantMember.Columns().FirstName: req.FirstName,
+			dao.MerchantMember.Columns().LastName:  req.LastName,
+		}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(ctx, "QueryOrCreateMerchant UpdateOwnerMember error:%s", err.Error())
+		}
+		merchant = query.GetMerchantById(ctx, one.MerchantId)
+		one = query.GetMerchantMemberByEmail(ctx, req.Email)
+		return merchant, one, nil
+	}
+}
+
 func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entity.Merchant, *entity.MerchantMember, error) {
 	merchantMasterMember := &entity.MerchantMember{
 		FirstName:  req.FirstName,
@@ -123,9 +154,20 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	err = SetupForCloudMode(ctx, merchant.Id)
 	ReloadAllMerchantsCacheForSDKAuthBackground()
-	member.ReloadMemberCacheForSdkAuthBackground(newOne.Id)
+	member.ReloadMemberCacheForSdkAuthBackground(merchantMasterMember.Id)
+	_, _ = redismq.Send(&redismq.Message{
+		Topic:      redismq2.TopicMerchantCreatedWebhook.Topic,
+		Tag:        redismq2.TopicMerchantCreatedWebhook.Tag,
+		Body:       fmt.Sprintf("%d", merchant.Id),
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+	})
+	_, _ = redismq.Send(&redismq.Message{
+		Topic:      redismq2.TopicMerchantMemberCreatedWebhook.Topic,
+		Tag:        redismq2.TopicMerchantMemberCreatedWebhook.Tag,
+		Body:       fmt.Sprintf("%d", merchantMasterMember.Id),
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+	})
 	return merchant, newOne, err
 }
 

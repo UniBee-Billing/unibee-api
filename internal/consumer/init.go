@@ -1,7 +1,9 @@
 package consumer
 
 import (
+	_ "unibee/internal/consumer/gateway"
 	_ "unibee/internal/consumer/invoice"
+	_ "unibee/internal/consumer/merchant"
 	_ "unibee/internal/consumer/mock"
 	_ "unibee/internal/consumer/payment"
 	_ "unibee/internal/consumer/refund"
