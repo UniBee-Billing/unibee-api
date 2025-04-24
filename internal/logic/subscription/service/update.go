@@ -190,6 +190,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.Status != 2, "Your account has been suspended")
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}

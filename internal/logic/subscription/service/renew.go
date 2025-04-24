@@ -53,6 +53,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.Status != 2, "Your account has been suspended")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "plan not found")
 	utility.Assert(plan.Type == consts.PlanTypeMain, "plan not main type")

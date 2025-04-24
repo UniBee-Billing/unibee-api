@@ -69,6 +69,8 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		return false
 	}
 	_ = webhookMessage.Data.Set("eventId", webhookMessage.EventId)
+	_ = webhookMessage.Data.Set("msgId", msgId)
+	_ = webhookMessage.Data.Set("datetime", datetime)
 	merchant := query.GetMerchantById(ctx, webhookMessage.MerchantId)
 	if merchant == nil {
 		g.Log().Errorf(ctx, "Webhook_Send %s %s merchant not found\n", "POST", webhookMessage.Url)

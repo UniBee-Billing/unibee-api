@@ -50,6 +50,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	if user == nil {
 		return &BillingCycleWalkRes{Message: "User Not Found"}, nil
 	}
+	if user.Status == 2 {
+		return &BillingCycleWalkRes{Message: "User Has Bean Suspended"}, nil
+	}
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	if plan == nil {
 		return &BillingCycleWalkRes{Message: "Plan Not Found"}, nil

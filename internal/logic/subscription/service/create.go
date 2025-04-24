@@ -171,6 +171,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	userEmail := ""
 	if user != nil {
 		userEmail = user.Email
+		utility.Assert(user.Status != 2, "Your account has been suspended")
 	}
 
 	var err error
@@ -298,22 +299,19 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var cancelAtPeriodEnd = 0
 	utility.Assert(len(plan.IntervalUnit) > 0, "Invalid plan billing period")
 	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
-		var totalAmountExcludingTax = plan.TrialAmount * req.Quantity
-		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
-			req.TrialEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
-		} else {
-			// if trialEnd set, ignore plan.TrialAmount and plan.demand
-			totalAmountExcludingTax = 0
-		}
 		//trial period
 		if plan.TrialAmount > 0 {
 			utility.Assert(len(addons) == 0, "addon is not available for charge trial plan")
 		}
-
-		cancelAtPeriodEnd = plan.CancelAtTrialEnd
+		var totalAmountExcludingTax int64 = 0
 		trialEnd = req.TrialEnd
-		//var currentTimeEnd = req.TrialEnd
 		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
+		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
+			totalAmountExcludingTax = plan.TrialAmount * req.Quantity
+			currentTimeEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
+			trialEnd = currentTimeStart.Timestamp() - 1
+		}
+
 		//Promo Credit
 		var promoCreditDiscountAmount int64 = 0
 		var promoCreditAccount *bean.CreditAccount
