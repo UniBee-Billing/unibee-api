@@ -78,10 +78,10 @@ type IMerchantEmail interface {
 	SendTemplateEmailToUser(ctx context.Context, req *email.SendTemplateEmailToUserReq) (res *email.SendTemplateEmailToUserRes, err error)
 	SenderSetup(ctx context.Context, req *email.SenderSetupReq) (res *email.SenderSetupRes, err error)
 	TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error)
-	TemplateUpdate(ctx context.Context, req *email.TemplateUpdateReq) (res *email.TemplateUpdateRes, err error)
-	TemplateSetDefault(ctx context.Context, req *email.TemplateSetDefaultReq) (res *email.TemplateSetDefaultRes, err error)
-	TemplateActivate(ctx context.Context, req *email.TemplateActivateReq) (res *email.TemplateActivateRes, err error)
-	TemplateDeactivate(ctx context.Context, req *email.TemplateDeactivateReq) (res *email.TemplateDeactivateRes, err error)
+	AddLocalizationVersion(ctx context.Context, req *email.AddLocalizationVersionReq) (res *email.AddLocalizationVersionRes, err error)
+	EditLocalizationVersion(ctx context.Context, req *email.EditLocalizationVersionReq) (res *email.EditLocalizationVersionRes, err error)
+	ActivateLocalizationVersion(ctx context.Context, req *email.ActivateLocalizationVersionReq) (res *email.ActivateLocalizationVersionRes, err error)
+	DeleteLocalizationVersion(ctx context.Context, req *email.DeleteLocalizationVersionReq) (res *email.DeleteLocalizationVersionRes, err error)
 	CustomizeLocalizationTemplateSync(ctx context.Context, req *email.CustomizeLocalizationTemplateSyncReq) (res *email.CustomizeLocalizationTemplateSyncRes, err error)
 }
 
@@ -224,6 +224,7 @@ type IMerchantSubscription interface {
 	Config(ctx context.Context, req *subscription.ConfigReq) (res *subscription.ConfigRes, err error)
 	ConfigUpdate(ctx context.Context, req *subscription.ConfigUpdateReq) (res *subscription.ConfigUpdateRes, err error)
 	PreviewSubscriptionNextInvoice(ctx context.Context, req *subscription.PreviewSubscriptionNextInvoiceReq) (res *subscription.PreviewSubscriptionNextInvoiceRes, err error)
+	ApplySubscriptionNextInvoice(ctx context.Context, req *subscription.ApplySubscriptionNextInvoiceReq) (res *subscription.ApplySubscriptionNextInvoiceRes, err error)
 	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
 	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
 	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)

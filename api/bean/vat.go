@@ -8,6 +8,7 @@ type VatCountryRate struct {
 	VatSupport            bool   `json:"vatSupport"               ` // vat support true or false
 	IsEU                  bool   `json:"isEU"                  `
 	StandardTaxPercentage int64  `json:"standardTaxPercentage" `
+	Mamo                  string `json:"mamo"                  description:"mamo"` // mamo
 }
 
 type ValidResult struct {

@@ -17,6 +17,7 @@ import (
 	"unibee/internal/logic/email/sender"
 	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/merchant_config/update"
+	"unibee/internal/logic/middleware/rate_limit"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -86,6 +87,14 @@ func GetDefaultMerchantEmailConfigWithClusterCloud(ctx context.Context, merchant
 }
 
 func getDefaultMerchantEmailConfigFromClusterCloud(ctx context.Context, merchantId uint64) (string, error) {
+	maxHourly := 1000
+	if !config.GetConfigInstance().IsProd() {
+		maxHourly = 50
+	}
+	checked, current := rate_limit.CheckRateLimit(ctx, fmt.Sprintf("UniBee#Cloud#MerchantDefaultMerchantEmailConfigFromClusterCloudHourlyLimitCheck#%d", merchantId), maxHourly, 3600)
+	g.Log().Infof(ctx, "MerchantDefaultMerchantEmailConfigFromClusterCloudHourlyLimitCheck merchantId:%d currentQps:%d maxHourly:%d", merchantId, current, maxHourly)
+	utility.Assert(checked, fmt.Sprintf("Reached max hourly email limitation, please upgrade your plan, current called:%d", current))
+
 	sendgridRes := redismq.Invoke(ctx, &redismq.InvoiceRequest{
 		Group:   "GID_UniBee_Cloud",
 		Method:  "GetSendgridKey",
@@ -207,8 +216,8 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(variableMap != nil, "variableMap not found")
-	var title = toLocalizationTitle(template.LanguageData, template.TemplateTitle, language)
-	var content = template.TemplateContent
+	var subject = template.LocalizationSubject(language)
+	var content = template.LocalizationContent(language)
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	merchant := query.GetMerchantById(ctx, merchantId)
@@ -218,8 +227,8 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
-		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), -1)
+		if len(subject) > 0 {
+			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
@@ -232,8 +241,8 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 		mapKey := "{" + key + "}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
-		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), -1)
+		if len(subject) > 0 {
+			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
@@ -245,40 +254,18 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = fmt.Sprintf("invoice_%s", time.Now().Format("20060102"))
 	}
-	var response string
-	if len(pdfFilePath) > 0 {
-		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
-		if !utility.TryLock(ctx, md5, 10) {
-			utility.Assert(false, "duplicate email too fast")
-		}
-		if len(template.GatewayTemplateId) > 0 {
-			response, err = gateway.SendDynamicPdfAttachEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language, pdfFilePath, attachName+".pdf")
-		} else {
-			response, err = gateway.SendPdfAttachEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
-		}
-		if err != nil {
-			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
-		} else {
-			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
-		}
-		return err
-	} else {
-		md5 := utility.MD5(fmt.Sprintf("%s%s%s", mailTo, title, content))
-		if !utility.TryLock(ctx, md5, 10) {
-			utility.Assert(false, "duplicate email too fast")
-		}
-		if len(template.GatewayTemplateId) > 0 {
-			response, err = gateway.SendDynamicTemplateEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language)
-		} else {
-			response, err = gateway.SendEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, content)
-		}
-		if err != nil {
-			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
-		} else {
-			SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
-		}
-		return err
-	}
+	return send(ctx, &SendgridEmailReq{
+		MerchantId:        merchantId,
+		MailTo:            mailTo,
+		Subject:           subject,
+		Content:           content,
+		LocalFilePath:     pdfFilePath,
+		AttachName:        attachName + ".pdf",
+		APIKey:            emailGatewayKey,
+		VariableMap:       variableMap,
+		Language:          language,
+		GatewayTemplateId: template.GatewayTemplateId,
+	})
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
@@ -328,8 +315,8 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	if err != nil {
 		return err
 	}
-	var title = toLocalizationTitle(template.LanguageData, template.TemplateTitle, language)
-	var content = template.TemplateContent
+	var subject = template.LocalizationSubject(language)
+	var content = template.LocalizationContent(language)
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	merchant := query.GetMerchantById(ctx, merchantId)
@@ -341,8 +328,8 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		mapKey := "{{" + key + "}}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
-		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), -1)
+		if len(subject) > 0 {
+			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
@@ -355,8 +342,8 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		mapKey := "{" + key + "}"
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
-		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), -1)
+		if len(subject) > 0 {
+			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
@@ -369,52 +356,81 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		attachName = fmt.Sprintf("invoice_%s", time.Now().Format("20060102"))
 	}
 
+	return send(ctx, &SendgridEmailReq{
+		MerchantId:        merchantId,
+		MailTo:            mailTo,
+		Subject:           subject,
+		Content:           content,
+		LocalFilePath:     pdfFilePath,
+		AttachName:        attachName + ".pdf",
+		APIKey:            emailGatewayKey,
+		VariableMap:       variableMap,
+		Language:          language,
+		GatewayTemplateId: template.GatewayTemplateId,
+	})
+}
+
+type SendgridEmailReq struct {
+	MerchantId        uint64                 `json:"merchantId"`
+	MailTo            string                 `json:"mailTo"`
+	Subject           string                 `json:"subject"`
+	Content           string                 `json:"content"`
+	LocalFilePath     string                 `json:"localFilePath"`
+	AttachName        string                 `json:"attachName"`
+	APIKey            string                 `json:"apiKey"`
+	VariableMap       map[string]interface{} `json:"variable_map"`
+	Language          string                 `json:"language"`
+	GatewayTemplateId string                 `json:"gatewayTemplateId"`
+}
+
+func send(ctx context.Context, req *SendgridEmailReq) error {
+	var err error
 	var response string
-	if len(pdfFilePath) > 0 {
-		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
+	if len(req.LocalFilePath) > 0 {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", req.MailTo, req.Subject, req.Content, req.AttachName))
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		if len(template.GatewayTemplateId) > 0 {
-			response, err = gateway.SendDynamicPdfAttachEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language, pdfFilePath, attachName+".pdf")
+		if len(req.GatewayTemplateId) > 0 {
+			response, err = gateway.SendSendgridDynamicTemplateWithAttachFileEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.GatewayTemplateId, req.VariableMap, req.Language, req.LocalFilePath, req.AttachName)
 		} else {
-			response, err = gateway.SendPdfAttachEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
+			response, err = gateway.SendPdfAttachEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.Content, req.LocalFilePath, req.AttachName)
 		}
 		if err != nil {
-			if len(template.GatewayTemplateId) > 0 {
-				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), attachName+".pdf", err.Error())
+			if len(req.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), req.AttachName, err.Error())
 			} else {
-				SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, req.AttachName, err.Error())
 			}
 		} else {
-			if len(template.GatewayTemplateId) > 0 {
-				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), attachName+".pdf", response)
+			if len(req.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), req.AttachName, response)
 			} else {
-				SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, req.AttachName, response)
 			}
 		}
 		return err
 	} else {
-		md5 := utility.MD5(fmt.Sprintf("%s%s%s", mailTo, title, content))
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s", req.MailTo, req.Subject, req.Content))
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		if len(template.GatewayTemplateId) > 0 {
-			response, err = gateway.SendDynamicTemplateEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, template.GatewayTemplateId, variableMap, language)
+		if len(req.GatewayTemplateId) > 0 {
+			response, err = gateway.SendSandgridDynamicTemplateEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.GatewayTemplateId, req.VariableMap, req.Language)
 		} else {
-			response, err = gateway.SendEmailToUser(GetMerchantEmailSender(ctx, merchantId), emailGatewayKey, mailTo, title, content)
+			response, err = gateway.SendEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.Content)
 		}
 		if err != nil {
-			if len(template.GatewayTemplateId) > 0 {
-				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), "", err.Error())
+			if len(req.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), "", err.Error())
 			} else {
-				SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, "", err.Error())
 			}
 		} else {
-			if len(template.GatewayTemplateId) > 0 {
-				SaveHistory(ctx, merchantId, mailTo, title, utility.MarshalToJsonString(variableMap), "", response)
+			if len(req.GatewayTemplateId) > 0 {
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), "", response)
 			} else {
-				SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
+				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, "", response)
 			}
 		}
 		return err
@@ -446,22 +462,33 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 	_, _ = dao.MerchantEmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }
 
-func toLocalizationTitle(languageData string, defaultTitle string, lang string) (title string) {
-	title = defaultTitle
-	if len(lang) == 0 {
-		lang = "en" // default language
-	}
-	if len(languageData) == 0 || len(lang) == 0 {
-		return title
-	}
-	var list []*bean.EmailLocalizationTemplate
-	err := utility.UnmarshalFromJsonString(languageData, &list)
-	if err == nil {
-		for _, one := range list {
-			if one.Language == lang {
-				title = one.Title
-			}
-		}
-	}
-	return title
-}
+//
+//func toLocalizationSubject(template *bean.MerchantEmailTemplate, lang string) (title string) {
+//	if len(lang) == 0 {
+//		lang = "en" // default language
+//	}
+//	if len(template.LanguageData) == 0 || len(lang) == 0 {
+//		return template.TemplateTitle
+//	}
+//	for _, one := range template.LanguageData {
+//		if one.Language == lang {
+//			title = one.Title
+//		}
+//	}
+//	return title
+//}
+//
+//func toLocalizationContent(template *bean.MerchantEmailTemplate, lang string) (content string) {
+//	if len(lang) == 0 {
+//		lang = "en" // default language
+//	}
+//	if len(template.LanguageData) == 0 || len(lang) == 0 {
+//		return template.TemplateContent
+//	}
+//	for _, one := range template.LanguageData {
+//		if one.Language == lang {
+//			content = one.Content
+//		}
+//	}
+//	return content
+//}

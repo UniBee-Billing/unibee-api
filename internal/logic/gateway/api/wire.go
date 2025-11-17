@@ -60,11 +60,12 @@ func (w Wire) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway
 }
 
 func (w Wire) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+	var paymentLink = ""
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 consts.PaymentCreated,
 		GatewayPaymentId:       createPayContext.Pay.PaymentId,
 		GatewayPaymentIntentId: createPayContext.Pay.PaymentId,
-		Link:                   "",
+		Link:                   paymentLink,
 	}, nil
 }
 

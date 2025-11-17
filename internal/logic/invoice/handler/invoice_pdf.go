@@ -144,10 +144,10 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 	var companyName = one.Metadata["IssueCompanyName"]
 	var address = one.Metadata["IssueAddress"]
 	if vatNumber == nil {
-		vatNumber = ""
+		vatNumber = merchantInfo.BusinessNum
 	}
 	if regNumber == nil {
-		regNumber = ""
+		regNumber = merchantInfo.Idcard
 	}
 	if companyName == nil {
 		companyName = merchantInfo.CompanyName

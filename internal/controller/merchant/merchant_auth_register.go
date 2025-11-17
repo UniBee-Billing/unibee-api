@@ -8,7 +8,7 @@ import (
 	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/merchant"
-	"unibee/internal/logic/middleware"
+	"unibee/internal/logic/middleware/license"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -30,12 +30,14 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 	internalReq := &merchant.CreateMerchantInternalReq{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Email:     req.Email,
-		Password:  req.Password,
-		Phone:     req.Phone,
-		UserName:  req.UserName,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Email:       req.Email,
+		Password:    req.Password,
+		Phone:       req.Phone,
+		UserName:    req.UserName,
+		CountryName: req.CountryName,
+		CountryCode: req.CountryCode,
 	}
 	userStr, err := json.Marshal(
 		internalReq,
@@ -57,7 +59,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		utility.Assert(config.GetConfigInstance().Mode == "cloud", "Register multi merchants should contain valid mode")
 		var containPremiumMerchant = false
 		for _, one := range list {
-			if middleware.IsPremiumVersion(ctx, one.Id) {
+			if license.IsPremiumVersion(ctx, one.Id) {
 				containPremiumMerchant = true
 				break
 			}

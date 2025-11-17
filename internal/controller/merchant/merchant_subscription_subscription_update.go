@@ -10,7 +10,6 @@ import (
 	"time"
 	"unibee/api/merchant/subscription"
 	_interface "unibee/internal/interface/context"
-	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -86,16 +85,29 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 			ApplyPromoCredit:       req.ApplyPromoCredit,
 			ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 		}, memberMemberId)
-		operation_log.AppendOptLog(taskCtx, &operation_log.OptLogRequest{
-			MerchantId:     update.SubscriptionPendingUpdate.MerchantId,
-			Target:         fmt.Sprintf("Subscription(%v)", update.SubscriptionPendingUpdate.SubscriptionId),
-			Content:        "Update",
-			UserId:         update.SubscriptionPendingUpdate.UserId,
-			SubscriptionId: update.SubscriptionPendingUpdate.SubscriptionId,
-			InvoiceId:      "",
-			PlanId:         0,
-			DiscountCode:   "",
-		}, err)
+		//if update.SubscriptionPendingUpdate != nil {
+		//	operation_log.AppendOptLog(taskCtx, &operation_log.OptLogRequest{
+		//		MerchantId:     update.SubscriptionPendingUpdate.MerchantId,
+		//		Target:         fmt.Sprintf("SubscriptionPendingUpdateId(%v)", update.SubscriptionPendingUpdate.PendingUpdateId),
+		//		Content:        "Update",
+		//		UserId:         update.SubscriptionPendingUpdate.UserId,
+		//		SubscriptionId: update.SubscriptionPendingUpdate.SubscriptionId,
+		//		InvoiceId:      "",
+		//		PlanId:         0,
+		//		DiscountCode:   "",
+		//	}, err)
+		//} else if update.Paid {
+		//	operation_log.AppendOptLog(taskCtx, &operation_log.OptLogRequest{
+		//		MerchantId:     update.SubscriptionPendingUpdate.MerchantId,
+		//		Target:         fmt.Sprintf("Subscription(%v)(DiscountCode:%s)(PremoCredit:%v)", req.SubscriptionId, req.DiscountCode, req.ApplyPromoCreditAmount),
+		//		Content:        "UpdateNextInvoice",
+		//		UserId:         update.SubscriptionPendingUpdate.UserId,
+		//		SubscriptionId: update.SubscriptionPendingUpdate.SubscriptionId,
+		//		InvoiceId:      "",
+		//		PlanId:         0,
+		//		DiscountCode:   "",
+		//	}, err)
+		//}
 	}()
 	wg.Wait()
 	utility.ReleaseLock(context.Background(), lockKey)

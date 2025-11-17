@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/golang-jwt/jwt/v5"
 	"strings"
 	"time"
@@ -75,7 +76,7 @@ func CreateMemberPortalToken(ctx context.Context, tokenType model.TokenType, mer
 		return "", err
 	}
 
-	return fmt.Sprintf("%s%s", TOKEN_PREFIX, tokenString), nil
+	return fmt.Sprintf("%s%s_%s", TOKEN_PREFIX, tokenString, gtime.Now().Format("20060102150405")), nil
 }
 
 func GetMemberPermissionKey(ctx context.Context, one *entity.MerchantMember) string {

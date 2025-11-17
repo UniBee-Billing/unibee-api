@@ -43,7 +43,7 @@ type SetupReq struct {
 	GatewayName         string                            `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly|unitpay|payssion|cryptadium" v:"required"`
 	DisplayName         *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayIcons        *[]string                         `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	GatewayKey          string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret       string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 	SubGateway          string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `
@@ -59,7 +59,7 @@ type EditReq struct {
 	GatewayId           uint64                            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	DisplayName         *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayLogo         *[]string                         `json:"gatewayLogo"  dc:"The logo of payment gateway"`
-	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	GatewayKey          *string                           `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret       *string                           `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 	SubGateway          *string                           `json:"subGateway"  dc:"The sub gateway of payment gateway" `
@@ -99,7 +99,7 @@ type WireTransferSetupReq struct {
 	g.Meta        `path:"/wire_transfer_setup" tags:"Gateway" method:"post" summary:"Wire Transfer Setup" dc:"Setup the wire transfer"`
 	DisplayName   *string             `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayIcons  *[]string           `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	Currency      string              `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64               `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
 	Bank          *detail.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer" v:"required"`
@@ -113,7 +113,7 @@ type WireTransferEditReq struct {
 	GatewayId     uint64              `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 	DisplayName   *string             `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayIcons  *[]string           `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort          *int64              `json:"sort"  dc:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	Currency      string              `json:"currency"   dc:"The currency of wire transfer " v:"required" `
 	MinimumAmount int64               `json:"minimumAmount"   dc:"The minimum amount of wire transfer, cents" v:"required" `
 	Bank          *detail.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer" v:"required"`

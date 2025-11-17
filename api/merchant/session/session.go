@@ -31,6 +31,7 @@ type NewSubUpdatePageReq struct {
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified"`
 	PlanId         int64  `json:"planId" dc:"Id of plan to update" dc:"Id of plan to update"`
+	VatCountryCode string `json:"vatCountryCode" dc:"Vat Country Code"`
 	ReturnUrl      string `json:"returnUrl"  dc:"ReturnUrl"`
 	CancelUrl      string `json:"cancelUrl" dc:"CancelUrl"`
 }

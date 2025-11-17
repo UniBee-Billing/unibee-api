@@ -60,8 +60,8 @@ type EditReq struct {
 	MetricRecurringCharge *[]*bean.PlanMetricMeteredChargeParam `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
 	GasPayer              *string                               `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata              *map[string]interface{}               `json:"metadata" dc:"Metadata，Map"`
-	TrialAmount           *int64                                `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
-	TrialDurationTime     *int64                                `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
+	TrialAmount           *int64                                `json:"trialAmount"                description:"price of trial period， not available for addon"`    // price of trial period
+	TrialDurationTime     *int64                                `json:"trialDurationTime"         description:"duration of trial，seconds, not available for addon"` // duration of trial
 	TrialDemand           *string                               `json:"trialDemand"               description:"demand of trial, not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd      *int                                  `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ProductId             *int64                                `json:"productId"   dc:"Id of product which plan to linked" `
@@ -101,53 +101,60 @@ type ListRes struct {
 }
 
 type CopyReq struct {
-	g.Meta `path:"/copy" tags:"Plan" method:"post" summary:"Copy Plan"`
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/copy" tags:"Plan" method:"post" summary:"Copy Plan"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type CopyRes struct {
 	Plan *bean.Plan `json:"plan" dc:"Plan"`
 }
 
 type ActivateReq struct {
-	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"Activate Plan"`
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/activate" tags:"Plan" method:"post" summary:"Activate Plan"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type ActivateRes struct {
 }
 
 type PublishReq struct {
-	g.Meta `path:"/publish" tags:"Plan" method:"post" summary:"Publish Plan" dc:"Publish plan，a plan will display at user portal when its published"`
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/publish" tags:"Plan" method:"post" summary:"Publish Plan" dc:"Publish plan，a plan will display at user portal when its published"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type PublishRes struct {
 }
 
 type UnPublishReq struct {
-	g.Meta `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublish Plan" `
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublish Plan" `
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type UnPublishRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"Plan Detail"`
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/detail" tags:"Plan" method:"get,post" summary:"Plan Detail"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type DetailRes struct {
 	Plan *detail.PlanDetail `json:"plan" dc:"Plan Detail"`
 }
 
 type ArchiveReq struct {
-	g.Meta      `path:"/archive" tags:"Plan" method:"post" summary:"Archive Plan"`
-	PlanId      uint64 `json:"planId" dc:"PlanId" v:"required"`
-	HardArchive bool   `json:"hardArchive" dc:"Hard Archive"`
+	g.Meta         `path:"/archive" tags:"Plan" method:"post" summary:"Archive Plan"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
+	HardArchive    bool   `json:"hardArchive" dc:"Hard Archive"`
 }
 type ArchiveRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"Plan" method:"post" summary:"Delete Plan"`
-	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+	g.Meta         `path:"/delete" tags:"Plan" method:"post" summary:"Delete Plan"`
+	PlanId         uint64 `json:"planId" dc:"The Id of plan, either planId or externalPlanId should be set" `
+	ExternalPlanId string `json:"externalPlanId" dc:"The ExternalId of plan, either externalPlanId or planId should be set" `
 }
 type DeleteRes struct {
 }

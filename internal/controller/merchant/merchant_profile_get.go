@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/profile"
@@ -50,6 +51,10 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 	if exchangeApiKeyConfig != nil {
 		exchangeApiKey = exchangeApiKeyConfig.ConfigValue
 	}
+	apikey := merchant.ApiKey
+	if config.GetConfigInstance().IsProd() {
+		apikey = utility.HideStar(merchant.ApiKey)
+	}
 	return &profile.GetRes{
 		Merchant:             bean.SimplifyMerchant(merchant),
 		MerchantMember:       detail.ConvertMemberToDetail(ctx, member),
@@ -59,7 +64,8 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		TimeZone:             time.GetTimeZoneList(),
 		Gateways:             detail.ConvertGatewayList(ctx, query.GetMerchantGatewayList(ctx, merchant.Id, unibee.Bool(false))),
 		ExchangeRateApiKey:   utility.HideStar(exchangeApiKey),
-		OpenApiKey:           utility.HideStar(merchant.ApiKey),
+		OpenAPIHost:          config.GetConfigInstance().Server.GetServerPath(),
+		OpenAPIKey:           apikey,
 		SendGridKey:          utility.HideStar(emailData),
 		EmailSender:          emailSender,
 		VatSenseKey:          utility.HideStar(vatGatewayKey),
@@ -67,5 +73,6 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		SegmentUserPortalKey: segment.GetMerchantSegmentUserPortalConfig(ctx, merchant.Id),
 		IsOwner:              isOwner,
 		MemberRoles:          memberRoles,
+		AnalyticsHost:        fmt.Sprintf("%s/analytics", config.GetConfigInstance().Server.GetServerPath()),
 	}, nil
 }

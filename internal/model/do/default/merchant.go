@@ -33,4 +33,6 @@ type Merchant struct {
 	TimeZone    interface{} // merchant default time zone
 	Host        interface{} // merchant user portal host
 	ApiKey      interface{} // merchant open api key
+	CountryCode interface{} // country_code
+	CountryName interface{} // country_name
 }

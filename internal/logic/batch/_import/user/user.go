@@ -110,6 +110,9 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		Custom:         tag,
 		MerchantId:     task.MerchantId,
 	})
+	if err != nil {
+		return target, err
+	}
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,

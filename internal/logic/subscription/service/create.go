@@ -50,7 +50,7 @@ type CreatePreviewInternalReq struct {
 	VatCountryCode         string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage          *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	TrialEnd               int64                  `json:"trialEnd"  description:"trial_end, utc time"` // trial_end, utc time
+	TrialEnd               int64                  `json:"trialEnd"  description:"trial_end, utc time, override plan's trial feature if specified'"` // trial_end, utc time
 	IsSubmit               bool
 	ProductData            *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	PaymentMethodId        string
@@ -296,7 +296,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	var currentTimeStart = gtime.Now()
 	var trialEnd = currentTimeStart.Timestamp() - 1
-	var cancelAtPeriodEnd = 0
+	if req.TrialEnd <= currentTimeStart.Timestamp() {
+		req.TrialEnd = 0
+	}
 	utility.Assert(len(plan.IntervalUnit) > 0, "Invalid plan billing period")
 	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
 		//trial period
@@ -408,6 +410,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountMessage:           discountMessage,
 			OtherActiveSubscriptionId: otherActiveSubscriptionId,
 			ApplyPromoCredit:          *req.ApplyPromoCredit,
+			CancelAtPeriodEnd:         plan.CancelAtTrialEnd,
 		}, nil
 	} else {
 		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
@@ -461,7 +464,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			TaxPercentage:             subscriptionTaxPercentage,
 			VatNumberValidateMessage:  vatNumberValidateMessage,
 			DiscountMessage:           discountMessage,
-			CancelAtPeriodEnd:         cancelAtPeriodEnd,
+			CancelAtPeriodEnd:         plan.CancelAtTrialEnd,
 			GatewayPaymentMethodId:    paymentMethodId,
 			GatewayPaymentType:        paymentType,
 			OtherActiveSubscriptionId: otherActiveSubscriptionId,

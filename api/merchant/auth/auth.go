@@ -75,13 +75,15 @@ type PasswordForgetOtpVerifyRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta    `path:"/sso/register" tags:"Member Authentication" method:"post" summary:"Register" dc:"Register with owner permission, send email with OTP code"`
-	FirstName string `json:"firstName" dc:"The merchant owner's first name" v:"required"`
-	LastName  string `json:"lastName" dc:"The merchant owner's last name" v:"required"`
-	Email     string `json:"email" dc:"The merchant owner's email address" v:"required"`
-	Password  string `json:"password" dc:"The owner's password" v:"required"`
-	Phone     string `json:"phone" dc:"The owner's Phone"`
-	UserName  string `json:"userName" dc:"The owner's UserName"`
+	g.Meta      `path:"/sso/register" tags:"Member Authentication" method:"post" summary:"Register" dc:"Register with owner permission, send email with OTP code"`
+	FirstName   string `json:"firstName" dc:"The merchant owner's first name" v:"required"`
+	LastName    string `json:"lastName" dc:"The merchant owner's last name" v:"required"`
+	Email       string `json:"email" dc:"The merchant owner's email address" v:"required"`
+	Password    string `json:"password" dc:"The owner's password" v:"required"`
+	Phone       string `json:"phone" dc:"The owner's Phone"`
+	UserName    string `json:"userName" dc:"The owner's UserName"`
+	CountryCode string `json:"countryCode" dc:"Country Code"`
+	CountryName string `json:"countryName" dc:"Country Name"`
 }
 type RegisterRes struct {
 }

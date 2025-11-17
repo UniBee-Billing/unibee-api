@@ -25,7 +25,7 @@ var LangMap = map[string]string{
 
 // Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
 // https://www.twilio.com/docs/sendgrid/api-reference
-func SendDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string) (result string, err error) {
+func SendSandgridDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string) (result string, err error) {
 	if f == nil {
 		f = sender.GetDefaultSender()
 	}
@@ -54,21 +54,17 @@ func SendDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey string, ma
 	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
 	if err != nil {
-		fmt.Printf("SendDynamicTemplateEmailToUser error:%s\n", err.Error())
+		fmt.Printf("SendSandgridDynamicTemplateEmailToUser error:%s\n", err.Error())
 		return "", err
 	} else {
 		fmt.Println(response.StatusCode)
 		fmt.Println(response.Body)
 		fmt.Println(response.Headers)
 	}
-	//if response.StatusCode != 201 {
-	//	fmt.Printf("SendDynamicTemplateEmailToUser errorCode:%d\n", response.StatusCode)
-	//	return "", gerror.Newf("SendDynamicTemplateEmailToUser errorCode:%d\n", response.StatusCode)
-	//}
 	return utility.MarshalToJsonString(response), nil
 }
 
-func SendDynamicPdfAttachEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string, pdfFilePath string, pdfFileName string) (result string, err error) {
+func SendSendgridDynamicTemplateWithAttachFileEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string, pdfFilePath string, pdfFileName string) (result string, err error) {
 	if f == nil {
 		f = sender.GetDefaultSender()
 	}
@@ -108,7 +104,7 @@ func SendDynamicPdfAttachEmailToUser(f *sender.Sender, emailGatewayKey string, m
 	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
 	if err != nil {
-		fmt.Printf("SendDynamicPdfAttachEmailToUser error:%s\n", err.Error())
+		fmt.Printf("SendSendgridDynamicTemplateWithAttachFileEmailToUser error:%s\n", err.Error())
 		return "", err
 	} else {
 		fmt.Println(response.StatusCode)

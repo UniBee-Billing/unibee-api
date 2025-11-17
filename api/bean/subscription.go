@@ -196,3 +196,9 @@ func SimplifySubscriptionOnetimeAddon(one *entity.SubscriptionOnetimeAddon) *Sub
 		Metadata:       metadata,
 	}
 }
+
+type SubscriptionNextInvoiceData struct {
+	DiscountCode           string `json:"discountCode"`
+	ApplyPromoCreditAmount int64  `json:"applyPromoCreditAmount"`
+	ApplyInvoiceId         string `json:"applyInvoiceId"`
+}

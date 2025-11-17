@@ -15,6 +15,8 @@ import (
 	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/merchant"
+	"unibee/internal/logic/middleware/license"
+	"unibee/internal/logic/middleware/rate_limit"
 	"unibee/internal/model"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -76,14 +78,14 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 
 	customCtx.UserAgent = r.Header.Get("User-Agent")
-	if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
-		customCtx.IsOpenApiCall = true
-	}
+	//if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
+	//	customCtx.IsOpenApiCall = true
+	//}
 	customCtx.Authorization = r.Header.Get("Authorization")
 	customCtx.TokenString = customCtx.Authorization
-	if len(customCtx.TokenString) > 0 && strings.HasPrefix(customCtx.TokenString, "Bearer ") && !jwt.IsPortalToken(customCtx.TokenString) {
+	customCtx.TokenString = strings.TrimSpace(strings.Replace(customCtx.TokenString, "Bearer ", "", 1)) // remove Bearer
+	if len(customCtx.TokenString) > 0 && !jwt.IsPortalToken(customCtx.TokenString) {
 		customCtx.IsOpenApiCall = true
-		customCtx.TokenString = strings.Replace(customCtx.TokenString, "Bearer ", "", 1) // remove Bearer
 	}
 	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s][%s] IsOpenApi:%v Token:%s Body:%s", customCtx.Language, customCtx.RequestId, r.Method, r.GetUrl(), customCtx.IsOpenApiCall, customCtx.TokenString, r.GetBodyString()))
 
@@ -218,7 +220,6 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 		jwt.ResetAuthTokenTTL(r.Context(), customCtx.TokenString)
 	} else {
 		// Api Call
-		customCtx.IsOpenApiCall = true
 		merchantInfo := query.GetMerchantByApiKey(r.Context(), customCtx.TokenString)
 		if merchantInfo == nil {
 			merchantInfo = merchant.GetMerchantByOpenApiKeyFromCache(r.Context(), customCtx.TokenString)
@@ -287,6 +288,15 @@ func (s *SMiddleware) UserPortalMerchantRouterHandler(r *ghttp.Request) {
 						domain = "user.unibee.top"
 					}
 					one = query.GetMerchantByHost(r.Context(), domain)
+				}
+			}
+		}
+		if one == nil {
+			merchantIdStr := r.Header.Get("MerchantId")
+			merchantId, err := strconv.ParseInt(merchantIdStr, 10, 64)
+			if err == nil {
+				if merchantId > 0 {
+					one = query.GetMerchantById(r.Context(), uint64(merchantId))
 				}
 			}
 		}
@@ -391,14 +401,14 @@ func doubleRequestLimit(id string, r *ghttp.Request) {
 
 func merchantQPSLimit(merchantId uint64, r *ghttp.Request) {
 	if config.GetConfigInstance().Mode == "cloud" {
-		maxQps := GetMerchantAPIRateLimit(r.Context(), merchantId)
-		checked, current := CheckQPSLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
+		maxQps := license.GetMerchantAPIRateLimit(r.Context(), merchantId)
+		checked, current := rate_limit.CheckRateLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
 		g.Log().Infof(r.Context(), "merchantQPSLimitCheck merchantId:%d currentQps:%d maxQps:%d", merchantId, current, maxQps)
 		utility.Assert(checked, fmt.Sprintf("Reached max api qps limitation, please upgrade your plan, current qps:%d", current))
 	} else {
 		maxQps := 500
 		// todo mark move to config file
-		checked, current := CheckQPSLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
+		checked, current := rate_limit.CheckRateLimit(r.Context(), fmt.Sprintf("UniBee#Cloud#MerchantAPIQPSLimitCheck#%d", merchantId), maxQps, 1000)
 		g.Log().Infof(r.Context(), "merchantQPSLimitCheck merchantId:%d currentQps:%d maxQps:%d", merchantId, current, maxQps)
 		utility.Assert(checked, fmt.Sprintf("Reached max api qps limitation, please upgrade your plan, current qps:%d", current))
 	}

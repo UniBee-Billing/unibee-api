@@ -15,7 +15,7 @@ import (
 type GatewaySort struct {
 	GatewayName string `json:"gatewayName" description:"Required, The gateway name, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
 	Id          uint64 `json:"gatewayId" description:"The gateway id"`
-	Sort        int64  `json:"sort" description:"Required, The sort value of payment gateway, should greater than 0, The bigger, the closer to the front"`
+	Sort        int64  `json:"sort" description:"Required, The sort value of payment gateway, should greater than 0, The higher the value, the lower the ranking"`
 }
 
 type GatewayCurrencyExchange struct {
@@ -45,7 +45,7 @@ type Gateway struct {
 	Bank                          *GatewayBank                     `json:"bank"   dc:"The receiving bank of wire transfer" `
 	WebhookEndpointUrl            string                           `json:"webhookEndpointUrl"   description:"The endpoint url of gateway webhook " `
 	WebhookSecret                 string                           `json:"webhookSecret"  dc:"The secret of gateway webhook"`
-	Sort                          int64                            `json:"sort"               description:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort                          int64                            `json:"sort"               description:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	IsSetupFinished               bool                             `json:"IsSetupFinished"  dc:"Whether the gateway finished setup process" `
 	CurrencyExchange              []*GatewayCurrencyExchange       `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 	CurrencyExchangeEnabled       bool                             `json:"currencyExchangeEnabled"            description:"whether to enable currency exchange"`

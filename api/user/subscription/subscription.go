@@ -154,6 +154,7 @@ type UpdateReq struct {
 	CancelUrl              string                 `json:"cancelUrl" dc:"CancelUrl"`
 	ApplyPromoCredit       bool                   `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	ManualPayment          bool                   `json:"manualPayment" dc:"ManualPayment"`
 }
 
 type UpdateRes struct {

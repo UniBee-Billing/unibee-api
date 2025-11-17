@@ -316,19 +316,20 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	var status = false
 	var returnUrl = ""
 	var isSuccess = false
+	var payment *entity.Payment
 	if len(payIdStr) > 0 {
 		response = ""
 		//Payment Redirect
-		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+		payment = query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
 			success := r.Get("success")
 			if success != nil {
 				if success.String() == "true" {
 					isSuccess = true
 				}
-				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
+				returnUrl = util.GetPaymentRedirectUrl(r.Context(), payment, success.String())
 			} else {
-				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
+				returnUrl = util.GetPaymentRedirectUrl(r.Context(), payment, "")
 			}
 		}
 		if r.Get("success").Bool() {
@@ -405,6 +406,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	}
 	log.SaveChannelHttpLog("GatewayRedirect", r.URL, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
+		Payment:   payment,
 		Status:    status,
 		Message:   response,
 		Success:   isSuccess,

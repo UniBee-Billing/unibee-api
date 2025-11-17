@@ -57,7 +57,7 @@ type CountRes struct {
 }
 type GetReq struct {
 	g.Meta `path:"/get" tags:"User" method:"get" summary:"Get User Profile"`
-	UserId int64 `json:"userId" dc:"UserId" `
+	UserId int64 `json:"userId" dc:"UserId" required:"true"`
 }
 
 type GetRes struct {
@@ -66,7 +66,7 @@ type GetRes struct {
 
 type FrozenReq struct {
 	g.Meta `path:"/suspend_user" tags:"User" method:"post" summary:"Suspend User"`
-	UserId int64 `json:"userId" dc:"UserId" `
+	UserId int64 `json:"userId" dc:"UserId" required:"true"`
 }
 
 type FrozenRes struct {
@@ -74,7 +74,7 @@ type FrozenRes struct {
 
 type ReleaseReq struct {
 	g.Meta `path:"/resume_user" tags:"User" method:"post" summary:"Resume User"`
-	UserId int64 `json:"userId" dc:"UserId" `
+	UserId int64 `json:"userId" dc:"UserId" required:"true"`
 }
 
 type ReleaseRes struct {

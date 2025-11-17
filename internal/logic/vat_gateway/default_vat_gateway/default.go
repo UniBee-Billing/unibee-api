@@ -3,6 +3,7 @@ package default_vat_gateway
 import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/api/bean"
+	config2 "unibee/internal/cmd/config"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -12,6 +13,9 @@ type DefaultVatGateway struct {
 }
 
 func (d DefaultVatGateway) VatRatesEnabled() bool {
+	if d.GetGatewayName() == "default" && config2.GetConfigInstance().Mode == "cloud" {
+		return true
+	}
 	return false
 }
 

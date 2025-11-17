@@ -14,6 +14,7 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
+	plan2 "unibee/internal/logic/batch/_import/plan"
 	"unibee/internal/logic/batch/_import/subscription"
 	user2 "unibee/internal/logic/batch/_import/user"
 	"unibee/internal/logic/oss"
@@ -23,6 +24,7 @@ import (
 
 var importTaskMap = map[string]_interface.BatchImportTask{
 	"UserImport":                user2.TaskUserImport{},
+	"PlanImport":                plan2.TaskPlanImport{},
 	"ActiveSubscriptionImport":  subscription.TaskActiveSubscriptionImport{},
 	"HistorySubscriptionImport": subscription.TaskHistorySubscriptionImport{},
 }

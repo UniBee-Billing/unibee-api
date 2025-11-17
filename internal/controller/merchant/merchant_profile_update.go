@@ -29,11 +29,14 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		utility.Assert(strings.HasPrefix(req.CompanyLogo, "http://") || strings.HasPrefix(req.CompanyLogo, "https://"), "companyLogo Invalid, should has http:// or https:// prefix")
 		companyLogo = req.CompanyLogo
 	}
+	utility.Assert(!strings.Contains(companyLogo, ".svg"), "companyLogo type err, please using other image type instead of SVG")
 	_, err = dao.Merchant.Ctx(ctx).Data(g.Map{
 		dao.Merchant.Columns().Email:       req.Email,
 		dao.Merchant.Columns().Address:     req.Address,
 		dao.Merchant.Columns().CompanyName: req.CompanyName,
 		dao.Merchant.Columns().CompanyLogo: companyLogo,
+		dao.Merchant.Columns().BusinessNum: req.CompanyVatNumber,
+		dao.Merchant.Columns().Idcard:      req.CompanyRegistryCode,
 		dao.Merchant.Columns().Phone:       req.Phone,
 		dao.Merchant.Columns().TimeZone:    req.TimeZone,
 		dao.Merchant.Columns().Host:        req.Host,

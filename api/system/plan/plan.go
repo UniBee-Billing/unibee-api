@@ -2,6 +2,7 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	"unibee/api/bean/detail"
 )
 
@@ -10,5 +11,6 @@ type DetailReq struct {
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {
-	Plan *detail.PlanDetail `json:"plan" dc:"Plan Detail"`
+	Plan     *detail.PlanDetail `json:"plan" dc:"Plan Detail"`
+	Merchant *bean.Merchant     `json:"merchant" dc:"Merchant"`
 }

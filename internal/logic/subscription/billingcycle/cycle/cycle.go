@@ -26,6 +26,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	service2 "unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service/next"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/user/vat"
 	entity "unibee/internal/model/entity/default"
@@ -209,7 +210,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 
 			if needInvoiceGenerate {
-				invoice, pendingUpdate := PreviewSubscriptionNextInvoice(ctx, sub, timeNow)
+				nextApplyData := next.GetSubscriptionNextInvoiceData(ctx, sub.SubscriptionId)
+				invoice, pendingUpdate := PreviewSubscriptionNextInvoice(ctx, sub, nextApplyData, timeNow)
 				gatewayId, paymentType, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", "", sub.SubscriptionId)
 				if gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -243,6 +245,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice update pendingUpdate err:", err.Error())
 						return nil, err
 					}
+				}
+				if nextApplyData != nil {
+					next.ApplySubscriptionNextInvoiceData(ctx, sub.SubscriptionId, one.InvoiceId)
 				}
 				g.Log().Debugf(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
@@ -301,7 +306,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	}
 }
 
-func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscription, timeNow int64) (*bean.Invoice, *entity.SubscriptionPendingUpdate) {
+func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscription, nextApplyData *bean.SubscriptionNextInvoiceData, timeNow int64) (*bean.Invoice, *entity.SubscriptionPendingUpdate) {
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
 	plan := query.GetPlanById(ctx, sub.PlanId)
@@ -311,8 +316,14 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 	if err == nil {
 		taxPercentage = percentage
 	}
+	if nextApplyData != nil && nextApplyData.DiscountCode != "" {
+		sub.DiscountCode = nextApplyData.DiscountCode
+	}
+
 	var invoice *bean.Invoice
 	var discountCode = ""
+	var applyPromoCreditAmount *int64
+
 	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
 		MerchantId:         sub.MerchantId,
 		UserId:             sub.UserId,
@@ -338,6 +349,11 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 	if config3.CheckCreditConfigDiscountCodeExclusive(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency) && len(discountCode) > 0 {
 		applyPromoCredit = false
 	}
+	if nextApplyData != nil && nextApplyData.ApplyPromoCreditAmount > 0 {
+		applyPromoCreditAmount = new(int64)
+		*applyPromoCreditAmount = nextApplyData.ApplyPromoCreditAmount
+		applyPromoCredit = true
+	}
 	if pendingUpdate != nil {
 		//generate PendingUpdate cycle invoice
 		updatePlan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
@@ -362,6 +378,7 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 			CreateFrom:                 consts.InvoiceAutoChargeFlag,
 			Metadata:                   map[string]interface{}{"SubscriptionUpdate": true, "IsUpgrade": false},
 			ApplyPromoCredit:           applyPromoCredit,
+			ApplyPromoCreditAmount:     applyPromoCreditAmount,
 			UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
 		})
 	} else {
@@ -387,12 +404,17 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 			InvoiceName:                "SubscriptionCycle",
 			FinishTime:                 timeNow,
 			CreateFrom:                 consts.InvoiceAutoChargeFlag,
+			Metadata:                   map[string]interface{}{},
 			ApplyPromoCredit:           applyPromoCredit,
+			ApplyPromoCreditAmount:     applyPromoCreditAmount,
 			UserMetricChargeForInvoice: metric_event.GetUserMetricStatForAutoChargeInvoice(ctx, sub.MerchantId, user, sub, true),
 		})
 	}
 	if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
 		invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
+	}
+	if nextApplyData != nil && invoice.Metadata != nil {
+		invoice.Metadata["NextApplyData"] = nextApplyData
 	}
 	return invoice, pendingUpdate
 }

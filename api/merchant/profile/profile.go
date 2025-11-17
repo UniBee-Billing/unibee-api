@@ -4,7 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
-	"unibee/internal/logic/middleware"
+	"unibee/internal/logic/middleware/license"
 )
 
 type GetLicenseReq struct {
@@ -12,9 +12,9 @@ type GetLicenseReq struct {
 }
 
 type GetLicenseRes struct {
-	Merchant     *bean.Merchant      `json:"merchant" dc:"Merchant"`
-	License      *middleware.License `json:"license" description:"The merchant license" `
-	APIRateLimit int                 `json:"APIRateLimit" dc:"APIRateLimit"`
+	Merchant     *bean.Merchant   `json:"merchant" dc:"Merchant"`
+	License      *license.License `json:"license" description:"The merchant license" `
+	APIRateLimit int              `json:"APIRateLimit" dc:"APIRateLimit"`
 }
 
 type GetLicenseUpdateUrlReq struct {
@@ -41,7 +41,8 @@ type GetRes struct {
 	Currency             []*bean.Currency             `json:"Currency" description:"Currency List" `
 	Gateways             []*detail.Gateway            `json:"gateways" description:"Gateway List" `
 	ExchangeRateApiKey   string                       `json:"exchangeRateApiKey" description:"ExchangeRateApiKey" `
-	OpenApiKey           string                       `json:"openApiKey" description:"OpenApiKey" `
+	OpenAPIHost          string                       `json:"openApiHost" description:"OpenApi Host"`
+	OpenAPIKey           string                       `json:"openApiKey" description:"OpenAPIKey" `
 	SendGridKey          string                       `json:"sendGridKey" description:"SendGridKey" `
 	VatSenseKey          string                       `json:"vatSenseKey" description:"VatSenseKey" `
 	EmailSender          *bean.Sender                 `json:"emailSender" description:"EmailSender" `
@@ -49,17 +50,22 @@ type GetRes struct {
 	SegmentUserPortalKey string                       `json:"segmentUserPortalKey" description:"SegmentUserPortalKey" `
 	IsOwner              bool                         `json:"isOwner" description:"Check Member is Owner" `
 	MemberRoles          []*bean.MerchantRole         `json:"MemberRoles" description:"The member role list'" `
+	AnalyticsHost        string                       `json:"analyticsHost" description:"Analytics Host"`
 }
 
 type UpdateReq struct {
-	g.Meta      `path:"/update" tags:"Merchant" method:"post" summary:"Update Profile"`
-	CompanyName string `json:"companyName" description:"company_name"`
-	Email       string `json:"email"       description:"email"`
-	Address     string `json:"address"     description:"address"`
-	CompanyLogo string `json:"companyLogo" description:"company_logo"`
-	Phone       string `json:"phone"       description:"phone"`
-	TimeZone    string `json:"timeZone" description:"User TimeZone"`
-	Host        string `json:"host" description:"User Portal Host"`
+	g.Meta              `path:"/update" tags:"Merchant" method:"post" summary:"Update Profile"`
+	CompanyName         string `json:"companyName" description:"company_name"`
+	Email               string `json:"email"       description:"email"`
+	Address             string `json:"address"     description:"address"`
+	CompanyLogo         string `json:"companyLogo" description:"company_logo"`
+	Phone               string `json:"phone"       description:"phone"`
+	TimeZone            string `json:"timeZone" description:"User TimeZone"`
+	Host                string `json:"host" description:"User Portal Host"`
+	CountryCode         string `json:"countryCode" dc:"Country Code"`
+	CountryName         string `json:"countryName" dc:"Country Name"`
+	CompanyVatNumber    string `json:"CompanyVatNumber" dc:"Country Vat Number"`
+	CompanyRegistryCode string `json:"CompanyRegistryCode" dc:"Country Registry Code"`
 }
 
 type UpdateRes struct {

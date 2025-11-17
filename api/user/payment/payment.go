@@ -28,5 +28,6 @@ type DetailReq struct {
 	PaymentId string `json:"paymentId" dc:"The unique id of payment" v:"required"`
 }
 type DetailRes struct {
+	PaymentStatus int                   `json:"paymentStatus" dc:"Payment Status，10-pending，20-success，30-failure, 40-cancel"`
 	PaymentDetail *detail.PaymentDetail `json:"paymentDetail" dc:"Payment Detail Object"`
 }

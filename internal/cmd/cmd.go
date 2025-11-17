@@ -66,9 +66,15 @@ var (
 					},
 				},
 			}
-			openapi.Servers = &goai.Servers{
-				{URL: config.GetConfigInstance().Server.DomainPath},
-				{URL: fmt.Sprintf("http://127.0.0.1%s", config.GetConfigInstance().Server.Address)},
+			if config.GetConfigInstance().IsProd() {
+				openapi.Servers = &goai.Servers{
+					{URL: config.GetConfigInstance().Server.DomainPath},
+				}
+			} else {
+				openapi.Servers = &goai.Servers{
+					{URL: config.GetConfigInstance().Server.DomainPath},
+					{URL: fmt.Sprintf("http://127.0.0.1%s", config.GetConfigInstance().Server.Address)},
+				}
 			}
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
@@ -399,6 +405,7 @@ var (
 				g.Log().Infof(ctx, "Server build version: %s ", g.Server().GetOpenApi().Info.Version)
 				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
+				g.Log().Infof(ctx, "Server hostedPagePath: %s ", config.GetConfigInstance().Server.HostedPagePath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
 				_, err = g.Redis().Set(ctx, "g_check", "checked")

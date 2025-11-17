@@ -26,4 +26,5 @@ type MerchantEmailTemplate struct {
 	GatewayTemplateId   interface{} //
 	LanguageData        interface{} //
 	TemplateDescription interface{} //
+	LanguageVersionData interface{} //
 }

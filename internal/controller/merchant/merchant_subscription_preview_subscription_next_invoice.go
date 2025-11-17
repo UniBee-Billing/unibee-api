@@ -9,6 +9,7 @@ import (
 	_interface "unibee/internal/interface/context"
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
+	"unibee/internal/logic/subscription/service/next"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -16,11 +17,26 @@ import (
 )
 
 func (c *ControllerSubscription) PreviewSubscriptionNextInvoice(ctx context.Context, req *subscription.PreviewSubscriptionNextInvoiceReq) (res *subscription.PreviewSubscriptionNextInvoiceRes, err error) {
+	if len(req.SubscriptionId) == 0 {
+		if req.UserId == 0 {
+			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil, one of it is required")
+			user := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
+			utility.Assert(user != nil, "user not found by ExternalUserId")
+			req.UserId = user.Id
+		}
+		utility.Assert(req.UserId > 0, "ExternalUserId|UserId is nil, one of it is required")
+		one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)
+		if one == nil {
+			one = query.GetLatestSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)
+		}
+		utility.Assert(one != nil, "subscription not found")
+		req.SubscriptionId = one.SubscriptionId
+	}
 	utility.Assert(len(req.SubscriptionId) > 0, "Invalid SubscriptionId")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "sub not found")
 	utility.Assert(sub.MerchantId == _interface.GetMerchantId(ctx), "no permission")
-	invoice, one := cycle.PreviewSubscriptionNextInvoice(ctx, sub, utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd))
+	invoice, one := cycle.PreviewSubscriptionNextInvoice(ctx, sub, next.GetSubscriptionNextInvoiceData(ctx, sub.SubscriptionId), utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd))
 	var pendingUpdateDetail *detail.SubscriptionPendingUpdateDetail
 	if one != nil {
 		var metadata = make(map[string]interface{})

@@ -46,7 +46,7 @@ func GetMerchantGatewayList(ctx context.Context, merchantId uint64, archive *boo
 	} else if archive != nil && !*archive {
 		q = q.Where(dao.MerchantGateway.Columns().IsDeleted, 0)
 	}
-	err := q.Order("is_deleted asc, enum_key desc").
+	err := q.Order("is_deleted asc, enum_key asc").
 		Scan(&data)
 	if err != nil {
 		g.Log().Errorf(ctx, "GetMerchantGatewayList error:%s", err)

@@ -2,15 +2,20 @@ package vat_gateway
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	config2 "unibee/internal/cmd/config"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/middleware/license"
+	"unibee/internal/logic/middleware/rate_limit"
 	"unibee/internal/logic/subscription/config"
+	"unibee/internal/logic/vat_gateway/cloud"
 	"unibee/internal/logic/vat_gateway/default_vat_gateway"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
@@ -119,9 +124,24 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 	if gateway == nil {
 		return nil, gerror.New("Default Vat Gateway Need Setup")
 	}
-	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
-	if validateError != nil {
-		return nil, validateError
+	var result *bean.ValidResult
+	var validateError error
+	if gateway.GetGatewayName() == DEFAULT_GATEWAY_NAME && config2.GetConfigInstance().Mode == "cloud" {
+		// merchant rate limit
+		maxHourly := license.GetMerchantAPIRateLimit(ctx, merchantId) * 10
+		checked, current := rate_limit.CheckRateLimit(ctx, fmt.Sprintf("UniBee#Cloud#MerchantValidateVatNumberByDefaultGatewayHourlyLimitCheck#%d", merchantId), maxHourly, 3600)
+		g.Log().Infof(ctx, "MerchantValidateVatNumberByDefaultGatewayHourlyLimitCheck merchantId:%d currentQps:%d maxHourly:%d", merchantId, current, maxHourly)
+		utility.Assert(checked, fmt.Sprintf("Reached max hourly validate limitation, please upgrade your plan, current called:%d", current))
+		result, validateError = cloud.ValidateVatNumberFromCloud(ctx, vatNumber, requestVatNumber)
+		if validateError != nil {
+			return nil, validateError
+		}
+	}
+	if result == nil {
+		result, validateError = gateway.ValidateVatNumber(vatNumber, requestVatNumber)
+		if validateError != nil {
+			return nil, validateError
+		}
 	}
 	var valid = 0
 	if result.Valid {
@@ -150,15 +170,20 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 	if gateway == nil {
 		return make([]*bean.VatCountryRate, 0), gerror.New("Default Vat Gateway Need Setup")
 	}
-	var countryRateList []*entity.CountryRate
-	err := dao.CountryRate.Ctx(ctx).
-		Where(dao.CountryRate.Columns().MerchantId, merchantId).
-		Where(dao.CountryRate.Columns().IsDeleted, 0).
-		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
-		Order("country_name").
-		Scan(&countryRateList)
-	if err != nil {
-		return nil, err
+	var countryRateList = make([]*entity.CountryRate, 0)
+	if gateway.GetGatewayName() == DEFAULT_GATEWAY_NAME && config2.GetConfigInstance().Mode == "cloud" {
+		countryRateList = cloud.GetCloudVatCountryList(ctx, merchantId)
+	}
+	if len(countryRateList) == 0 {
+		err := dao.CountryRate.Ctx(ctx).
+			Where(dao.CountryRate.Columns().MerchantId, merchantId).
+			Where(dao.CountryRate.Columns().IsDeleted, 0).
+			Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
+			Order("country_name").
+			Scan(&countryRateList)
+		if err != nil {
+			return nil, err
+		}
 	}
 	generalConfig := GetMerchantVATGeneralConfig(ctx, merchantId)
 	var list []*bean.VatCountryRate
@@ -176,11 +201,14 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 			}
 		}
 		list = append(list, &bean.VatCountryRate{
+			Id:                    countryRate.Id,
+			Gateway:               countryRate.Gateway,
 			CountryCode:           countryRate.CountryCode,
 			CountryName:           countryRate.CountryName,
 			VatSupport:            vatSupport,
 			IsEU:                  countryRate.Eu == 1,
 			StandardTaxPercentage: standardTaxPercentage,
+			Mamo:                  countryRate.Mamo,
 		})
 	}
 	return list, nil
@@ -192,14 +220,19 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 		return nil, gerror.New("Vat Gateway Need Setup")
 	}
 	var one *entity.CountryRate
-	err := dao.CountryRate.Ctx(ctx).
-		Where(dao.CountryRate.Columns().MerchantId, merchantId).
-		Where(dao.CountryRate.Columns().IsDeleted, 0).
-		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
-		Where(dao.CountryRate.Columns().CountryCode, countryCode).
-		Scan(&one)
-	if err != nil {
-		return nil, err
+	if gateway.GetGatewayName() == DEFAULT_GATEWAY_NAME && config2.GetConfigInstance().Mode == "cloud" {
+		one = cloud.GetCloudVatCountryListByCountryCode(ctx, merchantId, countryCode)
+	}
+	if one == nil {
+		err := dao.CountryRate.Ctx(ctx).
+			Where(dao.CountryRate.Columns().MerchantId, merchantId).
+			Where(dao.CountryRate.Columns().IsDeleted, 0).
+			Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
+			Where(dao.CountryRate.Columns().CountryCode, countryCode).
+			Scan(&one)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if one == nil {
 		return nil, gerror.New("vat data not found")
@@ -225,6 +258,7 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 		VatSupport:            vatSupport,
 		IsEU:                  one.Eu == 1,
 		StandardTaxPercentage: standardTaxPercentage,
+		Mamo:                  one.Mamo,
 	}, nil
 }
 

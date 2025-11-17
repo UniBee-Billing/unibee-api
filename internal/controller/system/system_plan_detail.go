@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/api/bean"
 	"unibee/api/system/plan"
 	plan2 "unibee/internal/logic/plan"
 	"unibee/internal/query"
@@ -15,7 +16,7 @@ func (c *ControllerPlan) Detail(ctx context.Context, req *plan.DetailReq) (res *
 		if err != nil {
 			return nil, err
 		}
-		return &plan.DetailRes{Plan: detail.Plan}, nil
+		return &plan.DetailRes{Plan: detail.Plan, Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, detail.Plan.Plan.MerchantId))}, nil
 	}
 	return nil, gerror.New("Plan Not Found")
 }

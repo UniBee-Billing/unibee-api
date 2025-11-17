@@ -6,8 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq "github.com/jackyang-hk/go-redismq"
+	"unibee/internal/cmd/config"
+	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/member"
 	"unibee/internal/logic/merchant"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -90,6 +93,31 @@ func init() {
 			return map[string]interface{}{"merchant": mer, "member": targetMember}, err
 		} else {
 			return nil, gerror.New("UnmarshalFromJsonString request error")
+		}
+	})
+	redismq.RegisterInvoke("DeleteMemberByEmail", func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		if config.GetConfigInstance().IsProd() || config.GetConfigInstance().Mode != "cloud" {
+			return nil, gerror.New("not support env")
+		}
+		g.Log().Infof(ctx, "DeleteMemberByEmail:%s", request)
+		targetMember := query.GetMerchantMemberByEmail(ctx, fmt.Sprintf("%s", request))
+		if targetMember != nil && targetMember.Role != "Owner" {
+			_, err = dao.MerchantMember.Ctx(ctx).Where(dao.MerchantMember.Columns().Id, targetMember.Id).Delete()
+			if err == nil {
+				operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+					MerchantId:     targetMember.MerchantId,
+					Target:         fmt.Sprintf("Member(%v)", targetMember.Email),
+					Content:        "DeleteViaProdMerchantCreation",
+					UserId:         0,
+					SubscriptionId: "",
+					InvoiceId:      "",
+					PlanId:         0,
+					DiscountCode:   "",
+				}, err)
+			}
+			return nil, err
+		} else {
+			return nil, gerror.New("member not found or is owner")
 		}
 	})
 	redismq.RegisterInvoke("NewMemberSessionByEmail", func(ctx context.Context, request interface{}) (response interface{}, err error) {

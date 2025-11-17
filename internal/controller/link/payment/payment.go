@@ -3,7 +3,7 @@ package payment
 import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee/internal/logic/payment/service"
+	"unibee/internal/logic/payment/link"
 )
 
 func LinkEntry(r *ghttp.Request) {
@@ -14,7 +14,7 @@ func LinkEntry(r *ghttp.Request) {
 		return
 	}
 	paymentId := r.Get("paymentId").String()
-	res := service.LinkCheck(r.Context(), paymentId, gtime.Now().Timestamp())
+	res := link.LinkCheck(r.Context(), paymentId, gtime.Now().Timestamp())
 	if len(res.Link) > 0 {
 		r.Response.RedirectTo(res.Link)
 	} else if len(res.Message) > 0 {

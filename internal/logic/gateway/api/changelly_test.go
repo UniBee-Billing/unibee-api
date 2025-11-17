@@ -52,5 +52,5 @@ func TestForGetCurrencyProviderList(t *testing.T) {
 func TestForTimeFormat(t *testing.T) {
 	fmt.Println(time.Now().Format("2006-01-02T15:04:05.876Z"))
 	fmt.Println(fmt.Sprintf("PDF Generated on %s", time.Now().Format(time.RFC850)))
-	fmt.Println(utility.ConvertCentToDollarStr(108, "USDT"))
+	fmt.Println(utility.ConvertCentToDollarStr(0, "USDT"))
 }
