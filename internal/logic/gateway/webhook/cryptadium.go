@@ -10,6 +10,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/gateway/util"
 	handler2 "unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -58,19 +59,20 @@ func (c CryptadiumWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Mer
 	var status = false
 	var returnUrl = ""
 	var isSuccess = false
+	var payment *entity.Payment
 	if len(payIdStr) > 0 {
 		response = ""
 		//Payment Redirect
-		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+		payment = query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
 			success := r.Get("success")
 			if success != nil {
 				if success.String() == "true" {
 					isSuccess = true
 				}
-				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
+				returnUrl = util.GetPaymentRedirectUrl(r.Context(), payment, success.String())
 			} else {
-				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
+				returnUrl = util.GetPaymentRedirectUrl(r.Context(), payment, "")
 			}
 		}
 		if r.Get("success").Bool() {
@@ -124,6 +126,7 @@ func (c CryptadiumWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Mer
 	}
 	log.SaveChannelHttpLog("GatewayRedirect", r.URL, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
+		Payment:   payment,
 		Status:    status,
 		Message:   response,
 		Success:   isSuccess,

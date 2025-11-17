@@ -2,11 +2,13 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	_plan "unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	plan2 "unibee/internal/logic/plan"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -14,6 +16,12 @@ import (
 )
 
 func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (res *_plan.ActivateRes, err error) {
+	if req.PlanId <= 0 {
+		utility.Assert(len(req.ExternalPlanId) > 0, "either planId or externalPlanId should be set")
+		one := query.GetPlanByExternalPlanId(ctx, _interface.GetMerchantId(ctx), req.ExternalPlanId)
+		utility.Assert(one != nil, fmt.Sprintf("Plan not found by externalPlanId:%s", req.ExternalPlanId))
+		req.PlanId = one.Id
+	}
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")

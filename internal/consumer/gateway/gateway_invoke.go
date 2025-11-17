@@ -60,7 +60,7 @@ type SetupGatewayInvokeReq struct {
 	GatewayName         string                            `json:"gatewayName"  dc:"The name of payment gateway, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
 	DisplayName         *string                           `json:"displayName"  dc:"The displayName of payment gateway"`
 	GatewayIcons        *[]string                         `json:"gatewayIcons"  dc:"The icons of payment gateway"`
-	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The bigger, the closer to the front"`
+	Sort                *int64                            `json:"sort"  dc:"The sort value of payment gateway, The higher the value, the lower the ranking"`
 	GatewayKey          string                            `json:"gatewayKey"  dc:"The key of payment gateway" `
 	GatewaySecret       string                            `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 	SubGateway          string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `

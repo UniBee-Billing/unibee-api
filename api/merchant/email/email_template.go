@@ -14,38 +14,43 @@ type TemplateListRes struct {
 	Total             int                           `json:"total" dc:"Total"`
 }
 
-type TemplateUpdateReq struct {
-	g.Meta          `path:"/template_update" tags:"Email Template" method:"post" summary:"Email Template Update" dc:"Update the email template"`
-	TemplateName    string `json:"templateName" dc:"The name of email template"       v:"required"`
-	TemplateTitle   string `json:"templateTitle" dc:"The title of email template"      v:"required"`
-	TemplateContent string `json:"templateContent" dc:"The content of email template"    v:"required"`
+type AddLocalizationVersionReq struct {
+	g.Meta        `path:"/template_add_localization_version" tags:"Email Template" method:"post" summary:"Add Email Template Localization Version"`
+	TemplateName  string                            `json:"templateName" dc:"Template Name" required:"true"`
+	Localizations []*bean.EmailLocalizationTemplate `json:"localizations" description:"" required:"true"`
 }
 
-type TemplateUpdateRes struct {
+type AddLocalizationVersionRes struct {
+	LocalizationVersion *bean.MerchantLocalizationVersion `json:"localizationVersion" description:""`
 }
 
-type TemplateSetDefaultReq struct {
-	g.Meta       `path:"/template_set_default" tags:"Email Template" method:"post" summary:"Setup Email Template Default" dc:"Setup email template as default"`
-	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
+type EditLocalizationVersionReq struct {
+	g.Meta        `path:"/template_edit_localization_version" tags:"Email Template" method:"post" summary:"Edit Email Template Localization Version"`
+	TemplateName  string                            `json:"templateName" dc:"Template Name" required:"true"`
+	VersionId     string                            `json:"versionId" description:"" required:"true"`
+	Localizations []*bean.EmailLocalizationTemplate `json:"localizations" description:"" required:"true"`
 }
 
-type TemplateSetDefaultRes struct {
+type EditLocalizationVersionRes struct {
+	LocalizationVersion *bean.MerchantLocalizationVersion `json:"localizationVersion" description:""`
 }
 
-type TemplateActivateReq struct {
-	g.Meta       `path:"/template_activate" tags:"Email Template" method:"post" summary:"Email Template Activate" dc:"Activate the email template"`
-	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
+type ActivateLocalizationVersionReq struct {
+	g.Meta       `path:"/template_activate_localization_version" tags:"Email Template" method:"post" summary:"Activate Email Template Localization Version"`
+	TemplateName string `json:"templateName" dc:"Template Name" required:"true"`
+	VersionId    string `json:"versionId" description:""`
 }
 
-type TemplateActivateRes struct {
+type ActivateLocalizationVersionRes struct {
 }
 
-type TemplateDeactivateReq struct {
-	g.Meta       `path:"/template_deactivate" tags:"Email Template" method:"post" summary:"Email Template Deactivate" dc:"Deactivate the email template"`
-	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
+type DeleteLocalizationVersionReq struct {
+	g.Meta       `path:"/template_delete_localization_version" tags:"Email Template" method:"post" summary:"Delete Email Template Localization Version"`
+	TemplateName string `json:"templateName" dc:"Template Name" required:"true"`
+	VersionId    string `json:"versionId" description:""`
 }
 
-type TemplateDeactivateRes struct {
+type DeleteLocalizationVersionRes struct {
 }
 
 type CustomizeLocalizationTemplateSyncReq struct {

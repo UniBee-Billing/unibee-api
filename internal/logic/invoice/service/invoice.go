@@ -29,6 +29,16 @@ import (
 	"unibee/utility"
 )
 
+func TryCancelSubscriptionLatestAutoChargeInvoice(ctx context.Context, subscription *entity.Subscription) {
+	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
+	if one != nil && one.Status == consts.InvoiceStatusProcessing && one.CreateFrom == consts.InvoiceAutoChargeFlag {
+		err := CancelProcessingInvoice(ctx, one.InvoiceId, "TryCancelSubscriptionLatestAutoChargeInvoice")
+		if err != nil {
+			g.Log().Errorf(ctx, `TryCancelSubscriptionLatestAutoChargeInvoice failure error:%s`, err.Error())
+		}
+	}
+}
+
 func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
 	if one != nil && one.Status == consts.InvoiceStatusProcessing {

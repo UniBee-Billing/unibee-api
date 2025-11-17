@@ -63,4 +63,5 @@ type Subscription struct {
 	CurrentPeriodPaid           interface{} // current period paid or not, 1-paid, other-the utc time to expire
 	LastTrackTime               interface{} // last subscription track time
 	ExternalSubscriptionId      interface{} // external_subscription_id
+	NextInvoiceData             interface{} // next_invoice_data
 }

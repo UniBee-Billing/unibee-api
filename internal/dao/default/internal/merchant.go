@@ -41,6 +41,8 @@ type MerchantColumns struct {
 	TimeZone    string // merchant default time zone
 	Host        string // merchant user portal host
 	ApiKey      string // merchant open api key
+	CountryCode string // country_code
+	CountryName string // country_name
 }
 
 // merchantColumns holds the columns for table merchant.
@@ -66,6 +68,8 @@ var merchantColumns = MerchantColumns{
 	TimeZone:    "time_zone",
 	Host:        "host",
 	ApiKey:      "api_key",
+	CountryCode: "country_code",
+	CountryName: "country_name",
 }
 
 // NewMerchantDao creates and returns a new DAO object for table data access.

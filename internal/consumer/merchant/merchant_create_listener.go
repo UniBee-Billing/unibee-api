@@ -9,7 +9,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/logic/member"
 	"unibee/internal/logic/merchant"
-	"unibee/internal/logic/middleware"
+	"unibee/internal/logic/middleware/license"
 	"unibee/internal/logic/vat_gateway/setup"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -47,7 +47,7 @@ func (t MerchantCreateListener) Consume(ctx context.Context, message *redismq.Me
 			g.Log().Errorf(ctx, "MerchantCreateListener SetupForCloudMode err:%s", err.Error())
 			return redismq.ReconsumeLater
 		}
-		middleware.GetMerchantLicense(ctx, merchantId)
+		license.GetMerchantLicense(ctx, merchantId)
 	}
 
 	return redismq.CommitMessage

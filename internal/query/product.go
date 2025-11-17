@@ -48,3 +48,14 @@ func GetProductById(ctx context.Context, id uint64, merchantId uint64) (one *ent
 	}
 	return
 }
+
+func GetProductByProductName(ctx context.Context, productName string, merchantId uint64) (one *entity.Product) {
+	if len(productName) <= 0 || productName == "Default" {
+		return GetDefaultProduct(ctx, merchantId)
+	}
+	err := dao.Product.Ctx(ctx).Where(dao.Product.Columns().ProductName, productName).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}

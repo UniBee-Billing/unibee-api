@@ -1,4 +1,4 @@
-package middleware
+package license
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 func GetMerchantAPIRateLimit(ctx context.Context, merchantId uint64) int {
 	var defaultRateLimit = 50
 	if !config.GetConfigInstance().IsProd() {
-		defaultRateLimit = 10
+		defaultRateLimit = 20
 	}
 	cache, err := g.Redis().Get(ctx, fmt.Sprintf("UniBee#Cloud#MerchantAPIRateLimit#%d", merchantId))
 	if err == nil && cache != nil {

@@ -32,6 +32,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
+	"unibee/internal/logic/subscription/service/next"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/user/vat"
 	entity "unibee/internal/model/entity/default"
@@ -228,7 +229,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	var effectImmediate = false
 
 	isUpgrade, isChangeToLongPlan, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
-	utility.Assert(changed, "Subscription is already on the specified plan; updates must include changes to the plan or addons.")
+
 	if req.Metadata == nil {
 		req.Metadata = make(map[string]interface{})
 	}
@@ -314,6 +315,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			req.ApplyPromoCredit = unibee.Bool(config3.CheckCreditConfigPreviewDefaultUsed(ctx, sub.MerchantId, consts.CreditAccountTypePromo, plan.Currency))
 		}
 	}
+	utility.Assert(changed ||
+		len(req.DiscountCode) > 0 ||
+		(req.ApplyPromoCredit != nil && *req.ApplyPromoCredit && req.ApplyPromoCreditAmount != nil && *req.ApplyPromoCreditAmount > 0), "Subscription is already on the specified plan; updates must include changes to the plan, addons, discount code or prome credit")
+
 	var prorationAmount int64
 	if effectImmediate {
 		if sub.Status != consts.SubStatusActive || !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
@@ -339,7 +344,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ApplyPromoCredit:       *req.ApplyPromoCredit,
 				ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 			})
-		} else if prorationDate < sub.CurrentPeriodStart {
+		} else if prorationDate < sub.CurrentPeriodStart || !changed {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			currentInvoice = &bean.Invoice{
 				InvoiceName:                    "SubscriptionUpdate",
@@ -498,7 +503,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			TaxPercentage:                  subscriptionTaxPercentage,
 		}
 	}
-
 	nextCode := ""
 	if len(recurringDiscountCode) > 0 {
 		code := query.GetDiscountByCode(ctx, sub.MerchantId, recurringDiscountCode)
@@ -506,26 +510,53 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			nextCode = recurringDiscountCode
 		}
 	}
-	nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-		UserId:             sub.UserId,
-		InvoiceName:        "SubscriptionCycle",
-		Currency:           sub.Currency,
-		DiscountCode:       nextCode,
-		TimeNow:            prorationDate,
-		PlanId:             req.NewPlanId,
-		Quantity:           req.Quantity,
-		AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
-		CountryCode:        countryCode,
-		VatNumber:          vatNumber,
-		TaxPercentage:      subscriptionTaxPercentage,
-		PeriodStart:        utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
-		PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), prorationDate, req.NewPlanId),
-		FinishTime:         utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
-		ProductData:        req.ProductData,
-		BillingCycleAnchor: prorationDate,
-		Metadata:           req.Metadata,
-		ApplyPromoCredit:   config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
-	})
+	if changed {
+		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			UserId:             sub.UserId,
+			InvoiceName:        "SubscriptionCycle",
+			Currency:           sub.Currency,
+			DiscountCode:       nextCode,
+			TimeNow:            prorationDate,
+			PlanId:             req.NewPlanId,
+			Quantity:           req.Quantity,
+			AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+			CountryCode:        countryCode,
+			VatNumber:          vatNumber,
+			TaxPercentage:      subscriptionTaxPercentage,
+			PeriodStart:        utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+			PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), prorationDate, req.NewPlanId),
+			FinishTime:         utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+			ProductData:        req.ProductData,
+			BillingCycleAnchor: prorationDate,
+			Metadata:           req.Metadata,
+			ApplyPromoCredit:   config3.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency),
+		})
+	} else {
+		if len(req.DiscountCode) > 0 {
+			nextCode = req.DiscountCode
+		}
+		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			UserId:                 sub.UserId,
+			InvoiceName:            "SubscriptionCycle",
+			Currency:               sub.Currency,
+			DiscountCode:           nextCode,
+			TimeNow:                prorationDate,
+			PlanId:                 req.NewPlanId,
+			Quantity:               req.Quantity,
+			AddonJsonData:          utility.MarshalToJsonString(req.AddonParams),
+			CountryCode:            countryCode,
+			VatNumber:              vatNumber,
+			TaxPercentage:          subscriptionTaxPercentage,
+			PeriodStart:            utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+			PeriodEnd:              subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), prorationDate, req.NewPlanId),
+			FinishTime:             utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+			ProductData:            req.ProductData,
+			BillingCycleAnchor:     prorationDate,
+			Metadata:               req.Metadata,
+			ApplyPromoCredit:       *req.ApplyPromoCredit,
+			ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
+		})
+	}
 
 	if currentInvoice.TotalAmount <= 0 && !isUpgrade {
 		effectImmediate = config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately
@@ -620,6 +651,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		AddonParams:            req.AddonParams,
 		GatewayId:              req.GatewayId,
 		EffectImmediate:        req.EffectImmediate,
+		GatewayPaymentType:     req.GatewayPaymentType,
 		DiscountCode:           req.DiscountCode,
 		TaxPercentage:          req.TaxPercentage,
 		ProductData:            req.ProductData,
@@ -639,7 +671,36 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	if len(req.ConfirmCurrency) > 0 {
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 	}
-	if prepare.Invoice.TotalAmount <= 0 && !prepare.IsUpgrade {
+	if !prepare.Changed && prepare.Invoice.TotalAmount == 0 {
+		if len(req.DiscountCode) > 0 || (req.ApplyPromoCreditAmount != nil && *req.ApplyPromoCreditAmount > 0) {
+			if req.ApplyPromoCreditAmount == nil {
+				next.SaveSubscriptionNextInvoiceData(ctx, prepare.Subscription.SubscriptionId, &bean.SubscriptionNextInvoiceData{
+					DiscountCode: req.DiscountCode,
+				})
+			} else {
+				next.SaveSubscriptionNextInvoiceData(ctx, prepare.Subscription.SubscriptionId, &bean.SubscriptionNextInvoiceData{
+					DiscountCode:           req.DiscountCode,
+					ApplyPromoCreditAmount: *req.ApplyPromoCreditAmount,
+				})
+			}
+			service3.TryCancelSubscriptionLatestAutoChargeInvoice(ctx, sub)
+			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+				MerchantId:     prepare.Subscription.MerchantId,
+				Target:         fmt.Sprintf("Subscription(%s)", prepare.Subscription.SubscriptionId),
+				Content:        fmt.Sprintf("UpdateNextInvoice(discountCode:%s,PromoCredit:%v)", req.DiscountCode, req.ApplyPromoCreditAmount),
+				UserId:         prepare.Subscription.UserId,
+				SubscriptionId: prepare.Subscription.SubscriptionId,
+				InvoiceId:      "",
+				PlanId:         0,
+				DiscountCode:   "",
+			}, err)
+		}
+		return &UpdateInternalRes{
+			Paid: true,
+			Link: "",
+			Note: "",
+		}, nil
+	} else if prepare.Invoice.TotalAmount <= 0 && !prepare.IsUpgrade {
 		utility.Assert(prepare.EffectImmediate == config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately, "System Error, Cannot Effect Immediate With Negative Amount")
 	}
 
@@ -759,6 +820,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 			Paid:            false,
 			Link:            "",
 		}
+		service3.TryCancelSubscriptionLatestAutoChargeInvoice(ctx, sub)
 	}
 
 	one.Link = subUpdateRes.Link

@@ -20,7 +20,8 @@ const DefaultConfigFileName = "config.yaml"
 var (
 	env                              string
 	mode                             string
-	unibeeApiUrl                     string
+	unibeeAPIUrl                     string
+	unibeeHostedUrl                  string
 	serverAddress                    string
 	serverJwtKey                     string
 	swaggerPath                      string
@@ -48,7 +49,8 @@ func Init() {
 
 	flag.StringVar(&env, "env", utility.GetEnvParam("env"), "local|daily|prod")
 	flag.StringVar(&mode, "mode", utility.GetEnvParam("mode"), "stand-alone|cloud")
-	flag.StringVar(&unibeeApiUrl, "unibee-api-url", utility.GetEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
+	flag.StringVar(&unibeeAPIUrl, "unibee-api-url", utility.GetEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
+	flag.StringVar(&unibeeHostedUrl, "unibee-hosted-url", utility.GetEnvParam("unibee.hosted.url"), "url, default blank")
 	flag.StringVar(&serverAddress, "server-address", utility.GetEnvParam("server.address"), "server address, default :8088")
 	flag.StringVar(&serverJwtKey, "server-jwtKey", utility.GetEnvParam("server.jwtKey"), "jwtKey to encrypt")
 	flag.StringVar(&swaggerPath, "server-swaggerPath", utility.GetEnvParam("server.swaggerPath"), "swaggerPath, default /swagger")
@@ -154,7 +156,8 @@ func SetupDefaultConfigs(ctx context.Context) {
 	utility.Assert(serverConfig != nil, "server config not found")
 	serverConfig["dumpRouterMap"] = false
 	setUpDefaultConfig(serverConfig, "address", serverAddress, ":8088")
-	setUpDefaultConfig(serverConfig, "domainPath", unibeeApiUrl, "http://127.0.0.1:8088")
+	setUpDefaultConfig(serverConfig, "domainPath", unibeeAPIUrl, "http://127.0.0.1:8088")
+	setUpDefaultConfig(serverConfig, "hostedPagePath", unibeeHostedUrl, "")
 	setUpDefaultConfig(serverConfig, "jwtKey", serverJwtKey, "3^&secret-key-for-UniBee*1!8*")
 	serverConfig["openapiPath"] = "/api.json"
 	setUpDefaultConfig(serverConfig, "swaggerPath", swaggerPath, "") ///swagger

@@ -20,6 +20,8 @@ import (
 
 type CreateMerchantInternalReq struct {
 	FirstName, LastName, Email, Password, Phone, UserName string
+	CountryCode                                           string `json:"countryCode" dc:"Country Code"`
+	CountryName                                           string `json:"countryName" dc:"Country Name"`
 }
 
 func GetOpenApiKeyRedisKey(token string) string {
@@ -51,7 +53,7 @@ func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 	utility.Assert(one != nil, "Merchant Not Found")
 	oldApikey := one.ApiKey
 	utility.Assert(PutOpenApiKeyToCache(ctx, oldApikey, merchantId), "Server Error")
-	apiKey := utility.GenerateRandomAlphanumeric(32)
+	apiKey := GenerateMerchantAPIKey()
 	_, err := dao.Merchant.Ctx(ctx).Data(g.Map{
 		dao.Merchant.Columns().ApiKey:    apiKey,
 		dao.Merchant.Columns().GmtModify: gtime.Now(),
@@ -112,9 +114,11 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	merchant := &entity.Merchant{
-		Phone:  req.Phone,
-		Email:  req.Email,
-		ApiKey: utility.GenerateRandomAlphanumeric(32), //32 bit open api key
+		Phone:       req.Phone,
+		Email:       req.Email,
+		CountryName: req.CountryName,
+		CountryCode: req.CountryCode,
+		ApiKey:      GenerateMerchantAPIKey(), //32 bit open api key
 	}
 	// transaction create Merchant
 	err := dao.Merchant.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -178,13 +182,15 @@ func SendMerchantRegisterEmail(ctx context.Context, req *CreateMerchantInternalR
 		publicIp = "0.0.0.0"
 	}
 	err := platform.SentPlatformMerchantRegisterEmail(map[string]string{
-		"ownerEmail": req.Email,
-		"ip":         publicIp,
-		"firstName":  req.FirstName,
-		"lastName":   req.LastName,
-		"Phone":      req.Phone,
-		"userName":   req.UserName,
-		"code":       verificationCode,
+		"ownerEmail":  req.Email,
+		"ip":          publicIp,
+		"firstName":   req.FirstName,
+		"lastName":    req.LastName,
+		"Phone":       req.Phone,
+		"userName":    req.UserName,
+		"code":        verificationCode,
+		"countryCode": req.CountryCode,
+		"countryName": req.CountryName,
 	})
 	utility.AssertError(err, "Server Error")
 }

@@ -31,4 +31,6 @@ type Merchant struct {
 	TimeZone    string      `json:"timeZone"    description:"merchant default time zone"` // merchant default time zone
 	Host        string      `json:"host"        description:"merchant user portal host"`  // merchant user portal host
 	ApiKey      string      `json:"apiKey"      description:"merchant open api key"`      // merchant open api key
+	CountryCode string      `json:"countryCode" description:"country_code"`               // country_code
+	CountryName string      `json:"countryName" description:"country_name"`               // country_name
 }

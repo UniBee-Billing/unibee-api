@@ -20,6 +20,7 @@ import (
 	"unibee/internal/logic/batch/export/credit"
 	"unibee/internal/logic/batch/export/discount"
 	"unibee/internal/logic/batch/export/invoice"
+	plan2 "unibee/internal/logic/batch/export/plan"
 	"unibee/internal/logic/batch/export/subscription"
 	"unibee/internal/logic/batch/export/transaction"
 	"unibee/internal/logic/batch/export/user"
@@ -34,6 +35,7 @@ var exportTaskMap = map[string]_interface.BatchExportTask{
 	"SubscriptionExport":      &subscription.TaskSubscriptionExport{},
 	"TransactionExport":       &transaction.TaskTransactionExport{},
 	"DiscountExport":          &discount.TaskDiscountExport{},
+	"PlanExport":              &plan2.TaskPlanExport{},
 	"UserDiscountExport":      &discount.TaskUserDiscountExport{},
 	"MultiUserDiscountExport": &discount.TaskMultiUserDiscountExport{},
 	"CreditTransactionExport": &credit.TaskCreditTransactionExport{},

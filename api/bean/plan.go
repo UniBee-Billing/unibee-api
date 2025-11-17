@@ -33,7 +33,7 @@ type Plan struct {
 	TrialAmount            int64                           `json:"trialAmount"                description:"price of trial period"`         // price of trial period
 	TrialDurationTime      int64                           `json:"trialDurationTime"         description:"duration of trial"`              // duration of trial
 	TrialDemand            string                          `json:"trialDemand"               description:""`
-	CancelAtTrialEnd       int                             `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	CancelAtTrialEnd       int                             `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ExternalPlanId         string                          `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 	ProductId              int64                           `json:"productId"                 description:"product id"`                                                                                                      // product id
 	DisableAutoCharge      int                             `json:"disableAutoCharge"         description:"disable auto-charge, 0-false,1-true"`                                                                             // disable auto-charge, 0-false,1-true
@@ -90,7 +90,7 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 		MetricLimits:           metricPlanCharge.MetricLimits,
 		MetricMeteredCharge:    metricPlanCharge.MetricMeteredCharge,
 		MetricRecurringCharge:  metricPlanCharge.MetricRecurringCharge,
-		CheckoutUrl:            fmt.Sprintf("%s/hosted/checkout?planId=%d", config.GetConfigInstance().Server.GetServerPath(), one.Id),
+		CheckoutUrl:            fmt.Sprintf("%s/hosted/checkout?planId=%d&env=%s", config.GetConfigInstance().Server.GetServerPath(), one.Id, config.GetConfigInstance().Env),
 	}
 }
 

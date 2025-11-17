@@ -10,6 +10,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/invoice_compute"
+	"unibee/internal/logic/payment/link"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
@@ -73,16 +74,16 @@ func TestPayment(t *testing.T) {
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, int64(100), one.TotalAmount)
 		require.Equal(t, true, len(one.InvoiceId) > 0)
-		checkRes := LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
+		checkRes := link.LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
 		require.NotNil(t, checkRes)
 		require.Equal(t, true, len(checkRes.Link) > 0)
-		checkRes = LinkCheck(ctx, one.PaymentId, gtime.Now().AddDate(0, 0, consts.DEFAULT_DAY_UTIL_DUE+1).Timestamp())
+		checkRes = link.LinkCheck(ctx, one.PaymentId, gtime.Now().AddDate(0, 0, consts.DEFAULT_DAY_UTIL_DUE+1).Timestamp())
 		require.NotNil(t, checkRes)
 		require.Equal(t, true, len(checkRes.Link) == 0)
 		require.Equal(t, true, len(checkRes.Message) > 0)
 		err = PaymentGatewayCancel(ctx, one)
 		require.Nil(t, err)
-		checkRes = LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
+		checkRes = link.LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
 		require.NotNil(t, checkRes)
 		require.Equal(t, true, len(checkRes.Link) == 0)
 		require.Equal(t, true, len(checkRes.Message) > 0)

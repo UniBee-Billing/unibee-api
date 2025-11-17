@@ -24,4 +24,5 @@ type MerchantEmailTemplate struct {
 	GatewayTemplateId   string      `json:"gatewayTemplateId"   description:""`                      //
 	LanguageData        string      `json:"languageData"        description:""`                      //
 	TemplateDescription string      `json:"templateDescription" description:""`                      //
+	LanguageVersionData string      `json:"languageVersionData" description:""`                      //
 }

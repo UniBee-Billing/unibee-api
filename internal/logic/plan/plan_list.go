@@ -29,6 +29,7 @@ type ListInternalReq struct {
 	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int     `json:"page" dc:"Page, Start With 0" `
 	Count         int     `json:"count" dc:"Count Of Page" `
+	SkipTotal     bool
 }
 
 func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.DetailRes, error) {
@@ -116,13 +117,18 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		q = q.Where(q.Builder().WhereOrLike(dao.Plan.Columns().PlanName, "%"+req.SearchKey+"%").
 			WhereOrLike(dao.Plan.Columns().Description, "%"+req.SearchKey+"%"))
 	}
-	err := q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
+	q = q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.Plan.Columns().Currency, strings.ToUpper(req.Currency)).
 		WhereLTE(dao.Plan.Columns().IsDeleted, 0).
 		OmitEmpty().
 		Order(fmt.Sprintf("is_deleted desc, %s, status asc", sortKey)).
-		Limit(req.Page*req.Count, req.Count).
-		ScanAndCount(&mainList, &total, true)
+		Limit(req.Page*req.Count, req.Count)
+	var err error
+	if req.SkipTotal {
+		err = q.Scan(&mainList)
+	} else {
+		err = q.ScanAndCount(&mainList, &total, true)
+	}
 	if err != nil {
 		return nil, 0
 	}

@@ -71,6 +71,9 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 		if value, ok := payload["planIds"].([]interface{}); ok {
 			req.PlanIds = export.JsonArrayTypeConvertUint64(ctx, value)
 		}
+		if value, ok := payload["productIds"].([]interface{}); ok {
+			req.ProductIds = export.JsonArrayTypeConvertInt64(ctx, value)
+		}
 		if value, ok := payload["currency"].(string); ok {
 			req.Currency = value
 		}

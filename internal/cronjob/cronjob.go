@@ -12,6 +12,8 @@ import (
 	"unibee/internal/cronjob/invoice"
 	"unibee/internal/cronjob/sub"
 	"unibee/internal/cronjob/vat"
+	"unibee/internal/logic/member"
+	"unibee/internal/logic/merchant"
 )
 
 func StartCronJobs() {
@@ -43,6 +45,10 @@ func StartCronJobs() {
 		invoice.TaskForExpireInvoices(ctx)
 		//payment.TaskForCancelExpiredPayment(ctx)
 		batch.TaskForExpireBatchTasks(ctx)
+		if !config.GetConfigInstance().IsProd() {
+			merchant.ReloadAllMerchantsCacheForSDKAuthBackground()
+			member.ReloadAllMembersCacheForSDKAuthBackground()
+		}
 	}, other1MinTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
@@ -66,6 +72,7 @@ func StartCronJobs() {
 	_, err = gcron.Add(ctx, "@hourly", func(ctx context.Context) {
 		gateway_log.TaskForDeleteChannelLogs(ctx)
 		gateway_log.TaskForDeleteWebhookMessage(ctx)
+		gateway_log.TaskForDeleteWebhookLog(ctx)
 		sub.TaskForUserSubCompensate(ctx, hourTask)
 	}, hourTask)
 	if err != nil {

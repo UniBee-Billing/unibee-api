@@ -19,11 +19,12 @@ type Config struct {
 }
 
 type Server struct {
-	Address     string `json:"address" yaml:"address"`
-	DomainPath  string `json:"domainPath" yaml:"domainPath"`
-	OpenApiPath string `json:"openapiPath" yaml:"openapiPath"`
-	SwaggerPath string `json:"swaggerPath" yaml:"swaggerPath"`
-	JwtKey      string `json:"jwtKey" yaml:"jwtKey"`
+	Address        string `json:"address" yaml:"address"`
+	DomainPath     string `json:"domainPath" yaml:"domainPath"`
+	OpenApiPath    string `json:"openapiPath" yaml:"openapiPath"`
+	SwaggerPath    string `json:"swaggerPath" yaml:"swaggerPath"`
+	JwtKey         string `json:"jwtKey" yaml:"jwtKey"`
+	HostedPagePath string `json:"hostedPagePath" yaml:"hostedPagePath"`
 }
 
 func (s *Server) GetDomainScheme() string {

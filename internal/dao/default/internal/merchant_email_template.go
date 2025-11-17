@@ -34,6 +34,7 @@ type MerchantEmailTemplateColumns struct {
 	GatewayTemplateId   string //
 	LanguageData        string //
 	TemplateDescription string //
+	LanguageVersionData string //
 }
 
 // merchantEmailTemplateColumns holds the columns for table merchant_email_template.
@@ -52,6 +53,7 @@ var merchantEmailTemplateColumns = MerchantEmailTemplateColumns{
 	GatewayTemplateId:   "gateway_template_id",
 	LanguageData:        "language_data",
 	TemplateDescription: "template_description",
+	LanguageVersionData: "language_version_data",
 }
 
 // NewMerchantEmailTemplateDao creates and returns a new DAO object for table data access.

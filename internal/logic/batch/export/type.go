@@ -31,6 +31,18 @@ func JsonArrayTypeConvertUint64(ctx context.Context, source []interface{}) []uin
 	return intSlice
 }
 
+func JsonArrayTypeConvertInt64(ctx context.Context, source []interface{}) []int64 {
+	intSlice := make([]int64, len(source))
+	for i, v := range source {
+		if val, ok := v.(float64); ok {
+			intSlice[i] = int64(val)
+		} else {
+			utility.Assert(false, fmt.Sprintf("ArrayTypeConvertError from:%v to []int", source))
+		}
+	}
+	return intSlice
+}
+
 func GetUTCOffsetFromTimeZone(timeZone string) (int64, error) {
 	if len(timeZone) == 0 {
 		return 0, fmt.Errorf("time zone is empty")

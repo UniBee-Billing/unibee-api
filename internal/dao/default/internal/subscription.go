@@ -71,6 +71,7 @@ type SubscriptionColumns struct {
 	CurrentPeriodPaid           string // current period paid or not, 1-paid, other-the utc time to expire
 	LastTrackTime               string // last subscription track time
 	ExternalSubscriptionId      string // external_subscription_id
+	NextInvoiceData             string // next_invoice_data
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -126,6 +127,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CurrentPeriodPaid:           "current_period_paid",
 	LastTrackTime:               "last_track_time",
 	ExternalSubscriptionId:      "external_subscription_id",
+	NextInvoiceData:             "next_invoice_data",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.
