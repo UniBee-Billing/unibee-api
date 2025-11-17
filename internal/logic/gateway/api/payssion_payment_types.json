@@ -14,6 +14,7 @@
   { "name": "Alipay", "paymentType": "alipay_cn", "countryName": "China" },
   { "name": "Tenpay", "paymentType": "tenpay_cn", "countryName": "China" },
   { "name": "Unionpay", "paymentType": "unionpay_cn", "countryName": "China" },
+  { "name": "VietQR", "paymentType": "vietqr_vn", "countryName": "Vietnam" },
   { "name": "Gash", "paymentType": "gash_tw", "countryName": "Taiwan" },
   { "name": "UPI", "paymentType": "upi_in", "countryName": "India" },
   { "name": "Indian Wallets", "paymentType": "wallet_in", "countryName": "India" },
