@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Başka bir aktif veya eksik abonelik mevcut",
+  "ClickTooFast": "Çok hızlı tıklıyorsunuz. Lütfen bir dakika bekleyin ve tekrar deneyin.",
+  "AmountNotMatch": "Toplam tutar güncel değil. Lütfen yenileyin ve tekrar deneyin.",
+  "PlanTrialGatewayError": "Bu plan için kart veya PayPal ödeme ağ geçidi gereklidir.",
+  "VatValidateError": "KDV numarası doğrulaması başarısız. Numara: %s",
+  "VatGatewayNeedSetup": "KDV ağ geçidi kurulmalıdır.",
+  "CountryCodeVatNumberNotMatch": "Ülke kodu hatası. KDV numaranızın ülkesi %s.",
+  "DiscountCodeInvalid": "İndirim kodu geçersiz.",
+  "DiscountCodeNotStart": "İndirim kodu henüz başlamadı.",
+  "DiscountCodePlanError": "İndirim kodu bu planla kullanılamaz.",
+  "DiscountCodeReachLimitation": "İndirim kodu kullanım limitine ulaşıldı."
+} 

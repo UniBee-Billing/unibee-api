@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -17,9 +18,24 @@ func GetPaymentById(ctx context.Context, id int64) (one *entity.Payment) {
 	return
 }
 
+func GetPaymentsByPaymentIds(ctx context.Context, paymentIds []string) (list []*entity.Payment) {
+	if len(paymentIds) == 0 {
+		return make([]*entity.Payment, 0)
+	}
+	err := dao.Payment.Ctx(ctx).WhereIn(dao.Payment.Columns().PaymentId, paymentIds).OmitEmpty().Scan(&list)
+	if err != nil {
+		return make([]*entity.Payment, 0)
+	}
+	return
+}
+
 func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.Payment) {
 	if len(paymentId) == 0 {
 		return nil
+	}
+	one = _interface.GetPaymentFromPreloadContext(ctx, paymentId)
+	if one != nil {
+		return one
 	}
 	err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, paymentId).OmitEmpty().Scan(&one)
 	if err != nil {

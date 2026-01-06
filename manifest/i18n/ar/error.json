@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "يوجد اشتراك نشط أو غير مكتمل آخر",
+  "ClickTooFast": "أنت تنقر بسرعة كبيرة. يرجى الانتظار لحظة والمحاولة مرة أخرى.",
+  "AmountNotMatch": "المبلغ الإجمالي قديم. يرجى التحديث والمحاولة مرة أخرى.",
+  "PlanTrialGatewayError": "مطلوب بوابة دفع بالبطاقة أو PayPal لهذه الخطة.",
+  "VatValidateError": "فشل التحقق من رقم ضريبة القيمة المضافة. الرقم: %s",
+  "VatGatewayNeedSetup": "يجب إعداد بوابة ضريبة القيمة المضافة.",
+  "CountryCodeVatNumberNotMatch": "خطأ في رمز البلد. بلد رقم ضريبة القيمة المضافة الخاص بك هو %s.",
+  "DiscountCodeInvalid": "رمز الخصم غير صالح.",
+  "DiscountCodeNotStart": "رمز الخصم لم يبدأ بعد.",
+  "DiscountCodePlanError": "لا يمكن استخدام رمز الخصم مع هذه الخطة.",
+  "DiscountCodeReachLimitation": "تم الوصول إلى حد استخدام رمز الخصم."
+} 

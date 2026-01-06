@@ -3,9 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/net/goai"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/swagger"
@@ -14,7 +11,9 @@ import (
 	"unibee/internal/controller/checkout"
 	"unibee/internal/controller/gateway_webhook_entry"
 	"unibee/internal/controller/link/_import"
+	"unibee/internal/controller/link/analytics"
 	"unibee/internal/controller/link/export"
+	"unibee/internal/controller/link/integrations"
 	"unibee/internal/controller/link/invoice"
 	"unibee/internal/controller/link/oss"
 	"unibee/internal/controller/link/payment"
@@ -32,6 +31,12 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/liberr"
+
+	"github.com/gogf/gf/v2/os/gfile"
+
+	"github.com/gogf/gf/v2/net/goai"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -76,6 +81,23 @@ var (
 					{URL: fmt.Sprintf("http://127.0.0.1%s", config.GetConfigInstance().Server.Address)},
 				}
 			}
+
+			{
+				staticResourceFilePath := "resource"
+				//static resource
+				//s.SetIndexFolder(true)
+				s.SetServerRoot(staticResourceFilePath)
+				// SPA fallback for embedded payment pages - only for non-static resources
+				s.BindHandler("GET:/embedded/*", func(r *ghttp.Request) {
+					filePath := staticResourceFilePath + r.URL.Path //
+					if gfile.Exists(filePath) {
+						r.Response.ServeFile(filePath)
+						return
+					}
+					r.Response.ServeFile(staticResourceFilePath + "/embedded/index.html")
+				})
+			}
+
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
@@ -114,6 +136,7 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().MerchantHandler,
 				)
+				group.GET("/analytics_portal", analytics.GoAnalyticsPortal)
 				group.Group("/product", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewProduct(),
@@ -219,6 +242,16 @@ var (
 						merchant.NewTrack(),
 					)
 				})
+				group.Group("/checkout", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewCheckout(),
+					)
+				})
+				group.Group("/integration", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewIntegration(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {
@@ -320,9 +353,24 @@ var (
 						checkout.NewGateway(),
 					)
 				})
+				group.Group("/payment", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewPayment(),
+					)
+				})
 				group.Group("/subscription", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						checkout.NewSubscription(),
+					)
+				})
+				group.Group("/merchant_checkout", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewCheckout(),
+					)
+				})
+				group.Group("/plan", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						checkout.NewPlan(),
 					)
 				})
 			})
@@ -362,12 +410,12 @@ var (
 						system.NewUser(),
 					)
 				})
+				group.Group("/refund", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewRefund(),
+					)
+				})
 				if !config.GetConfigInstance().IsProd() {
-					group.Group("/refund", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							system.NewRefund(),
-						)
-					})
 					group.Group("/auth", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewAuth(),
@@ -386,6 +434,8 @@ var (
 			s.BindHandler("GET:/export/{taskId}", export.LinkExportEntry)
 			s.BindHandler("GET:/import/template/{task}", _import.LinkImportTemplateEntry)
 			s.BindHandler("GET:/pay/{paymentId}", payment.LinkEntry)
+			// Integration Link
+			s.BindHandler("GET:/integrate/quickbooks/auth_back", integrations.QuickBooksAuthorizationEntry)
 			// Gateway Payment Redirect
 			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Payment Method Redirect
@@ -424,7 +474,9 @@ var (
 				}
 			}
 			{
-				cronjob.StartCronJobs()
+				if !config.GetConfigInstance().IsLocal() {
+					cronjob.StartCronJobs()
+				}
 			}
 			{
 				fmt.Println(utility.MarshalToJsonString(s.GetOpenApi()))
@@ -434,7 +486,9 @@ var (
 				//logic init
 				logic.StandaloneInit(ctx)
 				//SetupAllWebhooks
-				webhook.SetupAllWebhooksBackground()
+				if !config.GetConfigInstance().IsLocal() {
+					webhook.SetupAllWebhooksBackground()
+				}
 			}
 
 			{
@@ -449,8 +503,10 @@ var (
 				redismq.StartRedisMqConsumer()
 			}
 			{
-				merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
-				member.ReloadAllMembersCacheForSDKAuthBackground()
+				if !config.GetConfigInstance().IsLocal() {
+					merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
+					member.ReloadAllMembersCacheForSDKAuthBackground()
+				}
 			}
 
 			{

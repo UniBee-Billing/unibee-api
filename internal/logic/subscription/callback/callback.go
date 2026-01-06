@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
+	"unibee/api/bean"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/logic/email"
@@ -52,13 +53,13 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 		if payment.BizType == consts.BizTypeSubscription {
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "PaymentNeedAuthorisedCallback sub not found:"+payment.PaymentId)
-			oneUser := query.GetUserAccountById(ctx, uint64(sub.UserId))
+			oneUser := query.GetUserAccountById(ctx, sub.UserId)
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			utility.Assert(plan != nil, "PaymentNeedAuthorisedCallback plan not found:"+sub.SubscriptionId)
 			if oneUser != nil {
 				merchant := query.GetMerchantById(ctx, sub.MerchantId)
 				if merchant != nil {
-					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
+					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionNeedAuthorized, "", &bean.EmailTemplateVariable{
 						UserName:              oneUser.FirstName + " " + oneUser.LastName,
 						MerchantProductName:   plan.PlanName,
 						MerchantCustomerEmail: merchant.Email,

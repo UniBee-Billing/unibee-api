@@ -19,6 +19,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	controllerSubscription := merchant.ControllerSubscription{}
 	createRes, err := controllerSubscription.Create(ctx, &subscription2.CreateReq{
 		PlanId:                 req.PlanId,
+		Currency:               req.Currency,
 		Email:                  req.Email,
 		UserId:                 req.UserId,
 		ExternalUserId:         req.ExternalUserId,
@@ -38,6 +39,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		Discount:               req.Discount,
 		TrialEnd:               req.TrialEnd,
 		StartIncomplete:        req.StartIncomplete,
+		PaymentUIMode:          req.PaymentUIMode,
 		ProductData:            req.ProductData,
 		ApplyPromoCredit:       req.ApplyPromoCredit,
 		ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
@@ -50,8 +52,11 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	return &subscription.CreateRes{
 		Subscription:                   createRes.Subscription,
 		User:                           createRes.User,
+		PaymentId:                      createRes.PaymentId,
+		InvoiceId:                      createRes.InvoiceId,
 		Paid:                           createRes.Paid,
 		Link:                           createRes.Link,
+		Action:                         createRes.Action,
 		Token:                          createRes.Token,
 		OtherPendingCryptoSubscription: createRes.OtherPendingCryptoSubscription,
 	}, nil

@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -9,6 +10,7 @@ import (
 type CreatePreviewReq struct {
 	g.Meta                 `path:"/create_preview" tags:"Checkout" method:"post" summary:"CreateSubscriptionPreview"`
 	PlanId                 uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency of payment"`
 	Email                  string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId                 uint64                 `json:"userId" dc:"UserId"`
 	ExternalUserId         string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
@@ -59,6 +61,7 @@ type CreatePreviewRes struct {
 type CreateReq struct {
 	g.Meta                 `path:"/create_submit" tags:"Checkout" method:"post" summary:"CreateSubscription"`
 	PlanId                 uint64                      `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                      `json:"currency"          dc:"The currency of payment"`
 	UserId                 uint64                      `json:"userId" dc:"UserId"`
 	Email                  string                      `json:"email" dc:"Email, one of ExternalUserId&Email, UserId or User needed"`
 	ExternalUserId         string                      `json:"externalUserId" dc:"ExternalUserId, unique, one of ExternalUserId&Email, UserId or User needed"`
@@ -69,8 +72,8 @@ type CreateReq struct {
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
 	ConfirmCurrency        string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
-	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
+	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl, back to returnUrl if checkout completed"  `
+	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if checkout cancelled"`
 	VatCountryCode         string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                      `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage          *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
@@ -80,6 +83,7 @@ type CreateReq struct {
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	TrialEnd               int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
 	StartIncomplete        bool                        `json:"startIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	ApplyPromoCredit       bool                        `json:"applyPromoCredit" dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                      `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
@@ -88,8 +92,11 @@ type CreateReq struct {
 type CreateRes struct {
 	Subscription                   *bean.Subscription         `json:"subscription" dc:"Subscription"`
 	User                           *bean.UserAccount          `json:"user" dc:"user"`
+	PaymentId                      string                     `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId                      string                     `json:"invoiceId" dc:"The unique id of invoice"`
 	Paid                           bool                       `json:"paid"`
 	Link                           string                     `json:"link"`
+	Action                         *gjson.Json                `json:"action"`
 	Token                          string                     `json:"token" dc:"token"`
 	OtherPendingCryptoSubscription *detail.SubscriptionDetail `json:"otherPendingCryptoSubscription" `
 }

@@ -24,6 +24,21 @@ func (s *Context) Init(r *ghttp.Request, customCtx *model.Context) {
 	r.SetCtxVar(consts.ContextKey, customCtx)
 }
 
+func (s *Context) CopyFromCtx(sourceCtx context.Context) (targetCtx context.Context) {
+	targetCtx = context.Background()
+	if _interface.Context() != nil {
+		targetCtx = context.WithValue(targetCtx, consts.ContextKey, &model.Context{
+			Data: make(g.Map),
+		})
+		if _interface.Context().Get(sourceCtx) != nil && _interface.Context().Get(targetCtx) != nil {
+			_interface.Context().Get(targetCtx).RequestId = _interface.Context().Get(sourceCtx).RequestId
+			_interface.Context().Get(targetCtx).MerchantId = _interface.Context().Get(sourceCtx).MerchantId
+			_interface.Context().Get(targetCtx).MerchantMember = _interface.Context().Get(sourceCtx).MerchantMember
+		}
+	}
+	return targetCtx
+}
+
 func (s *Context) Get(ctx context.Context) *model.Context {
 	value := ctx.Value(consts.ContextKey)
 	if value == nil {

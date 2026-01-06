@@ -39,6 +39,7 @@ func (t UserMetricUpdateListener) Consume(ctx context.Context, message *redismq.
 			return redismq.CommitMessage
 		}
 		user2.SendMerchantUserMetricWebhookBackground(one.UserId, one.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED, fmt.Sprintf("%s#%s", one.Description, one.SubscriptionId))
+		user2.SendMerchantUserMetricWebhookBackground(one.UserId, one.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_SUBSCRIPTION_UPDATED, fmt.Sprintf("%s#%s", one.Description, one.SubscriptionId))
 	}
 
 	return redismq.CommitMessage

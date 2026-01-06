@@ -3,12 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
@@ -21,6 +18,11 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 type CreateProcessingInvoiceForSubReq struct {
@@ -38,6 +40,13 @@ func CreateProcessingInvoiceForSub(ctx context.Context, req *CreateProcessingInv
 	utility.Assert(req.Simplify != nil, "invoice data is nil")
 	utility.Assert(req.Sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, req.Sub.UserId)
+	gateway := query.GetGatewayById(ctx, req.GatewayId)
+	if gateway != nil {
+		if req.Simplify.Metadata == nil {
+			req.Simplify.Metadata = make(map[string]interface{})
+		}
+		detail.CopyGatewayCompanyIssuer(gateway, req.Simplify.Metadata)
+	}
 	//Try cancel current sub processing invoice
 	if req.IsSubLatestInvoice {
 		TryCancelSubscriptionLatestInvoice(ctx, req.Sub)
@@ -116,7 +125,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, req *CreateProcessingInv
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		SubscriptionId:                 req.Sub.SubscriptionId,
-		BizType:                        consts.BizTypeSubscription,
+		BizType:                        req.Simplify.BizType,
 		UserId:                         req.Sub.UserId,
 		MerchantId:                     req.Sub.MerchantId,
 		InvoiceName:                    req.Simplify.InvoiceName,

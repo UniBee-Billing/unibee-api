@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Er bestaat een ander actief of onvolledig abonnement",
+  "ClickTooFast": "U klikt te snel. Wacht even en probeer het opnieuw.",
+  "AmountNotMatch": "Het totale bedrag is verouderd. Vernieuw en probeer het opnieuw.",
+  "PlanTrialGatewayError": "Een kaart- of PayPal-betalingsgateway is vereist voor dit abonnement.",
+  "VatValidateError": "BTW-nummervalidatie mislukt. Nummer: %s",
+  "VatGatewayNeedSetup": "BTW-gateway moet worden ingesteld.",
+  "CountryCodeVatNumberNotMatch": "Landcodefout. Het land van uw BTW-nummer is %s.",
+  "DiscountCodeInvalid": "De kortingscode is ongeldig.",
+  "DiscountCodeNotStart": "De kortingscode is nog niet gestart.",
+  "DiscountCodePlanError": "De kortingscode kan niet worden gebruikt met dit abonnement.",
+  "DiscountCodeReachLimitation": "Het gebruikslimiet van de kortingscode is bereikt."
+} 

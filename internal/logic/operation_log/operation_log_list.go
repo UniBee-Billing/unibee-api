@@ -98,8 +98,14 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		}
 		if len(memberIdList) == 0 {
 			return make([]*detail.MerchantOperationLogDetail, 0), 0
+		} else if len(memberIdList) == 1 {
+			memberId := memberIdList[0]
+			q = q.Where(q.Builder().WhereOr(dao.MerchantOperationLog.Columns().MemberId, memberId).
+				WhereOrLike(dao.MerchantOperationLog.Columns().OptTarget, "%"+fmt.Sprintf("Member(%d)", memberId)+"%").
+				WhereOrLike(dao.MerchantOperationLog.Columns().OptAccount, "%"+fmt.Sprintf("Member(%d)", memberId)+"%"))
+		} else {
+			q = q.WhereIn(dao.MerchantOperationLog.Columns().MemberId, memberIdList)
 		}
-		q = q.WhereIn(dao.MerchantOperationLog.Columns().MemberId, memberIdList)
 	}
 
 	err := q.ScanAndCount(&mainList, &total, true)

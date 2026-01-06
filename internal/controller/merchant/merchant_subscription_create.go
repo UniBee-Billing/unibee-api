@@ -55,6 +55,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 			Address:            req.User.Address,
 			UserName:           req.User.UserName,
 			CountryCode:        req.User.CountryCode,
+			State:              req.User.State,
 			Type:               req.User.Type,
 			CompanyName:        req.User.CompanyName,
 			VATNumber:          req.User.VatNumber,
@@ -79,6 +80,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	createRes, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
 		MerchantId:             _interface.GetMerchantId(ctx),
 		PlanId:                 req.PlanId,
+		Currency:               req.Currency,
 		UserId:                 req.UserId,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
@@ -96,7 +98,9 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		DiscountCode:           req.DiscountCode,
 		Discount:               req.Discount,
 		TrialEnd:               req.TrialEnd,
+		FreeInInitialPeriod:    req.FreeInInitialPeriod,
 		StartIncomplete:        req.StartIncomplete,
+		PaymentUIMode:          req.PaymentUIMode,
 		ProductData:            req.ProductData,
 		ApplyPromoCredit:       req.ApplyPromoCredit,
 		ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
@@ -127,14 +131,16 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	token, err = jwt.CreatePortalToken(jwt.TOKENTYPEUSER, createRes.User.MerchantId, createRes.User.Id, createRes.User.Email, createRes.User.Language)
 	// longer checkout token then 86400=1day
 	utility.Assert(jwt.PutAuthTokenToCacheWithExpire(ctx, token, fmt.Sprintf("User#%d", createRes.User.Id), 86400), "Cache Error")
-	g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)
 	jwt.AppendRequestCookieWithToken(ctx, token)
 	return &subscription.CreateRes{
 		OtherPendingCryptoSubscription: pendingCryptoSub,
 		Subscription:                   createRes.Subscription,
 		User:                           createRes.User,
+		PaymentId:                      createRes.PaymentId,
+		InvoiceId:                      createRes.InvoiceId,
 		Paid:                           createRes.Paid,
 		Link:                           createRes.Link,
+		Action:                         createRes.Action,
 		Token:                          token,
 	}, nil
 }

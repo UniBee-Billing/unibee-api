@@ -30,12 +30,12 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 	datetime := getCurrentDateTime()
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", one.WebhookUrl, one.Body)
 	headers := map[string]string{
-		"Content-Gateway": "application/json",
-		"Msg-id":          one.RequestId,
-		"Datetime":        datetime,
-		"EventType":       one.WebhookEvent,
-		"EventId":         one.WebhookEventId,
-		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
+		"Content-Type":  "application/json",
+		"Msg-id":        one.RequestId,
+		"Datetime":      datetime,
+		"EventType":     one.WebhookEvent,
+		"EventId":       one.WebhookEventId,
+		"Authorization": fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	body := []byte(one.Body)
 	res, err := utility.SendRequest(one.WebhookUrl, "POST", body, headers)
@@ -80,13 +80,20 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
 	body := []byte(jsonString)
+	webhookSecret := merchant.WebhookSecret
+	if webhookSecret == "" {
+		webhookSecret = merchant.ApiKey
+	}
+	signature, algorithm := SignHMACWebhook(jsonString, merchant.ApiKey)
 	headers := map[string]string{
-		"Content-Gateway": "application/json",
-		"Msg-id":          msgId,
-		"Datetime":        datetime,
-		"EventType":       string(webhookMessage.Event),
-		"EventId":         webhookMessage.EventId,
-		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
+		"Content-Type":          "application/json",
+		"Msg-id":                msgId,
+		"Datetime":              datetime,
+		"EventType":             string(webhookMessage.Event),
+		"EventId":               webhookMessage.EventId,
+		"Authorization":         fmt.Sprintf("Bearer %s", merchant.ApiKey),
+		"X-Signature-Algorithm": algorithm,
+		"X-Signature":           signature,
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
 	g.Log().Infof(ctx, "SendWebhookRequest event:%v", webhookMessage.Event)

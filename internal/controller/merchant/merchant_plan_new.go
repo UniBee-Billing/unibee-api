@@ -37,9 +37,10 @@ func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.N
 		TrialDurationTime:     req.TrialDurationTime,
 		CancelAtTrialEnd:      req.CancelAtTrialEnd,
 		ProductId:             req.ProductId,
+		MultiCurrencies:       req.MultiCurrencies,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &plan.NewRes{Plan: bean.SimplifyPlan(one)}, nil
+	return &plan.NewRes{Plan: bean.SimplifyPlanWithContext(ctx, one)}, nil
 }

@@ -9,6 +9,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/go-playground/validator/v10 v10.16.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.5.6
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.6.4
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.5.6
@@ -19,6 +20,7 @@ require (
 	github.com/jackyang-hk/go-redismq v1.1.8
 	github.com/leekchan/accounting v1.0.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
+	github.com/pquerna/otp v1.4.0
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/segmentio/analytics-go/v3 v3.3.0
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
@@ -27,6 +29,7 @@ require (
 	github.com/stripe/stripe-go/v78 v78.6.0
 	github.com/xuri/excelize/v2 v2.8.1
 	golang.org/x/crypto v0.23.0
+	golang.org/x/oauth2 v0.20.0
 	golang.org/x/text v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -35,6 +38,7 @@ require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
+	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
@@ -49,7 +53,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/grokify/html-strip-tags-go v0.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

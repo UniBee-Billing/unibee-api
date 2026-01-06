@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean/detail"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/jwt"
+	"unibee/internal/logic/totp/client_activity"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -31,6 +33,8 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, newOne.MerchantId, newOne.Id, req.Email)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
+	g.RequestFromCtx(ctx).Cookie.Set(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY, token)
 	jwt.AppendRequestCookieWithToken(ctx, token)
+	client_activity.UpdateClientIdentityLoginTime(ctx, _interface.Context().Get(ctx).ClientIdentity)
 	return &auth.LoginOtpVerifyRes{MerchantMember: detail.ConvertMemberToDetail(ctx, newOne), Token: token}, nil
 }

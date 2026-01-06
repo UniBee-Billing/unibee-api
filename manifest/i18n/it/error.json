@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Esiste un'altra sottoscrizione attiva o incompleta",
+  "ClickTooFast": "Stai cliccando troppo velocemente. Attendi un momento e riprova.",
+  "AmountNotMatch": "L'importo totale è obsoleto. Aggiorna e riprova.",
+  "PlanTrialGatewayError": "È richiesto un gateway di pagamento con carta o PayPal per questo piano.",
+  "VatValidateError": "La validazione del numero IVA è fallita. Numero: %s",
+  "VatGatewayNeedSetup": "Il gateway IVA deve essere configurato.",
+  "CountryCodeVatNumberNotMatch": "Errore codice paese. Il paese del tuo numero IVA è %s.",
+  "DiscountCodeInvalid": "Il codice sconto non è valido.",
+  "DiscountCodeNotStart": "Il codice sconto non è ancora iniziato.",
+  "DiscountCodePlanError": "Il codice sconto non può essere utilizzato con questo piano.",
+  "DiscountCodeReachLimitation": "È stato raggiunto il limite di utilizzo del codice sconto."
+} 

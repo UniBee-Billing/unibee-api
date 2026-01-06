@@ -3,13 +3,13 @@ package session
 import "github.com/gogf/gf/v2/frame/g"
 
 type NewReq struct {
-	g.Meta         `path:"/new_session" tags:"Session" method:"post" summary:"New User Portal Session" dc:"New session for user portal or web component"`
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	g.Meta         `path:"/new_session" tags:"Session" method:"post" summary:"New Checkout Session" dc:"New session for hosted checkout or client portal. You can create user and get ClientSession from here, then append it to the checkout link (copied from Admin Portal Plan) as a query parameter, e.g. https://cs.unibee.dev/hosted/checkout?planId=253&env=prod&session=${clientSession}"`
 	Email          string `json:"email" dc:"Email" v:"required"`
+	ReturnUrl      string `json:"returnUrl" dc:"ReturnUrl, back to returnUrl if checkout completed"`
+	CancelUrl      string `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if checkout cancelled"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
 	FirstName      string `json:"firstName" dc:"First Name"`
 	LastName       string `json:"lastName" dc:"Last Name"`
-	ReturnUrl      string `json:"returnUrl" dc:"ReturnUrl"`
-	CancelUrl      string `json:"cancelUrl" dc:"CancelUrl"`
 	Password       string `json:"password" dc:"Password"`
 	Phone          string `json:"phone" dc:"Phone" `
 	Address        string `json:"address" dc:"Address"`

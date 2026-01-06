@@ -3,19 +3,32 @@ package subscription
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
+	"math"
 	"strconv"
 	"strings"
+	"time"
+	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/webhook/event"
+	subscription3 "unibee/internal/consumer/webhook/subscription"
 	dao "unibee/internal/dao/default"
-	currency2 "unibee/internal/logic/currency"
+	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/gateway/api"
+	handler2 "unibee/internal/logic/invoice/handler"
+	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/operation_log"
+	"unibee/internal/logic/plan/period"
+	"unibee/internal/logic/subscription/timeline"
+	user2 "unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
+	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 type TaskActiveSubscriptionImport struct {
@@ -34,10 +47,10 @@ func (t TaskActiveSubscriptionImport) TemplateHeader() interface{} {
 		ExternalSubscriptionId: "exampleSubscriptionId",
 		ExternalUserId:         "exampleUserId",
 		ExternalPlanId:         "examplePlanId",
-		Amount:                 "10.00",
-		Currency:               "EUR",
+		ExpectedTotalAmount:    "10.00",
 		Quantity:               "1",
 		Gateway:                "stripe",
+		CountryCode:            "EE",
 		CurrentPeriodStart:     "2024-05-13 06:19:27",
 		CurrentPeriodEnd:       "2024-06-13 06:19:27",
 		BillingCycleAnchor:     "2024-05-13 06:19:27",
@@ -56,8 +69,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		ExternalSubscriptionId: fmt.Sprintf("%s", row["ExternalSubscriptionId"]),
 		ExternalUserId:         fmt.Sprintf("%s", row["ExternalUserId"]),
 		ExternalPlanId:         fmt.Sprintf("%s", row["ExternalPlanId"]),
-		Amount:                 fmt.Sprintf("%s", row["Amount"]),
-		Currency:               fmt.Sprintf("%s", row["Currency"]),
+		ExpectedTotalAmount:    fmt.Sprintf("%s", row["Amount"]),
 		Quantity:               fmt.Sprintf("%s", row["Quantity"]),
 		Gateway:                fmt.Sprintf("%s", row["Gateway"]),
 		CurrentPeriodStart:     fmt.Sprintf("%s", row["CurrentPeriodStart"]),
@@ -65,6 +77,9 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		BillingCycleAnchor:     fmt.Sprintf("%s", row["BillingCycleAnchor"]),
 		FirstPaidTime:          fmt.Sprintf("%s", row["FirstPaidTime"]),
 		CreateTime:             fmt.Sprintf("%s", row["CreateTime"]),
+		CountryCode:            fmt.Sprintf("%s", row["CountryCode"]),
+		VatNumber:              fmt.Sprintf("%s", row["VatNumber"]),
+		TaxPercentage:          fmt.Sprintf("%s", row["TaxPercentage"]),
 		//StripeUserId:           fmt.Sprintf("%s", row["StripeUserId(Auto-Charge Required)"]),
 		//StripePaymentMethod:    fmt.Sprintf("%s", row["StripePaymentMethod(Auto-Charge Required)"]),
 		//PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
@@ -74,14 +89,34 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	if len(target.ExternalSubscriptionId) == 0 {
 		return target, gerror.New("Error, ExternalSubscriptionId is blank")
 	}
-
-	// data prepare
-	if len(target.ExternalUserId) == 0 {
-		return target, gerror.New("Error, ExternalUserId is blank")
+	target.CountryCode = strings.ToUpper(target.CountryCode)
+	if len(target.CountryCode) > 0 {
+		err = utility.ValidateCountryCode(target.CountryCode)
+		if err != nil {
+			return target, gerror.New(fmt.Sprintf("Error, CountryCode is invalid, %s", err.Error()))
+		}
 	}
-	user := query.GetUserAccountByExternalUserId(ctx, task.MerchantId, target.ExternalUserId)
+	// data prepare
+	user, err := user2.QueryOrCreateUser(ctx, &user2.NewUserInternalReq{
+		ExternalUserId: target.ExternalUserId,
+		Email:          target.Email,
+		CountryCode:    target.CountryCode,
+		VATNumber:      target.VatNumber,
+		MerchantId:     _interface.GetMerchantId(ctx),
+	})
+	if err != nil {
+		return target, gerror.Newf("QueryOrCreateUser,error:%s", err.Error())
+	}
 	if user == nil {
 		return target, gerror.New("Error, can't find user by ExternalUserId")
+	}
+	taxPercentage := user.TaxPercentage
+	if !vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId).VatRatesEnabled() && len(target.TaxPercentage) > 0 {
+		taxPercentage = 0
+		taxPercentageFloat, err := strconv.ParseFloat(target.TaxPercentage, 64)
+		if err == nil {
+			taxPercentage = int64(taxPercentageFloat * 10000)
+		}
 	}
 	if len(target.ExternalPlanId) == 0 {
 		return target, gerror.New("Error, ExternalPlanId is blank")
@@ -90,27 +125,22 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	if plan == nil {
 		return target, gerror.New("Error, can't find plan by ExternalPlanId")
 	}
-	if len(target.Amount) == 0 {
-		return target, gerror.New("Error, Amount is blank")
+	utility.Assert(plan.Status != consts.PlanStatusEditable, "plan status should not editable")
+	quantity, _ := strconv.ParseInt(target.Quantity, 10, 64)
+	if quantity == 0 {
+		quantity = 1
 	}
-	amountFloat, err := strconv.ParseFloat(target.Amount, 64)
-	if err != nil {
-		return target, gerror.Newf("Invalid Amount,error:%s", err.Error())
-	}
-	amount := int64(amountFloat * 100)
-	if amount <= 0 {
-		return target, gerror.New("Invalid Amount, should greater than 0")
-	}
-	if len(target.Currency) == 0 {
-		return target, gerror.New("Error, Currency is blank")
-	}
-	currency := strings.TrimSpace(strings.ToUpper(target.Currency))
-	if !currency2.IsCurrencySupport(currency) {
-		return target, gerror.New("Error, invalid Currency")
-	}
-	if utility.IsNoCentCurrency(currency) {
-		if amount%100 != 0 {
-			return target, gerror.New("Error, this currency No decimals allowed，made it divisible by 100")
+	totalAmountExcludingTax := plan.Amount * quantity
+	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(taxPercentage)))
+	totalAmount := totalAmountExcludingTax + taxAmount
+	if len(target.ExpectedTotalAmount) == 0 {
+		expectedTotalAmountFloat, err := strconv.ParseFloat(target.ExpectedTotalAmount, 64)
+		if err != nil {
+			return target, gerror.Newf("Invalid Amount,error:%s", err.Error())
+		}
+		expectedTotalAmount := int64(expectedTotalAmountFloat * 100)
+		if expectedTotalAmount > 0 && expectedTotalAmount != totalAmount {
+			return target, gerror.New(fmt.Sprintf("ExpectedTotalAmount Verify failed, calculated totalAmount %s != expectedTotalAmount %s", utility.ConvertCentToDollarStr(totalAmount, plan.Currency), utility.ConvertCentToDollarStr(expectedTotalAmount, plan.Currency)))
 		}
 	}
 	if len(target.Gateway) == 0 {
@@ -121,15 +151,12 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	if gatewayImpl == nil {
 		return target, gerror.New("Error, Invalid Gateway, should be one of " + strings.Join(api.ExportGatewaySetupListKeys(), "|"))
 	}
-	gateway := query.GetGatewayByGatewayName(ctx, task.MerchantId, target.Gateway)
+	gateway := query.GetDefaultGatewayByGatewayName(ctx, task.MerchantId, target.Gateway)
 	if gateway == nil {
 		return target, gerror.New("Error, gateway need setup")
 	}
 	gatewayId = gateway.Id
-	quantity, _ := strconv.ParseInt(target.Quantity, 10, 64)
-	if quantity == 0 {
-		quantity = 1
-	}
+
 	if len(target.CurrentPeriodStart) == 0 {
 		return target, gerror.New("Error, CurrentPeriodStart is blank")
 	}
@@ -246,6 +273,17 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		//	}
 		//}
 	}
+
+	metadata := make(map[string]interface{})
+	if _interface.Context().Get(ctx).MerchantMember != nil {
+		tag = fmt.Sprintf("ImportByMember:%d", _interface.Context().Get(ctx).MerchantMember.Id)
+		metadata["ImportFrom"] = tag
+	} else {
+		tag = fmt.Sprintf("ImportByOpenAPI")
+		metadata["ImportFrom"] = tag
+	}
+
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, utility.MaxInt64(currentPeriodEnd.Timestamp(), 0), plan.Id)
 	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
 	override := false
 	if one != nil {
@@ -256,23 +294,86 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error, no permission to override, user not match")
 		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().Type:                        consts.SubTypeUniBeeControl,
 			dao.Subscription.Columns().Status:                      consts.SubStatusActive,
-			dao.Subscription.Columns().Amount:                      amount,
-			dao.Subscription.Columns().Currency:                    currency,
+			dao.Subscription.Columns().Amount:                      totalAmount,
+			dao.Subscription.Columns().Currency:                    plan.Currency,
 			dao.Subscription.Columns().PlanId:                      plan.Id,
 			dao.Subscription.Columns().Quantity:                    quantity,
 			dao.Subscription.Columns().GatewayId:                   gatewayId,
+			dao.Subscription.Columns().TaxPercentage:               taxPercentage,
 			dao.Subscription.Columns().GatewayItemData:             target.Features,
 			dao.Subscription.Columns().GatewayDefaultPaymentMethod: gatewayPaymentMethod,
 			dao.Subscription.Columns().BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
 			dao.Subscription.Columns().CurrentPeriodStart:          currentPeriodStart.Timestamp(),
 			dao.Subscription.Columns().CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
+			dao.Subscription.Columns().DunningTime:                 dunningTime,
 			dao.Subscription.Columns().CurrentPeriodStartTime:      currentPeriodStart,
 			dao.Subscription.Columns().CurrentPeriodEndTime:        currentPeriodEnd,
 			dao.Subscription.Columns().FirstPaidTime:               firstPaidTime.Timestamp(),
 			dao.Subscription.Columns().CreateTime:                  createTime.Timestamp(),
+			dao.Subscription.Columns().MetaData:                    utility.MarshalToJsonString(metadata),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		override = true
+		utility.AssertError(err, "Override history error")
+
+		{
+			if len(one.LatestInvoiceId) == 0 {
+				currentInvoice := &bean.Invoice{
+					InvoiceName:                    "SubscriptionCreate",
+					BizType:                        consts.BizTypeSubscription,
+					ProductName:                    plan.PlanName,
+					OriginAmount:                   0,
+					TotalAmount:                    0,
+					TotalAmountExcludingTax:        0,
+					DiscountCode:                   "",
+					DiscountAmount:                 0,
+					Currency:                       one.Currency,
+					TaxAmount:                      0,
+					SubscriptionAmount:             0,
+					SubscriptionAmountExcludingTax: 0,
+					Lines: []*bean.InvoiceItemSimplify{{
+						Currency:               one.Currency,
+						OriginAmount:           0,
+						Amount:                 0,
+						DiscountAmount:         0,
+						Tax:                    0,
+						AmountExcludingTax:     0,
+						TaxPercentage:          0,
+						UnitAmountExcludingTax: 0,
+						Name:                   plan.PlanName,
+						Description:            plan.Description,
+						Proration:              false,
+						Quantity:               quantity,
+						PeriodEnd:              currentPeriodEnd.Timestamp(),
+						PeriodStart:            currentPeriodStart.Timestamp(),
+						Plan:                   bean.SimplifyPlan(plan),
+					}},
+					ProrationDate: time.Now().Unix(),
+					PeriodStart:   one.CurrentPeriodStart,
+					PeriodEnd:     one.CurrentPeriodEnd,
+					Metadata:      metadata,
+					CountryCode:   target.CountryCode,
+					VatNumber:     target.VatNumber,
+					TaxPercentage: 0,
+				}
+				invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+					PlanId:             plan.Id,
+					Simplify:           currentInvoice,
+					Sub:                one,
+					GatewayId:          one.GatewayId,
+					IsSubLatestInvoice: true,
+					TimeNow:            currentInvoice.ProrationDate,
+				})
+				utility.AssertError(err, "Create Latest Invoice Error")
+				invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
+				utility.AssertError(err, "Create Latest Invoice Error")
+				timeline.SubscriptionNewTimeline(ctx, invoice)
+				sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, one.UserId, one.SubscriptionId)
+			}
+		}
+
+		subscription3.SendMerchantSubscriptionWebhookBackground(one, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_IMPORT_OVERRIDE, map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()})
 
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			MerchantId:     one.MerchantId,
@@ -286,11 +387,12 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		}, err)
 	} else {
 		one = &entity.Subscription{
+			Type:                        consts.SubTypeUniBeeControl,
 			SubscriptionId:              utility.CreateSubscriptionId(),
 			ExternalSubscriptionId:      target.ExternalSubscriptionId,
 			UserId:                      user.Id,
-			Amount:                      amount,
-			Currency:                    currency,
+			Amount:                      totalAmount,
+			Currency:                    plan.Currency,
 			MerchantId:                  task.MerchantId,
 			PlanId:                      plan.Id,
 			Quantity:                    quantity,
@@ -300,22 +402,80 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
 			CurrentPeriodStartTime:      currentPeriodStart,
 			CurrentPeriodEndTime:        currentPeriodEnd,
+			DunningTime:                 dunningTime,
 			BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
 			FirstPaidTime:               firstPaidTime.Timestamp(),
 			CreateTime:                  createTime.Timestamp(),
 			CountryCode:                 user.CountryCode,
 			VatNumber:                   user.VATNumber,
-			TaxPercentage:               user.TaxPercentage,
+			TaxPercentage:               taxPercentage,
 			GatewaySubscriptionId:       target.ExternalSubscriptionId,
 			GatewayItemData:             target.Features,
 			Data:                        tag,
 			CurrentPeriodPaid:           1,
 			GatewayDefaultPaymentMethod: gatewayPaymentMethod,
+			MetaData:                    utility.MarshalToJsonString(metadata),
 		}
 		result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		utility.AssertError(err, "Save history error")
 		id, err := result.LastInsertId()
 		one.Id = uint64(id)
+
+		{
+			currentInvoice := &bean.Invoice{
+				InvoiceName:                    "SubscriptionCreate",
+				BizType:                        consts.BizTypeSubscription,
+				ProductName:                    plan.PlanName,
+				OriginAmount:                   0,
+				TotalAmount:                    0,
+				TotalAmountExcludingTax:        0,
+				DiscountCode:                   "",
+				DiscountAmount:                 0,
+				Currency:                       one.Currency,
+				TaxAmount:                      0,
+				SubscriptionAmount:             0,
+				SubscriptionAmountExcludingTax: 0,
+				Lines: []*bean.InvoiceItemSimplify{{
+					Currency:               one.Currency,
+					OriginAmount:           0,
+					Amount:                 0,
+					DiscountAmount:         0,
+					Tax:                    0,
+					AmountExcludingTax:     0,
+					TaxPercentage:          0,
+					UnitAmountExcludingTax: 0,
+					Name:                   plan.PlanName,
+					Description:            plan.Description,
+					Proration:              false,
+					Quantity:               quantity,
+					PeriodEnd:              currentPeriodEnd.Timestamp(),
+					PeriodStart:            currentPeriodStart.Timestamp(),
+					Plan:                   bean.SimplifyPlan(plan),
+				}},
+				ProrationDate: time.Now().Unix(),
+				PeriodStart:   one.CurrentPeriodStart,
+				PeriodEnd:     one.CurrentPeriodEnd,
+				Metadata:      metadata,
+				CountryCode:   target.CountryCode,
+				VatNumber:     target.VatNumber,
+				TaxPercentage: 0,
+			}
+			invoice, err := service3.CreateProcessingInvoiceForSub(ctx, &service3.CreateProcessingInvoiceForSubReq{
+				PlanId:             plan.Id,
+				Simplify:           currentInvoice,
+				Sub:                one,
+				GatewayId:          one.GatewayId,
+				IsSubLatestInvoice: true,
+				TimeNow:            currentInvoice.ProrationDate,
+			})
+			utility.AssertError(err, "Create Latest Invoice Error")
+			invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
+			utility.AssertError(err, "Create Latest Invoice Error")
+			timeline.SubscriptionNewTimeline(ctx, invoice)
+			sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, one.UserId, one.SubscriptionId)
+		}
+
+		subscription3.SendMerchantSubscriptionWebhookBackground(one, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_IMPORT_CREATED, map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()})
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
@@ -338,11 +498,14 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 
 type ImportActiveSubscriptionEntity struct {
 	ExternalSubscriptionId string `json:"ExternalSubscriptionId"    comment:"Required, The external id of subscription"     `
-	ExternalUserId         string `json:"ExternalUserId"    comment:"Required, The external id of user, user should import at first"    `
 	ExternalPlanId         string `json:"ExternalPlanId"   comment:"Required, The external id of plan, plan should created at first"   `
-	Amount                 string `json:"Amount"        comment:"Required, the recurring amount of subscription, em. 19.99 = 19.99 USD"     `
-	Currency               string `json:"Currency"      comment:"Required, Upper Case, the currency of subscription, USD|EUR "       `
+	Email                  string `json:"Email"  comment:"The email of user, one of Email or ExternalUserId is required" `
+	ExternalUserId         string `json:"ExternalUserId"    comment:"The external id of user, one of Email or ExternalUserId is required "    `
+	ExpectedTotalAmount    string `json:"ExpectedTotalAmount" comment:"Optional. If greater than 0, the system will verify the calculated total amount against this value (e.g., 19.99 = 19.99 USD)"`
 	Quantity               string `json:"Quantity"      comment:"the quantity of plan, default 1 if not provided "        `
+	CountryCode            string `json:"CountryCode"    comment:"Required, The country code of subscription, Tax is applied based on this country code."  `
+	VatNumber              string `json:"VatNumber"    comment:"The Vat Number of user"  `
+	TaxPercentage          string `json:"TaxPercentage" comment:"The TaxPercentage of user, valid when system vat gateway enabled, em. 10 = 10%"`
 	Gateway                string `json:"Gateway" comment:"Required, should one of stripe|paypal|wire_transfer|changelly "           `
 	CurrentPeriodStart     string `json:"CurrentPeriodStart" comment:"Required, UTC time, the current period start time of subscription, format '2006-01-02 15:04:05'"`
 	CurrentPeriodEnd       string `json:"CurrentPeriodEnd"   comment:"Required, UTC time, the current period end time of subscription, format '2006-01-02 15:04:05'"`

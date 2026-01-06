@@ -39,4 +39,5 @@ type MerchantGateway struct {
 	Currency              interface{} // currency
 	MinimumAmount         interface{} // minimum amount, cent
 	BankData              interface{} // bank credentials data
+	MetaData              interface{} // meta_data(json)
 }

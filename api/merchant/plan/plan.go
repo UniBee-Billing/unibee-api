@@ -11,7 +11,7 @@ type NewReq struct {
 	ExternalPlanId        string                               `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName              string                               `json:"planName" dc:"Plan Name"   v:"required" `
 	InternalName          string                               `json:"internalName"              description:""`
-	Amount                int64                                `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Amount                int64                                `json:"amount"   dc:"Plan Amount"   v:"required" `
 	Currency              string                               `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit          string                               `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
 	IntervalCount         int                                  `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
@@ -33,6 +33,7 @@ type NewReq struct {
 	TrialDemand           string                               `json:"trialDemand"               description:"demand of trial， not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd      int                                  `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ProductId             int64                                `json:"productId"   dc:"Id of product which plan to linked" `
+	MultiCurrencies       []*bean.PlanMultiCurrency            `json:"multiCurrencies"  dc:"Plan's MultiCurrencies" `
 }
 type NewRes struct {
 	Plan *bean.Plan `json:"plan" dc:"Plan"`
@@ -65,6 +66,7 @@ type EditReq struct {
 	TrialDemand           *string                               `json:"trialDemand"               description:"demand of trial, not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd      *int                                  `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ProductId             *int64                                `json:"productId"   dc:"Id of product which plan to linked" `
+	MultiCurrencies       *[]*bean.PlanMultiCurrency            `json:"multiCurrencies"  dc:"Plan's MultiCurrencies" `
 }
 type EditRes struct {
 	Plan *bean.Plan `json:"plan" dc:"Plan"`
@@ -84,7 +86,7 @@ type AddonsBindingRes struct {
 type ListReq struct {
 	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"Get Plan List"`
 	PlanIds       []int64 `json:"planIds"  dc:"filter id list of plan, default all" `
-	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
+	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all product(0) used if not specified" `
 	Type          []int   `json:"type"  dc:"1-main plan，2-addon plan,3-onetime" `
 	Status        []int   `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-SoftArchive, 5-HardArchive" `
 	PublishStatus int     `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
@@ -93,7 +95,7 @@ type ListReq struct {
 	SortField     string  `json:"sortField" dc:"Sort Field，plan_name|gmt_create|gmt_modify，Default gmt_create" `
 	SortType      string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int     `json:"page"  dc:"Page, Start 0" `
-	Count         int     `json:"count"  dc:"Count Of Per Page" `
+	Count         int     `json:"count"  dc:"Count Of Per Page, Default 100" `
 }
 type ListRes struct {
 	Plans []*detail.PlanDetail `json:"plans" dc:"Plans"`

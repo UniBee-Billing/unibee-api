@@ -1,0 +1,4 @@
+[
+  {"name": "Bitcoin", "paymentType": "BTC", "countryName": "Global", "autoCharge": false, "category": "Online Bitcoin"},
+  {"name": "USDT(ERC-20)", "paymentType": "USDT", "countryName": "ETH ERC-20", "autoCharge": false, "category": "Online ETH ERC-20"}
+]

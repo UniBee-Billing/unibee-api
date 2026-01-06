@@ -24,4 +24,7 @@ type SubscriptionOnetimeAddon struct {
 	PaymentId      interface{} // paymentId
 	MetaData       interface{} // meta_data(json)
 	UserId         interface{} // userId
+	InvoiceId      interface{} // invoice id
+	PeriodStart    interface{} // period_start, utc time
+	PeriodEnd      interface{} // period_end utc time
 }

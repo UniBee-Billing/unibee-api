@@ -60,9 +60,23 @@ func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, user
 				SubscriptionPeriodEnd:   sub.CurrentPeriodEnd,
 			})
 		}
-		//append addons
+		//append recurring addons
 		addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, sub.AddonData)
 		for _, addon := range addons {
+			list = append(list, &UserSubPlan{
+				MerchantId:              sub.MerchantId,
+				UserId:                  userId,
+				PlanId:                  addon.AddonPlan.Id,
+				PlanType:                addon.AddonPlan.Type,
+				Quantity:                addon.Quantity,
+				SubscriptionIds:         sub.SubscriptionId,
+				SubscriptionPeriodStart: sub.CurrentPeriodStart,
+				SubscriptionPeriodEnd:   sub.CurrentPeriodEnd,
+			})
+		}
+		//append current period one-time addons
+		onetimeCurrentPeriodAddons := addon2.GetSubscriptionOneTimeAddonsOfCurrentPeriod(ctx, sub)
+		for _, addon := range onetimeCurrentPeriodAddons {
 			list = append(list, &UserSubPlan{
 				MerchantId:              sub.MerchantId,
 				UserId:                  userId,

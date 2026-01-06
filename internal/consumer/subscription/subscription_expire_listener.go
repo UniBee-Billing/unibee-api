@@ -60,6 +60,8 @@ func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redism
 	service.TryCancelSubscriptionLatestInvoice(ctx, sub)
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	timeline.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId, consts.SubStatusExpired)
+	message.CustomData["Persistence"] = true
+	message.CustomData["SubscriptionId"] = sub.SubscriptionId
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED, message.CustomData)
 	//user2.SendMerchantUserMetricWebhookBackground(sub.UserId, sub.SubscriptionId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED, fmt.Sprintf("SubscriptionExpired#%s", sub.SubscriptionId))
 	return redismq.CommitMessage

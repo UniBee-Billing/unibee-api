@@ -13,6 +13,7 @@ import (
 	event2 "unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/message"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -71,6 +72,7 @@ func syncInvoice(ctx context.Context, req *invoice.InternalWebhookSyncReq) (tota
 		}
 
 		{
+			preload.InvoiceListPreloadForContext(ctx, list)
 			for _, one := range list {
 				event := event2.UNIBEE_WEBHOOK_EVENT_INVOICE_CREATED
 				if one.Status == consts.InvoiceStatusPaid {
@@ -88,7 +90,7 @@ func syncInvoice(ctx context.Context, req *invoice.InternalWebhookSyncReq) (tota
 					Body: utility.MarshalToJsonString(&message.WebhookMessage{
 						Id:         one.Id,
 						Event:      event2.WebhookEvent(event),
-						EventId:    utility.CreateEventId(),
+						EventId:    utility.CreateHistoryEventId(),
 						MerchantId: one.MerchantId,
 						Data:       utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)),
 					}),

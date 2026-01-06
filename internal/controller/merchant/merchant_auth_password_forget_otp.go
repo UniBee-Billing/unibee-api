@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/platform"
@@ -18,7 +19,6 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 	if !utility.TryLock(ctx, redisKey, 10) {
 		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
-
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification %s", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-PasswordForgetOtp-Verify", verificationCode)
@@ -31,7 +31,7 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 	utility.Assert(merchantMember.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
 	_, emailGatewayKey := email.GetDefaultMerchantEmailConfig(ctx, merchantMember.MerchantId)
 	if len(emailGatewayKey) > 0 {
-		err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", "", email.TemplateUserOTPLogin, "", &bean.EmailTemplateVariable{
 			UserName:         merchantMember.FirstName + " " + merchantMember.LastName,
 			CodeExpireMinute: "3",
 			Code:             verificationCode,

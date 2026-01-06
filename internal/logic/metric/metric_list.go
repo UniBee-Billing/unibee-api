@@ -2,6 +2,7 @@ package metric
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
@@ -11,11 +12,12 @@ import (
 
 type ListInternalReq struct {
 	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	SearchKey       string `json:"searchKey" dc:"Search Key, code or name"  `
 	SortField       string `json:"sortField" dc:"Sort, gmt_create" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int    `json:"page"  dc:"Page,Start 0" `
 	Count           int    `json:"count" dc:"Count Of Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
 }
@@ -30,7 +32,7 @@ func MerchantMetricList(ctx context.Context, req *ListInternalReq) ([]*bean.Merc
 		req.Page = 0
 	}
 
-	var isDeletes = []int{0}
+	//var isDeletes = []int{0}
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
@@ -46,15 +48,21 @@ func MerchantMetricList(ctx context.Context, req *ListInternalReq) ([]*bean.Merc
 	var list = make([]*bean.MerchantMetric, 0)
 	var entities []*entity.MerchantMetric
 	q := dao.MerchantMetric.Ctx(ctx).
-		Where(dao.MerchantMetric.Columns().MerchantId, req.MerchantId).
-		WhereIn(dao.MerchantMetricEvent.Columns().IsDeleted, isDeletes)
+		Where(dao.MerchantMetric.Columns().MerchantId, req.MerchantId)
+	//WhereIn(dao.MerchantMetricEvent.Columns().IsDeleted, isDeletes)
 	if req.CreateTimeStart > 0 {
 		q = q.WhereGTE(dao.MerchantMetric.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
 		q = q.WhereLTE(dao.MerchantMetric.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	q = q.Order(sortKey).
+	if len(req.SearchKey) > 0 {
+		q = q.Where(q.Builder().
+			WhereOrLike(dao.MerchantMetric.Columns().Code, "%"+req.SearchKey+"%").
+			WhereOrLike(dao.MerchantMetric.Columns().MetricDescription, "%"+req.SearchKey+"%").
+			WhereOrLike(dao.MerchantMetric.Columns().MetricName, "%"+req.SearchKey+"%"))
+	}
+	q = q.Order(fmt.Sprintf("is_deleted asc, %s", sortKey)).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty()
 	var err error

@@ -3,6 +3,7 @@ package bean
 import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -15,6 +16,16 @@ type GatewayCurrencyExchange struct {
 }
 
 var GatewayCurrencyExchangeKey = "GatewayCurrencyExchange"
+
+type GatewayPaymentData struct {
+	Status                 consts.PaymentStatusEnum `json:"status"`
+	GatewayPaymentId       string                   `json:"gatewayPaymentId"`
+	GatewayPaymentIntentId string                   `json:"gatewayPaymentIntentId"`
+	GatewayPaymentMethod   string                   `json:"gatewayPaymentMethod"`
+	Link                   string                   `json:"link"`
+	Action                 *gjson.Json              `json:"action"`
+	PaymentCode            string
+}
 
 type Payment struct {
 	PaymentId               string                   `json:"paymentId"              description:"payment id"`                                                             // payment id
@@ -49,6 +60,9 @@ type Payment struct {
 	AutoCharge              bool                     `json:"autoCharge"             description:""`
 	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"  description:"gateway currency exchange"`
 	LastError               string                   `json:"lastError"              description:"last error"` // last error
+	Action                  *gjson.Json              `json:"action" description:"the gateway next action"`
+	CryptoAmount            int64                    `json:"cryptoAmount"           description:"crypto_amount, cent"` // crypto_amount, cent
+	CryptoCurrency          string                   `json:"cryptoCurrency"         description:"crypto_currency"`     // crypto_currency
 }
 
 func SimplifyPayment(one *entity.Payment) *Payment {
@@ -81,6 +95,11 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 	if gatewayExchange != nil && len(gatewayExchange.FromCurrency) > 0 {
 		gatewayExchange.ExchangeAmount = utility.ExchangeCurrencyConvert(one.TotalAmount, gatewayExchange.FromCurrency, gatewayExchange.ToCurrency, gatewayExchange.ExchangeRate)
 	}
+	var paymentData = &GatewayPaymentData{}
+	if len(one.PaymentData) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.PaymentData, &paymentData)
+	}
+
 	return &Payment{
 		PaymentId:               one.PaymentId,
 		MerchantId:              one.MerchantId,
@@ -114,6 +133,9 @@ func SimplifyPayment(one *entity.Payment) *Payment {
 		GasPayer:                one.GasPayer,
 		AutoCharge:              autoCharge,
 		GatewayCurrencyExchange: gatewayExchange,
+		Action:                  paymentData.Action,
+		CryptoCurrency:          one.CryptoCurrency,
+		CryptoAmount:            one.CryptoAmount,
 	}
 }
 

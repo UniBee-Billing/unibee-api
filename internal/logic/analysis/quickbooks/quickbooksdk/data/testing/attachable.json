@@ -1,0 +1,23 @@
+{
+	"Attachable": {
+		"SyncToken": "0",
+		"domain": "QBO",
+		"AttachableRef": [
+			{
+				"IncludeOnSend": false,
+				"EntityRef": {
+					"type": "Invoice",
+					"value": "95"
+				}
+			}
+		],
+		"Note": "This is an attached note.",
+		"sparse": false,
+		"Id": "200900000000000008541",
+		"MetaData": {
+			"CreateTime": "2015-11-17T11:05:15-08:00",
+			"LastUpdatedTime": "2015-11-17T11:05:15-08:00"
+		}
+	},
+	"time": "2015-11-17T11:05:15.797-08:00"
+}

@@ -87,17 +87,18 @@ func (c Coinbase) GatewayNewPayment(ctx context.Context, gateway *entity.Merchan
 		gasPayer = "CUSTOMER"
 		createPayContext.Metadata["gasPayer"] = gasPayer
 	}
+	name, description := createPayContext.GetInvoiceSingleProductNameAndDescription()
 	param := map[string]interface{}{
 		"pricing_type": "fixed_price",
-		"name":         "crypto payment",
-		"description":  "crypto payment description",
+		"name":         name,
+		"description":  description,
 		"checkout_id":  createPayContext.Pay.PaymentId,
 		"local_price": map[string]string{
 			"amount":   utility.ConvertCentToDollarStr(createPayContext.Pay.CryptoAmount, createPayContext.Pay.CryptoCurrency),
 			"currency": createPayContext.Pay.CryptoCurrency,
 		},
 		"redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
-		"cancel_url\n": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
+		"cancel_url":   webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 		"metadata":     createPayContext.Metadata,
 	}
 	responseJson, err := SendCoinbasePaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "POST", urlPath, param)

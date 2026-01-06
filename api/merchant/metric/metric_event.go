@@ -1,10 +1,11 @@
 package metric
 
 import (
-	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type NewEventReq struct {
@@ -22,6 +23,19 @@ type NewEventReq struct {
 
 type NewEventRes struct {
 	MerchantMetricEvent *bean.MerchantMetricEvent `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
+}
+
+type EventCurrentValueReq struct {
+	g.Meta         `path:"/event/current_value" tags:"Metric Event" method:"post" summary:"Merchant Metric Event Current Value"`
+	MetricCode     string `json:"metricCode" dc:"MetricCode" v:"required"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId， UserId, ExternalUserId, or Email provides one of three options" `
+	Email          string `json:"email" dc:"Email， UserId, ExternalUserId, or Email provides one of three options" default:"account@unibee.dev"`
+	UserId         uint64 `json:"userId" dc:"UserId， UserId, ExternalUserId, or Email provides one of three options" `
+	ProductId      int64  `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
+}
+
+type EventCurrentValueRes struct {
+	CurrentValue int64 `json:"currentValue"`
 }
 
 type DeleteEventReq struct {
@@ -44,8 +58,8 @@ type EventListReq struct {
 	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int     `json:"page"  dc:"Page,Start 0" `
 	Count           int     `json:"count" dc:"Count OF Page" `
-	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type EventListRes struct {

@@ -6,6 +6,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -14,6 +15,8 @@ import (
 type SubscriptionListInternalReq struct {
 	MerchantId      uint64   `json:"merchantId" dc:"MerchantId"`
 	UserId          int64    `json:"userId"  dc:"UserId" `
+	ExternalUserId  string   `json:"externalUserId"  dc:"ExternalUserId" `
+	Email           string   `json:"Email" dc:"The filter email of subscription user" `
 	Status          []int    `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	Currency        string   `json:"currency" dc:"The currency of subscription" `
 	PlanIds         []uint64 `json:"planIds" dc:"The filter ids of plan" `
@@ -24,8 +27,8 @@ type SubscriptionListInternalReq struct {
 	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int      `json:"page" dc:"Page, Start With 0" `
 	Count           int      `json:"count" dc:"Count Of Page" `
-	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 	SkipTotal       bool
 }
 
@@ -48,12 +51,39 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		}
 	}
 	baseQuery := dao.Subscription.Ctx(ctx).
-		Where(dao.Subscription.Columns().MerchantId, req.MerchantId).
-		Where(dao.Subscription.Columns().UserId, req.UserId)
+		Where(dao.Subscription.Columns().MerchantId, req.MerchantId)
+	//Where(dao.Subscription.Columns().UserId, req.UserId)
 	if req.Status != nil && len(req.Status) > 0 {
 		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().Status, req.Status)
 	}
-	if req.ProductIds != nil && len(req.ProductIds) > 0 {
+
+	if len(req.Email) > 0 || len(req.ExternalUserId) > 0 {
+		var userIdList = make([]uint64, 0)
+		var userList []*entity.UserAccount
+		userQuery := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().MerchantId, req.MerchantId)
+		if req.UserId > 0 {
+			userQuery = userQuery.Where(dao.UserAccount.Columns().Id, req.UserId)
+		}
+		if len(req.Email) > 0 {
+			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
+		}
+		if len(req.ExternalUserId) > 0 {
+			userQuery = userQuery.Where(dao.UserAccount.Columns().ExternalUserId, req.ExternalUserId)
+		}
+		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&userList)
+		for _, user := range userList {
+			userIdList = append(userIdList, user.Id)
+		}
+		if len(userIdList) == 0 {
+			return list, 0
+		}
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().UserId, userIdList)
+	} else if req.UserId > 0 {
+		baseQuery = baseQuery.Where(dao.Subscription.Columns().UserId, req.UserId)
+	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
+	} else if req.ProductIds != nil && len(req.ProductIds) > 0 {
 		if req.PlanIds == nil {
 			req.PlanIds = make([]uint64, 0)
 		}
@@ -68,9 +98,9 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		for _, plan := range plans {
 			req.PlanIds = append(req.PlanIds, plan.Id)
 		}
-	}
-	if req.PlanIds != nil && len(req.PlanIds) > 0 {
-		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
+		if req.PlanIds != nil && len(req.PlanIds) > 0 {
+			baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
+		}
 	}
 	if req.CreateTimeStart > 0 {
 		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().CreateTime, req.CreateTimeStart)
@@ -103,6 +133,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		return nil, 0
 	}
 	var totalPlanIds []uint64
+	preload.SubscriptionListPreloadForContext(ctx, mainList)
 	for _, sub := range mainList {
 		totalPlanIds = append(totalPlanIds, sub.PlanId)
 		var addonParams []*bean.PlanAddonParam
@@ -154,7 +185,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 						if mapPlans[param.AddonPlanId] != nil {
 							subRo.Addons = append(subRo.Addons, &bean.PlanAddonDetail{
 								Quantity:  param.Quantity,
-								AddonPlan: bean.SimplifyPlan(mapPlans[param.AddonPlanId]),
+								AddonPlan: bean.SimplifyPlanWithContext(ctx, mapPlans[param.AddonPlanId]),
 							})
 						}
 					}

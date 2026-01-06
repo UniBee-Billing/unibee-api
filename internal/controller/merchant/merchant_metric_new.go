@@ -2,10 +2,11 @@ package merchant
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
 	_interface "unibee/internal/interface/context"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/query"
+
+	"github.com/gogf/gf/v2/errors/gerror"
 
 	"unibee/api/merchant/metric"
 )
@@ -23,6 +24,8 @@ func (c *ControllerMetric) New(ctx context.Context, req *metric.NewReq) (res *me
 		Description:         req.MetricDescription,
 		AggregationType:     req.AggregationType,
 		AggregationProperty: req.AggregationProperty,
+		MetaData:            req.MetaData,
+		Unit:                req.Unit,
 	})
 	if err != nil {
 		return nil, err

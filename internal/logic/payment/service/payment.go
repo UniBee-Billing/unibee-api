@@ -14,7 +14,6 @@ import (
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
-	"unibee/internal/cmd/config"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/log"
@@ -22,11 +21,10 @@ import (
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/currency"
 	email2 "unibee/internal/logic/email"
-	"unibee/internal/logic/fiat_exchange"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/multi_currencies/currency_exchange"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
@@ -96,19 +94,20 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 						}
 						createPayContext.Metadata[gateway_bean.GatewayCurrencyExchangeKey] = utility.MarshalToJsonString(createPayContext.GatewayCurrencyExchange)
 					} else if exchange.ExchangeRate == 0 {
-						exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, fiat_exchange.FiatExchangeApiKey)
-						var rate *float64
-						if config.GetConfigInstance().Mode != "cloud" {
-							utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi Need Setup")
-						}
-						if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
-							rate, err = fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
-						} else {
-							rate, err = fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
-						}
-						utility.AssertError(err, "transfer currency exchange error")
-						utility.Assert(rate != nil, "transfer currency error, exchange rate is nil")
-						exchange.ExchangeRate = *rate
+						//exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, multi_currencies.FiatExchangeApiKey)
+						//var rate *float64
+						//if config.GetConfigInstance().Mode != "cloud" {
+						//	utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi Need Setup")
+						//}
+						//if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+						//	rate, err = multi_currencies.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						//} else {
+						//	rate, err = multi_currencies.GetExchangeConversionRateFromClusterCloud(ctx, createPayContext.Pay.Currency, strings.ToUpper(exchange.ToCurrency))
+						//}
+						//utility.AssertError(err, "transfer currency exchange error")
+						//utility.Assert(rate != nil, "transfer currency error, exchange rate is nil")
+						//exchange.ExchangeRate = *rate
+						exchange.ExchangeRate = currency_exchange.GetMerchantExchangeCurrencyRate(ctx, createPayContext.Pay.MerchantId, createPayContext.Pay.Currency, exchange.ToCurrency)
 						//createPayContext.ExchangeAmount = int64(float64(createPayContext.Pay.TotalAmount) * *rate)
 						createPayContext.ExchangeAmount = utility.ExchangeCurrencyConvert(createPayContext.Pay.TotalAmount, exchange.FromCurrency, exchange.ToCurrency, exchange.ExchangeRate)
 						createPayContext.ExchangeCurrency = strings.ToUpper(exchange.ToCurrency)
@@ -134,35 +133,45 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		} else {
 			createPayContext.Pay.GasPayer = "user" // default user pay the gas
 		}
-		exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, fiat_exchange.FiatExchangeApiKey)
-		if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
-			if createPayContext.Pay.Currency == "USD" {
-				createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
-				createPayContext.Pay.CryptoCurrency = "USD"
-			} else {
-				rate, err := fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", createPayContext.Pay.Currency)
-				utility.AssertError(err, "transfer crypto currency error")
-				utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
-				createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
-				createPayContext.Pay.CryptoCurrency = "USD"
-			}
-		} else if config.GetConfigInstance().Mode == "cloud" {
-			if createPayContext.Pay.Currency == "USD" {
-				createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
-				createPayContext.Pay.CryptoCurrency = "USD"
-			} else {
-				rate, err := fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, "USD", createPayContext.Pay.Currency)
-				utility.AssertError(err, "transfer crypto currency error")
-				utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
-				createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
-				createPayContext.Pay.CryptoCurrency = "USD"
-			}
+		targetCryptoCurrency := createPayContext.Gateway.Currency
+		if targetCryptoCurrency == "" {
+			targetCryptoCurrency = "USD"
+		}
+		if currency.IsCurrencySupport(targetCryptoCurrency) {
+			exchangeRate := currency_exchange.GetMerchantExchangeCurrencyRate(ctx, createPayContext.Pay.MerchantId, createPayContext.Pay.Currency, targetCryptoCurrency)
+			createPayContext.Pay.CryptoAmount = utility.ExchangeCurrencyConvert(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency, targetCryptoCurrency, exchangeRate)
+			createPayContext.Pay.CryptoCurrency = targetCryptoCurrency
+			//
+			//exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, multi_currencies.FiatExchangeApiKey)
+			//if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+			//	if createPayContext.Pay.Currency == "USD" {
+			//		createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
+			//		createPayContext.Pay.CryptoCurrency = "USD"
+			//	} else {
+			//		rate, err := multi_currencies.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", createPayContext.Pay.Currency)
+			//		utility.AssertError(err, "transfer crypto currency error")
+			//		utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
+			//		createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
+			//		createPayContext.Pay.CryptoCurrency = "USD"
+			//	}
+			//} else if config.GetConfigInstance().Mode == "cloud" {
+			//	if createPayContext.Pay.Currency == "USD" {
+			//		createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
+			//		createPayContext.Pay.CryptoCurrency = "USD"
+			//	} else {
+			//		rate, err := multi_currencies.GetExchangeConversionRateFromClusterCloud(ctx, "USD", createPayContext.Pay.Currency)
+			//		utility.AssertError(err, "transfer crypto currency error")
+			//		utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
+			//		createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
+			//		createPayContext.Pay.CryptoCurrency = "USD"
+			//	}
 		} else {
 			trans, err := api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
-				Amount:      createPayContext.Pay.TotalAmount,
-				Currency:    createPayContext.Pay.Currency,
-				CountryCode: createPayContext.Pay.CountryCode,
-				Gateway:     createPayContext.Gateway,
+				Amount:         createPayContext.Pay.TotalAmount,
+				Currency:       createPayContext.Pay.Currency,
+				CryptoCurrency: targetCryptoCurrency,
+				CountryCode:    createPayContext.Pay.CountryCode,
+				Gateway:        createPayContext.Gateway,
 			})
 			if err != nil {
 				return nil, err
@@ -266,6 +275,16 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		g.Log().Errorf(ctx, `GatewayPaymentCreate paymentId:%s error:%s`, createPayContext.Pay.PaymentId, err.Error())
 		return nil, err
 	}
+	if len(gatewayInternalPayResult.CryptoCurrency) > 0 && gatewayInternalPayResult.CryptoAmount > 0 {
+		_, err = dao.Payment.Ctx(ctx).Data(g.Map{
+			dao.Payment.Columns().CryptoAmount:   gatewayInternalPayResult.CryptoAmount,
+			dao.Payment.Columns().CryptoCurrency: gatewayInternalPayResult.CryptoCurrency}).
+			Where(dao.Payment.Columns().Id, createPayContext.Pay.Id).Update()
+		if err != nil {
+			g.Log().Errorf(ctx, `GatewayPaymentCreate UpdateCryptoAmount paymentId:%s error:%s`, createPayContext.Pay.PaymentId, err.Error())
+			return nil, err
+		}
+	}
 	// send the payment status checker mq
 	_, _ = redismq.Send(&redismq.Message{
 		Topic:      redismqcmd.TopicPaymentChecker.Topic,
@@ -330,7 +349,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
-func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.Payment, error) {
+func ClearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.Payment, error) {
 	if len(invoice.PaymentId) > 0 {
 		lastPayment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
 		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
@@ -354,6 +373,7 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 
 type CreateSubInvoicePaymentDefaultAutomaticReq struct {
 	Invoice       *entity.Invoice
+	PaymentUIMode string `json:"paymentUIMode"`
 	ManualPayment bool
 	ReturnUrl     string
 	CancelUrl     string
@@ -363,7 +383,7 @@ type CreateSubInvoicePaymentDefaultAutomaticReq struct {
 
 func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSubInvoicePaymentDefaultAutomaticReq) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", req.Invoice.InvoiceId)
-	lastPayment, err := clearInvoicePayment(ctx, req.Invoice)
+	lastPayment, err := ClearInvoicePayment(ctx, req.Invoice)
 	if err != nil {
 		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%s err:%s", req.Invoice.InvoiceId, err.Error())
 	}
@@ -394,9 +414,10 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, req *CreateSub
 		automatic = 0
 	}
 	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-		PayImmediate: !req.ManualPayment,
-		CheckoutMode: req.ManualPayment,
-		Gateway:      gateway,
+		PayImmediate:  !req.ManualPayment,
+		CheckoutMode:  req.ManualPayment,
+		PaymentUIMode: req.PaymentUIMode,
+		Gateway:       gateway,
 		Pay: &entity.Payment{
 			SubscriptionId:    req.Invoice.SubscriptionId,
 			BizType:           req.Invoice.BizType,
@@ -467,7 +488,7 @@ func SendAuthorizedEmailBackground(invoice *entity.Invoice) {
 		merchant := query.GetMerchantById(ctx, invoice.MerchantId)
 		oneUser := query.GetUserAccountById(ctx, invoice.UserId)
 		if oneUser != nil && merchant != nil {
-			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
+			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, oneUser.Language, email2.TemplateSubscriptionNeedAuthorized, "", &bean.EmailTemplateVariable{
 				UserName:              oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName:   invoice.ProductName,
 				MerchantCustomerEmail: merchant.Email,

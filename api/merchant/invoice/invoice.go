@@ -50,6 +50,7 @@ type DetailReq struct {
 	g.Meta    `path:"/detail" tags:"Invoice" method:"get,post" summary:"Invoice Detail" dc:"Get detail of invoice"`
 	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 }
+
 type DetailRes struct {
 	Invoice     *detail.InvoiceDetail   `json:"invoice" dc:"Invoice Detail Object"`
 	CreditNotes []*detail.InvoiceDetail `json:"creditNotes" dc:"CreditNotes Object List Link To Invoice"`
@@ -57,24 +58,25 @@ type DetailRes struct {
 
 type ListReq struct {
 	g.Meta          `path:"/list" tags:"Invoice" method:"get,post" summary:"Get Invoice List" dc:"Get invoice list"`
-	FirstName       string `json:"firstName" dc:"The firstName of invoice" `
-	LastName        string `json:"lastName" dc:"The lastName of invoice" `
-	Currency        string `json:"currency" dc:"The currency of invoice" `
-	Status          []int  `json:"status" dc:"The status of invoice, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
-	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of invoice" `
-	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of invoice" `
-	UserId          uint64 `json:"userId" dc:"The filter userid of invoice" `
-	SendEmail       string `json:"sendEmail" dc:"The filter email of invoice" `
-	SortField       string `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
-	SortType        string `json:"sortType" dc:"Sort，asc|desc，Default desc" `
-	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin Permission" `
-	Type            *int   `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
-	Page            int    `json:"page"  dc:"Page, Start 0" `
-	Count           int    `json:"count"  dc:"Count" dc:"Count By Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
-	ReportTimeStart int64  `json:"reportTimeStart" dc:"ReportTimeStart" `
-	ReportTimeEnd   int64  `json:"reportTimeEnd" dc:"ReportTimeEnd" `
+	FirstName       string  `json:"firstName" dc:"The firstName of invoice" `
+	LastName        string  `json:"lastName" dc:"The lastName of invoice" `
+	Currency        string  `json:"currency" dc:"The currency of invoice" `
+	Status          []int   `json:"status" dc:"The status of invoice, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
+	AmountStart     *int64  `json:"amountStart" dc:"The filter start amount of invoice" `
+	AmountEnd       *int64  `json:"amountEnd" dc:"The filter end amount of invoice" `
+	UserId          uint64  `json:"userId" dc:"The filter userid of invoice" `
+	GatewayIds      []int64 `json:"gatewayIds" dc:"GatewayIds, Search Filter GatewayIds" `
+	SendEmail       string  `json:"sendEmail" dc:"The filter email of invoice" `
+	SortField       string  `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
+	SortType        string  `json:"sortType" dc:"Sort，asc|desc，Default desc" `
+	DeleteInclude   bool    `json:"deleteInclude" dc:"Deleted Involved，Need Admin Permission" `
+	Type            *int    `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
+	Page            int     `json:"page"  dc:"Page, Start 0" `
+	Count           int     `json:"count"  dc:"Count" dc:"Count By Page" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
+	ReportTimeStart int64   `json:"reportTimeStart" dc:"ReportTimeStart，UTC timestamp，seconds" `
+	ReportTimeEnd   int64   `json:"reportTimeEnd" dc:"ReportTimeEnd，UTC timestamp，seconds" `
 }
 
 type ListRes struct {
@@ -140,6 +142,13 @@ type CancelReq struct {
 	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 }
 type CancelRes struct {
+}
+
+type ClearPaymentReq struct {
+	g.Meta    `path:"/clearPayment" tags:"Invoice" method:"post" summary:"Admin Clear Invoice Current Pending Payment"`
+	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+}
+type ClearPaymentRes struct {
 }
 
 type RefundReq struct {

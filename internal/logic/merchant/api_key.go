@@ -13,3 +13,11 @@ func GenerateMerchantAPIKey() string {
 		return fmt.Sprintf("ub_test_%s", utility.GenerateRandomAlphanumeric(32))
 	}
 }
+
+func GenerateMerchantWebHookSecret() string {
+	if config.GetConfigInstance().IsProd() {
+		return fmt.Sprintf("ubwk_%s", utility.GenerateRandomAlphanumeric(32))
+	} else {
+		return fmt.Sprintf("ubwk_test_%s", utility.GenerateRandomAlphanumeric(32))
+	}
+}

@@ -3,26 +3,32 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean/detail"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
+	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/multi_currencies/currency_exchange"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/unibee"
+
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, subGateway string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
+func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string, subGateway string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange, metadata map[string]interface{}) *entity.MerchantGateway {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
 	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
 	utility.Assert(gatewayInfo != nil, "gateway not ready")
+	utility.Assert(len(gatewayKey) > 0, "publicKey invalid")
 	if len(gatewayKey) > 0 || len(gatewaySecret) > 0 {
 		var gatewayPaymentTypes = make([]*_interface.GatewayPaymentType, 0)
 		for _, paymentTypeStr := range paymentTypes {
@@ -41,15 +47,24 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		utility.AssertError(err, "gateway test error, key or secret invalid")
 	}
 	utility.Assert(gatewayName != "wire_transfer", "gateway should not wire transfer type")
-	var one *entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).
-		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
-		Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
-		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
-		OmitNil().
-		Scan(&one)
-	utility.AssertError(err, "system error")
-	utility.Assert(one == nil, "same gateway exist")
+	if gatewayInfo.GatewayType == consts.GatewayTypeCrypto {
+		exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, merchantId, currency_exchange.FiatExchangeApiKey)
+		if config.GetConfigInstance().Mode != "cloud" {
+			utility.Assert(exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0, "ExchangeApi Need Setup First For Crypto Gateway")
+		}
+	}
+
+	//var one *entity.MerchantGateway
+	//err := dao.MerchantGateway.Ctx(ctx).
+	//	Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+	//	Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+	//	Where(dao.MerchantGateway.Columns().IsDeleted, 0).
+	//	OmitNil().
+	//	Scan(&one)
+	//utility.AssertError(err, "system error")
+	//utility.Assert(one == nil, "same gateway exist")
+
+	minData := GetMinData(ctx, merchantId, gatewayName)
 
 	var name = ""
 	if displayName != nil {
@@ -65,7 +80,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	} else {
 		gatewaySort = gatewayInfo.Sort
 	}
-	one = &entity.MerchantGateway{
+	one := &entity.MerchantGateway{
 		MerchantId:    merchantId,
 		GatewayName:   gatewayName,
 		GatewayKey:    gatewayKey,
@@ -78,6 +93,8 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		Host:          gatewayInfo.Host,
 		Custom:        utility.MarshalToJsonString(currencyExchange),
 		BrandData:     unibee.StringValue(utility.JoinToStringPoint(paymentTypes)),
+		IsDeleted:     int(minData),
+		MetaData:      utility.MarshalToJsonString(metadata),
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "system error")
@@ -101,6 +118,26 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	return one
 }
 
+func GetMinData(ctx context.Context, merchantId uint64, gatewayName string) float64 {
+	minData, err := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+		Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+		Min(dao.MerchantGateway.Columns().IsDeleted)
+	utility.AssertError(err, "system error")
+	if minData > 0 {
+		minData = 0
+	} else if minData == 0 {
+		if query.GetDefaultGatewayByGatewayName(ctx, merchantId, gatewayName) == nil {
+			minData = 0
+		} else {
+			minData = -1
+		}
+	} else {
+		minData = minData - 1
+	}
+	return minData
+}
+
 func UpdateGatewaySort(ctx context.Context, merchantId uint64, gatewayId uint64, sort int64) {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
@@ -113,7 +150,7 @@ func UpdateGatewaySort(ctx context.Context, merchantId uint64, gatewayId uint64,
 	utility.AssertError(err, "system error")
 }
 
-func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targetGatewayKey *string, targetGatewaySecret *string, targetSubGateway *string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange) *entity.MerchantGateway {
+func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targetGatewayKey *string, targetGatewaySecret *string, targetSubGateway *string, paymentTypes []string, displayName *string, gatewayIcon *[]string, sort *int64, currencyExchange []*detail.GatewayCurrencyExchange, metadata *map[string]interface{}) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
@@ -123,6 +160,7 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 
 	if targetGatewayKey != nil || targetGatewaySecret != nil {
 		utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "gateway should not wire transfer type")
+		utility.Assert(one.IsDeleted <= 0, "gateway already archived")
 		gatewayKey := one.GatewayKey
 		gatewaySecret := one.GatewaySecret
 		subGateway := one.SubGateway
@@ -144,6 +182,8 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 			}
 		}
 		_, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, &_interface.GatewayTestReq{
+			OldKey:              one.GatewayKey,
+			OldSecret:           one.GatewaySecret,
 			Key:                 gatewayKey,
 			Secret:              gatewaySecret,
 			SubGateway:          subGateway,
@@ -165,6 +205,7 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 		dao.MerchantGateway.Columns().EnumKey:    sort,
 		dao.MerchantGateway.Columns().SubGateway: targetSubGateway,
 		dao.MerchantGateway.Columns().Custom:     utility.MarshalMetadataToJsonString(currencyExchange),
+		dao.MerchantGateway.Columns().MetaData:   utility.MarshalMetadataToJsonString(utility.MergeMetadata(one.MetaData, metadata)),
 		dao.MerchantGateway.Columns().GmtModify:  gtime.Now(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "system error")
@@ -186,14 +227,41 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, targe
 func ArchiveGateway(ctx context.Context, merchantId uint64, gatewayId uint64) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
-	utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "invalid gateway, wire transfer not supported")
+	utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "Invalid gateway: wire transfer not supported")
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == merchantId, "merchant not match")
-	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+	list := make([]*entity.MerchantGateway, 0)
+	err := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+		Where(dao.MerchantGateway.Columns().GatewayName, one.GatewayName).
+		WhereLTE(dao.MerchantGateway.Columns().IsDeleted, 0).
+		Scan(&list)
+	utility.AssertError(err, "system error")
+	utility.Assert(len(list) > 0, "no valid gateway found")
+	utility.Assert(len(list) > 1, "Archiving failed: only one valid gateway available")
+	var nextDefaultOne *entity.MerchantGateway
+	if one.IsDeleted == 0 {
+		for _, o := range list {
+			if o.Id != one.Id && o.IsDeleted < 0 {
+				nextDefaultOne = o
+				break
+			}
+		}
+		utility.Assert(nextDefaultOne != nil, "Archiving failed: only one valid gateway available")
+	}
+
+	_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
 		dao.MerchantGateway.Columns().IsDeleted: gtime.Now().Timestamp(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "system error")
 	one = query.GetGatewayById(ctx, gatewayId)
+
+	if nextDefaultOne != nil {
+		_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+			dao.MerchantGateway.Columns().IsDeleted: 0,
+		}).Where(dao.MerchantGateway.Columns().Id, nextDefaultOne.Id).OmitNil().Update()
+		utility.AssertError(err, "system error")
+	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
@@ -204,6 +272,81 @@ func ArchiveGateway(ctx context.Context, merchantId uint64, gatewayId uint64) *e
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	return one
+}
+
+func RestoreGateway(ctx context.Context, merchantId uint64, gatewayId uint64) *entity.MerchantGateway {
+	utility.Assert(gatewayId > 0, "gatewayId invalid")
+	one := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "invalid gateway, wire transfer not supported")
+	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == merchantId, "merchant not match")
+	if one.IsDeleted > 0 {
+		minData := GetMinData(ctx, merchantId, one.GatewayName)
+		_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+			dao.MerchantGateway.Columns().IsDeleted: minData,
+		}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
+		utility.AssertError(err, "system error")
+		one = query.GetGatewayById(ctx, gatewayId)
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
+			Content:        "Restore",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
+
+	return one
+}
+
+func SetDefaultGateway(ctx context.Context, merchantId uint64, gatewayId uint64) *entity.MerchantGateway {
+	utility.Assert(gatewayId > 0, "gatewayId invalid")
+	one := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(one.GatewayType != consts.GatewayTypeWireTransfer, "invalid gateway, wire transfer not supported")
+	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == merchantId, "merchant not match")
+	if one.IsDeleted != 0 {
+		oldDefaultOne := query.GetDefaultGatewayByGatewayName(ctx, merchantId, one.GatewayName)
+		var err error
+		if oldDefaultOne != nil {
+			minData := GetMinData(ctx, merchantId, oldDefaultOne.GatewayName)
+			err = dao.MerchantGateway.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+				result, err := transaction.Update(dao.MerchantGateway.Table(), g.Map{dao.MerchantGateway.Columns().IsDeleted: minData},
+					g.Map{dao.MerchantGateway.Columns().Id: oldDefaultOne.Id})
+				if err != nil || result == nil {
+					return err
+				}
+				result, err = transaction.Update(dao.MerchantGateway.Table(), g.Map{dao.MerchantGateway.Columns().IsDeleted: 0},
+					g.Map{dao.MerchantGateway.Columns().Id: one.Id})
+				if err != nil || result == nil {
+					return err
+				}
+				return nil
+			})
+			utility.AssertError(err, "system error")
+		} else {
+			_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+				dao.MerchantGateway.Columns().IsDeleted: 0,
+			}).Where(dao.MerchantGateway.Columns().Id, one.Id).OmitNil().Update()
+			utility.AssertError(err, "system error")
+		}
+		one = query.GetGatewayById(ctx, gatewayId)
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
+			Content:        "SetDefault",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
+
 	return one
 }
 
@@ -272,12 +415,7 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *e
 	var one *entity.MerchantGateway
 	gatewayInfo := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayInfo(ctx)
 	utility.Assert(gatewayInfo != nil, "gateway not ready")
-	err := dao.MerchantGateway.Ctx(ctx).
-		Where(dao.MerchantGateway.Columns().MerchantId, req.MerchantId).
-		Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
-		OmitEmpty().
-		Scan(&one)
-	utility.AssertError(err, "system error")
+	query.GetDefaultGatewayByGatewayName(ctx, req.MerchantId, gatewayName)
 	utility.Assert(one == nil, "same gateway exist")
 	var name = ""
 	if req.DisplayName != nil {

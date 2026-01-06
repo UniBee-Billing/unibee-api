@@ -30,10 +30,13 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 			g.Log().Errorf(ctx, "SubscriptionDetail parse addon param:%s", err.Error())
 		}
 	}
-	latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId))
+	invoiceEntity := query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)
+	latestInvoiceOne := bean.SimplifyInvoice(invoiceEntity)
 	if latestInvoiceOne != nil {
 		latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, latestInvoiceOne.DiscountCode))
 		latestInvoiceOne.PromoCreditTransaction = bean.SimplifyCreditTransaction(ctx, query.GetPromoCreditTransactionByInvoiceId(ctx, latestInvoiceOne.UserId, latestInvoiceOne.InvoiceId))
+		_, planSnapshot := detail.GetInvoicePlanSnapshot(ctx, invoiceEntity, latestInvoiceOne.Metadata, latestInvoiceOne.Lines)
+		latestInvoiceOne.PlanSnapshot = planSnapshot
 	}
 	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),

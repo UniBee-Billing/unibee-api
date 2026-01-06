@@ -5,6 +5,7 @@ import (
 	"strings"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -22,7 +23,7 @@ type PaymentTimelineListInternalReq struct {
 	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc" `
 	Page            int      `json:"page"  dc:"Page, Start With 0" `
 	Count           int      `json:"count"  dc:"Count" dc:"Count Of Page" `
-	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
 	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
 }
@@ -94,7 +95,7 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 	if err != nil {
 		return nil, err
 	}
-
+	preload.TransactionListPreloadForContext(ctx, mainList)
 	var resultList = make([]*detail.PaymentTimelineDetail, 0)
 	for _, one := range mainList {
 		resultList = append(resultList, detail.ConvertPaymentTimeline(ctx, one))

@@ -82,6 +82,7 @@ func QueryPaymentMethodList(ctx context.Context, req *PaymentMethodListInternalR
 		return make([]*bean.PaymentMethod, 0)
 	}
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	var gatewayPaymentId string
 	if len(req.PaymentId) > 0 {

@@ -17,6 +17,7 @@ func (c *ControllerInvoice) List(ctx context.Context, req *merchantInvoice.ListR
 		AmountEnd:       req.AmountEnd,
 		MerchantId:      _interface.GetMerchantId(ctx),
 		UserId:          req.UserId,
+		GatewayIds:      req.GatewayIds,
 		SendEmail:       req.SendEmail,
 		SortField:       req.SortField,
 		SortType:        req.SortType,

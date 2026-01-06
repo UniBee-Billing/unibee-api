@@ -3,6 +3,18 @@ package api
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"unibee/internal/cmd/config"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	webhook2 "unibee/internal/logic/gateway"
+	"unibee/internal/logic/gateway/api/log"
+	"unibee/internal/logic/gateway/gateway_bean"
+	entity "unibee/internal/model/entity/default"
+	"unibee/internal/query"
+	"unibee/utility"
+
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -18,16 +30,7 @@ import (
 	"github.com/stripe/stripe-go/v78/paymentmethod"
 	"github.com/stripe/stripe-go/v78/product"
 	"github.com/stripe/stripe-go/v78/refund"
-	"strconv"
-	"strings"
-	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
-	webhook2 "unibee/internal/logic/gateway"
-	"unibee/internal/logic/gateway/api/log"
-	"unibee/internal/logic/gateway/gateway_bean"
-	entity "unibee/internal/model/entity/default"
-	"unibee/internal/query"
-	"unibee/utility"
+	"github.com/stripe/stripe-go/v78/webhookendpoint"
 )
 
 type Stripe struct {
@@ -55,7 +58,18 @@ func (s Stripe) GatewayTest(ctx context.Context, req *_interface.GatewayTestReq)
 	stripe.Key = req.Secret
 	s.setUnibeeAppInfo()
 	utility.Assert(len(req.Secret) > 0, "invalid gatewaySecret")
-	utility.Assert(strings.HasPrefix(req.Secret, "sk_"), "invalid gatewaySecret, should start with 'sk_'")
+	utility.Assert(strings.HasPrefix(req.Secret, "sk_") || strings.HasPrefix(req.Secret, "rk_"), "invalid gatewaySecret, should start with 'sk_' or 'rk_'")
+	if strings.HasPrefix(req.Secret, "rk_") {
+		//  paymentmethod: Write
+		//  CheckoutSession: Write
+		//  customer: Write
+		//  paymentintent: Write
+		//  invoice: Write
+		//  dispute: Read
+		//	webhook endpoint: Write
+		checkMessage := CheckRKeyPermission(ctx, req.Secret)
+		utility.Assert(len(checkMessage) == 0, fmt.Sprintf("invalid Stripe Restricted Key:%s", checkMessage))
+	}
 
 	params := &stripe.ProductListParams{}
 	params.Limit = stripe.Int64(3)
@@ -360,6 +374,9 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, createPayContext.Pay.UserId)
+	if createPayContext.PaymentUIMode == "embedded" || createPayContext.PaymentUIMode == "custom" {
+		createPayContext.CheckoutMode = true
+	}
 
 	if createPayContext.CheckoutMode {
 		var items []*stripe.CheckoutSessionLineItemParams
@@ -396,18 +413,19 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 				items = append(items, item)
 			}
 		} else {
-			var productName = createPayContext.Invoice.ProductName
-			if len(productName) == 0 {
-				productName = createPayContext.Invoice.InvoiceName
-			}
-			if len(productName) == 0 {
-				productName = "DefaultProduct"
-			}
+			//var productName = createPayContext.Invoice.ProductName
+			//if len(productName) == 0 {
+			//	productName = createPayContext.Invoice.InvoiceName
+			//}
+			//if len(productName) == 0 {
+			//	productName = "DefaultProduct"
+			//}
+			name, _ := createPayContext.GetInvoiceSingleProductNameAndDescription()
 			item := &stripe.CheckoutSessionLineItemParams{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(fmt.Sprintf("%s", productName)),
+						Name: stripe.String(fmt.Sprintf("%s", name)),
 					},
 					UnitAmount: stripe.Int64(createPayContext.Invoice.TotalAmount),
 				},
@@ -421,9 +439,9 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 			Currency:          stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 			LineItems:         items,
 			PaymentMethodData: &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
-			SuccessURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
-			CancelURL:         stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
-			Metadata:          utility.ConvertToStringMetadata(createPayContext.Metadata),
+			//SuccessURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
+			//CancelURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
+			Metadata: utility.ConvertToStringMetadata(createPayContext.Metadata),
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 				Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
@@ -432,6 +450,15 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 		//if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
 		//	checkoutParams.PaymentMethodConfiguration = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
 		//}
+		if createPayContext.PaymentUIMode == "embedded" || createPayContext.PaymentUIMode == "custom" {
+			checkoutParams.UIMode = stripe.String(createPayContext.PaymentUIMode)
+			if createPayContext.PaymentUIMode == "embedded" {
+				checkoutParams.ReturnURL = stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true))
+			}
+		} else {
+			checkoutParams.SuccessURL = stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true))
+			checkoutParams.CancelURL = stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false))
+		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
 		checkoutParams.Metadata = utility.ConvertToStringMetadata(createPayContext.Metadata)
 		//checkoutParams.ExpiresAt
@@ -451,11 +478,24 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 		if detail.PaymentIntent != nil {
 			gatewayPaymentId = detail.PaymentIntent.ID
 		}
+		gatewayKey := gateway.GatewayKey
+		if len(detail.ClientSecret) == 0 {
+			gatewayKey = ""
+		}
+		action := gjson.New("")
+		_ = action.Set("stripeSessionId", detail.ID)
+		_ = action.Set("stripeClientSecret", detail.ClientSecret)
+		_ = action.Set("stripeAPIKey", gatewayKey)
+		paymentLink := detail.URL
+		if len(paymentLink) == 0 && len(detail.ClientSecret) > 0 {
+			paymentLink = fmt.Sprintf("%s/embedded/stripe?paymentId=%s", config.GetConfigInstance().Server.GetServerPath(), createPayContext.Pay.PaymentId)
+		}
 		return &gateway_bean.GatewayNewPaymentResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
-			Link:                   detail.URL,
+			Link:                   paymentLink,
+			Action:                 action,
 		}, nil
 	} else {
 		// need payment link
@@ -832,4 +872,171 @@ func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.Merchant
 		CancelTime:           gtime.NewFromTimeStamp(item.CanceledAt),
 		LastError:            lastError,
 	}
+}
+
+func isPermissionError(err error) bool {
+	if stripeErr, ok := err.(*stripe.Error); ok {
+		if stripeErr.Type == stripe.ErrorTypeAPI || stripeErr.Type == stripe.ErrorTypeInvalidRequest {
+			msgLower := strings.ToLower(stripeErr.Msg)
+			if strings.Contains(msgLower, "authentication error") ||
+				strings.Contains(msgLower, "permission") ||
+				strings.Contains(msgLower, "invalid api key") ||
+				strings.Contains(msgLower, "not allowed") ||
+				strings.Contains(msgLower, "unauthorized") {
+				return true
+			}
+		}
+		if stripeErr.Code == stripe.ErrorCodeAuthenticationRequired {
+			return true
+		}
+	}
+	return false
+}
+
+func CheckRKeyPermission(ctx context.Context, secretKey string) string {
+	stripe.Key = secretKey
+
+	// Helper to handle Stripe errors and format for return
+	handleStripeError := func(resource string, permission string, err error) string {
+		if err == nil {
+			return ""
+		}
+
+		if isPermissionError(err) {
+			return fmt.Sprintf("PermissionCheck Failed %s:%s。Error: %s", resource, permission, err.Error())
+		}
+
+		stripeErr, ok := err.(*stripe.Error)
+		if ok {
+			return fmt.Sprintf("PermissionCheck Failed %s:%s。Stripe API Error (%s): %s", resource, permission, stripeErr.Type, stripeErr.Msg)
+		}
+		return fmt.Sprintf("PermissionCheck Failed  %s:%s。Network/Other Error: %v", resource, permission, err)
+	}
+
+	fmt.Println("--- Starting Stripe rk_ Key Permission Check ---")
+
+	// --- 1. PaymentMethod Permissions ---
+	// Read
+	pmIter := paymentmethod.List(&stripe.PaymentMethodListParams{})
+	if pmIter.Err() != nil {
+		return handleStripeError("PaymentMethod", "Read", pmIter.Err())
+	}
+	// Write
+	_, err := paymentmethod.New(&stripe.PaymentMethodParams{Type: stripe.String("card")}) // Minimal param to trigger permission check
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") || strings.Contains(err.Error(), "No such PaymentMethod: pm_") {
+			return handleStripeError("PaymentMethod", "Write", err)
+		}
+		// If it's other non-permission errors, but the API call still fails, we consider the write operation unsuccessful
+		g.Log().Errorf(ctx, "PaymentMethod:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 2. Checkout Session Permissions ---
+	// Write (Read is implied if write to a specific session ID is present, no direct list API)
+	_, err = session.New(&stripe.CheckoutSessionParams{
+		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency:    stripe.String(string(stripe.CurrencyUSD)),
+					UnitAmount:  stripe.Int64(100),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Test Product")},
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+		SuccessURL: stripe.String("https://example.com/success"),
+		CancelURL:  stripe.String("https://example.com/cancel"),
+	})
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("Checkout Session", "Write", err)
+		}
+		g.Log().Errorf(ctx, "Checkout Session:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 3. Customer Permissions ---
+	// Read
+	custIter := customer.List(&stripe.CustomerListParams{})
+	if custIter.Err() != nil {
+		return handleStripeError("Customer", "Read", custIter.Err())
+	}
+	// Write
+	_, err = customer.New(&stripe.CustomerParams{Email: stripe.String("test-permission-check-temp@example.com")})
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("Customer", "Write", err)
+		}
+		g.Log().Errorf(ctx, "Customer:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 4. PaymentIntent Permissions ---
+	// Read
+	piIter := paymentintent.List(&stripe.PaymentIntentListParams{})
+	if piIter.Err() != nil {
+		return handleStripeError("PaymentIntent", "Read", piIter.Err())
+	}
+	// Write
+	_, err = paymentintent.New(&stripe.PaymentIntentParams{Amount: stripe.Int64(100), Currency: stripe.String(string(stripe.CurrencyUSD))})
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("PaymentIntent", "Write", err)
+		}
+		g.Log().Errorf(ctx, "PaymentIntent:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 5. Refund Permissions ---
+	// Read (indirectly checked if Write for a specific Refund is possible, no direct List for general read check without parent ID)
+	// For this purpose, we assume if write is possible, read on a specific refund is too.
+	// Write
+	_, err = refund.New(&stripe.RefundParams{Charge: stripe.String("ch_invalid_id_for_permission_test")}) // Invalid ID to avoid real refund
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("Refund", "Write", err)
+		}
+		g.Log().Errorf(ctx, "Refund:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 6. Invoice Permissions ---
+	// Read
+	invIter := invoice.List(&stripe.InvoiceListParams{})
+	if invIter.Err() != nil {
+		return handleStripeError("Invoice", "Read", invIter.Err())
+	}
+	// Write
+	_, err = invoice.New(&stripe.InvoiceParams{Customer: stripe.String("cus_invalid_id_for_permission_test")}) // Invalid ID
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("Invoice", "Write", err)
+		}
+		g.Log().Errorf(ctx, "Invoice:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// --- 7. Dispute Permissions ---
+	// Read
+	dispIter := dispute.List(&stripe.DisputeListParams{})
+	if dispIter.Err() != nil {
+		return handleStripeError("Dispute", "Read", dispIter.Err())
+	}
+	// Write (Disputes are not created via API, but updated. No direct 'create' test)
+	// We'll consider successful read as sufficient for dispute interaction for this test.
+	// If more granular check is needed for 'update dispute', you'd need a valid dispute ID to test.
+
+	// --- 8. WebhookEndpoint Permissions ---
+	// Read
+	whIter := webhookendpoint.List(&stripe.WebhookEndpointListParams{})
+	if whIter.Err() != nil {
+		return handleStripeError("WebhookEndpoint", "Read", whIter.Err())
+	}
+	// Write
+	_, err = webhookendpoint.New(&stripe.WebhookEndpointParams{URL: stripe.String("https://example.com/webhook-test-permission"), EnabledEvents: []*string{stripe.String("charge.succeeded")}})
+	if err != nil {
+		if strings.Contains(err.Error(), "authentication_error") || strings.Contains(err.Error(), "permission_error") {
+			return handleStripeError("WebhookEndpoint", "Write", err)
+		}
+		g.Log().Errorf(ctx, "WebhookEndpoint:Write encountered non-permission error (considered successful for permission check if not auth error): %v\n", err)
+	}
+
+	// All checks passed
+	return ""
 }

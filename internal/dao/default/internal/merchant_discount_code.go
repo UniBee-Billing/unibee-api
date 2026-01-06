@@ -48,6 +48,7 @@ type MerchantDiscountCodeColumns struct {
 	UpgradeOnly        string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  string // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 	PlanApplyType      string // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
+	PlanApplyGroup     string // plan_apply_group(json)
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -80,6 +81,7 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	UpgradeOnly:        "upgrade_only",
 	UpgradeLongerOnly:  "upgrade_longer_only",
 	PlanApplyType:      "plan_apply_type",
+	PlanApplyGroup:     "plan_apply_group",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

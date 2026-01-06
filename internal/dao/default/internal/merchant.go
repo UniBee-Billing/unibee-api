@@ -20,56 +20,58 @@ type MerchantDao struct {
 
 // MerchantColumns defines and stores column names for table merchant.
 type MerchantColumns struct {
-	Id          string // merchant_id
-	CompanyId   string // company_id
-	UserId      string // create_user_id
-	Type        string // type
-	CompanyName string // company_name
-	Email       string // email
-	BusinessNum string // business_num
-	Name        string // name
-	Idcard      string // idcard
-	Location    string // location
-	Address     string // address
-	GmtCreate   string // create time
-	GmtModify   string // update_time
-	IsDeleted   string // 0-UnDeleted，1-Deleted
-	CompanyLogo string // company_logo
-	HomeUrl     string //
-	Phone       string // phone
-	CreateTime  string // create utc time
-	TimeZone    string // merchant default time zone
-	Host        string // merchant user portal host
-	ApiKey      string // merchant open api key
-	CountryCode string // country_code
-	CountryName string // country_name
+	Id            string // merchant_id
+	CompanyId     string // company_id
+	UserId        string // create_user_id
+	Type          string // type
+	CompanyName   string // company_name
+	Email         string // email
+	BusinessNum   string // business_num
+	Name          string // name
+	Idcard        string // idcard
+	Location      string // location
+	Address       string // address
+	GmtCreate     string // create time
+	GmtModify     string // update_time
+	IsDeleted     string // Unarchived: <= 0; Archived: > 0
+	CompanyLogo   string // company_logo
+	HomeUrl       string //
+	Phone         string // phone
+	CreateTime    string // create utc time
+	TimeZone      string // merchant default time zone
+	Host          string // merchant user portal host
+	ApiKey        string // merchant open api key
+	CountryCode   string // country_code
+	CountryName   string // country_name
+	WebhookSecret string // merchant webhook secret
 }
 
 // merchantColumns holds the columns for table merchant.
 var merchantColumns = MerchantColumns{
-	Id:          "id",
-	CompanyId:   "company_id",
-	UserId:      "user_id",
-	Type:        "type",
-	CompanyName: "company_name",
-	Email:       "email",
-	BusinessNum: "business_num",
-	Name:        "name",
-	Idcard:      "idcard",
-	Location:    "location",
-	Address:     "address",
-	GmtCreate:   "gmt_create",
-	GmtModify:   "gmt_modify",
-	IsDeleted:   "is_deleted",
-	CompanyLogo: "company_logo",
-	HomeUrl:     "home_url",
-	Phone:       "phone",
-	CreateTime:  "create_time",
-	TimeZone:    "time_zone",
-	Host:        "host",
-	ApiKey:      "api_key",
-	CountryCode: "country_code",
-	CountryName: "country_name",
+	Id:            "id",
+	CompanyId:     "company_id",
+	UserId:        "user_id",
+	Type:          "type",
+	CompanyName:   "company_name",
+	Email:         "email",
+	BusinessNum:   "business_num",
+	Name:          "name",
+	Idcard:        "idcard",
+	Location:      "location",
+	Address:       "address",
+	GmtCreate:     "gmt_create",
+	GmtModify:     "gmt_modify",
+	IsDeleted:     "is_deleted",
+	CompanyLogo:   "company_logo",
+	HomeUrl:       "home_url",
+	Phone:         "phone",
+	CreateTime:    "create_time",
+	TimeZone:      "time_zone",
+	Host:          "host",
+	ApiKey:        "api_key",
+	CountryCode:   "country_code",
+	CountryName:   "country_name",
+	WebhookSecret: "webhook_secret",
 }
 
 // NewMerchantDao creates and returns a new DAO object for table data access.

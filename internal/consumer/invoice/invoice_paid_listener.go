@@ -10,6 +10,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/invoice"
+	"unibee/internal/logic/analysis/quickbooks"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/metric_event"
 	"unibee/internal/logic/subscription/service/next"
@@ -46,6 +47,7 @@ func (t InvoicePaidListener) Consume(ctx context.Context, message *redismq.Messa
 		if len(one.SubscriptionId) > 0 {
 			next.ClearSubscriptionNextInvoiceData(ctx, one.SubscriptionId, one.InvoiceId)
 		}
+		quickbooks.UploadPaidInvoice(ctx, one.InvoiceId)
 	}
 	return redismq.CommitMessage
 }

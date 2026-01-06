@@ -8,8 +8,11 @@ import (
 	"unibee/internal/cmd/config"
 	"unibee/internal/cronjob/batch"
 	"unibee/internal/cronjob/discount"
+	"unibee/internal/cronjob/email"
 	"unibee/internal/cronjob/gateway_log"
 	"unibee/internal/cronjob/invoice"
+	"unibee/internal/cronjob/multi_currency"
+	"unibee/internal/cronjob/statistics"
 	"unibee/internal/cronjob/sub"
 	"unibee/internal/cronjob/vat"
 	"unibee/internal/logic/member"
@@ -45,10 +48,6 @@ func StartCronJobs() {
 		invoice.TaskForExpireInvoices(ctx)
 		//payment.TaskForCancelExpiredPayment(ctx)
 		batch.TaskForExpireBatchTasks(ctx)
-		if !config.GetConfigInstance().IsProd() {
-			merchant.ReloadAllMerchantsCacheForSDKAuthBackground()
-			member.ReloadAllMembersCacheForSDKAuthBackground()
-		}
 	}, other1MinTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
@@ -59,6 +58,7 @@ func StartCronJobs() {
 	_, err = gcron.Add(ctx, "@every 10m", func(ctx context.Context) {
 		sub.TaskForSubscriptionTrackAfterCancelledOrExpired(ctx, other10MinTask)
 		sub.TaskForSubscriptionInitFailed(ctx, other10MinTask)
+		email.TaskForCompensateEmailHistory(ctx)
 		if !config.GetConfigInstance().IsProd() {
 			invoice.TaskForCompensateSubUpDownInvoices(ctx)
 		}
@@ -74,6 +74,10 @@ func StartCronJobs() {
 		gateway_log.TaskForDeleteWebhookMessage(ctx)
 		gateway_log.TaskForDeleteWebhookLog(ctx)
 		sub.TaskForUserSubCompensate(ctx, hourTask)
+		if !config.GetConfigInstance().IsProd() {
+			merchant.ReloadAllMerchantsCacheForSDKAuthBackground()
+			member.ReloadAllMembersCacheForSDKAuthBackground()
+		}
 	}, hourTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
@@ -83,6 +87,10 @@ func StartCronJobs() {
 	var dailyTask = "JobDailyTask"
 	_, err = gcron.Add(ctx, "@daily", func(ctx context.Context) {
 		invoice.TaskForCompensateSubUpDownInvoices(ctx)
+		multi_currency.TaskForSyncMerchantsMultiCurrencyConfigs(ctx)
+		if !config.GetConfigInstance().IsProd() {
+			statistics.TaskForUpdateAllMerchantStatistics(ctx)
+		}
 	}, dailyTask)
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", dailyTask, err.Error())

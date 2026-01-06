@@ -49,18 +49,18 @@ func NewUserSession(ctx context.Context, merchantId uint64, userId uint64, retur
 	ss := utility.GenerateRandomAlphanumeric(40)
 	_, err = g.Redis().Set(ctx, ss, one.Id)
 	utility.AssertError(err, "Server Error")
-	_, err = g.Redis().Expire(ctx, ss, config.GetConfigInstance().Auth.Login.Expire*60)
+	_, err = g.Redis().Expire(ctx, ss, config.GetConfigInstance().Auth.Login.Expire)
 	utility.AssertError(err, "Server Error")
 	if len(returnUrl) > 0 {
 		_, err = g.Redis().Set(ctx, ss+"_returnUrl", returnUrl)
 		utility.AssertError(err, "Server Error")
-		_, err = g.Redis().Expire(ctx, ss+"_returnUrl", config.GetConfigInstance().Auth.Login.Expire*60)
+		_, err = g.Redis().Expire(ctx, ss+"_returnUrl", config.GetConfigInstance().Auth.Login.Expire)
 		utility.AssertError(err, "Server Error")
 	}
 	if len(cancelUrl) > 0 {
 		_, err = g.Redis().Set(ctx, ss+"_cancelUrl", cancelUrl)
 		utility.AssertError(err, "Server Error")
-		_, err = g.Redis().Expire(ctx, ss+"_cancelUrl", config.GetConfigInstance().Auth.Login.Expire*60)
+		_, err = g.Redis().Expire(ctx, ss+"_cancelUrl", config.GetConfigInstance().Auth.Login.Expire)
 		utility.AssertError(err, "Server Error")
 	}
 

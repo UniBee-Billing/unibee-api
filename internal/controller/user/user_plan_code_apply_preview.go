@@ -28,7 +28,11 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 	utility.Assert(one.Status == consts.PlanStatusActive, "Plan Not Active")
 	utility.Assert(one.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
-	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)
+	currency := one.Currency
+	if len(req.Currency) > 0 {
+		currency = req.Currency
+	}
+	oneDiscount := query.GetDiscountByCode(ctx, one.MerchantId, req.Code)
 	if oneDiscount == nil {
 		return &plan.CodeApplyPreviewRes{
 			Valid:          false,
@@ -51,10 +55,10 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 		isChangeToSameIntervalPlan = *req.IsChangeToSameIntervalPlan
 	}
 	canApply, _, message := discount2.UserDiscountApplyPreview(ctx, &discount2.UserDiscountApplyReq{
-		MerchantId:                 _interface.GetMerchantId(ctx),
+		MerchantId:                 one.MerchantId,
 		PLanId:                     uint64(req.PlanId),
 		DiscountCode:               req.Code,
-		Currency:                   one.Currency,
+		Currency:                   currency,
 		TimeNow:                    gtime.Now().Timestamp(),
 		IsUpgrade:                  isUpgrade,
 		IsChangeToSameIntervalPlan: isChangeToSameIntervalPlan,
@@ -62,11 +66,11 @@ func (c *ControllerPlan) CodeApplyPreview(ctx context.Context, req *plan.CodeApp
 		IsRenew:                    false,
 		IsNewUser:                  service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Email),
 	})
-	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, one.MerchantId, one.Amount, one.Currency, req.Code, gtime.Now().Timestamp()), one.Amount)
+	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, one.MerchantId, req.Code), one.CurrencyAmount(ctx, currency), currency, gtime.Now().Timestamp()), one.CurrencyAmount(ctx, currency))
 	return &plan.CodeApplyPreviewRes{
 		Valid:          canApply,
 		DiscountAmount: discountAmount,
-		DiscountCode:   bean.SimplifyMerchantDiscountCode(oneDiscount),
+		DiscountCode:   bean.SimplifyMerchantDiscountCodeWithTargetCurrency(ctx, oneDiscount, currency),
 		FailureReason:  message,
 	}, nil
 }

@@ -5,14 +5,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gcfg"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/glog"
 	"os"
 	"strconv"
 	"strings"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gcfg"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
 const DefaultConfigFileName = "config.yaml"
@@ -22,6 +23,7 @@ var (
 	mode                             string
 	unibeeAPIUrl                     string
 	unibeeHostedUrl                  string
+	unibeeAnalyticsUrl               string
 	serverAddress                    string
 	serverJwtKey                     string
 	swaggerPath                      string
@@ -43,6 +45,11 @@ var (
 	nacosGroupArg                    string
 	nacosDataIdArg                   string
 	VatNumberUnExemptionCountryCodes string
+	oauthTokenSecret                 string
+	oauthGoogleClientId              string
+	oauthGoogleClientSecret          string
+	oauthGithubClientId              string
+	oauthGithubClientSecret          string
 )
 
 func Init() {
@@ -50,7 +57,8 @@ func Init() {
 	flag.StringVar(&env, "env", utility.GetEnvParam("env"), "local|daily|prod")
 	flag.StringVar(&mode, "mode", utility.GetEnvParam("mode"), "stand-alone|cloud")
 	flag.StringVar(&unibeeAPIUrl, "unibee-api-url", utility.GetEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
-	flag.StringVar(&unibeeHostedUrl, "unibee-hosted-url", utility.GetEnvParam("unibee.hosted.url"), "url, default blank")
+	flag.StringVar(&unibeeHostedUrl, "unibee-hosted-url", utility.GetEnvParam("unibee.hosted.url"), "hosted url, default blank")
+	flag.StringVar(&unibeeAnalyticsUrl, "unibee-analytics-url", utility.GetEnvParam("unibee.analytics.url"), "analytics url, default blank")
 	flag.StringVar(&serverAddress, "server-address", utility.GetEnvParam("server.address"), "server address, default :8088")
 	flag.StringVar(&serverJwtKey, "server-jwtKey", utility.GetEnvParam("server.jwtKey"), "jwtKey to encrypt")
 	flag.StringVar(&swaggerPath, "server-swaggerPath", utility.GetEnvParam("server.swaggerPath"), "swaggerPath, default /swagger")
@@ -71,6 +79,11 @@ func Init() {
 	flag.StringVar(&nacosGroupArg, "nacos-group", utility.GetEnvParam("nacos.group"), "nacos group")
 	flag.StringVar(&nacosDataIdArg, "nacos-data-id", utility.GetEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
 	flag.StringVar(&VatNumberUnExemptionCountryCodes, "vat-number-un-exemption-country-codes", utility.GetEnvParam("vat.number.un.exemption.country.codes"), "vat config, vat number not exemption countryCodes")
+	flag.StringVar(&oauthTokenSecret, "oauth-token-secret", utility.GetEnvParam("oauth.tokenSecret"), "OAuth token secret")
+	flag.StringVar(&oauthGoogleClientId, "oauth-google-client-id", utility.GetEnvParam("oauth.googleClientId"), "OAuth Google client ID")
+	flag.StringVar(&oauthGoogleClientSecret, "oauth-google-client-secret", utility.GetEnvParam("oauth.googleClientSecret"), "OAuth Google client secret")
+	flag.StringVar(&oauthGithubClientId, "oauth-github-client-id", utility.GetEnvParam("oauth.githubClientId"), "OAuth GitHub client ID")
+	flag.StringVar(&oauthGithubClientSecret, "oauth-github-client-secret", utility.GetEnvParam("oauth.githubClientSecret"), "OAuth GitHub client secret")
 
 	var ctx = gctx.New()
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(DefaultConfigFileName)
@@ -114,6 +127,7 @@ func Init() {
 				"logger":    map[string]interface{}{},
 				"vatConfig": map[string]interface{}{},
 				"auth":      map[string]interface{}{"login": map[string]interface{}{}},
+				"oauth":     map[string]interface{}{},
 			}
 			g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 		}
@@ -136,6 +150,8 @@ func Init() {
 	fmt.Println(gcfg.Instance().Get(ctx, "redis"))
 	fmt.Println("Auth Config:")
 	fmt.Println(gcfg.Instance().Get(ctx, "auth"))
+	fmt.Println("OAuth Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "oauth"))
 }
 
 type Nacos struct {
@@ -152,12 +168,14 @@ func SetupDefaultConfigs(ctx context.Context) {
 	setUpDefaultConfig(config, "mode", mode, "standalone")
 	setUpDefaultConfig(config, "logger", map[string]interface{}{}, map[string]interface{}{})
 	setUpDefaultConfig(config, "auth", map[string]interface{}{"login": map[string]interface{}{}}, map[string]interface{}{"login": map[string]interface{}{}})
+	setUpDefaultConfig(config, "oauth", map[string]interface{}{}, map[string]interface{}{})
 	serverConfig := g.Cfg().MustGet(ctx, "server").Map()
 	utility.Assert(serverConfig != nil, "server config not found")
 	serverConfig["dumpRouterMap"] = false
 	setUpDefaultConfig(serverConfig, "address", serverAddress, ":8088")
 	setUpDefaultConfig(serverConfig, "domainPath", unibeeAPIUrl, "http://127.0.0.1:8088")
 	setUpDefaultConfig(serverConfig, "hostedPagePath", unibeeHostedUrl, "")
+	setUpDefaultConfig(serverConfig, "analyticsPath", unibeeAnalyticsUrl, "")
 	setUpDefaultConfig(serverConfig, "jwtKey", serverJwtKey, "3^&secret-key-for-UniBee*1!8*")
 	serverConfig["openapiPath"] = "/api.json"
 	setUpDefaultConfig(serverConfig, "swaggerPath", swaggerPath, "") ///swagger
@@ -192,6 +210,15 @@ func SetupDefaultConfigs(ctx context.Context) {
 	} else {
 		setUpDefaultConfig(authLoginConfig, "expire", 600, 600)
 	}
+
+	// AuthJs Initial
+	oauthConfig := g.Cfg().MustGet(ctx, "oauth").Map()
+	utility.Assert(oauthConfig != nil, "oauth config not found")
+	setUpDefaultConfig(oauthConfig, "tokenSecret", oauthTokenSecret, "")
+	setUpDefaultConfig(oauthConfig, "googleClientId", oauthGoogleClientId, "")
+	setUpDefaultConfig(oauthConfig, "googleClientSecret", oauthGoogleClientSecret, "")
+	setUpDefaultConfig(oauthConfig, "githubClientId", oauthGithubClientId, "")
+	setUpDefaultConfig(oauthConfig, "githubClientSecret", oauthGithubClientSecret, "")
 
 	//vatConfig := g.Cfg().MustGet(ctx, "vatConfig").Map()
 	//if vatConfig != nil {

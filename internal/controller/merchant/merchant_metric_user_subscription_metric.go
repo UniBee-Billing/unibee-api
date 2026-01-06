@@ -16,5 +16,8 @@ func (c *ControllerMetric) UserSubscriptionMetric(ctx context.Context, req *metr
 	utility.Assert(sub != nil, "subscription not found")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	utility.Assert(user != nil, "user not found")
-	return &metric.UserSubscriptionMetricRes{UserMetric: metric_event.GetUserSubscriptionMetricStat(ctx, _interface.GetMerchantId(ctx), user, sub, false)}, nil
+	if _interface.Context().Get(ctx).IsAdminPortalCall {
+		req.ReloadCache = true
+	}
+	return &metric.UserSubscriptionMetricRes{UserMetric: metric_event.GetUserSubscriptionMetricStat(ctx, _interface.GetMerchantId(ctx), user, sub, req.ReloadCache)}, nil
 }

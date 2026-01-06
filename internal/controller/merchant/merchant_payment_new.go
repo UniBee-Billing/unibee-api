@@ -63,20 +63,26 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			req.ExternalPaymentId = uuid.New().String()
 		}
 	}
+	var plan *entity.Plan
 	if req.PlanId == 0 {
 		utility.Assert(req.TotalAmount > 0, "amount value is nil")
 		utility.Assert(len(req.Currency) > 0, "amount currency is nil")
 	} else {
-		plan := query.GetPlanById(ctx, req.PlanId)
+		plan = query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan != nil, "plan not found")
+		if len(req.Currency) == 0 {
+			req.Currency = plan.Currency
+		}
 		if req.TotalAmount > 0 {
-			utility.Assert(req.TotalAmount == plan.Amount, "TotalAmount not match plan's amount")
+			utility.Assert(req.TotalAmount == plan.CurrencyAmount(ctx, req.Currency), "TotalAmount not match plan's amount")
 		}
-		if len(req.Currency) > 0 {
-			utility.Assert(req.Currency == plan.Currency, "Currency not match plan's amount")
+		//if len(req.Currency) > 0 {
+		//	utility.Assert(req.Currency == plan.Currency, "Currency not match plan's amount")
+		//}
+		if req.Quantity < 1 {
+			req.Quantity = 1
 		}
-		req.TotalAmount = plan.Amount
-		req.Currency = plan.Currency
+		req.TotalAmount = plan.CurrencyAmount(ctx, req.Currency) * req.Quantity
 		if req.Metadata == nil {
 			req.Metadata = make(map[string]interface{})
 		}
@@ -105,7 +111,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		sendStatus = consts.InvoiceSendStatusUnSend
 	}
 	var invoice *bean.Invoice
-	if req.Items != nil && len(req.Items) > 0 {
+	if plan == nil && req.Items != nil && len(req.Items) > 0 {
 		var invoiceItems []*bean.InvoiceItemSimplify
 		var totalAmountExcludingTax int64 = 0
 		var totalAmount int64 = 0
@@ -132,6 +138,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}
 		utility.Assert(totalAmount == req.TotalAmount, "sum(items.amount) should match totalAmount")
 		invoice = &bean.Invoice{
+			BizType:                 consts.BizTypeOneTime,
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			Currency:                req.Currency,
@@ -147,7 +154,14 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Metadata:                req.Metadata,
 		}
 	} else {
+		if len(req.Name) == 0 && plan != nil {
+			name = plan.PlanName
+		}
+		if len(req.Description) == 0 && plan != nil {
+			req.Description = plan.Description
+		}
 		invoice = &bean.Invoice{
+			BizType:                 consts.BizTypeOneTime,
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			TotalAmountExcludingTax: req.TotalAmount,
@@ -171,6 +185,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				Name:                   name,
 				Description:            req.Description,
 				Quantity:               1,
+				Plan:                   bean.SimplifyPlan(plan),
 			}},
 			Metadata: req.Metadata,
 		}
@@ -180,8 +195,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(existPayment == nil, "same ExternalPaymentId exist:"+req.ExternalPaymentId)
 
 	resp, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-		CheckoutMode: true,
-		Gateway:      gateway,
+		CheckoutMode:  true,
+		PaymentUIMode: req.PaymentUIMode,
+		Gateway:       gateway,
 		Pay: &entity.Payment{
 			ExternalPaymentId: req.ExternalPaymentId,
 			BizType:           consts.BizTypeOneTime,
@@ -207,6 +223,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	res = &payment.NewRes{
 		Status:            consts.PaymentCreated,
 		PaymentId:         resp.Payment.PaymentId,
+		InvoiceId:         resp.Payment.InvoiceId,
 		ExternalPaymentId: req.ExternalPaymentId,
 		Link:              resp.Link,
 		Action:            resp.Action,

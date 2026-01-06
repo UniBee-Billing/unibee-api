@@ -2,13 +2,14 @@ package metric
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/internal/query"
 	"unibee/test"
 	"unibee/utility/unibee"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestMerchantMetric(t *testing.T) {
@@ -43,7 +44,7 @@ func TestMerchantMetric(t *testing.T) {
 		})
 		require.NotNil(t, list)
 		require.Equal(t, 1, len(list))
-		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, unibee.Int(MetricTypeChargeMetered), "test2", "test2")
+		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, unibee.Int(MetricTypeChargeMetered), "test2", "test2", "", nil)
 		require.Nil(t, err)
 		require.NotNil(t, one)
 		require.Equal(t, "test2", one.MetricName)

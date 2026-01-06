@@ -97,7 +97,7 @@ func (t TaskCreditTransactionExport) PageData(ctx context.Context, page int, cou
 			}
 			mainList = append(mainList, &ExportCreditTransactionEntity{
 				Id:              fmt.Sprintf("%v", one.Id),
-				ChangedAmount:   ConvertCreditAmountToDollarStr(one.DeltaAmount, one.Currency, one.AccountType),
+				ChangedAmount:   utility.ConvertCreditAmountToDollarStr(one.DeltaAmount, one.Currency, one.AccountType),
 				Email:           one.User.Email,
 				TransactionType: consts.CreditTransactionTypeToEnum(one.TransactionType).ExportDescription(one.DeltaAmount),
 				//TransactionId:      one.TransactionId,
@@ -115,14 +115,6 @@ func (t TaskCreditTransactionExport) PageData(ctx context.Context, page int, cou
 		}
 	}
 	return mainList, nil
-}
-
-func ConvertCreditAmountToDollarStr(cents int64, currency string, AccountType int) string {
-	if AccountType == consts.CreditAccountTypePromo {
-		return fmt.Sprintf("%d", cents)
-	} else {
-		return utility.ConvertCentToDollarStr(cents, currency)
-	}
 }
 
 type ExportCreditTransactionEntity struct {

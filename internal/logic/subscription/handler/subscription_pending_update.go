@@ -7,13 +7,16 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
+	"unibee/api/bean"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/email"
+	"unibee/internal/logic/plan/period"
+
+	//"unibee/internal/logic/invoice/service"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/logic/operation_log"
-	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
@@ -82,7 +85,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	if one.EffectImmediate == 1 {
 		periodEnd = invoice.PeriodEnd
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, periodEnd, one.UpdatePlanId)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, periodEnd, one.UpdatePlanId)
 
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
@@ -124,8 +127,9 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 
 	timeline.SubscriptionNewTimeline(ctx, invoice)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionUpdate, "", &bean.EmailTemplateVariable{
 		UserName:              user.FirstName + " " + user.LastName,
+		Currency:              sub.Currency,
 		MerchantProductName:   query.GetPlanById(ctx, one.UpdatePlanId).PlanName,
 		MerchantCustomerEmail: merchant.Email,
 		MerchantName:          query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
@@ -142,7 +146,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 			Content:        fmt.Sprintf("Update(%s->%s)(%d->%d)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description(), one.PlanId, one.UpdatePlanId),
 			UserId:         sub.UserId,
 			SubscriptionId: sub.SubscriptionId,
-			InvoiceId:      "",
+			InvoiceId:      invoice.InvoiceId,
 			PlanId:         0,
 			DiscountCode:   "",
 		}, err)
@@ -150,7 +154,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
 			Body:       one.SubscriptionId,
-			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName(), "Note": "PendingUpdatePaymentSuccess"},
 		})
 		if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
 			_, _ = redismq.Send(&redismq.Message{

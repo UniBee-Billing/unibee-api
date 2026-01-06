@@ -38,4 +38,5 @@ type MerchantDiscountCode struct {
 	UpgradeOnly        int         `json:"upgradeOnly"        description:"AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1"`                                        // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  int         `json:"upgradeLongerOnly"  description:"AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1"`                                // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 	PlanApplyType      int         `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`                             // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
+	PlanApplyGroup     string      `json:"planApplyGroup"     description:"plan_apply_group(json)"`                                                                                                   // plan_apply_group(json)
 }

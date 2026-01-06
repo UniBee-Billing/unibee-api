@@ -64,6 +64,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*be
 				}
 				vo.LanguageData = languageData
 				vo.LocalizationVersions = languageVersionData
+				vo.VariableGroups = getEmailTemplateGroupVariables()
 				list = append(list, vo)
 			}
 		}
@@ -86,17 +87,19 @@ func UpdateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templat
 		Where(dao.MerchantEmailTemplate.Columns().TemplateName, templateName).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
-	var languageData *bean.MerchantLocalizationVersion
+	var activeLanguage *bean.MerchantLocalizationVersion
+	var languageData = make([]*bean.EmailLocalizationTemplate, 0)
 	if languageVersionData != nil {
 		for _, v := range languageVersionData {
 			if v.Activate {
-				languageData = v
+				activeLanguage = v
+				languageData = v.Localizations
 				break
 			}
 		}
-		if languageData != nil {
+		if activeLanguage != nil {
 			for _, v := range languageVersionData {
-				if v != languageData {
+				if v != activeLanguage {
 					v.Activate = false
 				}
 			}

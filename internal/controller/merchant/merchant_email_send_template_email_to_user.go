@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"unibee/api/bean"
 	_interface "unibee/internal/interface/context"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/invoice/handler"
@@ -28,7 +29,9 @@ func (c *ControllerEmail) SendTemplateEmailToUser(ctx context.Context, req *emai
 		utility.Assert(one.UserId > 0 && int64(one.UserId) == req.UserId, "invoice userId not match")
 		pdfFileName = handler.GenerateInvoicePdf(ctx, one)
 	}
-	err = email2.SendTemplateEmailByOpenApi(ctx, _interface.GetMerchantId(ctx), user.Email, user.TimeZone, user.Language, req.TemplateName, pdfFileName, req.Variables)
+	var variables *bean.EmailTemplateVariable
+	_ = utility.UnmarshalFromJsonString(utility.MarshalToJsonString(req.Variables), &variables)
+	err = email2.SendTemplateEmailByOpenApi(ctx, _interface.GetMerchantId(ctx), user.Email, user.TimeZone, user.Language, req.TemplateName, pdfFileName, variables, nil)
 	if err != nil {
 		return nil, err
 	}

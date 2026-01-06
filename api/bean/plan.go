@@ -1,9 +1,12 @@
 package bean
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"strings"
 	"unibee/internal/cmd/config"
+	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
@@ -41,6 +44,67 @@ type Plan struct {
 	MetricMeteredCharge    []*PlanMetricMeteredChargeParam `json:"metricMeteredCharge"  dc:"Plan's MetricMeteredCharge" `
 	MetricRecurringCharge  []*PlanMetricMeteredChargeParam `json:"metricRecurringCharge"  dc:"Plan's MetricRecurringCharge" `
 	CheckoutUrl            string                          `json:"checkoutUrl"                 description:"CheckoutUrl"`
+	MultiCurrencies        []*PlanMultiCurrency            `json:"multiCurrencies"  dc:"Plan's MultiCurrencies" `
+}
+
+const MerchantMultiCurrenciesConfig = "MerchantMultiCurrenciesConfig"
+
+func GetMerchantMultiCurrencyConfig(ctx context.Context, merchantId uint64) []*MerchantMultiCurrencyConfig {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	var one *entity.MerchantConfig
+	err := dao.MerchantConfig.Ctx(ctx).
+		Where(dao.MerchantConfig.Columns().MerchantId, merchantId).
+		Where(dao.MerchantConfig.Columns().ConfigKey, MerchantMultiCurrenciesConfig).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	var configs = make([]*MerchantMultiCurrencyConfig, 0)
+	if one != nil {
+		_ = utility.UnmarshalFromJsonString(one.ConfigValue, &configs)
+	}
+	return configs
+}
+
+func SimplifyPlanWithContext(ctx context.Context, one *entity.Plan) *Plan {
+	plan := SimplifyPlan(one)
+	var multiCurrencies = make([]*PlanMultiCurrency, 0)
+	if len(one.GatewayProductDescription) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.GatewayProductDescription, &multiCurrencies)
+	}
+
+	exchangeCurrencyMap := make(map[string]*PlanMultiCurrency)
+	for _, multiCurrency := range multiCurrencies {
+		//if multiCurrency.AutoExchange {
+		//	multiCurrencies[i].ExchangeRate = currency_exchange.GetMerchantExchangeCurrencyRate(ctx, one.MerchantId, one.Currency, multiCurrency.Currency)
+		//}
+		//multiCurrencies[i].Amount = utility.ExchangeCurrencyConvert(one.Amount, one.Currency, multiCurrency.Currency, multiCurrency.ExchangeRate)
+		exchangeCurrencyMap[multiCurrency.Currency] = multiCurrency
+	}
+	multiCurrencyConfigs := GetMerchantMultiCurrencyConfig(ctx, one.MerchantId)
+	var targetMultiCurrencies = make([]*PlanMultiCurrency, 0)
+	for _, multiCurrencyConfig := range multiCurrencyConfigs {
+		if strings.ToUpper(multiCurrencyConfig.DefaultCurrency) == one.Currency {
+			for _, multiCurrency := range multiCurrencyConfig.MultiCurrencies {
+				if multiCurrency.Currency == one.Currency {
+					continue
+				}
+				target := &PlanMultiCurrency{
+					Currency:     multiCurrency.Currency,
+					AutoExchange: multiCurrency.AutoExchange,
+					ExchangeRate: multiCurrency.ExchangeRate,
+					Amount:       utility.ExchangeCurrencyConvert(one.Amount, one.Currency, multiCurrency.Currency, multiCurrency.ExchangeRate),
+				}
+				if _, ok := exchangeCurrencyMap[multiCurrency.Currency]; ok {
+					target.Disable = exchangeCurrencyMap[multiCurrency.Currency].Disable
+				}
+				targetMultiCurrencies = append(targetMultiCurrencies, target)
+			}
+			break
+		}
+	}
+	plan.MultiCurrencies = targetMultiCurrencies
+	return plan
 }
 
 func SimplifyPlan(one *entity.Plan) *Plan {
@@ -90,16 +154,69 @@ func SimplifyPlan(one *entity.Plan) *Plan {
 		MetricLimits:           metricPlanCharge.MetricLimits,
 		MetricMeteredCharge:    metricPlanCharge.MetricMeteredCharge,
 		MetricRecurringCharge:  metricPlanCharge.MetricRecurringCharge,
-		CheckoutUrl:            fmt.Sprintf("%s/hosted/checkout?planId=%d&env=%s", config.GetConfigInstance().Server.GetServerPath(), one.Id, config.GetConfigInstance().Env),
+		CheckoutUrl:            fmt.Sprintf("%s/checkout?planId=%d&env=%s", config.GetConfigInstance().Server.GetHostedPath(), one.Id, config.GetConfigInstance().Env),
 	}
 }
 
-func SimplifyPlanList(ones []*entity.Plan) (list []*Plan) {
+func SimplifyPlanList(ctx context.Context, ones []*entity.Plan) (list []*Plan) {
 	if len(ones) == 0 {
 		return make([]*Plan, 0)
 	}
 	for _, one := range ones {
-		list = append(list, SimplifyPlan(one))
+		list = append(list, SimplifyPlanWithContext(ctx, one))
 	}
 	return list
+}
+
+type PlanMultiCurrency struct {
+	Currency     string  `json:"currency" description:"target currency"`
+	AutoExchange bool    `json:"autoExchange" description:"using https://app.exchangerate-api.com/ to update exchange rate if true, the exchange APIKey need setup first"`
+	ExchangeRate float64 `json:"exchangeRate" description:"exchange rate, no setup required if AutoExchange is true"`
+	Amount       int64   `json:"amount" description:"the amount of exchange rate"`
+	Disable      bool    `json:"disable" description:"disable currency exchange"`
+}
+
+func GetPlanCurrencyAmount(ctx context.Context, p *entity.Plan, currency string) int64 {
+	if currency == "" || strings.ToUpper(currency) == strings.ToUpper(p.Currency) {
+		return p.Amount
+	}
+	multiCurrencyConfigs := GetMerchantMultiCurrencyConfig(ctx, p.MerchantId)
+	for _, multiCurrency := range multiCurrencyConfigs {
+		if strings.ToUpper(multiCurrency.DefaultCurrency) == strings.ToUpper(p.Currency) {
+			for _, one := range multiCurrency.MultiCurrencies {
+				if strings.ToUpper(one.Currency) == strings.ToUpper(currency) {
+					return utility.ExchangeCurrencyConvert(p.Amount, p.Currency, one.Currency, one.ExchangeRate)
+				}
+			}
+		}
+	}
+	utility.Assert(false, fmt.Sprintf("No currency(%s) config found for plan", currency))
+	return p.Amount
+}
+
+func (p *Plan) CurrencyAmount(ctx context.Context, targetCurrency string) int64 {
+	if targetCurrency == "" || strings.ToUpper(targetCurrency) == strings.ToUpper(p.Currency) {
+		return p.Amount
+	}
+
+	for _, one := range p.MultiCurrencies {
+		if strings.ToUpper(one.Currency) == strings.ToUpper(targetCurrency) {
+			if one.Disable {
+				utility.Assert(false, fmt.Sprintf("Exchange: currency(%s) disabled for plan(%d)", targetCurrency, p.Id))
+			}
+		}
+	}
+
+	multiCurrencyConfigs := GetMerchantMultiCurrencyConfig(ctx, p.MerchantId)
+	for _, multiCurrency := range multiCurrencyConfigs {
+		if strings.ToUpper(multiCurrency.DefaultCurrency) == strings.ToUpper(p.Currency) {
+			for _, one := range multiCurrency.MultiCurrencies {
+				if strings.ToUpper(one.Currency) == strings.ToUpper(targetCurrency) {
+					return utility.ExchangeCurrencyConvert(p.Amount, p.Currency, one.Currency, one.ExchangeRate)
+				}
+			}
+		}
+	}
+	utility.Assert(false, fmt.Sprintf("No currency(%s) config found for plan(%d)", targetCurrency, p.Id))
+	return p.Amount
 }

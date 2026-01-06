@@ -47,6 +47,7 @@ type MerchantGatewayColumns struct {
 	Currency              string // currency
 	MinimumAmount         string // minimum amount, cent
 	BankData              string // bank credentials data
+	MetaData              string // meta_data(json)
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
@@ -78,6 +79,7 @@ var merchantGatewayColumns = MerchantGatewayColumns{
 	Currency:              "currency",
 	MinimumAmount:         "minimum_amount",
 	BankData:              "bank_data",
+	MetaData:              "meta_data",
 }
 
 // NewMerchantGatewayDao creates and returns a new DAO object for table data access.

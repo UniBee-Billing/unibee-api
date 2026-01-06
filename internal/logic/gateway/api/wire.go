@@ -5,10 +5,12 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"strings"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
 )
 
 type Wire struct {
@@ -61,6 +63,8 @@ func (w Wire) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway
 
 func (w Wire) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	var paymentLink = ""
+	utility.Assert(createPayContext.Pay.TotalAmount >= gateway.MinimumAmount, "Total Amount not reach the gateway's minimum amount")
+	utility.Assert(strings.ToUpper(createPayContext.Pay.Currency) == strings.ToUpper(gateway.Currency), "Invoice currency not match the gateway's currency")
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 consts.PaymentCreated,
 		GatewayPaymentId:       createPayContext.Pay.PaymentId,

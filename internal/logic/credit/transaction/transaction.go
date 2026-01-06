@@ -20,7 +20,7 @@ type CreditTransactionListInternalReq struct {
 	TransactionTypes []int  `json:"transactionTypes" dc:"transaction type。1-recharge income，2-payment out，3-refund income，4-withdraw out，5-withdraw failed income, 6-admin change，7-recharge refund out" `
 	Page             int    `json:"page"  dc:"Page, Start 0" `
 	Count            int    `json:"count"  dc:"Count Of Per Page" `
-	CreateTimeStart  int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeStart  int64  `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
 	CreateTimeEnd    int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal        bool
 }

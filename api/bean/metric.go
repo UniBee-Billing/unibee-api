@@ -13,7 +13,7 @@ type PlanMetricLimitParam struct {
 type PlanMetricMeteredChargeParam struct {
 	MetricId           uint64                           `json:"metricId" dc:"MetricId"`
 	ChargeType         int                              `json:"chargeType" dc:"ChargeType,0-standard pricing 1-graduated pricing"`
-	StandardAmount     int64                            `json:"standardAmount" dc:"StandardAmount, used for standard pricing,cent"`
+	StandardAmount     int64                            `json:"standardAmount" dc:"StandardAmount, cent, used for standard pricing,cent"`
 	StandardStartValue int64                            `json:"standardStartValue" dc:"StandardStartValue, used for standard pricing"`
 	GraduatedAmounts   []*MetricPlanChargeGraduatedStep `json:"graduatedAmounts" dc:"GraduatedAmounts, used for graduated pricing"`
 }
@@ -23,6 +23,14 @@ type MetricPlanChargeGraduatedStep struct {
 	StartValue int64 `json:"startValue" dc:"StartValue"`
 	EndValue   int64 `json:"endValue" dc:"EndValue, -1 = infinity value(∞)"`
 	FlatAmount int64 `json:"flatAmount" dc:"FlatAmount,cent"`
+}
+
+type MetricPlanChargeLine struct {
+	UnitAmount int64  `json:"unitAmount" dc:"UnitAmount,cent"`
+	Quantity   int64  `json:"quantity" dc:"Quantity"`
+	Amount     int64  `json:"amount" dc:"Amount,cent"`
+	FlatAmount int64  `json:"flatAmount" dc:"FlatAmount,cent"`
+	Step       string `json:"step" dc:"Step"`
 }
 
 type MetricPlanBindingEntity struct {
@@ -78,4 +86,5 @@ type UserMetricChargeInvoiceItem struct {
 	TotalChargeAmount int64                         `json:"totalChargeAmount" dc:"TotalChargeAmount"`
 	Name              string                        `json:"name" dc:"Name"`
 	Description       string                        `json:"description" dc:"Description"`
+	Lines             []*MetricPlanChargeLine       `json:"lines" dc:"Lines"`
 }

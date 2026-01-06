@@ -41,31 +41,38 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	var targetUrl = ""
-	if len(redirect.ReturnUrl) > 0 {
-		if !redirect.Success {
-			targetUrl = fmt.Sprintf("%s", redirect.ReturnUrl)
-		} else if !strings.Contains(redirect.ReturnUrl, "?") {
-			targetUrl = fmt.Sprintf("%s?%s", redirect.ReturnUrl, redirect.QueryPath)
+	if config.GetConfigInstance().Server.DisableHostedPaymentChecker {
+		if len(redirect.ReturnUrl) > 0 {
+			//if !redirect.Success {
+			//	targetUrl = fmt.Sprintf("%s", redirect.ReturnUrl)
+			//} else if !strings.Contains(redirect.ReturnUrl, "?") {
+			//	targetUrl = fmt.Sprintf("%s?%s", redirect.ReturnUrl, redirect.QueryPath)
+			//} else {
+			//	targetUrl = fmt.Sprintf("%s&%s", redirect.ReturnUrl, redirect.QueryPath)
+			//}
+			targetUrl = redirect.ReturnUrl
 		} else {
-			targetUrl = fmt.Sprintf("%s&%s", redirect.ReturnUrl, redirect.QueryPath)
+			merchant := query.GetMerchantById(r.Context(), gateway.MerchantId)
+			if merchant != nil && len(merchant.Host) > 0 {
+				if strings.HasPrefix(merchant.Host, "http") {
+					targetUrl = merchant.Host
+				} else {
+					targetUrl = fmt.Sprintf("http://%s", merchant.Host)
+				}
+			}
+		}
+		if redirect.Payment != nil && config.GetConfigInstance().Server.IsHostedPathAvailable() && r.Get("success").Bool() {
+			cancelUrl := util.GetPaymentRedirectUrl(r.Context(), redirect.Payment, "false")
+			_, userSession, err := session2.NewUserSession(r.Context(), redirect.Payment.MerchantId, redirect.Payment.UserId, targetUrl, cancelUrl)
+			if err == nil && len(userSession) > 0 {
+				targetUrl = fmt.Sprintf("%s/payment_checker?merchantId=%d&paymentId=%s&session=%s&env=%s", config.GetConfigInstance().Server.GetHostedPath(), redirect.Payment.MerchantId, redirect.Payment.PaymentId, userSession, config.GetConfigInstance().Env)
+			}
 		}
 	} else {
-		merchant := query.GetMerchantById(r.Context(), gateway.MerchantId)
-		if merchant != nil && len(merchant.Host) > 0 {
-			if strings.HasPrefix(merchant.Host, "http") {
-				targetUrl = merchant.Host
-			} else {
-				targetUrl = fmt.Sprintf("http://%s", merchant.Host)
-			}
+		if redirect.Success {
+			targetUrl = fmt.Sprintf("%s/embedded/payment_checker?paymentId=%s&env=%s", config.GetConfigInstance().Server.GetServerPath(), redirect.Payment.PaymentId, config.GetConfigInstance().Env)
 		} else {
-			//r.Response.Writeln(utility.FormatToJsonString(redirect))
-		}
-	}
-	if redirect.Payment != nil && len(config.GetConfigInstance().Server.HostedPagePath) > 0 && r.Get("success").Bool() {
-		cancelUrl := util.GetPaymentRedirectUrl(r.Context(), redirect.Payment, "false")
-		_, userSession, err := session2.NewUserSession(r.Context(), redirect.Payment.MerchantId, redirect.Payment.UserId, targetUrl, cancelUrl)
-		if err == nil && len(userSession) > 0 {
-			targetUrl = fmt.Sprintf("%s/payment_checker?merchantId=%d&paymentId=%s&session=%s&env=%s", config.GetConfigInstance().Server.HostedPagePath, redirect.Payment.MerchantId, redirect.Payment.PaymentId, userSession, config.GetConfigInstance().Env)
+			targetUrl = redirect.ReturnUrl
 		}
 	}
 	if len(targetUrl) > 0 {

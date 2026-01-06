@@ -107,17 +107,18 @@ func (c Cryptadium) GatewayNewPayment(ctx context.Context, gateway *entity.Merch
 	} else {
 		gasPayer = "CUSTOMER"
 	}
-	var name = ""
-	var description = ""
-	if len(createPayContext.Invoice.Lines) > 0 {
-		var line = createPayContext.Invoice.Lines[0]
-		if len(line.Name) == 0 {
-			name = line.Description
-		} else {
-			name = line.Name
-			description = line.Description
-		}
-	}
+	//var name = ""
+	//var description = ""
+	//if len(createPayContext.Invoice.Lines) > 0 {
+	//	var line = createPayContext.Invoice.Lines[0]
+	//	if len(line.Name) == 0 {
+	//		name = line.Description
+	//	} else {
+	//		name = line.Name
+	//		description = line.Description
+	//	}
+	//}
+	name, description := createPayContext.GetInvoiceSingleProductNameAndDescription()
 
 	param := map[string]interface{}{
 		"Currency":             createPayContext.Pay.CryptoCurrency,

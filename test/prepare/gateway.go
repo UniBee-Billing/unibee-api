@@ -18,7 +18,7 @@ type GatewayBank struct {
 }
 
 func CreateTestGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
-	one := query.GetGatewayByGatewayName(ctx, merchantId, "autotest")
+	one := query.GetDefaultGatewayByGatewayName(ctx, merchantId, "autotest")
 	if one != nil {
 		return one
 	}
@@ -45,13 +45,13 @@ func CreateTestGateway(ctx context.Context, merchantId uint64) *entity.MerchantG
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	one = query.GetGatewayByGatewayName(ctx, merchantId, "autotest")
+	one = query.GetDefaultGatewayByGatewayName(ctx, merchantId, "autotest")
 	utility.Assert(one != nil, "autotest gateway error")
 	return one
 }
 
 func CreateTestCryptoGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
-	one := query.GetGatewayByGatewayName(ctx, merchantId, "autotest_crypto")
+	one := query.GetDefaultGatewayByGatewayName(ctx, merchantId, "autotest_crypto")
 	if one != nil {
 		return one
 	}
@@ -78,13 +78,13 @@ func CreateTestCryptoGateway(ctx context.Context, merchantId uint64) *entity.Mer
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	one = query.GetGatewayByGatewayName(ctx, merchantId, "autotest_crypto")
+	one = query.GetDefaultGatewayByGatewayName(ctx, merchantId, "autotest_crypto")
 	utility.Assert(one != nil, "autotest gateway error")
 	return one
 }
 
 func CreateTestWireTransferGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
-	one := query.GetGatewayByGatewayName(ctx, merchantId, "wire_transfer")
+	one := query.GetDefaultGatewayByGatewayName(ctx, merchantId, "wire_transfer")
 	if one != nil {
 		return one
 	}
@@ -109,7 +109,31 @@ func CreateTestWireTransferGateway(ctx context.Context, merchantId uint64) *enti
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	one = query.GetGatewayByGatewayName(ctx, merchantId, "wire_transfer")
+	one = query.GetDefaultGatewayByGatewayName(ctx, merchantId, "wire_transfer")
 	utility.Assert(one != nil, "autotest gateway error")
+	return one
+}
+
+func CreateTestAirwallexGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
+	one := query.GetDefaultGatewayByGatewayName(ctx, merchantId, "airwallex")
+	if one != nil {
+		return one
+	}
+	one = &entity.MerchantGateway{
+		MerchantId:    merchantId,
+		GatewayName:   "airwallex",
+		Name:          "Airwallex",
+		GatewayKey:    "test_airwallex_key",
+		GatewaySecret: "test_airwallex_secret",
+		GatewayType:   consts.GatewayTypeCard,
+		Logo:          "https://api.unibee.top/oss/file/airwallex-logo.png",
+		Currency:      "USD",
+	}
+	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	utility.AssertError(err, "system error")
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
+	one = query.GetDefaultGatewayByGatewayName(ctx, merchantId, "airwallex")
+	utility.Assert(one != nil, "airwallex gateway error")
 	return one
 }

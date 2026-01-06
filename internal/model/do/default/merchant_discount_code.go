@@ -40,4 +40,5 @@ type MerchantDiscountCode struct {
 	UpgradeOnly        interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  interface{} // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
 	PlanApplyType      interface{} // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
+	PlanApplyGroup     interface{} // plan_apply_group(json)
 }

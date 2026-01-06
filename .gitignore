@@ -26,5 +26,7 @@ config.yaml
 config.yaml.backup
 publish_dev.sh
 publish_main.sh
-squash_opensource.sh
 test/out/*.*
+embedded/node_modules
+embedded/build
+squash_opensource.sh

@@ -10,7 +10,8 @@ type NewUserInternalReq struct {
 	Address            string `json:"address" dc:"Address"`
 	UserName           string `json:"userName" dc:"UserName"`
 	CountryCode        string `json:"countryCode" dc:"CountryCode"`
-	Type               int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	State              string `json:"state" dc:"State"`
+	Type               int64  `json:"type" dc:"User type, 1-Individual|2-Business"`
 	CompanyName        string `json:"companyName" dc:"company name"`
 	VATNumber          string `json:"vATNumber" dc:"vat number"`
 	City               string `json:"city" dc:"city"`

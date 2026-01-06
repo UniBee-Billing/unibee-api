@@ -58,6 +58,9 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = uint64(value)
 		}
+		if value, ok := payload["gatewayIds"].([]interface{}); ok {
+			req.GatewayIds = export.JsonArrayTypeConvertInt64(ctx, value)
+		}
 		if value, ok := payload["firstName"].(string); ok {
 			req.FirstName = value
 		}
@@ -168,12 +171,20 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 					}
 				}
 			}
-			var productId int64 = 0
-			if one.Subscription.PlanId > 0 {
-				onePlan := query.GetPlanById(ctx, one.Subscription.PlanId)
-				if onePlan != nil {
-					productId = onePlan.ProductId
-				}
+			var productIdStr string
+			var planIdStr string
+			//var planNameStr string
+			//var planInternalNameStr string
+			//var planIntervalUnitStr string
+			//var planIntervalCountStr string
+			if one.PlanSnapshot != nil && one.PlanSnapshot.Plan != nil {
+				planIdStr = fmt.Sprintf("%v", one.PlanSnapshot.Plan.Id)
+				productIdStr = fmt.Sprintf("%v", &one.PlanSnapshot.Plan.ProductId)
+				//planNameStr = onePlan.PlanName
+				//planInternalNameStr = onePlan.InternalName
+				//planIntervalUnitStr = onePlan.IntervalUnit
+				//planIntervalCountStr = fmt.Sprintf("%d", onePlan.IntervalCount)
+
 			}
 			var transactionType = "payment"
 			var transactionId = one.PaymentId
@@ -195,6 +206,12 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				exchangeAmount = utility.ConvertCentToDollarStr(one.Refund.GatewayCurrencyExchange.ExchangeAmount, one.Refund.GatewayCurrencyExchange.ToCurrency)
 				exchangeRate = fmt.Sprintf("%.2f", one.Refund.GatewayCurrencyExchange.ExchangeRate)
 			}
+			var promoCreditChanged int64 = 0
+			var promoCreditDiscountAmount int64 = 0
+			if one.PromoCreditTransaction != nil {
+				promoCreditChanged = one.PromoCreditTransaction.DeltaAmount
+				promoCreditDiscountAmount = one.PromoCreditDiscountAmount
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
@@ -208,6 +225,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				City:                           one.UserSnapshot.City,
 				Address:                        one.UserSnapshot.Address,
 				InvoiceName:                    one.InvoiceName,
+				ProductId:                      productIdStr,
 				ProductName:                    one.ProductName,
 				TaxCode:                        one.CountryCode,
 				CountryCode:                    one.CountryCode,
@@ -239,8 +257,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				PaymentId:                      one.PaymentId,
 				RefundId:                       one.RefundId,
 				SubscriptionId:                 one.SubscriptionId,
-				PlanId:                         fmt.Sprintf("%v", one.Subscription.PlanId),
-				ProductId:                      fmt.Sprintf("%v", productId),
+				PlanId:                         planIdStr,
 				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd + timeZone),
 				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor + timeZone),
 				OriginalInvoiceId:              OriginInvoiceId,
@@ -252,6 +269,8 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				ExchangeAmount:                 exchangeAmount,
 				ExchangeCurrency:               exchangeCurrency,
 				ExchangeRate:                   exchangeRate,
+				PromoCreditChanged:             utility.ConvertCreditAmountToDollarStr(promoCreditChanged, one.Currency, consts.CreditAccountTypePromo),
+				PromoCreditDiscountAmount:      utility.ConvertCentToDollarStr(promoCreditDiscountAmount, one.Currency),
 			})
 		}
 	}
@@ -316,4 +335,6 @@ type ExportInvoiceEntity struct {
 	ExchangeCurrency               string      `json:"ExchangeCurrency" comment:"The exchange currency of invoice" group:"Transaction"`
 	ExchangeAmount                 string      `json:"ExchangeAmount" comment:"The exchange amount of invoice" group:"Transaction"`
 	ExchangeRate                   string      `json:"ExchangeRate" comment:"The exchange rate of invoice" group:"Transaction"`
+	PromoCreditChanged             string      `json:"PromoCreditChanged" comment:"The promo credit changed" group:"Transaction"`
+	PromoCreditDiscountAmount      string      `json:"PromoCreditDiscountAmount"     comment:"The promo credit currency discount amount"  group:"Transaction"`
 }

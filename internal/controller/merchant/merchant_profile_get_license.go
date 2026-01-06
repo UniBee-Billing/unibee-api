@@ -14,8 +14,10 @@ func (c *ControllerProfile) GetLicense(ctx context.Context, req *profile.GetLice
 	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchant != nil, "merchant not found")
 	return &profile.GetLicenseRes{
-		Merchant:     bean.SimplifyMerchant(merchant),
-		License:      license.GetMerchantLicense(ctx, merchant.Id),
-		APIRateLimit: license.GetMerchantAPIRateLimit(ctx, merchant.Id),
+		Merchant:           bean.SimplifyMerchant(merchant),
+		License:            license.GetMerchantLicense(ctx, merchant.Id),
+		APIRateLimit:       license.GetMerchantAPIRateLimit(ctx, merchant.Id),
+		MemberLimit:        license.GetMerchantMemberLimit(ctx, merchant.Id),
+		CurrentMemberCount: query.GetMerchantMemberCount(ctx, merchant.Id),
 	}, nil
 }

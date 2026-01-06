@@ -8,7 +8,7 @@ import (
 	redismq "github.com/jackyang-hk/go-redismq"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
-	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/subscription/billingcycle/expire"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -40,6 +40,9 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	if sub.Status == consts.SubStatusExpired {
 		return redismq.CommitMessage
 	}
+	if sub.Status == consts.SubStatusFailed {
+		return redismq.CommitMessage
+	}
 
 	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= consts.SubPendingTimeout {
 		//should expire sub
@@ -50,22 +53,32 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 		return redismq.CommitMessage
 	}
 
-	// After 3min Not Pay Send Email
+	//// After 3min Not Pay Send Email
+	//if sub.Status == consts.SubStatusPending && len(sub.LatestInvoiceId) > 0 {
+	//	invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+	//	if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
+	//		err := handler.SendInvoiceEmailToUser(ctx, sub.LatestInvoiceId, false, "")
+	//		_, _ = redismq.SendDelay(&redismq.Message{
+	//			Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+	//			Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
+	//			Body:       sub.SubscriptionId,
+	//			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+	//		}, 24*60*60) //every day send util expire
+	//		if err != nil {
+	//			g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SendDelay TopicSubscriptionCreatePaymentCheck Error:%s", err.Error())
+	//			return redismq.CommitMessage
+	//		}
+	//	}
+	//}
 	if sub.Status == consts.SubStatusPending && len(sub.LatestInvoiceId) > 0 {
 		invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
-		if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
-			err := handler.SendInvoiceEmailToUser(ctx, sub.LatestInvoiceId, false, "")
-			_, _ = redismq.SendDelay(&redismq.Message{
-				Topic:      redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
-				Tag:        redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
-				Body:       sub.SubscriptionId,
-				CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
-			}, 24*60*60) //every day send util expire
-			if err != nil {
-				g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SendDelay TopicSubscriptionCreatePaymentCheck Error:%s", err.Error())
-				return redismq.CommitMessage
+		if invoice != nil && invoice.Status == consts.InvoiceStatusPaid {
+			payment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
+			if payment != nil {
+				callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 			}
 		}
+		return redismq.ReconsumeLater
 	}
 	return redismq.CommitMessage
 }

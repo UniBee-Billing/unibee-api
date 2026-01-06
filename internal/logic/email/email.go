@@ -2,11 +2,7 @@ package email
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
+	"reflect"
 	"strings"
 	"time"
 	"unibee/api/bean"
@@ -22,6 +18,12 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 
 	// entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	// "os"
@@ -174,29 +176,63 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 	return err
 }
 
-type TemplateVariable struct {
-	InvoiceId             string      `json:"InvoiceId"`
-	UserName              string      `json:"User name" key:"UserName"`
-	MerchantProductName   string      `json:"Merchant Product Name" key:"ProductName"`
-	MerchantCustomerEmail string      `json:"Merchant’s customer support email address" key:"SupportEmail"`
-	MerchantName          string      `json:"Merchant Name" key:"MerchantName"`
-	DateNow               *gtime.Time `json:"DateNow" layout:"2006-01-02"`
-	PeriodEnd             *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
-	PaymentAmount         string      `json:"Payment Amount" key:"PaymentAmount"`
-	RefundAmount          string      `json:"Refund Amount" key:"RefundAmount"`
-	Currency              string      `json:"Currency" key:"Currency"`
-	TokenExpireMinute     string      `json:"TokenExpireMinute"`
-	CodeExpireMinute      string      `json:"CodeExpireMinute"`
-	Code                  string      `json:"Code"`
-	Link                  string      `json:"Link"`
-	HttpLink              string      `json:"HttpLink"`
-	AccountHolder         string      `json:"Account Holder" key:"WireTransferAccountHolder"`
-	Address               string      `json:"Address" key:"WireTransferAddress"`
-	BIC                   string      `json:"BIC" key:"WireTransferBIC"`
-	IBAN                  string      `json:"IBAN" key:"WireTransferIBAN"`
+func getEmailTemplateGroupVariables() []*bean.TemplateVariableGroup {
+	// Create a sample instance to get field information
+	sample := &bean.EmailTemplateVariable{}
+
+	// Use reflection to get field information
+	v := reflect.ValueOf(sample).Elem()
+	t := v.Type()
+
+	// Map to store groups by group name
+	groupMap := make(map[string]*bean.TemplateVariableGroup)
+
+	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
+		jsonTag := field.Tag.Get("json")
+		keyTag := field.Tag.Get("key")
+		groupTag := field.Tag.Get("group")
+
+		// Determine the variable name - use key if available, otherwise use json
+		varName := jsonTag
+		if keyTag != "" {
+			varName = keyTag
+		}
+
+		// Create template variable
+		templateVar := &bean.TemplateVariable{
+			VariableName: varName,
+		}
+
+		// Get or create group based on group tag
+		groupName := groupTag
+		if groupName == "" {
+			groupName = "Other Information" // Default group for fields without group tag
+		}
+
+		group, exists := groupMap[groupName]
+		if !exists {
+			group = &bean.TemplateVariableGroup{
+				GroupName: groupName,
+				Variables: []*bean.TemplateVariable{},
+			}
+			groupMap[groupName] = group
+		}
+
+		// Add variable to the group
+		group.Variables = append(group.Variables, templateVar)
+	}
+
+	// Convert map to slice
+	var groups []*bean.TemplateVariableGroup
+	for _, group := range groupMap {
+		groups = append(groups, group)
+	}
+
+	return groups
 }
 
-func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, variableMap map[string]interface{}) (err error) {
+func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *bean.EmailTemplateVariable, languageData *[]*bean.EmailLocalizationTemplate) (err error) {
 	mailTo = strings.ToLower(mailTo)
 	_, emailGatewayKey := GetDefaultMerchantEmailConfigWithClusterCloud(ctx, merchantId)
 	if len(emailGatewayKey) == 0 {
@@ -215,9 +251,13 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	utility.Assert(template != nil, "template not found:"+templateName)
 	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
 	utility.Assert(template != nil, "template not found")
-	utility.Assert(variableMap != nil, "variableMap not found")
-	var subject = template.LocalizationSubject(language)
-	var content = template.LocalizationContent(language)
+	utility.Assert(templateVariables != nil, "templateVariables not found")
+	variableMap, err := utility.ReflectTemplateStructToMap(templateVariables, timezone)
+	if err != nil {
+		return err
+	}
+	var subject = template.LocalizationSubject(language, languageData)
+	var content = template.LocalizationContent(language, languageData)
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	merchant := query.GetMerchantById(ctx, merchantId)
@@ -231,6 +271,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
+			content = strings.Replace(content, mapKey, htmlValue, -1)
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
 		}
 		if len(attachName) > 0 {
@@ -245,6 +286,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 			subject = strings.Replace(subject, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
+			content = strings.Replace(content, mapKey, htmlValue, -1)
 			content = strings.Replace(content, htmlKey, htmlValue, -1)
 		}
 		if len(attachName) > 0 {
@@ -254,7 +296,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = fmt.Sprintf("invoice_%s", time.Now().Format("20060102"))
 	}
-	return send(ctx, &SendgridEmailReq{
+	return Send(ctx, &SendgridEmailReq{
 		MerchantId:        merchantId,
 		MailTo:            mailTo,
 		Subject:           subject,
@@ -269,7 +311,7 @@ func SendTemplateEmailByOpenApi(ctx context.Context, merchantId uint64, mailTo s
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *bean.EmailTemplateVariable) error {
 	mailTo = strings.ToLower(mailTo)
 	_, emailGatewayKey := GetDefaultMerchantEmailConfigWithClusterCloud(superCtx, merchantId)
 	if len(emailGatewayKey) == 0 {
@@ -299,7 +341,7 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 	return nil
 }
 
-func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
+func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, language string, templateName string, pdfFilePath string, templateVariables *bean.EmailTemplateVariable, emailGatewayKey string) error {
 	mailTo = strings.ToLower(mailTo)
 	var template *bean.MerchantEmailTemplate
 	if merchantId > 0 {
@@ -315,8 +357,8 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	if err != nil {
 		return err
 	}
-	var subject = template.LocalizationSubject(language)
-	var content = template.LocalizationContent(language)
+	var subject = template.LocalizationSubject(language, nil)
+	var content = template.LocalizationContent(language, nil)
 	var attachName = template.TemplateAttachName
 	utility.Assert(variableMap != nil, "template parse error")
 	merchant := query.GetMerchantById(ctx, merchantId)
@@ -356,7 +398,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		attachName = fmt.Sprintf("invoice_%s", time.Now().Format("20060102"))
 	}
 
-	return send(ctx, &SendgridEmailReq{
+	return Send(ctx, &SendgridEmailReq{
 		MerchantId:        merchantId,
 		MailTo:            mailTo,
 		Subject:           subject,
@@ -383,7 +425,7 @@ type SendgridEmailReq struct {
 	GatewayTemplateId string                 `json:"gatewayTemplateId"`
 }
 
-func send(ctx context.Context, req *SendgridEmailReq) error {
+func Send(ctx context.Context, req *SendgridEmailReq) error {
 	var err error
 	var response string
 	if len(req.LocalFilePath) > 0 {
@@ -398,12 +440,14 @@ func send(ctx context.Context, req *SendgridEmailReq) error {
 		}
 		if err != nil {
 			if len(req.GatewayTemplateId) > 0 {
+				req.VariableMap["TemplateId"] = req.GatewayTemplateId
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), req.AttachName, err.Error())
 			} else {
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, req.AttachName, err.Error())
 			}
 		} else {
 			if len(req.GatewayTemplateId) > 0 {
+				req.VariableMap["TemplateId"] = req.GatewayTemplateId
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), req.AttachName, response)
 			} else {
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, req.AttachName, response)
@@ -416,18 +460,20 @@ func send(ctx context.Context, req *SendgridEmailReq) error {
 			utility.Assert(false, "duplicate email too fast")
 		}
 		if len(req.GatewayTemplateId) > 0 {
-			response, err = gateway.SendSandgridDynamicTemplateEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.GatewayTemplateId, req.VariableMap, req.Language)
+			response, err = gateway.SendSendgridDynamicTemplateEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.GatewayTemplateId, req.VariableMap, req.Language)
 		} else {
 			response, err = gateway.SendEmailToUser(GetMerchantEmailSender(ctx, req.MerchantId), req.APIKey, req.MailTo, req.Subject, req.Content)
 		}
 		if err != nil {
 			if len(req.GatewayTemplateId) > 0 {
+				req.VariableMap["TemplateId"] = req.GatewayTemplateId
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), "", err.Error())
 			} else {
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, "", err.Error())
 			}
 		} else {
 			if len(req.GatewayTemplateId) > 0 {
+				req.VariableMap["TemplateId"] = req.GatewayTemplateId
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, utility.MarshalToJsonString(req.VariableMap), "", response)
 			} else {
 				SaveHistory(ctx, req.MerchantId, req.MailTo, req.Subject, req.Content, "", response)
@@ -450,6 +496,12 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 			return
 		}
 	}()
+	status := 0
+	if strings.Contains(response, "202") {
+		status = 1
+	} else {
+		status = 2
+	}
 	one := &entity.MerchantEmailHistory{
 		MerchantId: merchantId,
 		Email:      mailTo,
@@ -457,6 +509,7 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 		Content:    content,
 		AttachFile: attachFilePath,
 		Response:   response,
+		Status:     status,
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	_, _ = dao.MerchantEmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)

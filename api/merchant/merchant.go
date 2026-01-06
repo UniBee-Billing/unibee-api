@@ -8,10 +8,12 @@ import (
 	"context"
 
 	"unibee/api/merchant/auth"
+	"unibee/api/merchant/checkout"
 	"unibee/api/merchant/credit"
 	"unibee/api/merchant/discount"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
+	"unibee/api/merchant/integration"
 	"unibee/api/merchant/invoice"
 	"unibee/api/merchant/member"
 	"unibee/api/merchant/metric"
@@ -33,14 +35,32 @@ import (
 
 type IMerchantAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
+	LoginOAuth(ctx context.Context, req *auth.LoginOAuthReq) (res *auth.LoginOAuthRes, err error)
 	Session(ctx context.Context, req *auth.SessionReq) (res *auth.SessionRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
 	PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error)
 	PasswordSetupOtp(ctx context.Context, req *auth.PasswordSetupOtpReq) (res *auth.PasswordSetupOtpRes, err error)
+	SetupOAuth(ctx context.Context, req *auth.SetupOAuthReq) (res *auth.SetupOAuthRes, err error)
 	PasswordForgetOtpVerify(ctx context.Context, req *auth.PasswordForgetOtpVerifyReq) (res *auth.PasswordForgetOtpVerifyRes, err error)
+	PasswordForgetTotpVerify(ctx context.Context, req *auth.PasswordForgetTotpVerifyReq) (res *auth.PasswordForgetTotpVerifyRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
+	RegisterEmailCheck(ctx context.Context, req *auth.RegisterEmailCheckReq) (res *auth.RegisterEmailCheckRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+	OauthMembers(ctx context.Context, req *auth.OauthMembersReq) (res *auth.OauthMembersRes, err error)
+	OauthGithub(ctx context.Context, req *auth.OauthGithubReq) (res *auth.OauthGithubRes, err error)
+	OauthGoogle(ctx context.Context, req *auth.OauthGoogleReq) (res *auth.OauthGoogleRes, err error)
+	RegisterOAuth(ctx context.Context, req *auth.RegisterOAuthReq) (res *auth.RegisterOAuthRes, err error)
+	ClearTotp(ctx context.Context, req *auth.ClearTotpReq) (res *auth.ClearTotpRes, err error)
+}
+
+type IMerchantCheckout interface {
+	List(ctx context.Context, req *checkout.ListReq) (res *checkout.ListRes, err error)
+	Detail(ctx context.Context, req *checkout.DetailReq) (res *checkout.DetailRes, err error)
+	New(ctx context.Context, req *checkout.NewReq) (res *checkout.NewRes, err error)
+	Edit(ctx context.Context, req *checkout.EditReq) (res *checkout.EditRes, err error)
+	GetLink(ctx context.Context, req *checkout.GetLinkReq) (res *checkout.GetLinkRes, err error)
+	Archive(ctx context.Context, req *checkout.ArchiveReq) (res *checkout.ArchiveRes, err error)
 }
 
 type IMerchantCredit interface {
@@ -76,12 +96,15 @@ type IMerchantDiscount interface {
 type IMerchantEmail interface {
 	GatewaySetup(ctx context.Context, req *email.GatewaySetupReq) (res *email.GatewaySetupRes, err error)
 	SendTemplateEmailToUser(ctx context.Context, req *email.SendTemplateEmailToUserReq) (res *email.SendTemplateEmailToUserRes, err error)
+	SendEmailToUser(ctx context.Context, req *email.SendEmailToUserReq) (res *email.SendEmailToUserRes, err error)
 	SenderSetup(ctx context.Context, req *email.SenderSetupReq) (res *email.SenderSetupRes, err error)
+	HistoryList(ctx context.Context, req *email.HistoryListReq) (res *email.HistoryListRes, err error)
 	TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error)
 	AddLocalizationVersion(ctx context.Context, req *email.AddLocalizationVersionReq) (res *email.AddLocalizationVersionRes, err error)
 	EditLocalizationVersion(ctx context.Context, req *email.EditLocalizationVersionReq) (res *email.EditLocalizationVersionRes, err error)
 	ActivateLocalizationVersion(ctx context.Context, req *email.ActivateLocalizationVersionReq) (res *email.ActivateLocalizationVersionRes, err error)
 	DeleteLocalizationVersion(ctx context.Context, req *email.DeleteLocalizationVersionReq) (res *email.DeleteLocalizationVersionRes, err error)
+	TestLocalizationVersion(ctx context.Context, req *email.TestLocalizationVersionReq) (res *email.TestLocalizationVersionRes, err error)
 	CustomizeLocalizationTemplateSync(ctx context.Context, req *email.CustomizeLocalizationTemplateSyncReq) (res *email.CustomizeLocalizationTemplateSyncRes, err error)
 }
 
@@ -93,6 +116,8 @@ type IMerchantGateway interface {
 	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
 	Archive(ctx context.Context, req *gateway.ArchiveReq) (res *gateway.ArchiveRes, err error)
+	Restore(ctx context.Context, req *gateway.RestoreReq) (res *gateway.RestoreRes, err error)
+	SetDefault(ctx context.Context, req *gateway.SetDefaultReq) (res *gateway.SetDefaultRes, err error)
 	EditCountryConfig(ctx context.Context, req *gateway.EditCountryConfigReq) (res *gateway.EditCountryConfigRes, err error)
 	SetupWebhook(ctx context.Context, req *gateway.SetupWebhookReq) (res *gateway.SetupWebhookRes, err error)
 	WireTransferSetup(ctx context.Context, req *gateway.WireTransferSetupReq) (res *gateway.WireTransferSetupRes, err error)
@@ -100,7 +125,13 @@ type IMerchantGateway interface {
 	SetupExchangeApi(ctx context.Context, req *gateway.SetupExchangeApiReq) (res *gateway.SetupExchangeApiRes, err error)
 }
 
+type IMerchantIntegration interface {
+	ConnectionQuickBooks(ctx context.Context, req *integration.ConnectionQuickBooksReq) (res *integration.ConnectionQuickBooksRes, err error)
+	DisconnectionQuickBooks(ctx context.Context, req *integration.DisconnectionQuickBooksReq) (res *integration.DisconnectionQuickBooksRes, err error)
+}
+
 type IMerchantInvoice interface {
+	CreditNoteList(ctx context.Context, req *invoice.CreditNoteListReq) (res *invoice.CreditNoteListRes, err error)
 	PdfGenerate(ctx context.Context, req *invoice.PdfGenerateReq) (res *invoice.PdfGenerateRes, err error)
 	PdfUpdate(ctx context.Context, req *invoice.PdfUpdateReq) (res *invoice.PdfUpdateRes, err error)
 	SendEmail(ctx context.Context, req *invoice.SendEmailReq) (res *invoice.SendEmailRes, err error)
@@ -112,6 +143,7 @@ type IMerchantInvoice interface {
 	Delete(ctx context.Context, req *invoice.DeleteReq) (res *invoice.DeleteRes, err error)
 	Finish(ctx context.Context, req *invoice.FinishReq) (res *invoice.FinishRes, err error)
 	Cancel(ctx context.Context, req *invoice.CancelReq) (res *invoice.CancelRes, err error)
+	ClearPayment(ctx context.Context, req *invoice.ClearPaymentReq) (res *invoice.ClearPaymentRes, err error)
 	Refund(ctx context.Context, req *invoice.RefundReq) (res *invoice.RefundRes, err error)
 	MarkRefund(ctx context.Context, req *invoice.MarkRefundReq) (res *invoice.MarkRefundRes, err error)
 	MarkWireTransferSuccess(ctx context.Context, req *invoice.MarkWireTransferSuccessReq) (res *invoice.MarkWireTransferSuccessRes, err error)
@@ -121,6 +153,8 @@ type IMerchantInvoice interface {
 type IMerchantMember interface {
 	Profile(ctx context.Context, req *member.ProfileReq) (res *member.ProfileRes, err error)
 	Update(ctx context.Context, req *member.UpdateReq) (res *member.UpdateRes, err error)
+	UpdateOAuth(ctx context.Context, req *member.UpdateOAuthReq) (res *member.UpdateOAuthRes, err error)
+	ClearOAuth(ctx context.Context, req *member.ClearOAuthReq) (res *member.ClearOAuthRes, err error)
 	Logout(ctx context.Context, req *member.LogoutReq) (res *member.LogoutRes, err error)
 	PasswordReset(ctx context.Context, req *member.PasswordResetReq) (res *member.PasswordResetRes, err error)
 	List(ctx context.Context, req *member.ListReq) (res *member.ListRes, err error)
@@ -129,6 +163,11 @@ type IMerchantMember interface {
 	Frozen(ctx context.Context, req *member.FrozenReq) (res *member.FrozenRes, err error)
 	Release(ctx context.Context, req *member.ReleaseReq) (res *member.ReleaseRes, err error)
 	OperationLogList(ctx context.Context, req *member.OperationLogListReq) (res *member.OperationLogListRes, err error)
+	GetTotpKey(ctx context.Context, req *member.GetTotpKeyReq) (res *member.GetTotpKeyRes, err error)
+	ConfirmTotpKey(ctx context.Context, req *member.ConfirmTotpKeyReq) (res *member.ConfirmTotpKeyRes, err error)
+	ResetTotp(ctx context.Context, req *member.ResetTotpReq) (res *member.ResetTotpRes, err error)
+	ClearTotp(ctx context.Context, req *member.ClearTotpReq) (res *member.ClearTotpRes, err error)
+	DeleteDevice(ctx context.Context, req *member.DeleteDeviceReq) (res *member.DeleteDeviceRes, err error)
 }
 
 type IMerchantMetric interface {
@@ -138,6 +177,7 @@ type IMerchantMetric interface {
 	Delete(ctx context.Context, req *metric.DeleteReq) (res *metric.DeleteRes, err error)
 	Detail(ctx context.Context, req *metric.DetailReq) (res *metric.DetailRes, err error)
 	NewEvent(ctx context.Context, req *metric.NewEventReq) (res *metric.NewEventRes, err error)
+	EventCurrentValue(ctx context.Context, req *metric.EventCurrentValueReq) (res *metric.EventCurrentValueRes, err error)
 	DeleteEvent(ctx context.Context, req *metric.DeleteEventReq) (res *metric.DeleteEventRes, err error)
 	EventList(ctx context.Context, req *metric.EventListReq) (res *metric.EventListRes, err error)
 	NewPlanLimit(ctx context.Context, req *metric.NewPlanLimitReq) (res *metric.NewPlanLimitRes, err error)
@@ -201,7 +241,10 @@ type IMerchantProfile interface {
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	CountryConfigList(ctx context.Context, req *profile.CountryConfigListReq) (res *profile.CountryConfigListRes, err error)
 	EditCountryConfig(ctx context.Context, req *profile.EditCountryConfigReq) (res *profile.EditCountryConfigRes, err error)
+	EditTotpConfig(ctx context.Context, req *profile.EditTotpConfigReq) (res *profile.EditTotpConfigRes, err error)
 	NewApiKey(ctx context.Context, req *profile.NewApiKeyReq) (res *profile.NewApiKeyRes, err error)
+	SetupMultiCurrencies(ctx context.Context, req *profile.SetupMultiCurrenciesReq) (res *profile.SetupMultiCurrenciesRes, err error)
+	AmountMultiCurrenciesExchange(ctx context.Context, req *profile.AmountMultiCurrenciesExchangeReq) (res *profile.AmountMultiCurrenciesExchangeRes, err error)
 }
 
 type IMerchantRole interface {
@@ -225,11 +268,14 @@ type IMerchantSubscription interface {
 	ConfigUpdate(ctx context.Context, req *subscription.ConfigUpdateReq) (res *subscription.ConfigUpdateRes, err error)
 	PreviewSubscriptionNextInvoice(ctx context.Context, req *subscription.PreviewSubscriptionNextInvoiceReq) (res *subscription.PreviewSubscriptionNextInvoiceRes, err error)
 	ApplySubscriptionNextInvoice(ctx context.Context, req *subscription.ApplySubscriptionNextInvoiceReq) (res *subscription.ApplySubscriptionNextInvoiceRes, err error)
+	ActiveSubscriptionImport(ctx context.Context, req *subscription.ActiveSubscriptionImportReq) (res *subscription.ActiveSubscriptionImportRes, err error)
+	HistorySubscriptionImport(ctx context.Context, req *subscription.HistorySubscriptionImportReq) (res *subscription.HistorySubscriptionImportRes, err error)
 	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
 	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
 	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
+	OnetimeAddonPreview(ctx context.Context, req *subscription.OnetimeAddonPreviewReq) (res *subscription.OnetimeAddonPreviewRes, err error)
 	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
-	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
+	OnetimeAddonPurchaseList(ctx context.Context, req *subscription.OnetimeAddonPurchaseListReq) (res *subscription.OnetimeAddonPurchaseListRes, err error)
 	Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error)
 	UserPendingCryptoSubscriptionDetail(ctx context.Context, req *subscription.UserPendingCryptoSubscriptionDetailReq) (res *subscription.UserPendingCryptoSubscriptionDetailRes, err error)
 	List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error)
@@ -248,6 +294,7 @@ type IMerchantSubscription interface {
 	Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error)
 	UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error)
 	Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error)
+	UpdateMetadata(ctx context.Context, req *subscription.UpdateMetadataReq) (res *subscription.UpdateMetadataRes, err error)
 }
 
 type IMerchantTask interface {
@@ -286,9 +333,13 @@ type IMerchantVat interface {
 	InitDefaultGateway(ctx context.Context, req *vat.InitDefaultGatewayReq) (res *vat.InitDefaultGatewayRes, err error)
 	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
 	NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error)
+	NumberValidateHistory(ctx context.Context, req *vat.NumberValidateHistoryReq) (res *vat.NumberValidateHistoryRes, err error)
+	NumberValidateHistoryActivate(ctx context.Context, req *vat.NumberValidateHistoryActivateReq) (res *vat.NumberValidateHistoryActivateRes, err error)
+	NumberValidateHistoryDeactivate(ctx context.Context, req *vat.NumberValidateHistoryDeactivateReq) (res *vat.NumberValidateHistoryDeactivateRes, err error)
 }
 
 type IMerchantWebhook interface {
+	GetWebhookSecret(ctx context.Context, req *webhook.GetWebhookSecretReq) (res *webhook.GetWebhookSecretRes, err error)
 	EventList(ctx context.Context, req *webhook.EventListReq) (res *webhook.EventListRes, err error)
 	EndpointList(ctx context.Context, req *webhook.EndpointListReq) (res *webhook.EndpointListRes, err error)
 	EndpointLogList(ctx context.Context, req *webhook.EndpointLogListReq) (res *webhook.EndpointLogListRes, err error)

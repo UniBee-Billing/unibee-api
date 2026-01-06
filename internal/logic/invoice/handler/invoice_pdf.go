@@ -3,9 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"golang.org/x/text/currency"
-	"golang.org/x/text/number"
 	"os"
 	"strconv"
 	"strings"
@@ -17,6 +14,10 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/number"
 )
 
 func GenerateInvoicePdf(ctx context.Context, one *entity.Invoice) string {
@@ -96,14 +97,22 @@ func createInvoicePdf(ctx context.Context, one *detail.InvoiceDetail, merchantIn
 
 	doc.SetPaidDate(one.GmtModify.Layout("2006-01-02"))
 
+	var issueLogo = one.Metadata["IssueLogo"]
+	if issueLogo != nil && issueLogo != "" {
+		merchantInfo.CompanyLogo = fmt.Sprintf("%s", issueLogo)
+	}
+
 	if len(merchantInfo.CompanyLogo) > 0 {
 		tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
-		utility.Assert(len(tempLogoPath) > 0, "download Logo error")
-		logoBytes, err := os.ReadFile(tempLogoPath)
-		if err != nil {
-			g.Log().Errorf(ctx, "createInvoicePdf Reading download Logo error:%s", err.Error())
+		if len(tempLogoPath) > 0 {
+			logoBytes, err := os.ReadFile(tempLogoPath)
+			if err != nil {
+				g.Log().Errorf(ctx, "createInvoicePdf Reading download Logo:%s error:%s", merchantInfo.CompanyLogo, err.Error())
+			} else {
+				doc.SetLogo(logoBytes)
+			}
 		} else {
-			doc.SetLogo(logoBytes)
+			g.Log().Errorf(ctx, "createInvoicePdf Reading download Logo:%s failed", merchantInfo.CompanyLogo)
 		}
 	}
 

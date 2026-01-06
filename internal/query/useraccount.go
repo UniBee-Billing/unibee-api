@@ -4,12 +4,30 @@ import (
 	"context"
 	"strings"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
+
+func GetUserAccountsByIds(ctx context.Context, ids []uint64) (list []*entity.UserAccount) {
+	if len(ids) <= 0 {
+		return make([]*entity.UserAccount, 0)
+	}
+	err := dao.UserAccount.Ctx(ctx).
+		WhereIn(dao.UserAccount.Columns().Id, ids).
+		Scan(&list)
+	if err != nil {
+		return make([]*entity.UserAccount, 0)
+	}
+	return
+}
 
 func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount) {
 	if id <= 0 {
 		return nil
+	}
+	one = _interface.GetUserFromPreloadContext(ctx, id)
+	if one != nil {
+		return one
 	}
 	err := dao.UserAccount.Ctx(ctx).
 		Where(dao.UserAccount.Columns().Id, id).

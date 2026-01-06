@@ -85,6 +85,9 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		if value, ok := payload["planIds"].([]interface{}); ok {
 			req.PlanIds = export.JsonArrayTypeConvert(ctx, value)
 		}
+		if value, ok := payload["gatewayIds"].([]interface{}); ok {
+			req.GatewayIds = export.JsonArrayTypeConvertInt64(ctx, value)
+		}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value
 		}

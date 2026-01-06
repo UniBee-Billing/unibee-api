@@ -37,9 +37,10 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 		TrialDemand:           req.TrialDemand,
 		CancelAtTrialEnd:      req.CancelAtTrialEnd,
 		ProductId:             req.ProductId,
+		MultiCurrencies:       req.MultiCurrencies,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &plan.EditRes{Plan: bean.SimplifyPlan(one)}, nil
+	return &plan.EditRes{Plan: bean.SimplifyPlanWithContext(ctx, one)}, nil
 }

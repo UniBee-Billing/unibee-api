@@ -10,10 +10,13 @@ import (
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/merchant/plan"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/currency"
+	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/metric"
+	"unibee/internal/logic/multi_currencies/currency_exchange"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
@@ -106,6 +109,7 @@ type PlanInternalReq struct {
 	TrialDemand           string                               `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd      int                                  `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ProductId             int64                                `json:"productId"   dc:"Id of product which plan to linked" `
+	MultiCurrencies       []*bean.PlanMultiCurrency            `json:"multiCurrencies"  dc:"Plan's MultiCurrencies" `
 }
 
 func MetricPlanChargeValidation(metricPlanCharges []*bean.PlanMetricMeteredChargeParam) error {
@@ -152,6 +156,8 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.Amount >= 0, "amount value should >= 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
+	message := CheckPlanMultiCurrencies(ctx, req.MerchantId, req.MultiCurrencies)
+	utility.Assert(message == "", message)
 	// product check and update
 	if req.ProductId > 0 {
 		product := query.GetProductById(ctx, uint64(req.ProductId), req.MerchantId)
@@ -167,10 +173,10 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	}
 
 	if req.Type != consts.PlanTypeMain {
-		if req.Type == consts.PlanTypeRecurringAddon {
-			utility.Assert(req.TrialDurationTime == 0, "Trial not available for addon")
-			utility.Assert(req.TrialAmount == 0, "Trial not available for addon")
-			utility.Assert(req.TrialDemand == "", "Trial not available for addon")
+		if req.Type == consts.PlanTypeRecurringAddon || req.Type == consts.PlanTypeOnetime {
+			utility.Assert(req.TrialDurationTime == 0, "Trial not available for addon and one-time plan")
+			utility.Assert(req.TrialAmount == 0, "Trial not available for addon and one-time plan")
+			utility.Assert(req.TrialDemand == "", "Trial not available for addon and one-time plan")
 		}
 		utility.Assert(len(req.MetricMeteredCharge) == 0, "Metric metered charge not available for addon")
 		utility.Assert(len(req.MetricRecurringCharge) == 0, "Metric recurring charge not available for addon")
@@ -251,6 +257,14 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 
 	utility.Assert(req.TrialDemand == "" || req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
+	var targetMultiCurrencies = make([]*bean.PlanMultiCurrency, 0)
+	if req.MultiCurrencies != nil {
+		for _, cur := range req.MultiCurrencies {
+			if cur.Disable {
+				targetMultiCurrencies = append(targetMultiCurrencies, cur)
+			}
+		}
+	}
 	one = &entity.Plan{
 		ExternalPlanId:         req.ExternalPlanId,
 		CompanyId:              merchantInfo.CompanyId,
@@ -282,6 +296,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 			MetricMeteredCharge:   req.MetricMeteredCharge,
 			MetricRecurringCharge: req.MetricRecurringCharge,
 		}),
+		GatewayProductDescription: utility.MarshalToJsonString(targetMultiCurrencies),
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -360,6 +375,7 @@ type EditInternalReq struct {
 	TrialDemand           *string                               `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 	CancelAtTrialEnd      *int                                  `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 	ProductId             *int64                                `json:"productId"   dc:"Id of product which plan to linked" `
+	MultiCurrencies       *[]*bean.PlanMultiCurrency            `json:"multiCurrencies"  dc:"Plan's MultiCurrencies" `
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
@@ -425,9 +441,9 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 
 	if one.Type != consts.PlanTypeMain {
 		if one.Type == consts.PlanTypeRecurringAddon {
-			utility.Assert(req.TrialDurationTime == nil, "Trial not available for addon")
-			utility.Assert(req.TrialAmount == nil, "Trial not available for addon")
-			utility.Assert(req.TrialDemand == nil, "Trial not available for addon")
+			utility.Assert(req.TrialDurationTime == nil || *req.TrialDurationTime == 0, "Trial not available for addon and one-time plan")
+			utility.Assert(req.TrialAmount == nil || *req.TrialAmount == 0, "Trial not available for addon and one-time plan")
+			utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "", "Trial not available for addon and one-time plan")
 		}
 		utility.Assert(req.MetricMeteredCharge == nil || len(*req.MetricMeteredCharge) == 0, "Metric metered charge not available for addon")
 		utility.Assert(req.MetricRecurringCharge == nil || len(*req.MetricRecurringCharge) == 0, "Metric recurring charge not available for addon")
@@ -506,29 +522,46 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		metricPlanCharge.MetricLimits = req.MetricLimits
 	}
 
+	var multiCurrencies = []*bean.PlanMultiCurrency{}
+	if len(one.GatewayProductDescription) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.GatewayProductDescription, &multiCurrencies)
+	}
+	if req.MultiCurrencies != nil {
+		message := CheckPlanMultiCurrencies(ctx, req.MerchantId, *req.MultiCurrencies)
+		utility.Assert(message == "", message)
+
+		multiCurrencies = make([]*bean.PlanMultiCurrency, 0)
+		for _, multiCurrency := range *req.MultiCurrencies {
+			if multiCurrency.Disable {
+				multiCurrencies = append(multiCurrencies, multiCurrency)
+			}
+		}
+	}
+
 	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "" || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
-		dao.Plan.Columns().ExternalPlanId:         req.ExternalPlanId,
-		dao.Plan.Columns().PlanName:               req.PlanName,
-		dao.Plan.Columns().InternalName:           req.InternalName,
-		dao.Plan.Columns().Amount:                 req.Amount,
-		dao.Plan.Columns().Currency:               editCurrency,
-		dao.Plan.Columns().IntervalUnit:           req.IntervalUnit,
-		dao.Plan.Columns().IntervalCount:          req.IntervalCount,
-		dao.Plan.Columns().Description:            req.Description,
-		dao.Plan.Columns().ImageUrl:               req.ImageUrl,
-		dao.Plan.Columns().HomeUrl:                req.HomeUrl,
-		dao.Plan.Columns().BindingAddonIds:        bindingAddonIds,
-		dao.Plan.Columns().BindingOnetimeAddonIds: bindingOnetimeAddonIds,
-		dao.Plan.Columns().GasPayer:               req.GasPayer,
-		dao.Plan.Columns().IsDeleted:              0,
-		dao.Plan.Columns().TrialDemand:            req.TrialDemand,
-		dao.Plan.Columns().TrialDurationTime:      req.TrialDurationTime,
-		dao.Plan.Columns().TrialAmount:            req.TrialAmount,
-		dao.Plan.Columns().CancelAtTrialEnd:       req.CancelAtTrialEnd,
-		dao.Plan.Columns().ProductId:              req.ProductId,
-		dao.Plan.Columns().MetricCharge:           utility.MarshalToJsonString(metricPlanCharge),
+		dao.Plan.Columns().ExternalPlanId:            req.ExternalPlanId,
+		dao.Plan.Columns().PlanName:                  req.PlanName,
+		dao.Plan.Columns().InternalName:              req.InternalName,
+		dao.Plan.Columns().Amount:                    req.Amount,
+		dao.Plan.Columns().Currency:                  editCurrency,
+		dao.Plan.Columns().IntervalUnit:              req.IntervalUnit,
+		dao.Plan.Columns().IntervalCount:             req.IntervalCount,
+		dao.Plan.Columns().Description:               req.Description,
+		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
+		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
+		dao.Plan.Columns().BindingAddonIds:           bindingAddonIds,
+		dao.Plan.Columns().BindingOnetimeAddonIds:    bindingOnetimeAddonIds,
+		dao.Plan.Columns().GasPayer:                  req.GasPayer,
+		dao.Plan.Columns().IsDeleted:                 0,
+		dao.Plan.Columns().TrialDemand:               req.TrialDemand,
+		dao.Plan.Columns().TrialDurationTime:         req.TrialDurationTime,
+		dao.Plan.Columns().TrialAmount:               req.TrialAmount,
+		dao.Plan.Columns().CancelAtTrialEnd:          req.CancelAtTrialEnd,
+		dao.Plan.Columns().ProductId:                 req.ProductId,
+		dao.Plan.Columns().MetricCharge:              utility.MarshalToJsonString(metricPlanCharge),
+		dao.Plan.Columns().GatewayProductDescription: utility.MarshalToJsonString(multiCurrencies),
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)
@@ -589,31 +622,32 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 	one = query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
 	one = &entity.Plan{
-		CompanyId:              one.CompanyId,
-		MerchantId:             one.MerchantId,
-		PlanName:               one.PlanName + "(Copy)",
-		InternalName:           one.InternalName,
-		Amount:                 one.Amount,
-		Currency:               one.Currency,
-		IntervalUnit:           one.IntervalUnit,
-		IntervalCount:          one.IntervalCount,
-		Type:                   one.Type,
-		Description:            one.Description,
-		ImageUrl:               one.ImageUrl,
-		HomeUrl:                one.HomeUrl,
-		BindingAddonIds:        one.BindingAddonIds,
-		BindingOnetimeAddonIds: one.BindingOnetimeAddonIds,
-		Status:                 consts.PlanStatusEditable,
-		CreateTime:             gtime.Now().Timestamp(),
-		MetaData:               one.MetaData,
-		PublishStatus:          consts.PlanPublishStatusUnPublished,
-		GasPayer:               one.GasPayer,
-		TrialDurationTime:      one.TrialDurationTime,
-		TrialAmount:            one.TrialAmount,
-		TrialDemand:            one.TrialDemand,
-		CancelAtTrialEnd:       one.CancelAtTrialEnd,
-		ProductId:              one.ProductId,
-		MetricCharge:           one.MetricCharge,
+		CompanyId:                 one.CompanyId,
+		MerchantId:                one.MerchantId,
+		PlanName:                  one.PlanName + "(Copy)",
+		InternalName:              one.InternalName,
+		Amount:                    one.Amount,
+		Currency:                  one.Currency,
+		IntervalUnit:              one.IntervalUnit,
+		IntervalCount:             one.IntervalCount,
+		Type:                      one.Type,
+		Description:               one.Description,
+		ImageUrl:                  one.ImageUrl,
+		HomeUrl:                   one.HomeUrl,
+		BindingAddonIds:           one.BindingAddonIds,
+		BindingOnetimeAddonIds:    one.BindingOnetimeAddonIds,
+		Status:                    consts.PlanStatusEditable,
+		CreateTime:                gtime.Now().Timestamp(),
+		MetaData:                  one.MetaData,
+		PublishStatus:             consts.PlanPublishStatusUnPublished,
+		GasPayer:                  one.GasPayer,
+		TrialDurationTime:         one.TrialDurationTime,
+		TrialAmount:               one.TrialAmount,
+		TrialDemand:               one.TrialDemand,
+		CancelAtTrialEnd:          one.CancelAtTrialEnd,
+		ProductId:                 one.ProductId,
+		MetricCharge:              one.MetricCharge,
+		GatewayProductDescription: one.GatewayProductDescription,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -821,4 +855,29 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 		return nil, err
 	}
 	return one, nil
+}
+
+func CheckPlanMultiCurrencies(ctx context.Context, merchantId uint64, multiCurrencies []*bean.PlanMultiCurrency) string {
+	if multiCurrencies == nil || len(multiCurrencies) <= 0 {
+		return ""
+	}
+	var containAutoExchange bool
+	for _, cur := range multiCurrencies {
+		if cur.AutoExchange {
+			containAutoExchange = true
+			break
+		}
+		if !currency.IsCurrencySupport(cur.Currency) {
+			return fmt.Sprintf("Invalid Currency:%s", cur.Currency)
+		}
+	}
+	if containAutoExchange {
+		exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, merchantId, currency_exchange.FiatExchangeApiKey)
+		if config.GetConfigInstance().Mode != "cloud" {
+			if exchangeApiKeyConfig == nil || len(exchangeApiKeyConfig.ConfigValue) == 0 {
+				return "Multi currencies auto exchange need setup ExchangeApi first"
+			}
+		}
+	}
+	return ""
 }

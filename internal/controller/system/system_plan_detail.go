@@ -16,6 +16,15 @@ func (c *ControllerPlan) Detail(ctx context.Context, req *plan.DetailReq) (res *
 		if err != nil {
 			return nil, err
 		}
+		{
+			var filterMultiCurrencies = make([]*bean.PlanMultiCurrency, 0)
+			for _, multiCurrency := range detail.Plan.Plan.MultiCurrencies {
+				if !multiCurrency.Disable {
+					filterMultiCurrencies = append(filterMultiCurrencies, multiCurrency)
+				}
+			}
+			detail.Plan.Plan.MultiCurrencies = filterMultiCurrencies
+		}
 		return &plan.DetailRes{Plan: detail.Plan, Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, detail.Plan.Plan.MerchantId))}, nil
 	}
 	return nil, gerror.New("Plan Not Found")

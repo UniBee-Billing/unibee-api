@@ -3,21 +3,25 @@ package member
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
+	"net/url"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/platform"
+	"unibee/internal/logic/totp"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-func NewSession(ctx context.Context, memberId int64, returnUrl string) (session string, err error) {
+func NewMemberSession(ctx context.Context, memberId int64, returnUrl string) (session string, err error) {
 	utility.Assert(memberId > 0, "Invalid member id")
 	one := query.GetMerchantMemberById(ctx, uint64(memberId))
 	utility.Assert(one != nil, "Invalid Session, Member Not Found")
@@ -56,15 +60,35 @@ func SessionTransfer(ctx context.Context, session string) (*entity.MerchantMembe
 	return one, returnUrl
 }
 
-func PasswordLogin(ctx context.Context, email string, password string) (one *entity.MerchantMember, token string) {
+func PasswordLogin(ctx context.Context, email string, password string, totpCode string, clientIdentify string) (one *entity.MerchantMember, token string) {
 	one = query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one != nil, "Email Not Found")
+	g.Log().Infof(ctx, fmt.Sprintf("MemberAuth_Email:%s LoginWithPassword:%s", email, password))
 	utility.Assert(utility.ComparePasswords(one.Password, password), "Login Failed, Password Not Match")
+	g.Log().Infof(ctx, fmt.Sprintf("MemberAuth_Email:%s PasswordVerifySuccess:%s", email, password))
+
+	// totp validator
+	if one.TotpValidatorType > 0 && len(one.TotpValidatorSecret) > 0 && !totp.IsClientIdentityValid(ctx, one.Email, clientIdentify) {
+		// need totp validate, not needed for every login
+		utility.Assert(len(totpCode) > 0, "2FA Code Needed")
+		utility.Assert(totp.ValidateMerchantMemberTotp(ctx, one.TotpValidatorType, one.Email, one.TotpValidatorSecret, totpCode, clientIdentify), "Invalid 2FA Code")
+	}
 
 	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, one.MerchantId, one.Id, one.Email)
 	fmt.Println("logged-in, save email/id in token: ", one.Email, "/", one.Id)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", one.Id)), "Cache Error")
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "Password Login",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+		Data:           utility.Base64EncodeToString(password),
+	}, err)
 	return one, token
 }
 
@@ -84,8 +108,10 @@ func ChangeMerchantMemberPasswordWithOutOldVerify(ctx context.Context, email str
 		InvoiceId:      "",
 		PlanId:         0,
 		DiscountCode:   "",
+		Data:           utility.Base64EncodeToString(newPassword),
 	}, err)
 	utility.AssertError(err, "server error")
+	g.Log().Infof(ctx, fmt.Sprintf("MemberAuth_Email:%s ChangeMerchantMemberPasswordWithOutOldVerify:%s", email, newPassword))
 }
 
 func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword string, newPassword string) {
@@ -105,8 +131,10 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 		InvoiceId:      "",
 		PlanId:         0,
 		DiscountCode:   "",
+		Data:           utility.Base64EncodeToString(newPassword),
 	}, err)
 	utility.AssertError(err, "server error")
+	g.Log().Infof(ctx, fmt.Sprintf("MemberAuth_Email:%s ChangeMerchantMemberPassword:%s", email, newPassword))
 }
 
 func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roleIds []uint64) error {
@@ -160,21 +188,30 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, roleIds []uint64) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, roleIds []uint64, returnUrl string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
-	utility.Assert(one == nil, "email exist")
+	if one != nil {
+		if one.MerchantId == merchantId {
+			utility.Assert(false, fmt.Sprintf("Invite failed: The email %s is already a member of this merchant", email))
+		} else {
+			utility.Assert(false, fmt.Sprintf("Invite failed: The email %s is already associated with another merchant", email))
+		}
+	}
 	for _, roleId := range roleIds {
 		role := query.GetRoleById(ctx, roleId)
 		utility.Assert(role != nil, "roleId "+strconv.FormatUint(roleId, 10)+" not found")
 	}
 
+	oneTimePasswdResetSecret := fmt.Sprintf("mmtpr%s", utility.GenerateRandomAlphanumeric(40))
 	one = &entity.MerchantMember{
-		MerchantId: merchantId,
-		Email:      email,
-		CreateTime: gtime.Now().Timestamp(),
-		FirstName:  firstName,
-		LastName:   lastName,
-		Role:       utility.MarshalToJsonString(roleIds),
+		MerchantId:          merchantId,
+		Email:               email,
+		CreateTime:          gtime.Now().Timestamp(),
+		FirstName:           firstName,
+		LastName:            lastName,
+		Role:                utility.MarshalToJsonString(roleIds),
+		TotpValidatorSecret: oneTimePasswdResetSecret,
+		TotpValidatorType:   0,
 	}
 
 	result, err := dao.MerchantMember.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -186,8 +223,17 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	var link = config.GetConfigInstance().Server.GetServerPath()
 	if strings.Compare(link, "https://api.unibee.top") == 0 {
 		link = "https://merchant.unibee.top"
+	} else if strings.Compare(link, "https://api.unibee.dev") == 0 {
+		link = "https://app.unibee.dev"
 	} else {
 		link = strings.Replace(link, "/api", "", 1)
+	}
+	if len(returnUrl) > 0 {
+		if strings.Contains(returnUrl, "?") {
+			link = fmt.Sprintf("%s&merchantId=%d&setupToken=%s&email=%s&env=%s", returnUrl, merchantId, oneTimePasswdResetSecret, url.QueryEscape(email), config.GetConfigInstance().Env)
+		} else {
+			link = fmt.Sprintf("%s?merchantId=%d&setupToken=%s&email=%s&env=%s", returnUrl, merchantId, oneTimePasswdResetSecret, url.QueryEscape(email), config.GetConfigInstance().Env)
+		}
 	}
 	merchant := query.GetMerchantById(ctx, one.MerchantId)
 	utility.Assert(merchant != nil, "Invalid Merchant")
@@ -199,11 +245,12 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		}
 
 		err = platform.SentPlatformMerchantInviteMember(map[string]string{
-			"ownerEmail":  ownerEmail,
-			"memberEmail": email,
-			"firstName":   one.FirstName,
-			"lastName":    one.LastName,
-			"link":        link,
+			"ownerEmail":   ownerEmail,
+			"memberEmail":  email,
+			"firstName":    one.FirstName,
+			"lastName":     one.LastName,
+			"merchantName": merchant.CompanyName,
+			"link":         link,
 		})
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
@@ -262,4 +309,120 @@ func ReleaseMember(ctx context.Context, memberId uint64) {
 	}, err)
 	utility.AssertError(err, "server error")
 	ReloadMemberCacheForSdkAuthBackground(one.Id)
+}
+
+func UpdateMemberAuthJsProvider(ctx context.Context, memberId uint64, oauth *jwt.OAuthJsClaims) {
+	one := query.GetMerchantMemberById(ctx, memberId)
+	utility.Assert(one != nil, "member not found")
+	var err error
+	var identityData = &bean.OauthIdentity{
+		OAuthAccountMap: make(map[string]*bean.Oauth),
+	}
+	provides := make([]string, 0)
+	if len(one.AuthJs) == 0 {
+		provides = append(provides, fmt.Sprintf("%s##%s", oauth.Provider, oauth.ProviderId))
+		identityData.Identity = strings.Join(provides, ";;")
+		identityData.OAuthAccountMap[oauth.Provider] = &bean.Oauth{
+			Provider:      oauth.Provider,
+			ProviderId:    oauth.ProviderId,
+			Name:          oauth.Name,
+			Image:         oauth.Image,
+			Email:         oauth.Email,
+			EmailVerified: oauth.EmailVerified,
+		}
+		_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+			dao.MerchantMember.Columns().AuthJs:    utility.MarshalMetadataToJsonString(identityData),
+			dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+	} else {
+		_ = utility.UnmarshalFromJsonString(one.AuthJs, &identityData)
+		provides = strings.Split(identityData.Identity, ";;")
+		found := false
+		for i, provider := range provides {
+			if strings.Contains(provider, oauth.Provider) {
+				provides[i] = fmt.Sprintf("%s##%s", oauth.Provider, oauth.ProviderId)
+				found = true
+				break
+			}
+		}
+		if !found {
+			provides = append(provides, fmt.Sprintf("%s##%s", oauth.Provider, oauth.ProviderId))
+		}
+		identityData.OAuthAccountMap[oauth.Provider] = &bean.Oauth{
+			Provider:      oauth.Provider,
+			ProviderId:    oauth.ProviderId,
+			Name:          oauth.Name,
+			Image:         oauth.Image,
+			Email:         oauth.Email,
+			EmailVerified: oauth.EmailVerified,
+		}
+		identityData.Identity = strings.Join(provides, ";;")
+		authJsData := utility.MarshalMetadataToJsonString(identityData)
+		_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+			dao.MerchantMember.Columns().AuthJs:    authJsData,
+			dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+		utility.AssertError(err, "Update OAuth Failed")
+	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("UpdateMember(%v) %s AuthJs Authorization", one.Id, oauth.Provider),
+		Content:        "UpdateMemberAuthJsProvider",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+}
+
+func ClearMemberAuthJsProvider(ctx context.Context, memberId uint64, Provider string) {
+	one := query.GetMerchantMemberById(ctx, memberId)
+	utility.Assert(one != nil, "member not found")
+	var err error
+	var identityData = &bean.OauthIdentity{
+		OAuthAccountMap: make(map[string]*bean.Oauth),
+	}
+	if len(one.AuthJs) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.AuthJs, &identityData)
+		provides := strings.Split(identityData.Identity, ";;")
+
+		// Remove the specified Provider
+		newProvides := make([]string, 0)
+		for _, provider := range provides {
+			if !strings.Contains(provider, Provider) {
+				newProvides = append(newProvides, provider)
+			}
+		}
+
+		// Remove the specified Provider from OAuthAccountMap
+		delete(identityData.OAuthAccountMap, Provider)
+
+		// Update Identity string
+		identityData.Identity = strings.Join(newProvides, ";;")
+
+		// If no OAuth bindings remain, clear the entire AuthJs field
+		if len(newProvides) == 0 {
+			_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+				dao.MerchantMember.Columns().AuthJs:    "",
+				dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+		} else {
+			_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+				dao.MerchantMember.Columns().AuthJs:    utility.MarshalMetadataToJsonString(identityData),
+				dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+		}
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Member(%v)", one.Id),
+			Content:        "ClearMemberAuthJsProvider",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
+
 }

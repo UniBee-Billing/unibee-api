@@ -4,6 +4,7 @@ import (
 	"context"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -122,6 +123,10 @@ func GetSubscriptionByExternalSubscriptionId(ctx context.Context, externalSubscr
 func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string) (one *entity.Subscription) {
 	if len(subscriptionId) == 0 {
 		return nil
+	}
+	one = _interface.GetSubscriptionFromPreloadContext(ctx, subscriptionId)
+	if one != nil {
+		return one
 	}
 	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{SubscriptionId: subscriptionId}).OmitEmpty().Scan(&one)
 	if err != nil {

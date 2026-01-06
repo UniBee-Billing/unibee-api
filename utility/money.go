@@ -25,7 +25,9 @@ func ConvertCentToDollarStr(cents int64, currency string) string {
 }
 
 func ExchangeCurrencyConvert(from int64, fromCurrency string, toCurrency string, exchangeRate float64) int64 {
-	if IsNoCentCurrency(strings.ToUpper(fromCurrency)) && !IsNoCentCurrency(strings.ToUpper(toCurrency)) {
+	if strings.ToUpper(fromCurrency) == strings.ToUpper(toCurrency) {
+		return from
+	} else if IsNoCentCurrency(strings.ToUpper(fromCurrency)) && !IsNoCentCurrency(strings.ToUpper(toCurrency)) {
 		return int64(float64(from*100) * exchangeRate)
 	} else if !IsNoCentCurrency(strings.ToUpper(fromCurrency)) && IsNoCentCurrency(strings.ToUpper(toCurrency)) {
 		return int64(float64(from/100) * exchangeRate)
@@ -36,7 +38,7 @@ func ExchangeCurrencyConvert(from int64, fromCurrency string, toCurrency string,
 func ConvertCentStrToCent(centStr string, currency string) int64 {
 	cents, err := strconv.ParseFloat(centStr, 64)
 	if err != nil {
-		panic(fmt.Sprintf("ConvertDollarStrToCent panic centStr:%s currency:%s err:%s", cents, currency, err.Error()))
+		panic(fmt.Sprintf("ConvertDollarStrToCent panic centStr:%f currency:%s err:%s", cents, currency, err.Error()))
 	}
 	return int64(cents)
 }

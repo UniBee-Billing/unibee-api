@@ -3,10 +3,6 @@ package message
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	event2 "unibee/internal/consumer/webhook/event"
@@ -14,6 +10,11 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 type WebhookMessage struct {
@@ -31,6 +32,7 @@ type WebhookMessage struct {
 }
 
 func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string, metadata map[string]interface{}) {
+	var webhookMessageId uint64 = 0
 	webhookMessage := &entity.MerchantWebhookMessage{
 		MerchantId:      merchantId,
 		WebhookEvent:    string(event),
@@ -39,10 +41,36 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 		CreateTime:      gtime.Now().Timestamp(),
 	}
 	insert, err := dao.MerchantWebhookMessage.Ctx(ctx).Data(webhookMessage).OmitNil().Insert(webhookMessage)
-	utility.AssertError(err, "webhook message insert error")
-	id, err := insert.LastInsertId()
-	utility.AssertError(err, "webhook message LastInsertId error")
-	webhookMessage.Id = uint64(id)
+	if err != nil {
+		g.Log().Errorf(ctx, "SendWebhookMessage insert merchant webhook message err:%s", err.Error())
+	} else {
+		id, err := insert.LastInsertId()
+		if err != nil {
+			g.Log().Errorf(ctx, "SendWebhookMessage insert merchant webhook message get LastInsertId err:%s", err.Error())
+		} else {
+			webhookMessage.Id = uint64(id)
+			webhookMessageId = webhookMessage.Id
+		}
+	}
+
+	if metadata != nil {
+		if _, ok := metadata["Persistence"]; ok {
+			if subId, ok := metadata["SubscriptionId"]; ok {
+				persistenceOne := &entity.MerchantWebhookMessage{
+					MerchantId:      merchantId,
+					WebhookEvent:    string(event),
+					Data:            data.String(),
+					WebsocketStatus: 50,
+					SubscriptionId:  fmt.Sprintf("%s", subId),
+					CreateTime:      gtime.Now().Timestamp(),
+				}
+				_, err = dao.MerchantWebhookMessage.Ctx(ctx).Data(persistenceOne).OmitNil().Insert(persistenceOne)
+				if err != nil {
+					g.Log().Errorf(ctx, fmt.Sprintf("SendWebhookMessage, Persistence error:%s", err.Error()))
+				}
+			}
+		}
+	}
 
 	eventId := utility.CreateEventId()
 
@@ -51,7 +79,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 			Topic: redismq2.TopicInternalWebhook.Topic,
 			Tag:   redismq2.TopicInternalWebhook.Tag,
 			Body: utility.MarshalToJsonString(&WebhookMessage{
-				Id:            webhookMessage.Id,
+				Id:            webhookMessageId,
 				Event:         event,
 				EventId:       eventId,
 				MerchantId:    merchantId,
@@ -74,7 +102,7 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 					Tag:                       redismq2.TopicMerchantWebhook.Tag,
 					ConsumerDelayMilliSeconds: 100,
 					Body: utility.MarshalToJsonString(&WebhookMessage{
-						Id:            webhookMessage.Id,
+						Id:            webhookMessageId,
 						Event:         event,
 						EventId:       eventId,
 						EndpointId:    merchantWebhook.Id,
@@ -86,7 +114,11 @@ func SendWebhookMessage(ctx context.Context, event event2.WebhookEvent, merchant
 						MetaData:      utility.MarshalToJsonString(metadata),
 					}),
 				})
-				g.Log().Infof(ctx, "SendWebhookMessage event:%s, merchantWebhookUrl:%s send:%v err:%v", event, merchantWebhook.WebhookUrl, send, err)
+				if err != nil {
+					g.Log().Errorf(ctx, "SendWebhookMessage event:%s, merchantWebhookUrl:%s send:%v err:%s", event, merchantWebhook.WebhookUrl, send, err.Error())
+				} else {
+					g.Log().Infof(ctx, "SendWebhookMessage event:%s, merchantWebhookUrl:%s send:%v", event, merchantWebhook.WebhookUrl, send)
+				}
 			}
 		}
 	}

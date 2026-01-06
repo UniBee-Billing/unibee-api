@@ -5,6 +5,7 @@ import (
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -106,6 +107,10 @@ func GetCreditAccountByUserId(ctx context.Context, userId uint64, creditType int
 func GetPromoCreditTransactionByInvoiceId(ctx context.Context, userId uint64, invoiceId string) (one *entity.CreditTransaction) {
 	if userId <= 0 || len(invoiceId) <= 0 {
 		return nil
+	}
+	one = _interface.GetPromoCreditTransactionFromPreloadContext(ctx, invoiceId)
+	if one != nil {
+		return one
 	}
 	err := dao.CreditTransaction.Ctx(ctx).
 		Where(dao.CreditTransaction.Columns().UserId, userId).

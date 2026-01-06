@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"unibee/api/bean"
 	_interface "unibee/internal/interface/context"
 	email2 "unibee/internal/logic/email"
@@ -13,19 +14,26 @@ import (
 
 func (c *ControllerEmail) ActivateLocalizationVersion(ctx context.Context, req *email.ActivateLocalizationVersionReq) (res *email.ActivateLocalizationVersionRes, err error) {
 	utility.Assert(len(req.TemplateName) > 0, "Invalid template name")
-	utility.Assert(len(req.VersionId) > 0, "Invalid versionId")
 	template := query.GetMerchantEmailTemplateByTemplateName(ctx, _interface.GetMerchantId(ctx), req.TemplateName)
 	utility.Assert(template != nil, "template not found")
 	var one *bean.MerchantLocalizationVersion
-	for _, v := range template.LocalizationVersions {
-		if req.VersionId == v.VersionId {
-			one = v
+	if len(req.VersionId) > 0 {
+		for _, v := range template.LocalizationVersions {
+			if req.VersionId == v.VersionId {
+				one = v
+			}
+		}
+		utility.Assert(one != nil, "Invalid localization versionId")
+		one.Activate = true
+		if one != nil && one.Localizations != nil && len(one.Localizations) > 0 {
+			for _, v := range one.Localizations {
+				utility.Assert(len(v.Title) > 0, fmt.Sprintf("Empty Subject For Language:%s", v.Language))
+				utility.Assert(len(v.Content) > 0, fmt.Sprintf("Empty Content For Language:%s", v.Language))
+			}
 		}
 	}
-	utility.Assert(one != nil, "Invalid localization versionId")
-	one.Activate = true
 	for _, v := range template.LocalizationVersions {
-		if v != one {
+		if one == nil || v != one {
 			v.Activate = false
 		}
 	}

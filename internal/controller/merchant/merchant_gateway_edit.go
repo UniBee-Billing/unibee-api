@@ -9,5 +9,16 @@ import (
 )
 
 func (c *ControllerGateway) Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error) {
-	return &gateway.EditRes{Gateway: gateway3.ConvertGatewayDetail(ctx, gateway2.EditGateway(ctx, _interface.GetMerchantId(ctx), req.GatewayId, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.GatewayPaymentTypes, req.DisplayName, req.GatewayLogo, req.Sort, req.CurrencyExchange))}, nil
+	if req.CompanyIssuer != nil {
+		if req.Metadata == nil {
+			metadata := map[string]interface{}{}
+			req.Metadata = &metadata
+		}
+		(*req.Metadata)["IssueCompanyName"] = req.CompanyIssuer.IssueCompanyName
+		(*req.Metadata)["IssueAddress"] = req.CompanyIssuer.IssueAddress
+		(*req.Metadata)["IssueRegNumber"] = req.CompanyIssuer.IssueRegNumber
+		(*req.Metadata)["IssueVatNumber"] = req.CompanyIssuer.IssueVatNumber
+		(*req.Metadata)["IssueLogo"] = req.CompanyIssuer.IssueLogo
+	}
+	return &gateway.EditRes{Gateway: gateway3.ConvertGatewayDetail(ctx, gateway2.EditGateway(ctx, _interface.GetMerchantId(ctx), req.GatewayId, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.GatewayPaymentTypes, req.DisplayName, req.GatewayLogo, req.Sort, req.CurrencyExchange, req.Metadata))}, nil
 }

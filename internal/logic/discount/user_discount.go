@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -62,8 +63,8 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if discountCode.DiscountType == consts.DiscountTypeFixedAmount && len(discountCode.Currency) == 0 {
 		return false, false, "Code is fixed amount,but currency not set"
 	}
-	if discountCode.DiscountType == consts.DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
-		return false, false, "Code currency not match plan"
+	if discountCode.DiscountType == consts.DiscountTypeFixedAmount && !bean.IsDiscountCodeSupportCurrency(ctx, req.MerchantId, discountCode, req.Currency) {
+		return false, false, fmt.Sprintf("Unsupported discount code currency(%s)", req.Currency)
 	}
 	compensateHistoryPlanId(ctx, req)
 	{
@@ -122,6 +123,71 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 								break
 							}
 						}
+						if match {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
+					}
+				} else if discountCode.PlanApplyType == 3 || discountCode.PlanApplyType == 4 {
+					// 3-Apply to Plans by Groups(Billing Period Included), 4-Apply to Plans except by Groups(Billing Period Included)
+					var planApplySelectorGroup = &bean.GroupPlanSelector{}
+					if len(discountCode.PlanApplyGroup) > 0 {
+						_ = utility.UnmarshalFromJsonString(discountCode.PlanApplyGroup, &planApplySelectorGroup)
+					}
+					if req.PLanId <= 0 {
+						return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+					}
+					var excludeMatch = false
+					planIds := strings.Split(discountCode.PlanIds, ",")
+					for _, s := range planIds {
+						planId, err := strconv.ParseUint(s, 10, 64)
+						if err == nil && planId == req.PLanId {
+							excludeMatch = true
+							break
+						}
+					}
+					plan := query.GetPlanById(ctx, req.PLanId)
+					if plan == nil {
+						return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+					}
+					var match = false
+					var currencyMatch = false
+					if planApplySelectorGroup.Currency != nil && len(planApplySelectorGroup.Currency) > 0 {
+						for _, targetCurrency := range planApplySelectorGroup.Currency {
+							if strings.ToUpper(targetCurrency) == strings.ToUpper(req.Currency) {
+								currencyMatch = true
+							}
+						}
+					} else {
+						currencyMatch = true
+					}
+					var intervalMatch = false
+					if planApplySelectorGroup.GroupPlanIntervalSelector != nil && len(planApplySelectorGroup.GroupPlanIntervalSelector) > 0 {
+						for _, intervalSelector := range planApplySelectorGroup.GroupPlanIntervalSelector {
+							if intervalSelector.IntervalCount == plan.IntervalCount && strings.ToUpper(intervalSelector.IntervalUnit) == strings.ToUpper(plan.IntervalUnit) {
+								intervalMatch = true
+							}
+						}
+					} else {
+						intervalMatch = true
+					}
+					var planTypeMatch = false
+					if planApplySelectorGroup.Type != nil && len(planApplySelectorGroup.Type) > 0 {
+						for _, targetType := range planApplySelectorGroup.Type {
+							if plan.Type == targetType {
+								planTypeMatch = true
+							}
+						}
+					} else {
+						planTypeMatch = true
+					}
+					if currencyMatch && intervalMatch && planTypeMatch && !excludeMatch {
+						match = true
+					}
+					if discountCode.PlanApplyType == 3 {
+						if !match {
+							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
+						}
+					} else if discountCode.PlanApplyType == 4 {
 						if match {
 							return false, false, i18n.LocalizationFormat(ctx, "{#DiscountCodePlanError}")
 						}
@@ -410,20 +476,13 @@ func UpdateUserDiscountPaymentIdWhenInvoicePaid(ctx context.Context, invoiceId s
 	}).Where(dao.MerchantUserDiscountCode.Columns().InvoiceId, invoiceId).OmitNil().Update()
 }
 
-func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountExcludeTax int64, currency string, discountCode string, timeNow int64) int64 {
+func ComputeDiscountAmount(ctx context.Context, merchantDiscountCode *entity.MerchantDiscountCode, totalAmountExcludeTax int64, currency string, timeNow int64) int64 {
 	if timeNow == 0 {
 		timeNow = gtime.Now().Timestamp()
-	}
-	if merchantId <= 0 {
-		return 0
 	}
 	if totalAmountExcludeTax <= 0 {
 		return 0
 	}
-	if len(discountCode) == 0 {
-		return 0
-	}
-	merchantDiscountCode := query.GetDiscountByCode(ctx, merchantId, discountCode)
 	if merchantDiscountCode == nil {
 		return 0
 	}
@@ -437,8 +496,8 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountEx
 	if merchantDiscountCode.DiscountType == consts.DiscountTypePercentage {
 		return int64(float64(totalAmountExcludeTax) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
 	} else if merchantDiscountCode.DiscountType == consts.DiscountTypeFixedAmount &&
-		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
-		return merchantDiscountCode.DiscountAmount
+		bean.IsDiscountCodeSupportCurrency(ctx, merchantDiscountCode.MerchantId, merchantDiscountCode, currency) {
+		return entity.ExchangeAmountToCurrency(ctx, merchantDiscountCode.MerchantId, merchantDiscountCode.DiscountAmount, merchantDiscountCode.Currency, currency)
 	}
 	return 0
 }
@@ -461,8 +520,8 @@ func ComputeHistoryDiscountAmount(ctx context.Context, merchantId uint64, totalA
 	if merchantDiscountCode.DiscountType == consts.DiscountTypePercentage {
 		return int64(float64(totalAmountExcludeTax) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
 	} else if merchantDiscountCode.DiscountType == consts.DiscountTypeFixedAmount &&
-		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
-		return merchantDiscountCode.DiscountAmount
+		bean.IsDiscountCodeSupportCurrency(ctx, merchantId, merchantDiscountCode, currency) {
+		return entity.ExchangeAmountToCurrency(ctx, merchantId, merchantDiscountCode.DiscountAmount, merchantDiscountCode.Currency, currency)
 	}
 	return 0
 }

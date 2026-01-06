@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"fmt"
 	dao "unibee/internal/dao/default"
 	entity "unibee/internal/model/entity/default"
 )
@@ -117,4 +118,31 @@ func GetMerchantOwnerMember(ctx context.Context, merchantId uint64) (one *entity
 		return nil
 	}
 	return one
+}
+
+func GetMerchantMemberCount(ctx context.Context, merchantId uint64) int {
+	if merchantId <= 0 {
+		return 100
+	}
+	count, err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().MerchantId, merchantId).
+		Where(dao.MerchantMember.Columns().IsDeleted, 0).
+		Count()
+	if err != nil {
+		return 100
+	}
+	return count
+}
+
+func GetMerchantMembersByAuthJsProvider(ctx context.Context, Provider string, ProviderId string) (list []*entity.MerchantMember) {
+	if len(Provider) == 0 || len(ProviderId) == 0 {
+		return nil
+	}
+	err := dao.MerchantMember.Ctx(ctx).
+		WhereLike(dao.MerchantMember.Columns().AuthJs, "%"+fmt.Sprintf("%s##%s", Provider, ProviderId)+"%").
+		Scan(&list)
+	if err != nil {
+		return nil
+	}
+	return list
 }

@@ -2,6 +2,7 @@ package detail
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -10,6 +11,8 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 	"unicode"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
 )
 
 type GatewaySort struct {
@@ -56,18 +59,43 @@ type Gateway struct {
 	PrivateSecretName             string                           `json:"privateSecretName"  dc:""`
 	SubGatewayName                string                           `json:"subGatewayName"  dc:""`
 	AutoChargeEnabled             bool                             `json:"autoChargeEnabled"  dc:""`
+	IsDefault                     bool                             `json:"isDefault"  dc:""`
+	CompanyIssuer                 *GatewayCompanyIssuer            `json:"companyIssuer" dc:""`
+	Metadata                      map[string]interface{}           `json:"metadata"                  description:""`
 }
 
 type GatewayBank struct {
-	AccountHolder string `json:"accountHolder"   dc:"The AccountHolder of wire transfer " v:"required" `
-	BIC           string `json:"bic"   dc:"The BIC of wire transfer " v:"required" `
-	IBAN          string `json:"iban"   dc:"The IBAN of wire transfer " v:"required" `
-	Address       string `json:"address"   dc:"The address of wire transfer " v:"required" `
+	AccountHolder    string `json:"accountHolder"   dc:"The AccountHolder of wire transfer " v:"required" `
+	AccountNumber    string `json:"accountNumber,omitempty"  dc:"The Account Number"`
+	SwiftCode        string `json:"swiftCode,omitempty"  dc:"The Swift Code"`
+	BankName         string `json:"bankName,omitempty"  dc:"The Bank Name"`
+	BSBCode          string `json:"bsbCode,omitempty"  dc:"The BSB Code"`
+	BIC              string `json:"bic"   dc:"The BIC of wire transfer " `
+	IBAN             string `json:"iban"   dc:"The IBAN of wire transfer " `
+	ABARoutingNumber string `json:"ABARoutingNumber"   dc:"The ABARoutingNumber of wire transfer " `
+	CNAPS            string `json:"CNAPS"   dc:"The CNAPS of wire transfer " `
+	Address          string `json:"address"   dc:"The address of wire transfer " v:"required" `
+	Remarks          string `json:"Remarks"   dc:"The Remarks additional content " `
+}
+
+type GatewayCompanyIssuer struct {
+	IssueVatNumber   string `json:"issueVatNumber"  dc:""`
+	IssueRegNumber   string `json:"issueRegNumber"  dc:""`
+	IssueCompanyName string `json:"issueCompanyName"  dc:""`
+	IssueAddress     string `json:"issueAddress"  dc:""`
+	IssueLogo        string `json:"issueLogo"  dc:""`
 }
 
 func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gateway {
 	if one == nil {
 		return nil
+	}
+	var metadata = make(map[string]interface{})
+	if len(one.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("SimplifyPlan Unmarshal Metadata error:%s", err.Error())
+		}
 	}
 	var countryConfig map[string]bool
 	_ = utility.UnmarshalFromJsonString(one.CountryConfig, &countryConfig)
@@ -162,6 +190,23 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		one.EnumKey = gatewayInfo.Sort
 	}
 
+	var companyIssuer = &GatewayCompanyIssuer{}
+	if v, ok := metadata["IssueVatNumber"]; ok {
+		companyIssuer.IssueVatNumber = fmt.Sprintf("%s", v)
+	}
+	if v, ok := metadata["IssueRegNumber"]; ok {
+		companyIssuer.IssueRegNumber = fmt.Sprintf("%s", v)
+	}
+	if v, ok := metadata["IssueCompanyName"]; ok {
+		companyIssuer.IssueCompanyName = fmt.Sprintf("%s", v)
+	}
+	if v, ok := metadata["IssueAddress"]; ok {
+		companyIssuer.IssueAddress = fmt.Sprintf("%s", v)
+	}
+	if v, ok := metadata["IssueLogo"]; ok {
+		companyIssuer.IssueLogo = fmt.Sprintf("%s", v)
+	}
+
 	return &Gateway{
 		Id:                            one.Id,
 		Name:                          name,
@@ -187,12 +232,15 @@ func ConvertGatewayDetail(ctx context.Context, one *entity.MerchantGateway) *Gat
 		IsSetupFinished:               isSetupFinished,
 		CurrencyExchange:              currencyExchangeList,
 		CurrencyExchangeEnabled:       currencyExchangeEnabled,
-		Archive:                       one.IsDeleted != 0,
+		Archive:                       one.IsDeleted > 0,
 		PublicKeyName:                 publicKeyName,
 		PrivateSecretName:             privateSecretName,
 		SubGatewayName:                subGatewayName,
 		AutoChargeEnabled:             autoChargeEnabled,
 		GatewayPaymentTypes:           gatewayPaymentTypes,
+		IsDefault:                     one.IsDeleted == 0 && one.Id > 0,
+		Metadata:                      metadata,
+		CompanyIssuer:                 companyIssuer,
 	}
 }
 
@@ -216,4 +264,45 @@ func ConvertGatewayList(ctx context.Context, ones []*entity.MerchantGateway) (li
 		list = append(list, ConvertGatewayDetail(ctx, one))
 	}
 	return list
+}
+
+func CopyGatewayCompanyIssuer(one *entity.MerchantGateway, targetMetaData map[string]interface{}) {
+	if one != nil && targetMetaData != nil {
+		var metadata = make(map[string]interface{})
+		if len(one.MetaData) > 0 {
+			err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+			if err != nil {
+				fmt.Printf("CopyGatewayCompanyIssuer Unmarshal Metadata error:%s", err.Error())
+			}
+		}
+		issueCompanyName := ""
+		issueAddress := ""
+		issueVatNumber := ""
+		issueRegNumber := ""
+		issueLogo := ""
+		if v, ok := metadata["IssueCompanyName"]; ok {
+			issueCompanyName = fmt.Sprintf("%s", v)
+		}
+		if v, ok := metadata["IssueAddress"]; ok {
+			issueAddress = fmt.Sprintf("%s", v)
+		}
+		if v, ok := metadata["IssueVatNumber"]; ok {
+			issueVatNumber = fmt.Sprintf("%s", v)
+		}
+		if v, ok := metadata["IssueRegNumber"]; ok {
+			issueRegNumber = fmt.Sprintf("%s", v)
+		}
+		if v, ok := metadata["IssueLogo"]; ok {
+			issueLogo = fmt.Sprintf("%s", v)
+		}
+		if len(issueCompanyName) > 0 && len(issueAddress) > 0 {
+			targetMetaData["IssueCompanyName"] = issueCompanyName
+			targetMetaData["IssueAddress"] = issueAddress
+			targetMetaData["IssueVatNumber"] = issueVatNumber
+			targetMetaData["IssueRegNumber"] = issueRegNumber
+		}
+		if len(issueLogo) > 0 {
+			targetMetaData["IssueLogo"] = issueLogo
+		}
+	}
 }

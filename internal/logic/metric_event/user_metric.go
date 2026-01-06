@@ -3,10 +3,6 @@ package metric_event
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/internal/consts"
@@ -19,6 +15,11 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 func UpdateMetricEventForInvoicePaid(one *entity.Invoice) {
@@ -65,6 +66,12 @@ func UpdateMetricEventForInvoicePaid(one *entity.Invoice) {
 				}
 			}
 		}
+		if invoiceDetail.Subscription != nil {
+			user := query.GetUserAccountById(ctx, invoiceDetail.UserId)
+			if user != nil {
+				GetUserMetricStat(ctx, invoiceDetail.MerchantId, user, invoiceDetail.Subscription.ProductId, true)
+			}
+		}
 	}()
 }
 
@@ -91,6 +98,7 @@ func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint6
 			TotalChargeAmount: v.TotalChargeAmount,
 			Name:              v.Metric.MetricName,
 			Description:       v.Metric.MetricDescription,
+			Lines:             v.Lines,
 		})
 	}
 	for _, v := range userMetric.RecurringChargeStats {
@@ -103,6 +111,7 @@ func GetUserMetricStatForAutoChargeInvoice(ctx context.Context, merchantId uint6
 			TotalChargeAmount: v.TotalChargeAmount,
 			Name:              v.Metric.MetricName,
 			Description:       v.Metric.MetricDescription,
+			Lines:             v.Lines,
 		})
 	}
 	return &bean.UserMetricChargeInvoiceItemEntity{
@@ -124,7 +133,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 	var meteredChargeStats = make([]*detail.UserMerchantMetricChargeStat, 0)
 	var recurringChargeStats = make([]*detail.UserMerchantMetricChargeStat, 0)
 	if one != nil {
-		limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, one)
+		limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, one, reloadCache)
 		for _, metricLimit := range limitMap {
 			met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
 			if met != nil {
@@ -138,7 +147,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 		for _, metricMeteredCharge := range planMetricBindingEntity.MetricMeteredCharge {
 			met := query.GetMerchantMetric(ctx, metricMeteredCharge.MetricId)
 			metricUserUsedValue := GetUserMetricCachedUseValue(ctx, merchantId, user.Id, met, one, reloadCache)
-			totalChargeAmount, _, graduateStep := event_charge.ComputeMetricUsedChargePrice(metricUserUsedValue.UsedValue, metricMeteredCharge)
+			totalChargeAmount, _, graduateStep, lines := event_charge.ComputeMetricUsedChargePrice(ctx, query.GetPlanById(ctx, one.PlanId), one.Currency, metricUserUsedValue.UsedValue, metricMeteredCharge)
 			meteredChargeStats = append(meteredChargeStats, &detail.UserMerchantMetricChargeStat{
 				MetricId:          metricMeteredCharge.MetricId,
 				Metric:            bean.SimplifyMerchantMetric(met),
@@ -148,12 +157,13 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 				ChargePricing:     metricMeteredCharge,
 				TotalChargeAmount: totalChargeAmount,
 				GraduatedStep:     graduateStep,
+				Lines:             lines,
 			})
 		}
 		for _, metricRecurringCharge := range planMetricBindingEntity.MetricRecurringCharge {
 			met := query.GetMerchantMetric(ctx, metricRecurringCharge.MetricId)
 			metricUserUsedValue := GetUserMetricCachedUseValue(ctx, merchantId, user.Id, met, one, reloadCache)
-			totalChargeAmount, _, graduateStep := event_charge.ComputeMetricUsedChargePrice(metricUserUsedValue.UsedValue, metricRecurringCharge)
+			totalChargeAmount, _, graduateStep, lines := event_charge.ComputeMetricUsedChargePrice(ctx, query.GetPlanById(ctx, one.PlanId), one.Currency, metricUserUsedValue.UsedValue, metricRecurringCharge)
 			recurringChargeStats = append(recurringChargeStats, &detail.UserMerchantMetricChargeStat{
 				MetricId:          metricRecurringCharge.MetricId,
 				Metric:            bean.SimplifyMerchantMetric(met),
@@ -163,6 +173,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 				ChargePricing:     metricRecurringCharge,
 				TotalChargeAmount: totalChargeAmount,
 				GraduatedStep:     graduateStep,
+				Lines:             lines,
 			})
 		}
 		return &detail.UserMetric{
@@ -191,8 +202,8 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 	}
 }
 
-func checkMetricUsedValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append int64) (int64, uint64, bool) {
-	limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, sub)
+func checkMetricUsedValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append int64, reloadCache bool) (int64, uint64, bool) {
+	limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, sub, reloadCache)
 	useValue := GetUserMetricCachedUseValue(ctx, merchantId, user.Id, met, sub, false)
 	if metricLimit, ok := limitMap[met.Id]; ok {
 		if met.AggregationType == metric.MetricAggregationTypeLatest || met.AggregationType == metric.MetricAggregationTypeMax {
@@ -206,17 +217,18 @@ func checkMetricUsedValue(ctx context.Context, merchantId uint64, user *entity.U
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uint64, sub *entity.Subscription) map[uint64]*detail.PlanMetricLimitDetail {
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uint64, sub *entity.Subscription, reloadCache bool) map[uint64]*detail.PlanMetricLimitDetail {
 	var limitMap = make(map[uint64]*detail.PlanMetricLimitDetail)
-	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, false)
+	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, reloadCache)
 	if len(userSubPlans) > 0 {
 		g.Log().Infof(ctx, "GetUserMetricTotalLimits userId:%d subPlanId:%d userSubPlans:%s", userId, sub.PlanId, utility.MarshalToJsonString(userSubPlans))
 		for _, subPlan := range userSubPlans {
-			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, false)
+			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, reloadCache)
 			for _, planLimit := range list {
 				if planLimit.Metric != nil {
+					targetLimit := planLimit.MetricLimit * uint64(utility.MaxInt64(1, subPlan.Quantity))
 					if _, ok := limitMap[planLimit.MetricId]; ok {
-						limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
+						limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + targetLimit
 						limitMap[planLimit.MetricId].PlanLimits = append(limitMap[planLimit.MetricId].PlanLimits, planLimit)
 					} else {
 						limitMap[planLimit.MetricId] = &detail.PlanMetricLimitDetail{
@@ -228,7 +240,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uin
 							Type:                planLimit.Metric.Type,
 							AggregationType:     planLimit.Metric.AggregationType,
 							AggregationProperty: planLimit.Metric.AggregationProperty,
-							TotalLimit:          planLimit.MetricLimit,
+							TotalLimit:          targetLimit,
 							PlanLimits:          []*detail.MerchantMetricPlanLimitDetail{planLimit},
 						}
 					}

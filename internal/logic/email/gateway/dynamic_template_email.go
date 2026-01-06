@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
+	"unibee/internal/logic/email/sender"
+	"unibee/utility"
+
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"os"
-	"unibee/internal/logic/email/sender"
-	"unibee/utility"
 )
 
 var LangMap = map[string]string{
@@ -21,11 +22,24 @@ var LangMap = map[string]string{
 	"ru": "russian",
 	"vi": "vietnamese",
 	"pt": "portuguese",
+	"ja": "japanese",
+	"de": "german",
+	"fr": "french",
+	"it": "italian",
+	"es": "spanish",
+	"sv": "swedish",
+	"no": "norwegian",
+	"hi": "hindi",
+	"th": "thai",
+	"ko": "korean",
+	"ar": "arabic",
+	"tr": "turkish",
+	"nl": "dutch",
 }
 
 // Sendgrid Template https://github.com/sendgrid/sendgrid-go/blob/main/use-cases/transactional-templates-with-mailer-helper.md
 // https://www.twilio.com/docs/sendgrid/api-reference
-func SendSandgridDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string) (result string, err error) {
+func SendSendgridDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey string, mailTo string, subject string, templateId string, variables map[string]interface{}, language string) (result string, err error) {
 	if f == nil {
 		f = sender.GetDefaultSender()
 	}
@@ -54,7 +68,7 @@ func SendSandgridDynamicTemplateEmailToUser(f *sender.Sender, emailGatewayKey st
 	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
 	if err != nil {
-		fmt.Printf("SendSandgridDynamicTemplateEmailToUser error:%s\n", err.Error())
+		fmt.Printf("SendSendgridDynamicTemplateEmailToUser error:%s\n", err.Error())
 		return "", err
 	} else {
 		fmt.Println(response.StatusCode)

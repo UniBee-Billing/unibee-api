@@ -17,6 +17,10 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(one != nil, "user not found")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
+	currency := plan.Currency
+	if len(req.Currency) > 0 {
+		currency = req.Currency
+	}
 	req.Quantity = utility.MaxInt64(1, req.Quantity)
 	controllerPayment := merchant.ControllerPayment{}
 	if req.Metadata == nil {
@@ -25,23 +29,27 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	req.Metadata["PlanId"] = req.PlanId
 	req.Metadata["Quantity"] = req.Quantity
 	paymentRes, paymentErr := controllerPayment.New(ctx, &merchantPaymentApi.NewReq{
-		UserId:      one.Id,
-		Currency:    plan.Currency,
-		TotalAmount: plan.Amount * req.Quantity,
+		PaymentUIMode: req.PaymentUIMode,
+		UserId:        one.Id,
+		Currency:      currency,
+		//TotalAmount:   plan.CurrencyAmount(ctx, currency) * req.Quantity,
+		PlanId:      plan.Id,
+		Quantity:    req.Quantity,
 		GatewayId:   req.GatewayId,
 		RedirectUrl: req.ReturnUrl,
 		CountryCode: one.CountryCode,
-		Name:        fmt.Sprintf("%s", plan.PlanName),
-		Description: plan.Description,
+		//Name:        fmt.Sprintf("%s", plan.PlanName),
+		//Description: plan.Description,
 		SendInvoice: true,
-		Items: []*merchantPaymentApi.Item{{
-			Quantity:               req.Quantity,
-			UnitAmountExcludingTax: plan.Amount,
-			Amount:                 plan.Amount * req.Quantity,
-			Name:                   fmt.Sprintf("%s", plan.PlanName),
-			Description:            plan.Description,
-			AmountExcludingTax:     plan.Amount * req.Quantity,
-		}},
+		//Items: []*merchantPaymentApi.Item{{
+		//	Quantity:               req.Quantity,
+		//	Currency:               currency,
+		//	UnitAmountExcludingTax: plan.CurrencyAmount(ctx, currency),
+		//	Amount:                 plan.CurrencyAmount(ctx, currency) * req.Quantity,
+		//	Name:                   fmt.Sprintf("%s", plan.PlanName),
+		//	Description:            plan.Description,
+		//	AmountExcludingTax:     plan.CurrencyAmount(ctx, currency) * req.Quantity,
+		//}},
 		Metadata: req.Metadata,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{

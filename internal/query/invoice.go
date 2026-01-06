@@ -4,12 +4,17 @@ import (
 	"context"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
 
 func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.Invoice) {
 	if len(invoiceId) == 0 {
 		return nil
+	}
+	one = _interface.GetInvoiceFromPreloadContext(ctx, invoiceId)
+	if one != nil {
+		return one
 	}
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{InvoiceId: invoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {

@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "एक अन्य सक्रिय या अपूर्ण सदस्यता मौजूद है",
+  "ClickTooFast": "आप बहुत तेजी से क्लिक कर रहे हैं। कृपया एक क्षण प्रतीक्षा करें और पुनः प्रयास करें।",
+  "AmountNotMatch": "कुल राशि पुरानी है। कृपया अपडेट करें और पुनः प्रयास करें।",
+  "PlanTrialGatewayError": "इस योजना के लिए कार्ड या PayPal भुगतान गेटवे की आवश्यकता है।",
+  "VatValidateError": "VAT संख्या सत्यापन विफल। संख्या: %s",
+  "VatGatewayNeedSetup": "VAT गेटवे सेटअप करना होगा।",
+  "CountryCodeVatNumberNotMatch": "देश कोड त्रुटि। आपकी VAT संख्या का देश %s है।",
+  "DiscountCodeInvalid": "छूट कोड अमान्य है।",
+  "DiscountCodeNotStart": "छूट कोड अभी तक शुरू नहीं हुआ है।",
+  "DiscountCodePlanError": "छूट कोड इस योजना के साथ उपयोग नहीं किया जा सकता।",
+  "DiscountCodeReachLimitation": "छूट कोड का उपयोग सीमा पहुंच गई है।"
+} 

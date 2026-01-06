@@ -20,11 +20,12 @@ func GetMerchantMetric(ctx context.Context, id uint64) (one *entity.MerchantMetr
 	return one
 }
 
-func GetMerchantMetricByCode(ctx context.Context, code string) (one *entity.MerchantMetric) {
+func GetMerchantMetricByCode(ctx context.Context, merchantId uint64, code string) (one *entity.MerchantMetric) {
 	if len(code) <= 0 {
 		return nil
 	}
 	err := dao.MerchantMetric.Ctx(ctx).
+		Where(dao.MerchantMetric.Columns().MerchantId, merchantId).
 		Where(dao.MerchantMetric.Columns().Code, code).
 		Where(dao.MerchantMetric.Columns().IsDeleted, 0).
 		Scan(&one)

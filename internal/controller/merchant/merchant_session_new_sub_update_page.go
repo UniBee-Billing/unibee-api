@@ -32,11 +32,12 @@ func (c *ControllerSession) NewSubUpdatePage(ctx context.Context, req *session.N
 	if one == nil {
 		one = query.GetLatestSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx), req.ProductId)
 	}
+	utility.Assert(one != nil, "No latest subscription found, please purchase your first plan")
 	_, userSession, err := session2.NewUserSession(ctx, one.MerchantId, req.UserId, req.ReturnUrl, req.CancelUrl)
 	if err != nil {
 		return nil, err
 	}
-	url := fmt.Sprintf("%s/hosted/sub-update-hosted?merchantId=%d&subscriptionId=%s&session=%s&env=%s", config.GetConfigInstance().Server.GetServerPath(), one.MerchantId, one.SubscriptionId, userSession, config.GetConfigInstance().Env)
+	url := fmt.Sprintf("%s/sub-update-hosted?merchantId=%d&subscriptionId=%s&session=%s&env=%s", config.GetConfigInstance().Server.GetHostedPath(), one.MerchantId, one.SubscriptionId, userSession, config.GetConfigInstance().Env)
 	if req.PlanId > 0 {
 		url = fmt.Sprintf("%s&planId=%d", url, req.PlanId)
 	}

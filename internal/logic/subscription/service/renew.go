@@ -19,7 +19,7 @@ import (
 	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/service"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/user/sub_update"
@@ -39,6 +39,7 @@ type RenewInternalReq struct {
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"`
 	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
@@ -82,11 +83,16 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	if sub.TestClock > timeNow && !config2.GetConfigInstance().IsProd() {
 		timeNow = sub.TestClock
 	}
+	if req.Metadata == nil {
+		req.Metadata = make(map[string]interface{})
+	}
+	req.Metadata["SubscriptionRenew"] = true
+	req.Metadata["PreviousSubscriptionStatus"] = sub.Status
 
 	if req.Discount != nil {
 		// create external discount
 		utility.Assert(sub.PlanId > 0, "planId invalid")
-		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, sub.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -115,7 +121,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		}
 	}
 	if req.ApplyPromoCredit == nil {
-		req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency))
+		// https://unibee.atlassian.net/browse/BETA-642
+		req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigRecurring(ctx, sub.MerchantId, consts.CreditAccountTypePromo, sub.Currency))
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
@@ -131,7 +138,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		VatNumber:              vatNumber,
 		TaxPercentage:          subscriptionTaxPercentage,
 		PeriodStart:            timeNow,
-		PeriodEnd:              subscription2.GetPeriodEndFromStart(ctx, timeNow, timeNow, sub.PlanId),
+		PeriodEnd:              period.GetPeriodEndFromStart(ctx, timeNow, timeNow, sub.PlanId),
 		FinishTime:             timeNow,
 		ProductData:            req.ProductData,
 		BillingCycleAnchor:     timeNow,
@@ -161,6 +168,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	if invoice.TotalAmount > 0 {
 		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
 			Invoice:       invoice,
+			PaymentUIMode: req.PaymentUIMode,
 			ManualPayment: req.ManualPayment,
 			ReturnUrl:     req.ReturnUrl,
 			CancelUrl:     req.CancelUrl,
@@ -175,14 +183,14 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")
 		createRes = &gateway_bean.GatewayNewPaymentResp{
+			Invoice:                invoice,
 			Payment:                nil,
 			Status:                 consts.PaymentSuccess,
 			GatewayPaymentId:       "",
 			GatewayPaymentIntentId: "",
 			GatewayPaymentMethod:   "",
-			Link:                   GetSubscriptionZeroPaymentLink(req.ReturnUrl, sub.SubscriptionId),
+			Link:                   GetSubscriptionZeroPaymentLink(invoice, req.ReturnUrl, sub.SubscriptionId),
 			Action:                 nil,
-			Invoice:                nil,
 			PaymentCode:            "",
 		}
 	}
@@ -215,7 +223,10 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(ctx, sub),
+		PaymentId:    createRes.Invoice.PaymentId,
+		InvoiceId:    createRes.Invoice.InvoiceId,
 		Paid:         createRes.Status == consts.PaymentSuccess,
 		Link:         createRes.Link,
+		Action:       createRes.Action,
 	}, nil
 }

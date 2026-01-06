@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "다른 활성 또는 불완전한 구독이 존재합니다",
+  "ClickTooFast": "클릭이 너무 빠릅니다. 잠시 기다린 후 다시 시도해 주세요.",
+  "AmountNotMatch": "총 금액이 오래되었습니다. 새로고침하고 다시 시도해 주세요.",
+  "PlanTrialGatewayError": "이 플랜에는 카드 또는 PayPal 결제 게이트웨이가 필요합니다.",
+  "VatValidateError": "VAT 번호 검증에 실패했습니다. 번호: %s",
+  "VatGatewayNeedSetup": "VAT 게이트웨이를 설정해야 합니다.",
+  "CountryCodeVatNumberNotMatch": "국가 코드 오류. VAT 번호의 국가는 %s입니다.",
+  "DiscountCodeInvalid": "할인 코드가 유효하지 않습니다.",
+  "DiscountCodeNotStart": "할인 코드가 아직 시작되지 않았습니다.",
+  "DiscountCodePlanError": "이 플랜에서는 할인 코드를 사용할 수 없습니다.",
+  "DiscountCodeReachLimitation": "할인 코드 사용 한도에 도달했습니다."
+} 

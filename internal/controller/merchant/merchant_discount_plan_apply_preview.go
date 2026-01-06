@@ -28,6 +28,10 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 	utility.Assert(plan != nil, "Plan Not Found")
 	utility.Assert(plan.Type == consts.PlanTypeMain, "Not Main Plan")
 	utility.Assert(len(req.Code) > 0, "Invalid Code")
+	currency := plan.Currency
+	if len(req.Currency) > 0 {
+		currency = req.Currency
+	}
 	oneDiscount := query.GetDiscountByCode(ctx, _interface.GetMerchantId(ctx), req.Code)
 	if oneDiscount == nil || oneDiscount.IsDeleted > 0 {
 		return &discount.PlanApplyPreviewRes{
@@ -55,7 +59,7 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 		MerchantId:                 _interface.GetMerchantId(ctx),
 		PLanId:                     uint64(req.PlanId),
 		DiscountCode:               req.Code,
-		Currency:                   plan.Currency,
+		Currency:                   currency,
 		TimeNow:                    gtime.Now().Timestamp(),
 		IsUpgrade:                  isUpgrade,
 		IsChangeToSameIntervalPlan: isChangeToSameIntervalPlan,
@@ -63,11 +67,11 @@ func (c *ControllerDiscount) PlanApplyPreview(ctx context.Context, req *discount
 		IsRenew:                    true,
 		IsNewUser:                  service.IsNewSubscriptionUser(ctx, _interface.GetMerchantId(ctx), strings.ToLower(req.Email)),
 	})
-	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, plan.MerchantId, plan.Amount, plan.Currency, req.Code, gtime.Now().Timestamp()), plan.Amount)
+	discountAmount := utility.MinInt64(discount2.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, plan.MerchantId, req.Code), plan.CurrencyAmount(ctx, currency), currency, gtime.Now().Timestamp()), plan.CurrencyAmount(ctx, currency))
 	return &discount.PlanApplyPreviewRes{
 		Valid:          canApply,
 		DiscountAmount: discountAmount,
-		DiscountCode:   bean.SimplifyMerchantDiscountCode(oneDiscount),
+		DiscountCode:   bean.SimplifyMerchantDiscountCodeWithTargetCurrency(ctx, oneDiscount, currency),
 		FailureReason:  message,
 	}, nil
 }

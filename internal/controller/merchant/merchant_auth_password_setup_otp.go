@@ -2,33 +2,39 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean/detail"
+	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
+	"unibee/internal/logic/jwt"
 	auth2 "unibee/internal/logic/member"
-	entity "unibee/internal/model/entity/default"
+	"unibee/internal/logic/totp/client_activity"
 	"unibee/internal/query"
 	"unibee/utility"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 
 	"unibee/api/merchant/auth"
 )
 
 func (c *ControllerAuth) PasswordSetupOtp(ctx context.Context, req *auth.PasswordSetupOtpReq) (res *auth.PasswordSetupOtpRes, err error) {
-	setupToken, err := g.Redis().Get(ctx, req.Email+"-MerchantAuth-PasswordSetup-Verify")
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	utility.Assert(setupToken != nil, "Setup token invalid")
-	utility.Assert((setupToken.String()) == req.SetupToken, "Setup token not match")
-
-	var newOne *entity.MerchantMember
-	newOne = query.GetMerchantMemberByEmail(ctx, req.Email)
-	utility.Assert(newOne != nil, "User Not Found")
+	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
+	utility.Assert(merchantMember != nil, "User Not Found")
+	utility.Assert(merchantMember.TotpValidatorSecret == req.SetupToken, "Invalid setupToken")
 	auth2.ChangeMerchantMemberPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
-	_, err = g.Redis().Del(ctx, req.Email+"-MerchantAuth-PasswordSetup-Verify")
-	if err != nil {
-		g.Log().Errorf(ctx, "Delete_Setup_Token Error:%s", err.Error())
-	}
-	return &auth.PasswordSetupOtpRes{}, nil
+	_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+		dao.MerchantMember.Columns().TotpValidatorSecret: "",
+		dao.MerchantMember.Columns().GmtModify:           gtime.Now(),
+	}).Where(dao.MerchantMember.Columns().Id, merchantMember.Id).Update()
+	utility.AssertError(err, "setup failed")
+	// 9. Generate system JWT token
+	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, merchantMember.MerchantId, merchantMember.Id, merchantMember.Email)
+	utility.AssertError(err, "Server Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", merchantMember.Id)), "Cache Error")
+
+	// 10. Set cookies
+	g.RequestFromCtx(ctx).Cookie.Set(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY, token)
+	jwt.AppendRequestCookieWithToken(ctx, token)
+	client_activity.UpdateClientIdentityLoginTime(ctx, _interface.Context().Get(ctx).ClientIdentity)
+	return &auth.PasswordSetupOtpRes{MerchantMember: detail.ConvertMemberToDetail(ctx, merchantMember), Token: token}, nil
 }

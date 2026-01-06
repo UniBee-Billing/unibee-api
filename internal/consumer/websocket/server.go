@@ -32,6 +32,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 	if merchant == nil {
 		glog.Error(r.Context(), gerror.New("MerchantWebSocketMessage merchantApiKey invalid"))
 		r.Exit()
+		return
 	}
 	ws, err := r.WebSocket()
 	if err != nil {

@@ -98,7 +98,7 @@ func SimplifySubscription(ctx context.Context, one *entity.Subscription) *Subscr
 		if err != nil {
 			latestTimeLine = nil
 		}
-		if latestTimeLine != nil {
+		if latestTimeLine != nil && latestTimeLine.Status != consts.SubTimeLineStatusProcessing && latestTimeLine.Status != consts.SubTimeLineStatusPending {
 			cancelOrExpireTime = latestTimeLine.PeriodEnd
 		} else {
 			cancelOrExpireTime = one.GmtModify.Timestamp()
@@ -167,12 +167,24 @@ type SubscriptionOnetimeAddon struct {
 	Status         int                    `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
 	IsDeleted      int                    `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`                         // 0-UnDeleted，1-Deleted
 	CreateTime     int64                  `json:"createTime"     description:"create utc time"`                               // create utc time
-	PaymentId      string                 `json:"paymentId"     description:"PaymentId"`                                      // PaymentId
-	PaymentLink    string                 `json:"paymentLink"     description:"PaymentLink"`                                  // PaymentLink
-	Metadata       map[string]interface{} `json:"metadata" description:""`
+	InvoiceId      string                 `json:"invoiceId"      description:"invoice id"`
+	PaymentId      string                 `json:"paymentId"      description:"PaymentId"`   // PaymentId
+	PaymentLink    string                 `json:"paymentLink"    description:"PaymentLink"` // PaymentLink
+	Metadata       map[string]interface{} `json:"metadata"       description:""`
 }
 
-func SimplifySubscriptionOnetimeAddon(one *entity.SubscriptionOnetimeAddon) *SubscriptionOnetimeAddon {
+func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.Payment) {
+	if len(paymentId) == 0 {
+		return nil
+	}
+	err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, paymentId).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
+func SimplifySubscriptionOnetimeAddon(ctx context.Context, one *entity.SubscriptionOnetimeAddon) *SubscriptionOnetimeAddon {
 	if one == nil {
 		return nil
 	}
@@ -181,6 +193,15 @@ func SimplifySubscriptionOnetimeAddon(one *entity.SubscriptionOnetimeAddon) *Sub
 		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+	var invoiceId = ""
+	if len(one.InvoiceId) > 0 {
+		invoiceId = one.InvoiceId
+	} else {
+		payment := GetPaymentByPaymentId(ctx, one.PaymentId)
+		if payment != nil {
+			invoiceId = payment.InvoiceId
 		}
 	}
 	return &SubscriptionOnetimeAddon{
@@ -192,6 +213,7 @@ func SimplifySubscriptionOnetimeAddon(one *entity.SubscriptionOnetimeAddon) *Sub
 		IsDeleted:      one.IsDeleted,
 		CreateTime:     one.CreateTime,
 		PaymentId:      one.PaymentId,
+		InvoiceId:      invoiceId,
 		PaymentLink:    link.GetPaymentLink(one.PaymentId),
 		Metadata:       metadata,
 	}

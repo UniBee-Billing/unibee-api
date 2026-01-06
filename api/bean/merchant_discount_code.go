@@ -1,12 +1,16 @@
 package bean
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strconv"
 	"strings"
 	"unibee/internal/consts"
+	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/multi_currencies/currency_exchange"
 	entity "unibee/internal/model/entity/default"
+	"unibee/utility"
 )
 
 type MerchantDiscountCode struct {
@@ -24,7 +28,8 @@ type MerchantDiscountCode struct {
 	StartTime          int64                  `json:"startTime"          description:"start of discount available utc time"`                                       // start of discount available utc time
 	EndTime            int64                  `json:"endTime"            description:"end of discount available utc time, 0-invalid"`                              // end of discount available utc time
 	CreateTime         int64                  `json:"createTime"         description:"create utc time"`                                                            // create utc time
-	PlanApplyType      int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
+	PlanApplyType      int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified, 3-Apply to Plans by Groups(Billing Period Included), 4-Apply to Plans except by Groups(Billing Period Included)"`
+	PlanApplyGroup     *GroupPlanSelector     `json:"planApplyGroup"       dc:"plan apply group, each item match once if specified, matched all if item not specified"`
 	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 	Quantity           int64                  `json:"quantity"           description:"quantity of code, 0-no limit"`
@@ -34,6 +39,43 @@ type MerchantDiscountCode struct {
 	UserScope          int                    `json:"userScope"          description:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"` // AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew
 	UpgradeOnly        bool                   `json:"upgradeOnly"        description:"AdvanceConfig, 0-false,1-true, will forbid for all except same interval upgrade action if set true"`                       // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade action if set 1
 	UpgradeLongerOnly  bool                   `json:"upgradeLongerOnly"  description:"AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set true"`                             // AdvanceConfig, 0-false,1-true, will forbid for all except upgrade to longer plan if set 1
+}
+
+func GetMerchantMultiCurrenciesConfigMap(ctx context.Context, merchantId uint64) map[string][]*MerchantCurrencyConfig {
+	data := merchant_config.GetMerchantConfig(ctx, merchantId, currency_exchange.MerchantMultiCurrenciesConfig)
+	var configs = make([]*MerchantMultiCurrencyConfig, 0)
+	if data != nil {
+		_ = utility.UnmarshalFromJsonString(data.ConfigValue, &configs)
+	}
+	var configMap = make(map[string][]*MerchantCurrencyConfig, 0)
+	for _, config := range configs {
+		configMap[config.DefaultCurrency] = config.MultiCurrencies
+	}
+	return configMap
+}
+
+func IsDiscountCodeSupportCurrency(ctx context.Context, merchantId uint64, discountCode *entity.MerchantDiscountCode, currency string) bool {
+	if strings.ToUpper(currency) == strings.ToUpper(discountCode.Currency) {
+		return true
+	}
+	configMap := GetMerchantMultiCurrenciesConfigMap(ctx, merchantId)
+	if target, ok := configMap[discountCode.Currency]; ok {
+		for _, config := range target {
+			if strings.ToUpper(config.Currency) == strings.ToUpper(currency) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func SimplifyMerchantDiscountCodeWithTargetCurrency(ctx context.Context, one *entity.MerchantDiscountCode, targetCurrency string) *MerchantDiscountCode {
+	target := SimplifyMerchantDiscountCode(one)
+	if target != nil && strings.ToUpper(one.Currency) != strings.ToUpper(targetCurrency) && IsDiscountCodeSupportCurrency(ctx, one.MerchantId, one, targetCurrency) {
+		target.Currency = targetCurrency
+		target.DiscountAmount = entity.ExchangeAmountToCurrency(ctx, one.MerchantId, one.DiscountAmount, one.Currency, targetCurrency)
+	}
+	return target
 }
 
 func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCode {
@@ -66,6 +108,10 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 	if len(planIds) > 0 && one.PlanApplyType == 0 {
 		one.PlanApplyType = 1
 	}
+	var planApplyGroup *GroupPlanSelector
+	if len(one.PlanApplyGroup) > 0 {
+		_ = utility.UnmarshalFromJsonString(one.PlanApplyGroup, &planApplyGroup)
+	}
 	return &MerchantDiscountCode{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
@@ -82,6 +128,7 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 		EndTime:            one.EndTime,
 		CreateTime:         one.CreateTime,
 		PlanApplyType:      one.PlanApplyType,
+		PlanApplyGroup:     planApplyGroup,
 		PlanIds:            planIds,
 		Metadata:           metadata,
 		Quantity:           one.Quantity,
@@ -92,4 +139,15 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 		UpgradeOnly:        one.UpgradeOnly == 1,
 		UpgradeLongerOnly:  one.UpgradeLongerOnly == 1,
 	}
+}
+
+type GroupPlanSelector struct {
+	Currency                  []string                     `json:"currency"`
+	GroupPlanIntervalSelector []*GroupPlanIntervalSelector `json:"groupPlanIntervalSelector"`
+	Type                      []int                        `json:"type"  dc:"1-main plan，2-addon plan,3-onetime" `
+}
+
+type GroupPlanIntervalSelector struct {
+	IntervalUnit  string `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount int    `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
 }

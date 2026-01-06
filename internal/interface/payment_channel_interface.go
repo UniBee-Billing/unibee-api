@@ -38,6 +38,8 @@ type GatewayInfo struct {
 }
 
 type GatewayTestReq struct {
+	OldKey              string
+	OldSecret           string
 	Key                 string
 	Secret              string
 	SubGateway          string

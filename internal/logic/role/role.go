@@ -3,8 +3,6 @@ package role
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"math"
 	"strconv"
 	"unibee/api/bean"
@@ -15,6 +13,9 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 type CreateRoleInternalReq struct {
@@ -72,6 +73,7 @@ func EditMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	member.ReloadAllMembersCacheForSDKAuthBackground()
 	return err
 }
 
@@ -95,6 +97,7 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 		PlanId:         0,
 		DiscountCode:   "",
 	}, err)
+	member.ReloadAllMembersCacheForSDKAuthBackground()
 	return err
 }
 
@@ -107,7 +110,7 @@ func HardDeleteMerchantRole(ctx context.Context, merchantId uint64, role string)
 
 func GetMemberListByRoleId(ctx context.Context, merchantId uint64, roleId uint64) ([]*detail.MerchantMemberDetail, int) {
 	resultList := make([]*detail.MerchantMemberDetail, 0)
-	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId)
+	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId, "")
 	for _, one := range totalList {
 		var found = false
 		for _, role := range one.MemberRoles {
@@ -122,7 +125,7 @@ func GetMemberListByRoleId(ctx context.Context, merchantId uint64, roleId uint64
 	return resultList, len(resultList)
 }
 
-func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []uint64, page int, count int) ([]*detail.MerchantMemberDetail, int) {
+func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []uint64, page int, count int, email string) ([]*detail.MerchantMemberDetail, int) {
 	if count <= 0 {
 		count = 20
 	}
@@ -130,7 +133,7 @@ func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []ui
 		page = 0
 	}
 	resultList := make([]*detail.MerchantMemberDetail, 0)
-	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId)
+	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId, email)
 	for _, one := range totalList {
 		var found = false
 		for _, role := range one.MemberRoles {

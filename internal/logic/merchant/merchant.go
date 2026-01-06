@@ -20,8 +20,10 @@ import (
 
 type CreateMerchantInternalReq struct {
 	FirstName, LastName, Email, Password, Phone, UserName string
-	CountryCode                                           string `json:"countryCode" dc:"Country Code"`
-	CountryName                                           string `json:"countryName" dc:"Country Name"`
+	CountryCode                                           string                 `json:"countryCode" dc:"Country Code"`
+	CountryName                                           string                 `json:"countryName" dc:"Country Name"`
+	CompanyName                                           string                 `json:"companyName" dc:"Company Name"`
+	Metadata                                              map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func GetOpenApiKeyRedisKey(token string) string {
@@ -111,6 +113,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		UserName:   req.UserName,
 		Mobile:     req.Phone,
 		Role:       "Owner",
+		MetaData:   utility.MarshalToJsonString(req.Metadata),
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	merchant := &entity.Merchant{
@@ -118,6 +121,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		Email:       req.Email,
 		CountryName: req.CountryName,
 		CountryCode: req.CountryCode,
+		CompanyName: req.CompanyName,
 		ApiKey:      GenerateMerchantAPIKey(), //32 bit open api key
 	}
 	// transaction create Merchant

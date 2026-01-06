@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
+	"unibee/api/bean"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
@@ -15,7 +16,7 @@ import (
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
@@ -65,7 +66,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	if sub.Status == consts.SubStatusActive {
 		return nil
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, invoice.TrialEnd), sub.PlanId)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, invoice.TrialEnd), sub.PlanId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
@@ -92,7 +93,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if oneUser != nil && plan != nil && merchant != nil {
-			err = email2.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, oneUser.Language, email2.TemplateSubscriptionTrialStart, "", &email2.TemplateVariable{
+			err = email2.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, oneUser.Language, email2.TemplateSubscriptionTrialStart, "", &bean.EmailTemplateVariable{
 				UserName:              oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName:   plan.PlanName,
 				MerchantCustomerEmail: merchant.Email,
@@ -125,7 +126,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
 			Body:       sub.SubscriptionId,
-			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName(), "Note": "FirstInvoicePaid"},
 		})
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicUserMetricUpdate.Topic,
@@ -167,7 +168,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		billingCycleAnchor = sub.BillingCycleAnchor
 	}
 	periodEnd := utility.MaxInt64(invoice.PeriodEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, periodEnd, sub.PlanId)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, periodEnd, sub.PlanId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().BillingCycleAnchor:     billingCycleAnchor,
@@ -204,7 +205,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 			Content:        fmt.Sprintf("Activate(%s->%s)", consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(consts.SubStatusActive).Description()),
 			UserId:         sub.UserId,
 			SubscriptionId: sub.SubscriptionId,
-			InvoiceId:      "",
+			InvoiceId:      invoice.InvoiceId,
 			PlanId:         0,
 			DiscountCode:   "",
 		}, err)
@@ -212,7 +213,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 			Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 			Tag:        redismq2.TopicSubscriptionUpdate.Tag,
 			Body:       sub.SubscriptionId,
-			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+			CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName(), "Note": "NextBillingCyclePaymentSuccess"},
 		})
 		if sub.Status != consts.SubStatusIncomplete && sub.Status != consts.SubStatusActive {
 			_, _ = redismq.Send(&redismq.Message{

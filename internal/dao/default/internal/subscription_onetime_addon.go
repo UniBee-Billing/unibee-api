@@ -32,6 +32,9 @@ type SubscriptionOnetimeAddonColumns struct {
 	PaymentId      string // paymentId
 	MetaData       string // meta_data(json)
 	UserId         string // userId
+	InvoiceId      string // invoice id
+	PeriodStart    string // period_start, utc time
+	PeriodEnd      string // period_end utc time
 }
 
 // subscriptionOnetimeAddonColumns holds the columns for table subscription_onetime_addon.
@@ -48,6 +51,9 @@ var subscriptionOnetimeAddonColumns = SubscriptionOnetimeAddonColumns{
 	PaymentId:      "payment_id",
 	MetaData:       "meta_data",
 	UserId:         "user_id",
+	InvoiceId:      "invoice_id",
+	PeriodStart:    "period_start",
+	PeriodEnd:      "period_end",
 }
 
 // NewSubscriptionOnetimeAddonDao creates and returns a new DAO object for table data access.

@@ -1442,7 +1442,7 @@ type (
 	// Event struct.
 	//
 	// The basic webhook event data type. This struct is intended to be
-	// embedded into resource type specific event structs.
+	// paymentUIMode into resource type specific event structs.
 	Event struct {
 		ID              string    `json:"id"`
 		CreateTime      time.Time `json:"create_time"`

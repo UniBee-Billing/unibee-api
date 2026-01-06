@@ -59,6 +59,9 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 		if value, ok := payload["userId"].(float64); ok {
 			req.UserId = int64(value)
 		}
+		if value, ok := payload["externalUserId"].(string); ok {
+			req.ExternalUserId = value
+		}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value
 		}
@@ -151,6 +154,9 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				PlanId:                 fmt.Sprintf("%v", one.Plan.Id),
 				ExternalPlanId:         fmt.Sprintf("%v", one.Plan.ExternalPlanId),
 				PlanName:               one.Plan.PlanName,
+				PlanInternalName:       one.Plan.InternalName,
+				PlanIntervalUnit:       one.Plan.IntervalUnit,
+				PlanIntervalCount:      fmt.Sprintf("%d", one.Plan.IntervalCount),
 				Quantity:               fmt.Sprintf("%v", one.Subscription.Quantity),
 				Gateway:                subGateway,
 				Status:                 consts.SubStatusToEnum(one.Subscription.Status).Description(),
@@ -191,6 +197,9 @@ type ExportSubscriptionEntity struct {
 	Amount                 string      `json:"Amount"             comment:""`
 	Currency               string      `json:"Currency"           comment:""`
 	PlanName               string      `json:"PlanName"           comment:""`
+	PlanInternalName       string      `json:"PlanInternalName"   comment:"PlanInternalName"`
+	PlanIntervalUnit       string      `json:"PlanIntervalUnit"   comment:"period unit,day|month|year|week"`
+	PlanIntervalCount      string      `json:"PlanIntervalCount"  comment:"period unit count"`
 	Quantity               string      `json:"Quantity"           comment:""`
 	Gateway                string      `json:"Gateway"            comment:""`
 	Status                 string      `json:"Status"             comment:""`

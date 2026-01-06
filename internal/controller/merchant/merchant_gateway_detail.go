@@ -17,7 +17,7 @@ func (c *ControllerGateway) Detail(ctx context.Context, req *gateway.DetailReq) 
 		utility.Assert(one != nil, "Gateway not found")
 		return &gateway.DetailRes{Gateway: detail.ConvertGatewayDetail(ctx, one)}, nil
 	} else {
-		one := query.GetGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), *req.GatewayName)
+		one := query.GetDefaultGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), *req.GatewayName)
 		utility.Assert(one != nil, "Gateway not setup")
 		return &gateway.DetailRes{Gateway: detail.ConvertGatewayDetail(ctx, one)}, nil
 	}

@@ -4,10 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"strings"
 	entity "unibee/internal/model/entity/default"
 )
 
 func GetPaymentRedirectUrl(ctx context.Context, payment *entity.Payment, success string) string {
+	var targetUrl = ""
+	if payment == nil {
+		return targetUrl
+	}
 	if success == "false" {
 		var metadata = make(map[string]string)
 		if len(payment.MetaData) > 0 {
@@ -18,11 +23,20 @@ func GetPaymentRedirectUrl(ctx context.Context, payment *entity.Payment, success
 		}
 		cancelUrl := metadata["CancelUrl"]
 		if cancelUrl != "" && len(cancelUrl) > 0 {
-			return cancelUrl
+			targetUrl = cancelUrl
 		} else {
-			return payment.ReturnUrl
+			targetUrl = payment.ReturnUrl
 		}
 	} else {
-		return payment.ReturnUrl
+		targetUrl = payment.ReturnUrl
 	}
+	if len(targetUrl) == 0 {
+		return targetUrl
+	}
+	if strings.Contains(targetUrl, "?") {
+		targetUrl = targetUrl + fmt.Sprintf("&paymentId=%s&subId=%s&invoiceId=%s&success=%v", payment.PaymentId, payment.SubscriptionId, payment.InvoiceId, success)
+	} else {
+		targetUrl = targetUrl + fmt.Sprintf("?paymentId=%s&subId=%s&invoiceId=%s&success=%v", payment.PaymentId, payment.SubscriptionId, payment.InvoiceId, success)
+	}
+	return targetUrl
 }

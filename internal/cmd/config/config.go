@@ -15,16 +15,19 @@ type Config struct {
 	MinioConfig MinioConfig `json:"minio" yaml:"minio"`
 	Server      Server      `json:"server" yaml:"server"`
 	Auth        Auth        `json:"auth" yaml:"auth"`
+	OAuth       OAuth       `json:"oauth" yaml:"oauth"`
 	VatConfig   VatConfig   `json:"vatConfig" yaml:"vatConfig"`
 }
 
 type Server struct {
-	Address        string `json:"address" yaml:"address"`
-	DomainPath     string `json:"domainPath" yaml:"domainPath"`
-	OpenApiPath    string `json:"openapiPath" yaml:"openapiPath"`
-	SwaggerPath    string `json:"swaggerPath" yaml:"swaggerPath"`
-	JwtKey         string `json:"jwtKey" yaml:"jwtKey"`
-	HostedPagePath string `json:"hostedPagePath" yaml:"hostedPagePath"`
+	Address                     string `json:"address" yaml:"address"`
+	DomainPath                  string `json:"domainPath" yaml:"domainPath"`
+	OpenApiPath                 string `json:"openapiPath" yaml:"openapiPath"`
+	SwaggerPath                 string `json:"swaggerPath" yaml:"swaggerPath"`
+	AnalyticsPath               string `json:"analyticsPath" yaml:"analyticsPath"`
+	JwtKey                      string `json:"jwtKey" yaml:"jwtKey"`
+	HostedPagePath              string `json:"hostedPagePath" yaml:"hostedPagePath"`
+	DisableHostedPaymentChecker bool   `json:"disableHostedPaymentChecker" yaml:"disableHostedPaymentChecker"`
 }
 
 func (s *Server) GetDomainScheme() string {
@@ -37,6 +40,20 @@ func (s *Server) GetDomainScheme() string {
 
 func (s *Server) GetServerPath() string {
 	return fmt.Sprintf("%s", s.DomainPath)
+}
+
+func (s *Server) GetHostedPath() string {
+	if s.HostedPagePath != "" {
+		return fmt.Sprintf("%s", s.HostedPagePath)
+	}
+	return fmt.Sprintf("%s/hosted", s.DomainPath)
+}
+
+func (s *Server) IsHostedPathAvailable() bool {
+	if len(s.HostedPagePath) > 0 {
+		return true
+	}
+	return false
 }
 
 type RedisConfig struct {
@@ -102,4 +119,12 @@ func (config Config) IsStage() bool {
 
 func (config Config) IsProd() bool {
 	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "prod") == 0
+}
+
+type OAuth struct {
+	TokenSecret        string `json:"tokenSecret" yaml:"tokenSecret"`
+	GoogleClientId     string `json:"googleClientId" yaml:"googleClientId"`
+	GoogleClientSecret string `json:"googleClientSecret" yaml:"googleClientSecret"`
+	GithubClientId     string `json:"githubClientId" yaml:"githubClientId"`
+	GithubClientSecret string `json:"githubClientSecret" yaml:"githubClientSecret"`
 }

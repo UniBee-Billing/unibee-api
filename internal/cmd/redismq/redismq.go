@@ -45,5 +45,6 @@ var (
 	TopicCreditPaymentSuccess             = redismq.MQTopicEnum{Topic: "unibee_credit", Tag: "payment_success", Description: "payment success"}
 	TopicCreditRefundSuccess              = redismq.MQTopicEnum{Topic: "unibee_credit", Tag: "refund_success", Description: "refund success"}
 	TopicMerchantCreatedWebhook           = redismq.MQTopicEnum{Topic: "unibee_merchant", Tag: "merchant_create", Description: "merchant create"}
+	TopicMerchantUpdatedWebhook           = redismq.MQTopicEnum{Topic: "unibee_merchant", Tag: "merchant_update", Description: "merchant update"}
 	TopicMerchantMemberCreatedWebhook     = redismq.MQTopicEnum{Topic: "unibee_member", Tag: "member_create", Description: "member create"}
 )

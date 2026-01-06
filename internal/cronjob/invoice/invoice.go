@@ -3,8 +3,6 @@ package invoice
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"time"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -14,6 +12,9 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 func TaskForExpireInvoices(ctx context.Context) {
@@ -136,9 +137,11 @@ func TaskForCompensateSubUpDownInvoices(ctx context.Context) {
 				isUpgrade = false
 				changed = true
 			} else {
-				var oldAddonParams []*bean.PlanAddonParam
-				err := utility.UnmarshalFromJsonString(one.AddonData, &oldAddonParams)
-				utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+				var oldAddonParams []*bean.PlanAddonParam = make([]*bean.PlanAddonParam, 0)
+				err = utility.UnmarshalFromJsonString(one.AddonData, &oldAddonParams)
+				if err != nil {
+					g.Log().Errorf(ctx, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+				}
 				var oldAddonMap = make(map[uint64]int64)
 				for _, oldAddon := range oldAddonParams {
 					if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
@@ -147,9 +150,11 @@ func TaskForCompensateSubUpDownInvoices(ctx context.Context) {
 						oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
 					}
 				}
-				var addonParams []*bean.PlanAddonParam
+				var addonParams []*bean.PlanAddonParam = make([]*bean.PlanAddonParam, 0)
 				err = utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
-				utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+				if err != nil {
+					g.Log().Errorf(ctx, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+				}
 				var newAddonMap = make(map[uint64]int64)
 				for _, newAddon := range addonParams {
 					if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {

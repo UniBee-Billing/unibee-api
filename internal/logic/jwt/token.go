@@ -17,9 +17,11 @@ import (
 )
 
 const (
-	TOKEN_PREFIX            = "UniBee.Portal."
-	TOKENTYPEUSER           = "USER"
-	TOKENTYPEMERCHANTMember = "MERCHANT_MEMBER"
+	TOKEN_PREFIX                   = "UniBee.Portal."
+	TOKENTYPEUSER                  = "USER"
+	TOKENTYPEMERCHANTMember        = "MERCHANT_MEMBER"
+	USER_TYPE_TOKEN_COOKIE_KEY     = "__" + TOKEN_PREFIX + TOKENTYPEUSER + ".Token"
+	MERCHANT_TYPE_TOKEN_COOKIE_KEY = "__" + TOKEN_PREFIX + TOKENTYPEMERCHANTMember + ".Token"
 )
 
 func IsPortalToken(token string) bool {

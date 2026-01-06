@@ -14,9 +14,10 @@ func TestForGetCurrencyProviderList(t *testing.T) {
 	ctx := context.Background()
 	changelly := Changelly{}
 	trans, err := changelly.GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
-		Amount:      106,
-		Currency:    "USD",
-		CountryCode: "FR",
+		Amount:         106,
+		Currency:       "USD",
+		CountryCode:    "FR",
+		CryptoCurrency: "USDT",
 		Gateway: &entity.MerchantGateway{
 			Id:                    29,
 			MerchantId:            0,

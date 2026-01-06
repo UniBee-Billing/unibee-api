@@ -2,13 +2,10 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
+	"strings"
 	"time"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -18,18 +15,25 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
 	payment2 "unibee/internal/logic/credit/payment"
+	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/fiat_exchange"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	discount2 "unibee/internal/logic/invoice/discount"
-	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/multi_currencies/currency_exchange"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
+	"golang.org/x/text/currency"
 )
 
 func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoice, payment *entity.Payment) (*entity.Invoice, error) {
@@ -37,6 +41,15 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	utility.Assert(payment != nil, "payment data is nil")
 	utility.Assert(len(payment.PaymentId) > 0, "paymentId is nil")
 	utility.Assert(len(payment.InvoiceId) > 0, "payment InvoiceId is nil")
+
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	if gateway != nil {
+		if invoice.Metadata == nil {
+			invoice.Metadata = make(map[string]interface{})
+		}
+		detail.CopyGatewayCompanyIssuer(gateway, invoice.Metadata)
+	}
+
 	user := query.GetUserAccountById(ctx, payment.UserId)
 	var sendEmail = ""
 	var userSnapshot *entity.UserAccount
@@ -133,6 +146,8 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      sendEmail,
 		GatewayPaymentId:               payment.GatewayPaymentId,
+		GatewayInvoiceId:               invoice.PaymentType,
+		GatewayPaymentMethod:           invoice.PaymentMethodId,
 		TotalAmount:                    invoice.TotalAmount,
 		CryptoAmount:                   payment.CryptoAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
@@ -190,7 +205,9 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
-	utility.Assert(len(payment.PaymentId) > 0, "paymentId is nil")
+	if len(payment.PaymentId) == 0 {
+		return nil, errors.New("paymentId is empty")
+	}
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
 	if one == nil && payment.Status == consts.PaymentSuccess {
 		// improve, switch invoice to success payment
@@ -354,6 +371,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
 		CreateFrom:                     refund.RefundComment,
+		Data:                           invoice.Data,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -523,61 +541,71 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
 	utility.Assert(user != nil, "user not found")
 
-	exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, user.MerchantId, fiat_exchange.FiatExchangeApiKey)
-	var cryptoCurrency string
-	var cryptoAmount int64 = -1
-	if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
-		if one.Currency == "USD" {
-			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().CryptoCurrency: "USD",
-				dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
-			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-			if err != nil {
-				fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
-			}
-			return err
-		} else {
-			rate, err := fiat_exchange.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", one.Currency)
-			if err != nil {
-				return err
-			}
-			if rate != nil {
-				cryptoCurrency = "USD"
-				cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
-			}
-		}
-	} else if config2.GetConfigInstance().Mode == "cloud" {
-		if one.Currency == "USD" {
-			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().CryptoCurrency: "USD",
-				dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
-			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-			if err != nil {
-				fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
-			}
-			return err
-		} else {
-			rate, err := fiat_exchange.GetExchangeConversionRateFromClusterCloud(ctx, "USD", one.Currency)
-			if err != nil {
-				return err
-			}
-			if rate != nil {
-				cryptoCurrency = "USD"
-				cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
-			}
-		}
+	var cryptoCurrency = gateway.Currency
+	if cryptoCurrency == "" {
+		cryptoCurrency = "USD"
 	}
-	if len(cryptoCurrency) == 0 {
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	if payment != nil && len(payment.CryptoCurrency) > 0 {
+		cryptoCurrency = payment.CryptoCurrency
+	}
+	var cryptoAmount int64 = -1
+	//exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, user.MerchantId, multi_currencies.FiatExchangeApiKey)
+	//if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+	//	if one.Currency == cryptoCurrency {
+	//		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+	//			dao.Invoice.Columns().CryptoCurrency: cryptoCurrency,
+	//			dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
+	//		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	//		if err != nil {
+	//			fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
+	//		}
+	//		return err
+	//	} else {
+	//		rate, err := multi_currencies.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, cryptoCurrency, one.Currency)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		if rate != nil {
+	//			cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
+	//		}
+	//	}
+	//} else if config2.GetConfigInstance().Mode == "cloud" {
+	//	if one.Currency == cryptoCurrency {
+	//		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+	//			dao.Invoice.Columns().CryptoCurrency: cryptoCurrency,
+	//			dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
+	//		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	//		if err != nil {
+	//			fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
+	//		}
+	//		return err
+	//	} else {
+	//		rate, err := multi_currencies.GetExchangeConversionRateFromClusterCloud(ctx, cryptoCurrency, one.Currency)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		if rate != nil {
+	//			cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
+	//		}
+	//	}
+	//}
+	if currency2.IsCurrencySupport(cryptoCurrency) {
+		exchangeRate := currency_exchange.GetMerchantExchangeCurrencyRate(ctx, one.MerchantId, one.Currency, cryptoCurrency)
+		cryptoAmount = utility.ExchangeCurrencyConvert(one.TotalAmount, one.Currency, cryptoCurrency, exchangeRate)
+	} else {
 		trans, err := api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
-			Amount:   one.TotalAmount,
-			Currency: one.Currency,
-			Gateway:  gateway,
+			Amount:         one.TotalAmount,
+			Currency:       one.Currency,
+			CryptoCurrency: cryptoCurrency,
+			Gateway:        gateway,
 		})
 		if err != nil {
 			return err
 		}
 		cryptoCurrency = trans.CryptoCurrency
 		cryptoAmount = trans.CryptoAmount
+
 	}
 	utility.Assert(len(cryptoCurrency) > 0, "transfer to crypto currency error")
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -623,6 +651,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 			var bic string
 			var iban string
 			var address string
+			var bankData = ""
 			gateway := query.GetGatewayById(ctx, one.GatewayId)
 			if gateway != nil && gateway.GatewayType == consts.GatewayTypeWireTransfer {
 				template = email.TemplateNewProcessingInvoiceForWireTransfer
@@ -632,6 +661,38 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 					bic = gatewaySimplify.Bank.BIC
 					iban = gatewaySimplify.Bank.IBAN
 					address = gatewaySimplify.Bank.Address
+					if len(accountHolder) > 0 {
+						bankData = fmt.Sprintf("%s <p>Account&nbsp;holder:&nbsp;%s</p>", bankData, accountHolder)
+					}
+					if len(gatewaySimplify.Bank.IBAN) > 0 {
+						bankData = fmt.Sprintf("%s <p>IBAN:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.IBAN)
+					}
+					if len(gatewaySimplify.Bank.BIC) > 0 {
+						bankData = fmt.Sprintf("%s <p>BIC:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.BIC)
+					}
+					if len(gatewaySimplify.Bank.BankName) > 0 {
+						bankData = fmt.Sprintf("%s <p>Bank&nbsp;name:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.BankName)
+					}
+					if len(gatewaySimplify.Bank.AccountNumber) > 0 {
+						bankData = fmt.Sprintf("%s <p>Account&nbsp;number:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.AccountNumber)
+					}
+					if len(gatewaySimplify.Bank.SwiftCode) > 0 {
+						bankData = fmt.Sprintf("%s <p>SWIFT&nbsp;Code:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.SwiftCode)
+					}
+					if len(gatewaySimplify.Bank.CNAPS) > 0 {
+						bankData = fmt.Sprintf("%s <p>CNAPS&nbsp;Code:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.CNAPS)
+					}
+					if len(gatewaySimplify.Bank.ABARoutingNumber) > 0 {
+						bankData = fmt.Sprintf("%s <p>ABARouting&nbsp;Number:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.ABARoutingNumber)
+					}
+					if len(gatewaySimplify.Bank.Address) > 0 {
+						bankData = fmt.Sprintf("%s <p>Bank&nbsp;address:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.Address)
+					}
+					var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
+					bankData = fmt.Sprintf("%s <p>Invoice&nbsp;amount:&nbsp;%s</p>", bankData, fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency)))
+					if len(gatewaySimplify.Bank.Remarks) > 0 {
+						bankData = fmt.Sprintf("%s <p>Remarks:&nbsp;%s</p>", bankData, gatewaySimplify.Bank.Remarks)
+					}
 				}
 			} else if one.TrialEnd > 0 && one.TrialEnd > one.PeriodStart {
 				// paid trial invoice
@@ -653,7 +714,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 			if len(sendTemplate) > 0 {
 				template = sendTemplate
 			}
-			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &email.TemplateVariable{
+			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &bean.EmailTemplateVariable{
 				InvoiceId:             one.InvoiceId,
 				UserName:              user.FirstName + " " + user.LastName,
 				MerchantProductName:   one.ProductName,
@@ -665,10 +726,12 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				TokenExpireMinute:     strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 				Link:                  "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
 				HttpLink:              link.GetInvoiceLink(one.InvoiceId, one.SendTerms),
+				Currency:              one.Currency,
 				AccountHolder:         accountHolder,
 				BIC:                   bic,
 				IBAN:                  iban,
 				Address:               address,
+				BankData:              bankData,
 			})
 			if err != nil {
 				g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())
@@ -699,11 +762,12 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bo
 				} else {
 					return nil
 				}
-				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &email.TemplateVariable{
+				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, user.Language, template, pdfFileName, &bean.EmailTemplateVariable{
 					InvoiceId:             one.InvoiceId,
 					UserName:              user.FirstName + " " + user.LastName,
 					MerchantProductName:   one.ProductName,
 					MerchantCustomerEmail: merchant.Email,
+					Currency:              one.Currency,
 					MerchantName:          query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
 					DateNow:               gtime.Now(),
 					PeriodEnd:             gtime.Now().AddDate(0, 0, 5),

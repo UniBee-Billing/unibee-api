@@ -2,13 +2,35 @@ package query
 
 import (
 	"context"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
+
+func GetOneLatestMainPlanByMerchantId(ctx context.Context, merchantId uint64) (one *entity.Plan) {
+	if merchantId <= 0 {
+		return nil
+	}
+	err := dao.Plan.Ctx(ctx).
+		Where(dao.Plan.Columns().MerchantId, merchantId).
+		Where(dao.Plan.Columns().Type, consts.PlanTypeMain).
+		Where(dao.Plan.Columns().IsDeleted, 0).
+		Order("is_deleted desc, status asc").
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
 
 func GetPlanById(ctx context.Context, id uint64) (one *entity.Plan) {
 	if id <= 0 {
 		return nil
+	}
+	one = _interface.GetPlanFromPreloadContext(ctx, id)
+	if one != nil {
+		return one
 	}
 	err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, id).OmitEmpty().Scan(&one)
 	if err != nil {
@@ -32,7 +54,7 @@ func GetPlanByExternalPlanId(ctx context.Context, merchantId uint64, externalPla
 }
 
 func GetPlansByIds(ctx context.Context, ids []int64) (list []*entity.Plan) {
-	err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, ids).OmitEmpty().Scan(&list)
+	err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, ids).Scan(&list)
 	if err != nil {
 		return nil
 	}

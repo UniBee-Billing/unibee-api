@@ -86,7 +86,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	}
 
 	if req.Type != nil {
-		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-organization")
+		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-Business")
 	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Type:            req.Type,

@@ -24,4 +24,6 @@ type MerchantMetric struct {
 	GmtModify           *gtime.Time // update time
 	IsDeleted           interface{} // 0-UnDeleted，1-Deleted
 	CreateTime          interface{} // create utc time
+	MetaData            interface{} // meta_data(json)
+	Unit                interface{} // unit
 }

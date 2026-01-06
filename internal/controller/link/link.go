@@ -7,6 +7,10 @@ import (
 	entity "unibee/internal/model/entity/default"
 )
 
+func GetQuickbooksAuthorizationLink() string {
+	return fmt.Sprintf("%s/integrate/quickbooks/auth_back", config.GetConfigInstance().Server.GetServerPath())
+}
+
 func GetInvoiceLink(invoiceId string, st string) string {
 	if len(invoiceId) == 0 {
 		return ""

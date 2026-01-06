@@ -26,7 +26,7 @@ RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 #                                INSTALLATION
 ###############################################################################
 ENV WORKDIR                 /app
-ADD resource                $WORKDIR/
+ADD resource                $WORKDIR/resource
 COPY --from=builder /app/temp/linux_amd64/main $WORKDIR/main
 ADD ./version.txt $WORKDIR/version.txt
 ADD ./resource/email/template.html $WORKDIR/resource/email/template.html

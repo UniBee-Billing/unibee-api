@@ -2,8 +2,10 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"unibee/api/bean/detail"
 	"unibee/internal/cmd/config"
+	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/merchant"
 	"unibee/internal/logic/middleware/license"
 	"unibee/internal/query"
@@ -39,5 +41,15 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}
 
 	_, member, err := merchant.CreateMerchant(ctx, createMerchantReq)
-	return &auth.RegisterVerifyRes{MerchantMember: detail.ConvertMemberToDetail(ctx, member)}, nil
+	utility.AssertError(err, "CreateMerchant Error")
+
+	// 9. Generate system JWT token
+	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, member.MerchantId, member.Id, member.Email)
+	utility.AssertError(err, "Server Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", member.Id)), "Cache Error")
+
+	// 10. Set cookies
+	g.RequestFromCtx(ctx).Cookie.Set(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY, token)
+	jwt.AppendRequestCookieWithToken(ctx, token)
+	return &auth.RegisterVerifyRes{MerchantMember: detail.ConvertMemberToDetail(ctx, member), Token: token}, nil
 }

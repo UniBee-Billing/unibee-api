@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
@@ -23,6 +24,18 @@ func (c *ControllerMember) Update(ctx context.Context, req *member.UpdateReq) (r
 	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
+	}
+	if req.Metadata != nil {
+		var metadata = make(map[string]interface{})
+		if len(one.MetaData) > 0 {
+			_ = gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		}
+		for k, v := range *req.Metadata {
+			metadata[k] = v
+		}
+		_, _ = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+			dao.MerchantMember.Columns().MetaData: utility.MarshalToJsonString(metadata),
+		}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
 	}
 	return &member.UpdateRes{MerchantMember: detail.ConvertMemberToDetail(ctx, one)}, nil
 }

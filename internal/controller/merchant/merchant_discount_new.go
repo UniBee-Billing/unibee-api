@@ -25,6 +25,7 @@ func (c *ControllerDiscount) New(ctx context.Context, req *discount.NewReq) (res
 		StartTime:         req.StartTime,
 		EndTime:           req.EndTime,
 		PlanApplyType:     req.PlanApplyType,
+		PlanApplyGroup:    req.PlanApplyGroup,
 		PlanIds:           req.PlanIds,
 		Metadata:          req.Metadata,
 		Quantity:          req.Quantity,

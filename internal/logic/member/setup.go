@@ -117,6 +117,7 @@ func ReloadMemberCacheForSdkAuthBackground(id uint64) {
 
 func ConvertMemberPermissions(ctx context.Context, member *MerchantMember) (isOwner bool, permissions []*MerchantRolePermission) {
 	permissions = make([]*MerchantRolePermission, 0)
+	permissionGroupMap := make(map[string]*bean.MerchantRolePermission)
 	if member != nil {
 		if strings.Contains(member.Role, "Owner") {
 			isOwner = true
@@ -134,11 +135,29 @@ func ConvertMemberPermissions(ctx context.Context, member *MerchantMember) (isOw
 									Group:       permission.Group,
 									Permissions: permission.Permissions,
 								})
+								if groupPermission, ok := permissionGroupMap[permission.Group]; ok {
+									for _, p := range permission.Permissions {
+										if groupPermission.Permissions == nil {
+											groupPermission.Permissions = make([]string, 0)
+										}
+										if len(p) > 0 && !utility.IsStringInArray(groupPermission.Permissions, p) {
+											groupPermission.Permissions = append(groupPermission.Permissions, p)
+										}
+									}
+								} else {
+									permissionGroupMap[permission.Group] = permission
+								}
 							}
 						}
 					}
 				}
 			}
+			//for _, permission := range permissionGroupMap {
+			//	permissions = append(permissions, &MerchantRolePermission{
+			//		Group:       permission.Group,
+			//		Permissions: permission.Permissions,
+			//	})
+			//}
 		}
 	}
 	return isOwner, permissions

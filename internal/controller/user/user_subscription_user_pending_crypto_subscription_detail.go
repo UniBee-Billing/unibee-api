@@ -18,10 +18,10 @@ func (c *ControllerSubscription) UserPendingCryptoSubscriptionDetail(ctx context
 	if one != nil {
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		if gateway.GatewayType == consts.GatewayTypeCrypto {
-			detail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
+			subscriptionDetail, err := detail.SubscriptionDetail(ctx, one.SubscriptionId)
 			if err == nil {
 				return &subscription.UserPendingCryptoSubscriptionDetailRes{
-					Subscription: detail,
+					Subscription: subscriptionDetail,
 				}, nil
 			}
 		}

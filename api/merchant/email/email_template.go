@@ -1,8 +1,9 @@
 package email
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type TemplateListReq struct {
@@ -17,6 +18,7 @@ type TemplateListRes struct {
 type AddLocalizationVersionReq struct {
 	g.Meta        `path:"/template_add_localization_version" tags:"Email Template" method:"post" summary:"Add Email Template Localization Version"`
 	TemplateName  string                            `json:"templateName" dc:"Template Name" required:"true"`
+	VersionName   string                            `json:"versionName" dc:"Versioin Name" required:"true"`
 	Localizations []*bean.EmailLocalizationTemplate `json:"localizations" description:"" required:"true"`
 }
 
@@ -28,6 +30,7 @@ type EditLocalizationVersionReq struct {
 	g.Meta        `path:"/template_edit_localization_version" tags:"Email Template" method:"post" summary:"Edit Email Template Localization Version"`
 	TemplateName  string                            `json:"templateName" dc:"Template Name" required:"true"`
 	VersionId     string                            `json:"versionId" description:"" required:"true"`
+	VersionName   *string                           `json:"versionName" description:""`
 	Localizations []*bean.EmailLocalizationTemplate `json:"localizations" description:"" required:"true"`
 }
 
@@ -38,7 +41,7 @@ type EditLocalizationVersionRes struct {
 type ActivateLocalizationVersionReq struct {
 	g.Meta       `path:"/template_activate_localization_version" tags:"Email Template" method:"post" summary:"Activate Email Template Localization Version"`
 	TemplateName string `json:"templateName" dc:"Template Name" required:"true"`
-	VersionId    string `json:"versionId" description:""`
+	VersionId    string `json:"versionId" description:"activate default if not specified"`
 }
 
 type ActivateLocalizationVersionRes struct {
@@ -47,10 +50,21 @@ type ActivateLocalizationVersionRes struct {
 type DeleteLocalizationVersionReq struct {
 	g.Meta       `path:"/template_delete_localization_version" tags:"Email Template" method:"post" summary:"Delete Email Template Localization Version"`
 	TemplateName string `json:"templateName" dc:"Template Name" required:"true"`
-	VersionId    string `json:"versionId" description:""`
+	VersionId    string `json:"versionId" description:"" required:"true"`
 }
 
 type DeleteLocalizationVersionRes struct {
+}
+
+type TestLocalizationVersionReq struct {
+	g.Meta       `path:"/template_test_localization_version" tags:"Email Template" method:"post" summary:"Test Email Template Localization Version"`
+	Email        string `json:"email" dc:"Email" required:"true"`
+	TemplateName string `json:"templateName" dc:"Template Name" required:"true"`
+	VersionId    string `json:"versionId" description:"" required:"true"`
+	Language     string `json:"language" dc:"Language" required:"true"`
+}
+
+type TestLocalizationVersionRes struct {
 }
 
 type CustomizeLocalizationTemplateSyncReq struct {

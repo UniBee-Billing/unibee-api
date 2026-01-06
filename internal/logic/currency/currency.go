@@ -59,12 +59,12 @@ func GetMerchantCurrencies() []*bean.Currency {
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "SGD",
-		Symbol:   "$",
+		Symbol:   "S$",
 		Scale:    100,
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "HKD",
-		Symbol:   "$",
+		Symbol:   "HK$",
 		Scale:    100,
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
@@ -89,12 +89,12 @@ func GetMerchantCurrencies() []*bean.Currency {
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "CAD",
-		Symbol:   "$",
+		Symbol:   "CA$",
 		Scale:    100,
 	})
 	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "AUD",
-		Symbol:   "$",
+		Symbol:   "A$",
 		Scale:    100,
 	})
 	return supportCurrency

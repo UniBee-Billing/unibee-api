@@ -36,19 +36,59 @@ type NewPaymentRes struct {
 	Action            *gjson.Json `json:"action" dc:"action"`
 }
 
+type OnetimeAddonPreviewReq struct {
+	g.Meta                 `path:"/new_onetime_addon_preview" tags:"Subscription Payment" method:"post" summary:"New Subscription Onetime Addon Preview" dc:"Preview for subscription onetime addon purchase"`
+	SubscriptionId         string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription of userId will attach the addon"`
+	UserId                 uint64                 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
+	AddonId                uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency of payment"`
+	Quantity               int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
+	DiscountCode           string                 `json:"discountCode" dc:"DiscountCode"`
+	DiscountAmount         *int64                 `json:"discountAmount"     dc:"Amount of discount"`
+	DiscountPercentage     *int64                 `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount specified"`
+	GatewayId              *uint64                `json:"gatewayId" dc:"GatewayId, use user's gateway if not provide"`
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
+	TaxPercentage          *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, default user's taxPercentage if not specified"`
+	ApplyPromoCredit       *bool                  `json:"applyPromoCredit"  dc:"apply promo credit or not"`
+	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	Metadata               map[string]interface{} `json:"metadata" dc:"Metadata，custom data"`
+}
+
+type OnetimeAddonPreviewRes struct {
+	Addon            *bean.Plan                 `json:"addon"`
+	Quantity         int64                      `json:"quantity"`
+	TaxAmount        int64                      `json:"taxAmount"                `
+	DiscountAmount   int64                      `json:"discountAmount"`
+	TotalAmount      int64                      `json:"totalAmount"                `
+	OriginAmount     int64                      `json:"originAmount"                `
+	Currency         string                     `json:"currency"              `
+	Invoice          *bean.Invoice              `json:"invoice"`
+	UserId           uint64                     `json:"userId" `
+	Email            string                     `json:"email" `
+	TaxPercentage    int64                      `json:"taxPercentage"              `
+	VatNumber        string                     `json:"vatNumber"              `
+	Discount         *bean.MerchantDiscountCode `json:"discount" `
+	ApplyPromoCredit bool                       `json:"applyPromoCredit"  dc:"apply promo credit or not"`
+}
+
 type OnetimeAddonNewReq struct {
-	g.Meta             `path:"/new_onetime_addon_payment" tags:"Subscription Payment" method:"post" summary:"New Subscription Onetime Addon Payment" dc:"Create payment for subscription onetime addon purchase"`
-	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription of userId will attach the addon"`
-	UserId             uint64                 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
-	AddonId            uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
-	Quantity           int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
-	ReturnUrl          string                 `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
-	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，custom data"`
-	DiscountCode       string                 `json:"discountCode" dc:"DiscountCode"`
-	DiscountAmount     *int64                 `json:"discountAmount"     dc:"Amount of discount"`
-	DiscountPercentage *int64                 `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount provide"`
-	GatewayId          *uint64                `json:"gatewayId" dc:"GatewayId, use user's gateway if not provide"`
-	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, use subscription's taxPercentage if not provide"`
+	g.Meta                 `path:"/new_onetime_addon_payment" tags:"Subscription Payment" method:"post" summary:"New Subscription Onetime Addon Payment" dc:"Create payment for subscription onetime addon purchase"`
+	SubscriptionId         string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription of userId will attach the addon"`
+	UserId                 uint64                 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
+	AddonId                uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency of payment"`
+	Quantity               int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
+	ReturnUrl              string                 `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
+	CancelUrl              string                 `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if user cancel the payment"`
+	DiscountCode           string                 `json:"discountCode" dc:"DiscountCode"`
+	DiscountAmount         *int64                 `json:"discountAmount"     dc:"Amount of discount"`
+	DiscountPercentage     *int64                 `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount specified"`
+	GatewayId              *uint64                `json:"gatewayId" dc:"GatewayId, use user's gateway if not provide"`
+	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
+	TaxPercentage          *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, default user's taxPercentage if not specified"`
+	ApplyPromoCredit       *bool                  `json:"applyPromoCredit"  dc:"apply promo credit or not"`
+	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	Metadata               map[string]interface{} `json:"metadata" dc:"Metadata，custom data"`
 }
 
 type OnetimeAddonNewRes struct {
@@ -58,13 +98,13 @@ type OnetimeAddonNewRes struct {
 	Invoice                  *bean.Invoice                  `json:"invoice" dc:"invoice of one-time payment"`
 }
 
-type OnetimeAddonListReq struct {
-	g.Meta `path:"/onetime_addon_list" tags:"Subscription Payment" method:"get" summary:"Get Subscription Onetime Addon List"`
+type OnetimeAddonPurchaseListReq struct {
+	g.Meta `path:"/onetime_addon_purchase_list" tags:"Subscription Payment" method:"get" summary:"Get Subscription Onetime Addon Purchase History List"`
 	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
 	Page   int    `json:"page"  dc:"Page, Start With 0" `
-	Count  int    `json:"count" dc:"Count Of Page" `
+	Count  int    `json:"count" dc:"Count Of Page，Default 100 " `
 }
 
-type OnetimeAddonListRes struct {
+type OnetimeAddonPurchaseListRes struct {
 	SubscriptionOnetimeAddons []*detail.SubscriptionOnetimeAddonDetail `json:"subscriptionOnetimeAddons" description:"SubscriptionOnetimeAddons" `
 }

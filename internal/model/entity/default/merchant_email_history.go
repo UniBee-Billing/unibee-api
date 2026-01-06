@@ -10,14 +10,15 @@ import (
 
 // MerchantEmailHistory is the golang structure for table merchant_email_history.
 type MerchantEmailHistory struct {
-	Id         uint64      `json:"id"         description:""`                //
-	MerchantId uint64      `json:"merchantId" description:""`                //
-	Email      string      `json:"email"      description:""`                //
-	Title      string      `json:"title"      description:""`                //
-	Content    string      `json:"content"    description:""`                //
-	AttachFile string      `json:"attachFile" description:""`                //
-	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`     // create time
-	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`     // update time
-	Response   string      `json:"response"   description:""`                //
-	CreateTime int64       `json:"createTime" description:"create utc time"` // create utc time
+	Id         uint64      `json:"id"         description:""`                              //
+	MerchantId uint64      `json:"merchantId" description:""`                              //
+	Email      string      `json:"email"      description:""`                              //
+	Title      string      `json:"title"      description:""`                              //
+	Content    string      `json:"content"    description:""`                              //
+	AttachFile string      `json:"attachFile" description:""`                              //
+	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`                   // create time
+	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`                   // update time
+	Response   string      `json:"response"   description:""`                              //
+	CreateTime int64       `json:"createTime" description:"create utc time"`               // create utc time
+	Status     int         `json:"status"     description:"0-pending,1-success,2-failure"` // 0-pending,1-success,2-failure
 }

@@ -75,7 +75,7 @@ type RegisterReq struct {
 	Address     string  `json:"address" dc:"Address"`
 	CountryCode string  `json:"countryCode" dc:"CountryCode"`
 	UserName    string  `json:"userName" dc:"UserName"`
-	Type        int64   `json:"type" dc:"User type, 1-Individual|2-organization"`
+	Type        int64   `json:"type" dc:"User type, 1-Individual|2-Business"`
 	CompanyName string  `json:"companyName" dc:"company name"`
 	VATNumber   *string `json:"vATNumber" dc:"vat number"`
 	City        string  `json:"city" dc:"city"`

@@ -125,14 +125,19 @@ func (c UnitPay) GetSubscription(ctx context.Context, secret string, subscriptio
 func (c UnitPay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantGateway, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api?method=initPayment"
 	//var name = ""
-	var description = createPayContext.Invoice.ProductName
-	if len(createPayContext.Invoice.Lines) > 0 {
-		var line = createPayContext.Invoice.Lines[0]
-		if len(line.Name) > 0 {
-			description = line.Name
-		} else if len(line.Description) > 0 {
-			description = line.Description
-		}
+	//var description = createPayContext.Invoice.ProductName
+	//if len(createPayContext.Invoice.Lines) > 0 {
+	//	var line = createPayContext.Invoice.Lines[0]
+	//	if len(line.Name) > 0 {
+	//		description = line.Name
+	//	} else if len(line.Description) > 0 {
+	//		description = line.Description
+	//	}
+	//}
+	name, description := createPayContext.GetInvoiceSingleProductNameAndDescription()
+	desc := name
+	if len(desc) == 0 {
+		desc = description
 	}
 
 	var currency = createPayContext.Pay.Currency
@@ -149,7 +154,7 @@ func (c UnitPay) GatewayNewPayment(ctx context.Context, gateway *entity.Merchant
 		"sum":         utility.ConvertCentToDollarStr(totalAmount, currency),
 		"paymentType": "card",
 		//"title":               name,
-		"desc":      description,
+		"desc":      desc,
 		"projectId": gateway.GatewayKey,
 		//"customer_id": strconv.FormatUint(createPayContext.Pay.UserId, 10),
 		"account":   createPayContext.Pay.PaymentId,

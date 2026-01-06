@@ -2,11 +2,6 @@ package webhook
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
 	context2 "unibee/internal/interface/context"
@@ -14,6 +9,12 @@ import (
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
 var GatewayWebhookNameMapping = map[string]_interface.GatewayWebhookInterface{
@@ -28,6 +29,12 @@ var GatewayWebhookNameMapping = map[string]_interface.GatewayWebhookInterface{
 	"payssion":        &PayssionWebhook{},
 	"alipay":          &AlipayWebhook{},
 	"alipay+":         &AlipayPlusWebhook{},
+	"bank131":         &Bank131Webhook{},
+	"sberpay":         &SberPayWebhook{},
+	"firekassa":       &FireKassaWebhook{},
+	"mulenpay":        &MulenPayWebhook{},
+	"alikassa":        &AliKassaWebhook{},
+	"blockonomics":    &BlockonomicsWebhook{},
 }
 
 type GatewayWebhookProxy struct {

@@ -7,31 +7,33 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
 )
 
 type InvoiceListInternalReq struct {
-	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	FirstName       string `json:"firstName" dc:"FirstName" `
-	LastName        string `json:"lastName" dc:"LastName" `
-	Currency        string `json:"Currency" dc:"Currency" `
-	Status          []int  `json:"status" dc:"Status" `
-	AmountStart     *int64 `json:"amountStart" dc:"AmountStart" `
-	AmountEnd       *int64 `json:"amountEnd" dc:"AmountEnd" `
-	UserId          uint64 `json:"userId" dc:"Filter UserId Default All" `
-	SendEmail       string `json:"sendEmail" dc:"Filter SendEmail Default All" `
-	SortField       string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc" `
-	DeleteInclude   bool   `json:"deleteInclude" dc:"Is Delete Include" `
-	Type            *int   `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
-	Page            int    `json:"page"  dc:"Page, Start With 0" `
-	Count           int    `json:"count"  dc:"Count Of Page"`
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
-	ReportTimeStart int64  `json:"reportTimeStart" dc:"ReportTimeStart" `
-	ReportTimeEnd   int64  `json:"reportTimeEnd" dc:"ReportTimeEnd" `
+	MerchantId      uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
+	FirstName       string  `json:"firstName" dc:"FirstName" `
+	LastName        string  `json:"lastName" dc:"LastName" `
+	Currency        string  `json:"Currency" dc:"Currency" `
+	Status          []int   `json:"status" dc:"Status" `
+	AmountStart     *int64  `json:"amountStart" dc:"AmountStart" `
+	AmountEnd       *int64  `json:"amountEnd" dc:"AmountEnd" `
+	UserId          uint64  `json:"userId" dc:"Filter UserId Default All" `
+	GatewayIds      []int64 `json:"gatewayIds" dc:"GatewayIds, Search Filter GatewayIds" `
+	SendEmail       string  `json:"sendEmail" dc:"Filter SendEmail Default All" `
+	SortField       string  `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
+	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc" `
+	DeleteInclude   bool    `json:"deleteInclude" dc:"Is Delete Include" `
+	Type            *int    `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
+	Page            int     `json:"page"  dc:"Page, Start With 0" `
+	Count           int     `json:"count"  dc:"Count Of Page"`
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	ReportTimeStart int64   `json:"reportTimeStart" dc:"ReportTimeStart" `
+	ReportTimeEnd   int64   `json:"reportTimeEnd" dc:"ReportTimeEnd" `
 	SkipTotal       bool
 }
 
@@ -77,6 +79,9 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	}
 	if req.UserId > 0 {
 		query = query.Where(dao.Invoice.Columns().UserId, req.UserId)
+	}
+	if req.GatewayIds != nil && len(req.GatewayIds) > 0 {
+		query = query.WhereIn(dao.Invoice.Columns().GatewayId, req.GatewayIds)
 	}
 	if req.Status != nil && len(req.Status) > 0 {
 		query = query.WhereIn(dao.Invoice.Columns().Status, req.Status)
@@ -145,6 +150,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		return nil, err
 	}
 	var resultList []*detail.InvoiceDetail
+	preload.InvoiceListPreloadForContext(ctx, mainList)
 	for _, invoice := range mainList {
 		resultList = append(resultList, detail.ConvertInvoiceToDetail(ctx, invoice))
 	}

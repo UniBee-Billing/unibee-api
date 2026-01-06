@@ -26,7 +26,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email, one.Language)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
-	g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)
-	jwt.AppendRequestCookieWithToken(ctx, token)
+	//g.RequestFromCtx(ctx).Cookie.Set(jwt.USER_TYPE_TOKEN_COOKIE_KEY, token)
+	//jwt.AppendRequestCookieWithToken(ctx, token)
 	return &auth.LoginOtpVerifyRes{User: bean.SimplifyUserAccount(one), Token: token}, nil
 }

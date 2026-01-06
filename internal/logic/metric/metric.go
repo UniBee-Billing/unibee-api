@@ -3,16 +3,17 @@ package metric
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 const (
@@ -50,13 +51,15 @@ func MerchantMetricDetail(ctx context.Context, merchantId uint64, merchantMetric
 }
 
 type NewMerchantMetricInternalReq struct {
-	MerchantId          uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	Code                string `json:"code" dc:"Code" v:"required"`
-	Name                string `json:"name" dc:"Name" v:"required"`
-	Type                *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring(come later)"`
-	Description         string `json:"description" dc:"Description"`
-	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
-	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	MerchantId          uint64                 `json:"merchantId" dc:"MerchantId" v:"required"`
+	Code                string                 `json:"code" dc:"Code" v:"required"`
+	Name                string                 `json:"name" dc:"Name" v:"required"`
+	Type                *int                   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring(come later)"`
+	Description         string                 `json:"description" dc:"Description"`
+	AggregationType     int                    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
+	AggregationProperty string                 `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	MetaData            map[string]interface{} `json:"metaData"            description:"meta_data(json)"`
+	Unit                string                 `json:"unit"                description:"unit"`
 }
 
 func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*bean.MerchantMetric, error) {
@@ -72,7 +75,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 		metricType = *req.Type
 	}
 
-	one := query.GetMerchantMetricByCode(ctx, req.Code)
+	one := query.GetMerchantMetricByCode(ctx, req.MerchantId, req.Code)
 	utility.Assert(one == nil, "metric already exist")
 	one = &entity.MerchantMetric{
 		MerchantId:          req.MerchantId,
@@ -82,6 +85,8 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 		Type:                metricType,
 		AggregationType:     req.AggregationType,
 		AggregationProperty: req.AggregationProperty,
+		Unit:                req.Unit,
+		MetaData:            utility.MarshalToJsonString(req.MetaData),
 		CreateTime:          gtime.Now().Timestamp(),
 	}
 	result, err := dao.MerchantMetric.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -104,15 +109,16 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, metricType *int, name string, description string) (*bean.MerchantMetric, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, metricType *int, name string, description string, unit string, metadata *map[string]interface{}) (*bean.MerchantMetric, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
-	utility.Assert(one != nil, "endpoint not found")
+	utility.Assert(one != nil, "metric not found")
 	_, err := dao.MerchantMetric.Ctx(ctx).Data(g.Map{
 		dao.MerchantMetric.Columns().MetricName:        name,
 		dao.MerchantMetric.Columns().Type:              metricType,
 		dao.MerchantMetric.Columns().MetricDescription: description,
+		dao.MerchantMetric.Columns().Unit:              unit,
 		dao.MerchantMetric.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
@@ -121,6 +127,13 @@ func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64,
 	}
 	one.MetricName = name
 	one.MetricDescription = description
+	if metadata != nil {
+		_, err = dao.MerchantMetric.Ctx(ctx).Data(g.Map{
+			dao.MerchantMetric.Columns().MetaData:  utility.MarshalToJsonString(metadata),
+			dao.MerchantMetric.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
+		one.MetaData = utility.MarshalToJsonString(metadata)
+	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),

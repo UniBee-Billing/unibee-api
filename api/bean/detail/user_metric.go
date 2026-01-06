@@ -16,6 +16,7 @@ type UserMerchantMetricChargeStat struct {
 	ChargePricing     *bean.PlanMetricMeteredChargeParam  `json:"chargePricing" dc:"ChargePricing"`
 	TotalChargeAmount int64                               `json:"totalChargeAmount" dc:"TotalChargeAmount"`
 	GraduatedStep     *bean.MetricPlanChargeGraduatedStep `json:"graduatedStep" dc:"GraduatedStep"`
+	Lines             []*bean.MetricPlanChargeLine        `json:"lines" dc:"Lines"`
 }
 
 type UserMetric struct {

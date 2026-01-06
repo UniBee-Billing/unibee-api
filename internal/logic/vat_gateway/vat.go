@@ -106,7 +106,9 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 		}, nil
 	}
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
-	if one != nil {
+	if one != nil && !(one.Valid != 1 &&
+		(strings.Contains(one.ValidateMessage, "You have reached your request limit threshold") ||
+			strings.Contains(one.ValidateMessage, "Please try again later"))) {
 		var valid = false
 		if one.Valid == 1 {
 			valid = true
@@ -147,20 +149,37 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 	if result.Valid {
 		valid = 1
 	}
-	one = &entity.MerchantVatNumberVerifyHistory{
-		MerchantId:      merchantId,
-		VatNumber:       vatNumber,
-		Valid:           int64(valid),
-		ValidateGateway: gateway.GetGatewayName(),
-		CountryCode:     result.CountryCode,
-		CompanyName:     result.CompanyName,
-		CompanyAddress:  result.CompanyAddress,
-		ValidateMessage: result.ValidateMessage,
-		CreateTime:      gtime.Now().Timestamp(),
-	}
-	_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
-	if err != nil {
-		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
+	if one != nil {
+		validateMessage := result.ValidateMessage
+		if validateMessage != "" {
+			validateMessage = fmt.Sprintf("%s(%d)", result.ValidateMessage, gtime.Now().Timestamp())
+		}
+		_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(g.Map{
+			dao.MerchantVatNumberVerifyHistory.Columns().Valid:           int64(valid),
+			dao.MerchantVatNumberVerifyHistory.Columns().CountryCode:     result.CountryCode,
+			dao.MerchantVatNumberVerifyHistory.Columns().CompanyName:     result.CompanyName,
+			dao.MerchantVatNumberVerifyHistory.Columns().CompanyAddress:  result.CompanyAddress,
+			dao.MerchantVatNumberVerifyHistory.Columns().ValidateMessage: validateMessage,
+		}).Where(dao.MerchantVatNumberVerifyHistory.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record update failure %s`, err.Error())
+		}
+	} else {
+		one = &entity.MerchantVatNumberVerifyHistory{
+			MerchantId:      merchantId,
+			VatNumber:       vatNumber,
+			Valid:           int64(valid),
+			ValidateGateway: gateway.GetGatewayName(),
+			CountryCode:     result.CountryCode,
+			CompanyName:     result.CompanyName,
+			CompanyAddress:  result.CompanyAddress,
+			ValidateMessage: result.ValidateMessage,
+			CreateTime:      gtime.Now().Timestamp(),
+		}
+		_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err.Error())
+		}
 	}
 	return result, nil
 }

@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Existe otra suscripción activa o incompleta",
+  "ClickTooFast": "Está haciendo clic demasiado rápido. Por favor, espere un momento e inténtelo de nuevo.",
+  "AmountNotMatch": "El monto total está desactualizado. Por favor, actualice e inténtelo de nuevo.",
+  "PlanTrialGatewayError": "Se requiere una pasarela de pago con tarjeta o PayPal para este plan.",
+  "VatValidateError": "La validación del número de IVA falló. Número: %s",
+  "VatGatewayNeedSetup": "La pasarela de IVA debe configurarse.",
+  "CountryCodeVatNumberNotMatch": "Error de código de país. El país de su número de IVA es %s.",
+  "DiscountCodeInvalid": "El código de descuento no es válido.",
+  "DiscountCodeNotStart": "El código de descuento no ha comenzado.",
+  "DiscountCodePlanError": "El código de descuento no se puede usar con este plan.",
+  "DiscountCodeReachLimitation": "Se ha alcanzado el límite de uso del código de descuento."
+} 

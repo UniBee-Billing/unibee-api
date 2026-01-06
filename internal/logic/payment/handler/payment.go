@@ -372,7 +372,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 
 	if payment == nil {
-		g.Log().Infof(ctx, "payment not found, paymentId=%s", req.PaymentId)
+		g.Log().Infof(ctx, "handlePaySuccess payment not found, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
 
@@ -388,7 +388,8 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			dao.Payment.Columns().Code:                 req.PaymentCode,
 			dao.Payment.Columns().GatewayPaymentMethod: req.GatewayPaymentMethod,
 		}).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
-		return nil
+
+		return CompensateForPaymentSuccess(ctx, payment)
 	}
 
 	var paidAt = gtime.Now().Timestamp()
@@ -433,12 +434,15 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
+		if payment == nil {
+			g.Log().Infof(ctx, "handlePaySuccess payment not found, paymentId=%s", req.PaymentId)
+			return errors.New("payment not found:" + req.PaymentId)
+		}
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			g.Log().Errorf(ctx, `UpdateInvoiceFromPayment error %s\n`, err.Error())
-		}
-		if len(req.GatewayUserId) > 0 {
-			_, _ = util.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
+			g.Log().Infof(ctx, `UpdateInvoiceFromPaymentSuccess error:%s`, err.Error())
+		} else {
+			callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 		}
 		{
 			event.SaveEvent(ctx, entity.PaymentEvent{
@@ -453,10 +457,13 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			})
 			err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
 			if err != nil {
-				g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
+				g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPaymentSuccess error %s`, err.Error())
 			}
 		}
 		{
+			if len(req.GatewayUserId) > 0 {
+				_, _ = util.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
+			}
 			//default payment method update
 			if len(req.GatewayPaymentMethod) > 0 {
 				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
@@ -469,7 +476,26 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
 			}
 		}
+	}
+	return err
+}
+
+func CompensateForPaymentSuccess(ctx context.Context, payment *entity.Payment) (err error) {
+	//select * from payment,payment_timeline where payment.status = 20 and payment.payment_id COLLATE utf8mb4_unicode_ci = payment_timeline.payment_id COLLATE utf8mb4_unicode_ci and payment_timeline.status != 1 order by payment.id desc
+	//select * from payment,invoice where payment.status = 20 and payment.payment_id COLLATE utf8mb4_unicode_ci = invoice.payment_id COLLATE utf8mb4_unicode_ci and invoice.status != 3 order by payment.id desc
+	invoice := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	if invoice != nil && invoice.Status != consts.InvoiceStatusPaid {
+		invoice, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+		if err != nil {
+			g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentSuccess error %s`, err.Error())
+			return err
+		}
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
+	}
+	err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
+	if err != nil {
+		g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPaymentSuccess error %s`, err.Error())
+		return err
 	}
 	return err
 }
@@ -551,6 +577,10 @@ func HandlePaymentWebhookEvent(ctx context.Context, paymentId string, gatewayPay
 func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entity.Payment, uniqueId string) error {
 	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 	payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, `CreateOrUpdatePaymentTimelineForPayment payment not found PaymentId:%s`, uniqueId)
+		return gerror.Newf("CreateOrUpdatePaymentTimelineForPayment payment not found PaymentId:%s", uniqueId)
+	}
 	g.Log().Infof(ctx, "CreateOrUpdatePaymentTimelineForPayment %s", payment.PaymentId)
 
 	var status = 0
@@ -593,7 +623,7 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 	}
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	if invoice != nil {
-		err := CreateOrUpdatePaymentItemForPaymentInvoice(ctx, payment, invoice)
+		err := CreateOrUpdatePaymentItemForPaymentInvoice(ctx, invoice, payment.Status)
 		if err != nil {
 			g.Log().Errorf(ctx, "CreateOrUpdatePaymentItemForPaymentInvoice error:%s", err.Error())
 		}
@@ -601,41 +631,40 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 	return nil
 }
 
-func CreateOrUpdatePaymentItemForPaymentInvoice(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) error {
-	if payment == nil || invoice == nil {
-		return gerror.Newf(`payment or invoice is nil`)
+func CreateOrUpdatePaymentItemForPaymentInvoice(ctx context.Context, invoice *entity.Invoice, paymentStatus int) error {
+	if invoice == nil {
+		return gerror.Newf(`invoice is nil`)
 	}
-	payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
 	var status = 0
-	if payment.Status == consts.PaymentSuccess {
+	if paymentStatus == consts.PaymentSuccess {
 		status = 1
-	} else if payment.Status == consts.PaymentFailed || payment.Status == consts.PaymentCancelled {
+	} else if paymentStatus == consts.PaymentFailed || paymentStatus == consts.PaymentCancelled {
 		status = 2
 	}
 	var list []*entity.PaymentItem
 	var total = 0
 	_ = dao.PaymentItem.Ctx(ctx).
-		Where(dao.PaymentItem.Columns().PaymentId, payment).
+		Where(dao.PaymentItem.Columns().InvoiceId, invoice.InvoiceId).
 		OmitEmpty().ScanAndCount(&list, &total, true)
 	invoiceSimplify := bean.SimplifyInvoice(invoice)
 	if total != len(invoiceSimplify.Lines) {
-		_, _ = dao.PaymentItem.Ctx(ctx).Where(dao.PaymentItem.Columns().PaymentId, payment.PaymentId).Delete()
+		_, _ = dao.PaymentItem.Ctx(ctx).Where(dao.PaymentItem.Columns().InvoiceId, invoice.InvoiceId).Delete()
 		for i, item := range invoiceSimplify.Lines {
 			one := &entity.PaymentItem{
-				BizType:        payment.BizType,
-				MerchantId:     payment.MerchantId,
-				UserId:         payment.UserId,
-				SubscriptionId: payment.SubscriptionId,
-				InvoiceId:      payment.InvoiceId,
-				UniqueId:       fmt.Sprintf("%s_%d", payment.PaymentId, i),
-				Currency:       payment.Currency,
+				BizType:        invoice.BizType,
+				MerchantId:     invoice.MerchantId,
+				UserId:         invoice.UserId,
+				SubscriptionId: invoice.SubscriptionId,
+				InvoiceId:      invoice.InvoiceId,
+				UniqueId:       fmt.Sprintf("%s_%d", invoice.InvoiceId, i),
+				Currency:       invoice.Currency,
 				Name:           item.Name,
 				Description:    item.Description,
 				Amount:         item.Amount,
 				UnitAmount:     item.UnitAmountExcludingTax,
 				Quantity:       item.Quantity,
-				GatewayId:      payment.GatewayId,
-				PaymentId:      payment.PaymentId,
+				GatewayId:      invoice.GatewayId,
+				PaymentId:      invoice.PaymentId,
 				Status:         status,
 				CreateTime:     gtime.Now().Timestamp(),
 			}
@@ -648,7 +677,7 @@ func CreateOrUpdatePaymentItemForPaymentInvoice(ctx context.Context, payment *en
 		_, err := dao.PaymentItem.Ctx(ctx).Data(g.Map{
 			dao.PaymentItem.Columns().GmtModify: gtime.Now(),
 			dao.PaymentItem.Columns().Status:    status,
-		}).Where(dao.PaymentItem.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
+		}).Where(dao.PaymentItem.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
 		if err != nil {
 			return gerror.Newf(`record update failure %s`, err.Error())
 		}

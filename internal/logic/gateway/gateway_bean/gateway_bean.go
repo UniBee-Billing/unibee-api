@@ -19,6 +19,7 @@ type GatewayCurrencyExchange struct {
 type GatewayNewPaymentReq struct {
 	Merchant                *entity.Merchant         `json:"merchant"`
 	CheckoutMode            bool                     `json:"checkoutMode"`
+	PaymentUIMode           string                   `json:"paymentUIMode"`
 	Pay                     *entity.Payment          `json:"pay"`
 	Gateway                 *entity.MerchantGateway  `json:"gateway"`
 	ExternalUserId          string                   `json:"externalUserId"`
@@ -32,6 +33,35 @@ type GatewayNewPaymentReq struct {
 	GatewayCurrencyExchange *GatewayCurrencyExchange `json:"gatewayCurrencyExchange"`
 	ExchangeAmount          int64                    `json:"exchangeAmount"           description:"exchange_amount, cent"`
 	ExchangeCurrency        string                   `json:"exchangeCurrency"         description:"exchange_currency"`
+}
+
+func (c *GatewayNewPaymentReq) GetInvoiceSingleProductNameAndDescription() (name string, description string) {
+	var containNegative = false
+	for _, line := range c.Invoice.Lines {
+		if line.Amount <= 0 {
+			containNegative = true
+		}
+	}
+	if !containNegative {
+		if len(c.Invoice.Lines) > 0 {
+			var line = c.Invoice.Lines[0]
+			if len(line.Name) == 0 {
+				name = line.Description
+			} else {
+				name = line.Name
+				description = line.Description
+			}
+		}
+	} else {
+		name = c.Invoice.ProductName
+		if len(name) == 0 {
+			name = c.Invoice.InvoiceName
+		}
+		if len(name) == 0 {
+			name = "DefaultProduct"
+		}
+	}
+	return name, description
 }
 
 type GatewayNewPaymentRefundReq struct {
@@ -53,6 +83,8 @@ type GatewayNewPaymentResp struct {
 	Action                 *gjson.Json              `json:"action"`
 	Invoice                *entity.Invoice          `json:"invoice"`
 	PaymentCode            string
+	CryptoAmount           int64  `json:"cryptoAmount"           description:"crypto_amount, cent"` // crypto_amount, cent
+	CryptoCurrency         string `json:"cryptoCurrency"         description:"crypto_currency"`     // crypto_currency
 }
 
 type GatewayPaymentCaptureResp struct {
@@ -84,10 +116,11 @@ type GatewayPaymentRefundResp struct {
 }
 
 type GatewayCryptoFromCurrencyAmountDetailReq struct {
-	Amount      int64                   `json:"amount" `
-	Currency    string                  `json:"currency" `
-	CountryCode string                  `json:"countryCode" `
-	Gateway     *entity.MerchantGateway `json:"gateway" `
+	Amount         int64                   `json:"amount" `
+	Currency       string                  `json:"currency" `
+	CryptoCurrency string                  `json:"cryptoCurrency" `
+	CountryCode    string                  `json:"countryCode" `
+	Gateway        *entity.MerchantGateway `json:"gateway" `
 }
 
 type GatewayCryptoToCurrencyAmountDetailRes struct {
@@ -136,9 +169,12 @@ type GatewayCreateSubscriptionResp struct {
 	GatewayUserId         string                       `json:"gatewayUserId"`
 	GatewaySubscriptionId string                       `json:"gatewaySubscriptionId"`
 	Data                  string                       `json:"data"`
+	PaymentId             string                       `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId             string                       `json:"invoiceId" dc:"The unique id of invoice"`
 	Link                  string                       `json:"link"`
 	Status                consts.GatewayPlanStatusEnum `json:"status"`
 	Paid                  bool                         `json:"paid"`
+	Action                *gjson.Json                  `json:"action"`
 }
 
 type GatewayBalance struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	"unibee/internal/cmd/i18n"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/platform"
@@ -20,6 +21,11 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		utility.Assert(false, i18n.LocalizationFormat(ctx, "{#ClickTooFast}"))
 	}
 
+	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
+	utility.Assert(merchantMember != nil, "merchant member not found")
+	utility.Assert(merchantMember.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
+	utility.Assert(merchantMember.TotpValidatorType == 0, "Please login via 2FA")
+
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification :%s\n", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-Verify", verificationCode)
@@ -27,12 +33,9 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-Verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
-	utility.Assert(merchantMember != nil, "merchant member not found")
-	utility.Assert(merchantMember.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
 	_, emailGatewayKey := email.GetDefaultMerchantEmailConfig(ctx, merchantMember.MerchantId)
 	if len(emailGatewayKey) > 0 {
-		err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", "", email.TemplateMerchantOTPLogin, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", "", email.TemplateMerchantOTPLogin, "", &bean.EmailTemplateVariable{
 			UserName:         merchantMember.FirstName + " " + merchantMember.LastName,
 			CodeExpireMinute: "3",
 			Code:             verificationCode,

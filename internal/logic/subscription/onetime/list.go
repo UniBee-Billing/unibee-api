@@ -11,23 +11,24 @@ import (
 	"unibee/internal/query"
 )
 
-type SubscriptionOnetimeAddonListInternalReq struct {
+type SubscriptionOnetimeAddonPurchaseListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId"`
 	UserId     uint64 `json:"userId"  dc:"UserId" `
 	Page       int    `json:"page" dc:"Page, Start With 0" `
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeAddonListInternalReq) (list []*detail.SubscriptionOnetimeAddonDetail) {
+func SubscriptionOnetimeAddonPurchaseList(ctx context.Context, req *SubscriptionOnetimeAddonPurchaseListInternalReq) (list []*detail.SubscriptionOnetimeAddonDetail) {
 	var mainList []*entity.SubscriptionOnetimeAddon
 	if req.Count <= 0 {
-		req.Count = 20
+		req.Count = 100
 	}
 	if req.Page < 0 {
 		req.Page = 0
 	}
 	baseQuery := dao.SubscriptionOnetimeAddon.Ctx(ctx).
-		Where(dao.SubscriptionOnetimeAddon.Columns().UserId, req.UserId).WhereIn(dao.Subscription.Columns().Status, []int{1, 2})
+		Where(dao.SubscriptionOnetimeAddon.Columns().UserId, req.UserId).
+		WhereIn(dao.SubscriptionOnetimeAddon.Columns().Status, []int{1, 2})
 	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
@@ -36,9 +37,18 @@ func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeA
 	for _, one := range mainList {
 		var metadata = make(map[string]interface{})
 		if len(one.MetaData) > 0 {
-			err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+			err = gjson.Unmarshal([]byte(one.MetaData), &metadata)
 			if err != nil {
 				fmt.Printf("SimplifySubscriptionOnetimeAddon Unmarshal Metadata error:%s", err.Error())
+			}
+		}
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+		var invoiceId = ""
+		if len(one.InvoiceId) > 0 {
+			invoiceId = one.InvoiceId
+		} else {
+			if payment != nil {
+				invoiceId = payment.InvoiceId
 			}
 		}
 		list = append(list, &detail.SubscriptionOnetimeAddonDetail{
@@ -49,7 +59,8 @@ func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeA
 			Quantity:       one.Quantity,
 			Status:         one.Status,
 			CreateTime:     one.CreateTime,
-			Payment:        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, one.PaymentId)),
+			Payment:        bean.SimplifyPayment(payment),
+			Invoice:        bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, invoiceId)),
 			Metadata:       metadata,
 		})
 	}

@@ -164,7 +164,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	var response string
 	var status = false
 	var returnUrl = ""
-	var isSuccess = true
+	var isSuccess = false
 	var payment *entity.Payment
 	if len(payIdStr) > 0 {
 		response = ""

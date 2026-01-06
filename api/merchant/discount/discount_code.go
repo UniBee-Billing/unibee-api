@@ -18,8 +18,8 @@ type ListReq struct {
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int    `json:"page"  dc:"Page, Start 0" `
 	Count           int    `json:"count"  dc:"Count Of Per Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type ListRes struct {
@@ -38,25 +38,26 @@ type DetailRes struct {
 
 type NewReq struct {
 	g.Meta             `path:"/new" tags:"Discount" method:"post" summary:"New Discount Code" dc:"Create a new discount code, code can used in onetime or subscription purchase to make discount"`
-	Code               string                 `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
-	Name               *string                `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                                    // name
-	BillingType        int                    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"  v:"required"` // billing_type, 1-one-time, 2-recurring
-	DiscountType       int                    `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"  v:"required"`                  // discount_type, 1-percentage, 2-fixed_amount
-	DiscountAmount     int64                  `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                 // amount of discount, available when discount_type is fixed_amount
-	DiscountPercentage int64                  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                                          // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string                 `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                   // currency of discount, available when discount_type is fixed_amount
-	CycleLimit         int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"`                                                                                                                                                                                        // the count limitation of subscription cycle , 0-no limit
-	StartTime          *int64                 `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                                                                                                                                                                                                                     // start of discount available utc time
-	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
-	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
-	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
-	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
-	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
-	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
-	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
-	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
-	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
-	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	Code               string                  `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Name               *string                 `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                                    // name
+	BillingType        int                     `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"  v:"required"` // billing_type, 1-one-time, 2-recurring
+	DiscountType       int                     `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"  v:"required"`                  // discount_type, 1-percentage, 2-fixed_amount
+	DiscountAmount     int64                   `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                 // amount of discount, available when discount_type is fixed_amount
+	DiscountPercentage int64                   `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                                          // percentage of discount, 100=1%, available when discount_type is percentage
+	Currency           string                  `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                   // currency of discount, available when discount_type is fixed_amount
+	CycleLimit         int                     `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"`                                                                                                                                                                                        // the count limitation of subscription cycle , 0-no limit
+	StartTime          *int64                  `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                                                                                                                                                                                                                     // start of discount available utc time
+	EndTime            *int64                  `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	PlanApplyType      *int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified, 3-Apply to Plans by Groups(Billing Period Included), 4-Apply to Plans except by Groups(Billing Period Included)"`
+	PlanApplyGroup     *bean.GroupPlanSelector `json:"planApplyGroup"       dc:"plan apply group, each item match once if specified, matched all if item not specified"`
+	PlanIds            []int64                 `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Quantity           *uint64                 `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
+	Advance            *bool                   `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserScope          *int                    `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
+	UpgradeOnly        *bool                   `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
+	UpgradeLongerOnly  *bool                   `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
+	UserLimit          *int                    `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
+	Metadata           map[string]interface{}  `json:"metadata" dc:"Metadata，Map"`
 }
 
 type NewRes struct {
@@ -65,25 +66,26 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Discount" method:"post" summary:"Edit Discount Code" dc:"Edit the discount code before activate"`
-	Id                 uint64                 `json:"id"                 dc:"The discount's Id" v:"required"`
-	Name               *string                `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                      // name
-	BillingType        int                    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"` // billing_type, 1-one-time, 2-recurring
-	DiscountType       int                    `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"`                  // discount_type, 1-percentage, 2-fixed_amount
-	DiscountAmount     int64                  `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                   // amount of discount, available when discount_type is fixed_amount
-	DiscountPercentage int64                  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                            // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string                 `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                     // currency of discount, available when discount_type is fixed_amount
-	CycleLimit         int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"`
-	StartTime          *int64                 `json:"startTime"         dc:"The start time of discount code can effect, editable after activate, utc time"`
-	EndTime            *int64                 `json:"endTime"           dc:"The end time of discount code can effect, editable after activate, utc time"`
-	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"`
-	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
-	Quantity           *uint64                `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
-	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
-	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
-	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
-	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
-	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
-	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	Id                 uint64                  `json:"id"                 dc:"The discount's Id" v:"required"`
+	Name               *string                 `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                      // name
+	BillingType        int                     `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"` // billing_type, 1-one-time, 2-recurring
+	DiscountType       int                     `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"`                  // discount_type, 1-percentage, 2-fixed_amount
+	DiscountAmount     int64                   `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                   // amount of discount, available when discount_type is fixed_amount
+	DiscountPercentage int64                   `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                            // percentage of discount, 100=1%, available when discount_type is percentage
+	Currency           string                  `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                     // currency of discount, available when discount_type is fixed_amount
+	CycleLimit         int                     `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"`
+	StartTime          *int64                  `json:"startTime"         dc:"The start time of discount code can effect, editable after activate, utc time"`
+	EndTime            *int64                  `json:"endTime"           dc:"The end time of discount code can effect, editable after activate, utc time"`
+	PlanApplyType      *int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified, 3-Apply to Plans by Groups(Billing Period Included), 4-Apply to Plans except by Groups(Billing Period Included)"`
+	PlanApplyGroup     *bean.GroupPlanSelector `json:"planApplyGroup"       dc:"plan apply group, each item match once if specified, matched all if item not specified"`
+	PlanIds            []int64                 `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Quantity           *uint64                 `json:"quantity"           description:"Quantity of code, default 0, set 0 to disable quantity management"`
+	Advance            *bool                   `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserScope          *int                    `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
+	UpgradeOnly        *bool                   `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except same interval upgrade action if set true" `
+	UpgradeLongerOnly  *bool                   `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
+	UserLimit          *int                    `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
+	Metadata           map[string]interface{}  `json:"metadata" dc:"Metadata，Map"`
 }
 
 type EditRes struct {
@@ -124,8 +126,8 @@ type UserDiscountListReq struct {
 	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int      `json:"page"  dc:"Page, Start 0" `
 	Count           int      `json:"count"  dc:"Count Of Per Page" `
-	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64    `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64    `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type UserDiscountListRes struct {
@@ -137,6 +139,7 @@ type PlanApplyPreviewReq struct {
 	g.Meta         `path:"/plan_apply_preview" tags:"User Discount" method:"post" summary:"Plan Apply Preview" dc:"Check discount can apply to plan, Only check rules about plan，the actual usage is subject to the subscription interface"`
 	Code           string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
 	PlanId         int64  `json:"planId" dc:"The id of plan which code to apply, either planId or externalPlanId is needed"`
+	Currency       string `json:"currency"          dc:"The currency of plan which code to apply"`
 	ExternalPlanId string `json:"externalPlanId" dc:"The externalId of plan which code to apply, either planId or externalPlanId is needed"`
 	//SubscriptionId     string `json:"subscriptionId"            description:"SubscriptionId"`
 	IsUpgrade                  *bool  `json:"isUpgrade"            description:"IsUpgrade"`

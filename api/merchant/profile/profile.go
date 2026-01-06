@@ -12,9 +12,11 @@ type GetLicenseReq struct {
 }
 
 type GetLicenseRes struct {
-	Merchant     *bean.Merchant   `json:"merchant" dc:"Merchant"`
-	License      *license.License `json:"license" description:"The merchant license" `
-	APIRateLimit int              `json:"APIRateLimit" dc:"APIRateLimit"`
+	Merchant           *bean.Merchant   `json:"merchant" dc:"Merchant"`
+	License            *license.License `json:"license" description:"The merchant license" `
+	APIRateLimit       int              `json:"APIRateLimit" dc:"APIRateLimit"`
+	MemberLimit        int              `json:"memberLimit" dc:"MemberLimit, -1=Unlimited"`
+	CurrentMemberCount int              `json:"currentMemberCount" dc:"CurrentMemberCount"`
 }
 
 type GetLicenseUpdateUrlReq struct {
@@ -33,24 +35,31 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant             *bean.Merchant               `json:"merchant" dc:"Merchant"`
-	MerchantMember       *detail.MerchantMemberDetail `json:"merchantMember" dc:"MerchantMember"`
-	Env                  string                       `json:"env" description:"System Env, em: daily|stage|local|prod" `
-	IsProd               bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
-	TimeZone             []string                     `json:"TimeZone" description:"TimeZone List" `
-	Currency             []*bean.Currency             `json:"Currency" description:"Currency List" `
-	Gateways             []*detail.Gateway            `json:"gateways" description:"Gateway List" `
-	ExchangeRateApiKey   string                       `json:"exchangeRateApiKey" description:"ExchangeRateApiKey" `
-	OpenAPIHost          string                       `json:"openApiHost" description:"OpenApi Host"`
-	OpenAPIKey           string                       `json:"openApiKey" description:"OpenAPIKey" `
-	SendGridKey          string                       `json:"sendGridKey" description:"SendGridKey" `
-	VatSenseKey          string                       `json:"vatSenseKey" description:"VatSenseKey" `
-	EmailSender          *bean.Sender                 `json:"emailSender" description:"EmailSender" `
-	SegmentServerSideKey string                       `json:"segmentServerSideKey" description:"SegmentServerSideKey" `
-	SegmentUserPortalKey string                       `json:"segmentUserPortalKey" description:"SegmentUserPortalKey" `
-	IsOwner              bool                         `json:"isOwner" description:"Check Member is Owner" `
-	MemberRoles          []*bean.MerchantRole         `json:"MemberRoles" description:"The member role list'" `
-	AnalyticsHost        string                       `json:"analyticsHost" description:"Analytics Host"`
+	Merchant                     *bean.Merchant                      `json:"merchant" dc:"Merchant"`
+	MerchantMember               *detail.MerchantMemberDetail        `json:"merchantMember" dc:"MerchantMember"`
+	Env                          string                              `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	IsProd                       bool                                `json:"isProd" description:"Check System Env Is Prod, true|false" `
+	TimeZone                     []string                            `json:"TimeZone" description:"TimeZone List" `
+	DefaultCurrency              string                              `json:"defaultCurrency" description:"Default Currency" `
+	Currency                     []*bean.Currency                    `json:"Currency" description:"Currency List" `
+	Gateways                     []*detail.Gateway                   `json:"gateways" description:"Gateway List" `
+	ExchangeRateApiKey           string                              `json:"exchangeRateApiKey" description:"ExchangeRateApiKey" `
+	OpenAPIHost                  string                              `json:"openApiHost" description:"OpenApi Host"`
+	OpenAPIKey                   string                              `json:"openApiKey" description:"OpenAPIKey" `
+	SendGridKey                  string                              `json:"sendGridKey" description:"SendGridKey" `
+	VatSenseKey                  string                              `json:"vatSenseKey" description:"VatSenseKey" `
+	EmailSender                  *bean.Sender                        `json:"emailSender" description:"EmailSender" `
+	SegmentServerSideKey         string                              `json:"segmentServerSideKey" description:"SegmentServerSideKey" `
+	SegmentUserPortalKey         string                              `json:"segmentUserPortalKey" description:"SegmentUserPortalKey" `
+	GlobalTOPTEnabled            bool                                `json:"globalTOPTEnabled" description:"GlobalTOPTEnabled" `
+	QuickBooksCompanyName        string                              `json:"quickBooksCompanyName" description:"QuickBooksCompanyName" `
+	QuickBooksLastSynchronized   string                              `json:"quickBooksLastSynchronized" description:"QuickBooksLastSynchronized" `
+	QuickBooksLastSyncError      string                              `json:"quickBooksLastSyncError" description:"QuickBooksLastSyncError" `
+	IsOwner                      bool                                `json:"isOwner" description:"Check Member is Owner" `
+	MemberRoles                  []*bean.MerchantRole                `json:"MemberRoles" description:"The member role list'" `
+	CloudFeatureAnalyticsEnabled bool                                `json:"cloudFeatureAnalyticsEnabled" description:"Analytics Feature Enabled For Cloud Version"`
+	AnalyticsHost                string                              `json:"analyticsHost" description:"Analytics Host"`
+	MultiCurrencies              []*bean.MerchantMultiCurrencyConfig `json:"multiCurrencyConfigs"  dc:"Merchant's MultiCurrency Configs" `
 }
 
 type UpdateReq struct {
@@ -64,8 +73,8 @@ type UpdateReq struct {
 	Host                string `json:"host" description:"User Portal Host"`
 	CountryCode         string `json:"countryCode" dc:"Country Code"`
 	CountryName         string `json:"countryName" dc:"Country Name"`
-	CompanyVatNumber    string `json:"CompanyVatNumber" dc:"Country Vat Number"`
-	CompanyRegistryCode string `json:"CompanyRegistryCode" dc:"Country Registry Code"`
+	CompanyVatNumber    string `json:"companyVatNumber" dc:"Country Vat Number"`
+	CompanyRegistryCode string `json:"companyRegistryCode" dc:"Country Registry Code"`
 }
 
 type UpdateRes struct {
@@ -88,9 +97,34 @@ type EditCountryConfigReq struct {
 type EditCountryConfigRes struct {
 }
 
+type EditTotpConfigReq struct {
+	g.Meta   `path:"/edit_totp_config" tags:"Merchant" method:"post" summary:"Admin Edit 2FA Config"`
+	Activate bool `json:"activate"   description:"activate 2FA for all members, all members need 2FA while login if activate, otherwise not"`
+}
+
+type EditTotpConfigRes struct {
+}
+
 type NewApiKeyReq struct {
 	g.Meta `path:"/new_apikey" tags:"Merchant" method:"post" summary:"Generate New APIKey" dc:"Generate new apikey, The old one expired in one hour"`
 }
 type NewApiKeyRes struct {
 	ApiKey string `json:"apiKey" description:"ApiKey"`
+}
+
+type SetupMultiCurrenciesReq struct {
+	g.Meta          `path:"/setup_multi_currencies" tags:"Merchant" method:"post" summary:"Multi Currencies Setup"`
+	MultiCurrencies []*bean.MerchantMultiCurrencyConfig `json:"multiCurrencyConfigs"  dc:"Merchant's MultiCurrencies" `
+}
+type SetupMultiCurrenciesRes struct {
+	MultiCurrencies []*bean.MerchantMultiCurrencyConfig `json:"multiCurrencyConfigs"  dc:"Merchant's MultiCurrencies" `
+}
+
+type AmountMultiCurrenciesExchangeReq struct {
+	g.Meta   `path:"/amount_multi_currencies_exchange" tags:"Merchant" method:"post" summary:"Amount Multi Currencies Exchange"`
+	Amount   int64  `json:"amount"   dc:"Amount"   v:"required" `
+	Currency string `json:"currency"   dc:"The Default Currency" v:"required" `
+}
+type AmountMultiCurrenciesExchangeRes struct {
+	MultiCurrencies []*bean.PlanMultiCurrency `json:"multiCurrencyConfigs"  dc:"Merchant's MultiCurrencies" `
 }

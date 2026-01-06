@@ -211,3 +211,18 @@ func TestStripeDisuteGet(t *testing.T) {
 	//result, _ := dispute.Get("du_1R0NQ5DaLWZKMs9NNyZGafGl", params)
 	//fmt.Println(utility.MarshalToJsonString(result))
 }
+
+func TestGetRefundDetail(t *testing.T) {
+	stripe.Key = ""
+	stripe.SetAppInfo(&stripe.AppInfo{
+		Name:    "UniBee.api",
+		Version: "1.0.0",
+		URL:     "https://merchant.unibee.dev",
+	})
+	params := &stripe.RefundParams{}
+	response, err := refund.Get("re_3R4oZiDaLWZKMs9N11YvR66y", params)
+	if err != nil {
+		fmt.Println(utility.MarshalToJsonString(err))
+	}
+	fmt.Println(utility.MarshalToJsonString(response))
+}

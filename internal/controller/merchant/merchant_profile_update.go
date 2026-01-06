@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	"unibee/api/bean"
+	redismq2 "unibee/internal/cmd/redismq"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface/context"
 	merchant2 "unibee/internal/logic/merchant"
@@ -35,6 +37,8 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		dao.Merchant.Columns().Address:     req.Address,
 		dao.Merchant.Columns().CompanyName: req.CompanyName,
 		dao.Merchant.Columns().CompanyLogo: companyLogo,
+		dao.Merchant.Columns().CountryCode: req.CountryCode,
+		dao.Merchant.Columns().CountryName: req.CountryName,
 		dao.Merchant.Columns().BusinessNum: req.CompanyVatNumber,
 		dao.Merchant.Columns().Idcard:      req.CompanyRegistryCode,
 		dao.Merchant.Columns().Phone:       req.Phone,
@@ -56,6 +60,13 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		DiscountCode:   "",
 	}, err)
 	merchant2.ReloadAllMerchantsCacheForSDKAuthBackground()
+
+	_, _ = redismq.Send(&redismq.Message{
+		Topic:      redismq2.TopicMerchantUpdatedWebhook.Topic,
+		Tag:        redismq2.TopicMerchantUpdatedWebhook.Tag,
+		Body:       fmt.Sprintf("%d", merchant.Id),
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+	})
 
 	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.Context().Get(ctx).MerchantMember.MerchantId))}, nil
 }

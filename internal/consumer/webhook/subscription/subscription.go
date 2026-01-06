@@ -37,6 +37,16 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft
 		} else {
 			subDetailRes.DayLeft = dayLeft
 		}
+		if metadata != nil {
+			if note, ok := metadata["Note"]; ok {
+				if noteStr, ok := note.(string); ok {
+					if len(noteStr) > 0 {
+						subDetailRes.Note = noteStr
+						subDetailRes.Source = noteStr
+					}
+				}
+			}
+		}
 		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes), "", "", metadata)
 	}()
 }

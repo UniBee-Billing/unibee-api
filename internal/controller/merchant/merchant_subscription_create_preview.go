@@ -51,6 +51,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 			Address:            req.User.Address,
 			UserName:           req.User.UserName,
 			CountryCode:        req.User.CountryCode,
+			State:              req.User.State,
 			Type:               req.User.Type,
 			CompanyName:        req.User.CompanyName,
 			VATNumber:          req.User.VatNumber,
@@ -75,6 +76,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
 		MerchantId:             _interface.GetMerchantId(ctx),
 		PlanId:                 req.PlanId,
+		Currency:               req.Currency,
 		UserId:                 req.UserId,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
@@ -85,6 +87,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		TaxPercentage:          req.TaxPercentage,
 		DiscountCode:           req.DiscountCode,
 		TrialEnd:               req.TrialEnd,
+		FreeInInitialPeriod:    req.FreeInInitialPeriod,
 		ApplyPromoCredit:       req.ApplyPromoCredit,
 		ApplyPromoCreditAmount: req.ApplyPromoCreditAmount,
 	})

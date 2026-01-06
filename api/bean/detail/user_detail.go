@@ -55,8 +55,8 @@ type UserAccountDetail struct {
 	CreateTime          int64                  `json:"createTime"         description:"create utc time"`              // create utc time
 	ExternalUserId      string                 `json:"externalUserId"     description:"external_user_id"`             // external_user_id
 	Status              int                    `json:"status"             description:"0-Active, 2-Suspend"`
-	TaxPercentage       int64                  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`               // taxPercentage，1000 = 10%
-	Type                int64                  `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
+	TaxPercentage       int64                  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`           // taxPercentage，1000 = 10%
+	Type                int64                  `json:"type"               description:"User type, 1-Individual|2-Business"` // User type, 1-Individual|2-Business
 	Gateway             *Gateway               `json:"gateway"            description:"Gateway"`
 	City                string                 `json:"city" dc:"city"`
 	ZipCode             string                 `json:"zipCode" dc:"zip_code"`

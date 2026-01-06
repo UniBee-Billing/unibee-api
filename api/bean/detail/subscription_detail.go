@@ -23,6 +23,8 @@ type SubscriptionDetail struct {
 	LatestInvoice                       *bean.Invoice                    `json:"latestInvoice" dc:"LatestInvoice"`
 	Discount                            *bean.MerchantDiscountCode       `json:"discount" dc:"Discount"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	Note                                string                           `json:"note" dc:"note"`
+	Source                              string                           `json:"source" dc:"Source"`
 }
 
 type SubscriptionPendingUpdateEvent struct {
@@ -178,6 +180,7 @@ type SubscriptionOnetimeAddonDetail struct {
 	Status         int                    `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
 	CreateTime     int64                  `json:"createTime"     description:"create utc time"`                               // create utc time
 	Payment        *bean.Payment          `json:"payment"        description:"Payment"`
+	Invoice        *bean.Invoice          `json:"invoice"        description:"Invoice"`
 	Metadata       map[string]interface{} `json:"metadata"       description:"Metadata"`
 	User           *bean.UserAccount      `json:"user"           description:"User"`
 }

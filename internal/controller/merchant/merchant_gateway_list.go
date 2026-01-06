@@ -16,7 +16,13 @@ func (c *ControllerGateway) List(ctx context.Context, req *gateway.ListReq) (res
 	}
 	data := query.GetMerchantGatewayList(ctx, _interface.GetMerchantId(ctx), req.Archive)
 
+	gateways := gateway2.ConvertGatewayList(ctx, data)
+	if _interface.Context().Get(ctx).IsOpenApiCall {
+		for i, _ := range gateways {
+			gateways[i].Bank = nil
+		}
+	}
 	return &gateway.ListRes{
-		Gateways: gateway2.ConvertGatewayList(ctx, data),
+		Gateways: gateways,
 	}, nil
 }

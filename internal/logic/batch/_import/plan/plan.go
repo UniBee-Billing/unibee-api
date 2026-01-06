@@ -78,7 +78,7 @@ func (t TaskPlanImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		return target, gerror.Newf("Invalid Amount,error:%s", err.Error())
 	}
 	amount := int64(amountFloat * 100)
-	if amount <= 0 {
+	if amount < 0 {
 		return target, gerror.New("Invalid Amount, should greater than 0")
 	}
 
@@ -132,7 +132,10 @@ func (t TaskPlanImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 	}
 	var metadata map[string]interface{}
 	if len(target.Metadata) > 0 {
-		_ = utility.UnmarshalFromJsonString(target.Metadata, &metadata)
+		err = utility.UnmarshalFromJsonString(target.Metadata, &metadata)
+		if err != nil {
+			return target, gerror.New("Error, Metadata not Json Format")
+		}
 	}
 	one := query.GetPlanByExternalPlanId(ctx, task.MerchantId, target.ExternalPlanId)
 	if one != nil {

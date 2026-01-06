@@ -28,6 +28,7 @@ type MerchantWebhookMessageColumns struct {
 	GmtCreate       string // create time
 	GmtModify       string // update time
 	CreateTime      string // create utc time
+	SubscriptionId  string // subscription id
 }
 
 // merchantWebhookMessageColumns holds the columns for table merchant_webhook_message.
@@ -40,6 +41,7 @@ var merchantWebhookMessageColumns = MerchantWebhookMessageColumns{
 	GmtCreate:       "gmt_create",
 	GmtModify:       "gmt_modify",
 	CreateTime:      "create_time",
+	SubscriptionId:  "subscription_id",
 }
 
 // NewMerchantWebhookMessageDao creates and returns a new DAO object for table data access.

@@ -4,12 +4,6 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/xuri/excelize/v2"
 	"os"
 	"reflect"
 	"strconv"
@@ -27,18 +21,26 @@ import (
 	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/xuri/excelize/v2"
 )
 
 var exportTaskMap = map[string]_interface.BatchExportTask{
-	"InvoiceExport":           &invoice.TaskInvoiceExport{},
+	"InvoiceExport":           &invoice.TaskInvoiceV2Export{},
 	"UserExport":              &user.TaskUserExport{},
-	"SubscriptionExport":      &subscription.TaskSubscriptionExport{},
-	"TransactionExport":       &transaction.TaskTransactionExport{},
+	"SubscriptionExport":      &subscription.TaskSubscriptionV2Export{},
+	"TransactionExport":       &transaction.TaskTransactionV2Export{},
 	"DiscountExport":          &discount.TaskDiscountExport{},
 	"PlanExport":              &plan2.TaskPlanExport{},
-	"UserDiscountExport":      &discount.TaskUserDiscountExport{},
-	"MultiUserDiscountExport": &discount.TaskMultiUserDiscountExport{},
-	"CreditTransactionExport": &credit.TaskCreditTransactionExport{},
+	"UserDiscountExport":      &discount.TaskUserDiscountV2Export{},
+	"MultiUserDiscountExport": &discount.TaskMultiUserDiscountV2Export{},
+	"CreditTransactionExport": &credit.TaskCreditTransactionV2Export{},
+	"CreditNoteExport":        &invoice.TaskCreditNoteV2Export{},
 }
 
 func GetExportTaskImpl(task string) _interface.BatchExportTask {
@@ -274,7 +276,9 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			err = file.AddComment(GeneralExportImportSheetName, comment)
 		}
 
-		fileName := fmt.Sprintf("Batch_export_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
+		// Generate timestamp for filename
+		timestamp := gtime.Now().Format("2006-01-02_15-04")
+		fileName := fmt.Sprintf("Batch_export_%v_%s.xlsx", task.Id, timestamp)
 		err = file.SaveAs(fileName)
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
@@ -282,7 +286,7 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 		if format == "csv" {
-			fileName, err = convertXlsxFileToCSV(fileName, GeneralExportImportSheetName, fmt.Sprintf("Batch_export_task_%v_%v_%v.csv", task.MerchantId, task.MemberId, task.Id))
+			fileName, err = convertXlsxFileToCSV(fileName, GeneralExportImportSheetName, fmt.Sprintf("Batch_export_%v_%s.csv", task.Id, timestamp))
 		}
 		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_export", fileName, strconv.FormatUint(task.MemberId, 10))
 		if err != nil {

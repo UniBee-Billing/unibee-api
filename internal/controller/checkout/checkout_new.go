@@ -31,3 +31,27 @@ type ControllerVat struct{}
 func NewVat() checkout.ICheckoutVat {
 	return &ControllerVat{}
 }
+
+type ControllerCheckout struct{}
+
+func NewCheckout() checkout.ICheckoutCheckout {
+	return &ControllerCheckout{}
+}
+
+type ControllerPlan struct{}
+
+func NewPlan() checkout.ICheckoutPlan {
+	return &ControllerPlan{}
+}
+
+type ControllerPayment struct{}
+
+func NewPayment() checkout.ICheckoutPayment {
+	return &ControllerPayment{}
+}
+
+type ControllerTranslater struct{}
+
+func NewTranslater() checkout.ICheckoutTranslater {
+	return &ControllerTranslater{}
+}

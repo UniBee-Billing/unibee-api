@@ -30,6 +30,7 @@ type MerchantEmailHistoryColumns struct {
 	GmtModify  string // update time
 	Response   string //
 	CreateTime string // create utc time
+	Status     string // 0-pending,1-success,2-failure
 }
 
 // merchantEmailHistoryColumns holds the columns for table merchant_email_history.
@@ -44,6 +45,7 @@ var merchantEmailHistoryColumns = MerchantEmailHistoryColumns{
 	GmtModify:  "gmt_modify",
 	Response:   "response",
 	CreateTime: "create_time",
+	Status:     "status",
 }
 
 // NewMerchantEmailHistoryDao creates and returns a new DAO object for table data access.

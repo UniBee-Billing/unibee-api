@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	event2 "unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/message"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	detail2 "unibee/internal/logic/subscription/service/detail"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
@@ -74,8 +76,32 @@ func syncSubscription(ctx context.Context, req *subscription.InternalWebhookSync
 		}
 
 		{
+			preload.SubscriptionListPreloadForContext(ctx, list)
 			for _, one := range list {
-				event := event2.UNIBEE_WEBHOOK_EVENT_USER_CREATED
+				{
+					var historyList = make([]*entity.MerchantWebhookMessage, 0)
+					_ = dao.MerchantWebhookMessage.Ctx(ctx).
+						Where(dao.MerchantWebhookMessage.Columns().MerchantId, one.MerchantId).
+						Where(dao.MerchantWebhookMessage.Columns().SubscriptionId, one.SubscriptionId).
+						Where(dao.MerchantWebhookMessage.Columns().WebsocketStatus, 50).
+						WhereNotNull(dao.MerchantWebhookMessage.Columns().Data).
+						Scan(&historyList)
+					for _, history := range historyList {
+						_, _ = redismq.Send(&redismq.Message{
+							Topic: redismq2.TopicInternalWebhook.Topic,
+							Tag:   redismq2.TopicInternalWebhook.Tag,
+							Body: utility.MarshalToJsonString(&message.WebhookMessage{
+								Id:         history.Id,
+								Event:      event2.WebhookEvent(history.WebhookEvent),
+								EventId:    utility.CreateHistoryEventId(),
+								MerchantId: history.MerchantId,
+								Data:       gjson.New(history.Data),
+							}),
+						})
+					}
+				}
+
+				event := event2.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED
 				if one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete {
 					event = event2.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ACTIVATED
 				} else if one.Status == consts.SubStatusCancelled {

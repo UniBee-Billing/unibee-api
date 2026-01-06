@@ -3,11 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/google/uuid"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"math"
 	"strconv"
 	"strings"
@@ -27,9 +22,18 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/google/uuid"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 func TryCancelSubscriptionLatestAutoChargeInvoice(ctx context.Context, subscription *entity.Subscription) {
+	if subscription == nil {
+		return
+	}
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
 	if one != nil && one.Status == consts.InvoiceStatusProcessing && one.CreateFrom == consts.InvoiceAutoChargeFlag {
 		err := CancelProcessingInvoice(ctx, one.InvoiceId, "TryCancelSubscriptionLatestAutoChargeInvoice")
@@ -61,6 +65,7 @@ func checkInvoice(one *detail.InvoiceDetail) {
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
 	}
+	totalTax = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(one.TaxPercentage)))
 	var totalAmount = totalTax + totalAmountExcludingTax
 	utility.Assert(one.TaxAmount == totalTax, "invoice taxAmount mistake")
 	utility.Assert(one.TotalAmountExcludingTax == totalAmountExcludingTax, "invoice totalAmountExcludingTax mistake")
@@ -80,6 +85,8 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
+	metadata := map[string]interface{}{}
+	detail.CopyGatewayCompanyIssuer(gateway, metadata)
 
 	var invoiceItems []*bean.InvoiceItemSimplify
 	var totalAmountExcludingTax int64 = 0
@@ -130,6 +137,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		CreateTime:                     gtime.Now().Timestamp(),
 		CountryCode:                    user.CountryCode,
 		CreateFrom:                     "Admin",
+		MetaData:                       utility.MarshalToJsonString(metadata),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -604,7 +612,7 @@ func MarkWireTransferInvoiceAsPaid(ctx context.Context, invoiceId string, transf
 	utility.Assert(gateway != nil, "invoice gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
 	utility.Assert(one.TotalAmount >= gateway.MinimumAmount, "Total Amount not reach the gateway's minimum amount")
-	utility.Assert(strings.ToUpper(one.Currency) == strings.ToUpper(gateway.Currency), "Invoice currency not reach the gateway's currency")
+	utility.Assert(strings.ToUpper(one.Currency) == strings.ToUpper(gateway.Currency), "Invoice currency not match the gateway's currency")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
 		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{

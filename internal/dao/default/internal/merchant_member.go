@@ -20,38 +20,46 @@ type MerchantMemberDao struct {
 
 // MerchantMemberColumns defines and stores column names for table merchant_member.
 type MerchantMemberColumns struct {
-	Id         string // userId
-	GmtCreate  string // create time
-	GmtModify  string // update time
-	MerchantId string // merchant id
-	IsDeleted  string // 0-UnDeleted，1-Deleted
-	Password   string // password
-	UserName   string // user name
-	Mobile     string // mobile
-	Email      string // email
-	FirstName  string // first name
-	LastName   string // last name
-	CreateTime string // create utc time
-	Role       string // role
-	Status     string // 0-Active, 2-Suspend
+	Id                  string // userId
+	GmtCreate           string // create time
+	GmtModify           string // update time
+	MerchantId          string // merchant id
+	IsDeleted           string // 0-UnDeleted，1-Deleted
+	Password            string // password
+	UserName            string // user name
+	Mobile              string // mobile
+	Email               string // email
+	FirstName           string // first name
+	LastName            string // last name
+	CreateTime          string // create utc time
+	Role                string // role
+	Status              string // 0-Active, 2-Suspend
+	TotpValidatorType   string // 0-Inactive, 1-Google Validator
+	TotpValidatorSecret string // totp validator secret
+	AuthJs              string // auth js data
+	MetaData            string // meta_data(json)
 }
 
 // merchantMemberColumns holds the columns for table merchant_member.
 var merchantMemberColumns = MerchantMemberColumns{
-	Id:         "id",
-	GmtCreate:  "gmt_create",
-	GmtModify:  "gmt_modify",
-	MerchantId: "merchant_id",
-	IsDeleted:  "is_deleted",
-	Password:   "password",
-	UserName:   "user_name",
-	Mobile:     "mobile",
-	Email:      "email",
-	FirstName:  "first_name",
-	LastName:   "last_name",
-	CreateTime: "create_time",
-	Role:       "role",
-	Status:     "status",
+	Id:                  "id",
+	GmtCreate:           "gmt_create",
+	GmtModify:           "gmt_modify",
+	MerchantId:          "merchant_id",
+	IsDeleted:           "is_deleted",
+	Password:            "password",
+	UserName:            "user_name",
+	Mobile:              "mobile",
+	Email:               "email",
+	FirstName:           "first_name",
+	LastName:            "last_name",
+	CreateTime:          "create_time",
+	Role:                "role",
+	Status:              "status",
+	TotpValidatorType:   "totp_validator_type",
+	TotpValidatorSecret: "totp_validator_secret",
+	AuthJs:              "auth_js",
+	MetaData:            "meta_data",
 }
 
 // NewMerchantMemberDao creates and returns a new DAO object for table data access.

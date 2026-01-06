@@ -1,8 +1,9 @@
 package gateway
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean/detail"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type EditSortReq struct {
@@ -23,8 +24,8 @@ type SetupListRes struct {
 
 type DetailReq struct {
 	g.Meta      `path:"/detail" tags:"Gateway" method:"get,post" summary:"Payment Gateway" dc:"Get Payment Gateway Detail"`
-	GatewayId   *uint64 `json:"gatewayId"  dc:"The id of payment gateway, either gatewayId or gatewayName"`
-	GatewayName *string `json:"gatewayName"  dc:"The name of payment gateway, , either gatewayId or gatewayName, stripe|paypal|changelly|unitpay|payssion|cryptadium"`
+	GatewayId   *uint64 `json:"gatewayId"  dc:"The id of payment gateway, either gatewayId or gatewayName should provided"`
+	GatewayName *string `json:"gatewayName"  dc:"The specified name of payment gateway, either gatewayId or gatewayName should provided, stripe|paypal|changelly|unitpay|payssion|cryptadium, return default gateway if provided"`
 }
 type DetailRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
@@ -49,6 +50,8 @@ type SetupReq struct {
 	SubGateway          string                            `json:"subGateway"  dc:"The sub gateway of payment gateway" `
 	CurrencyExchange    []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 	GatewayPaymentTypes []string                          `json:"gatewayPaymentTypes"  dc:"Selected gateway payment types"`
+	CompanyIssuer       *detail.GatewayCompanyIssuer      `json:"companyIssuer" dc:"The company issuer of payment gateway"`
+	Metadata            map[string]interface{}            `json:"metadata" dc:"Metadata，Map"`
 }
 type SetupRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
@@ -65,6 +68,8 @@ type EditReq struct {
 	SubGateway          *string                           `json:"subGateway"  dc:"The sub gateway of payment gateway" `
 	CurrencyExchange    []*detail.GatewayCurrencyExchange `json:"currencyExchange" dc:"The currency exchange for gateway payment, effect at start of payment creation when currency matched"`
 	GatewayPaymentTypes []string                          `json:"gatewayPaymentTypes"  dc:"Selected gateway payment types"`
+	CompanyIssuer       *detail.GatewayCompanyIssuer      `json:"companyIssuer" dc:"The company issuer of payment gateway"`
+	Metadata            *map[string]interface{}           `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
@@ -75,6 +80,22 @@ type ArchiveReq struct {
 	GatewayId uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
 }
 type ArchiveRes struct {
+	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
+}
+
+type RestoreReq struct {
+	g.Meta    `path:"/restore" tags:"Gateway" method:"post" summary:"Payment Gateway Restore" dc:"Restore the exist payment gateway"`
+	GatewayId uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+}
+type RestoreRes struct {
+	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
+}
+
+type SetDefaultReq struct {
+	g.Meta    `path:"/set_default" tags:"Gateway" method:"post" summary:"Payment Gateway Set Default" dc:"Set default the exist payment gateway"`
+	GatewayId uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+}
+type SetDefaultRes struct {
 	Gateway *detail.Gateway `json:"gateway" dc:"Payment Gateway Object"`
 }
 

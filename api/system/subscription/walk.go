@@ -24,3 +24,17 @@ type InternalWebhookSyncRes struct {
 	FirstId string `json:"firstId" dc:"The first subscriptionId of sync data, only output when isSynchronous=true" `
 	LastId  string `json:"lastId" dc:"The last subscriptionId of sync data, only output when isSynchronous=true" `
 }
+
+type BatchSendSubActivateWebhookEventReq struct {
+	g.Meta `path:"/batch_sent_sub_activate_webhook_event" tags:"System-Admin" method:"post" summary:"Batch Send Sub Activate Webhook Event"`
+	SubIds []string `json:"subIds" dc:"SubIds" v:"required"`
+}
+type BatchSendSubActivateWebhookEventRes struct {
+}
+
+type BatchSendSubUpdateWebhookEventReq struct {
+	g.Meta `path:"/batch_sent_sub_update_webhook_event" tags:"System-Admin" method:"post" summary:"Batch Send Sub Update Webhook Event"`
+	SubIds []string `json:"subIds" dc:"SubIds" v:"required"`
+}
+type BatchSendSubUpdateWebhookEventRes struct {
+}

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"regexp"
 )
 
 func DetectLocalIP() string {
@@ -64,4 +65,25 @@ func GetPublicIP() string {
 	}
 	publicIP = string(body)
 	return publicIP
+}
+
+func ExtractFirstIPAddresses(text string) string {
+	var ips []string
+
+	// Remove \b
+	ipv4Regex := regexp.MustCompile(`(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)`)
+
+	matchesV4 := ipv4Regex.FindAllString(text, -1)
+	fmt.Println("V4 matches:", matchesV4)
+
+	for _, match := range matchesV4 {
+		if net.ParseIP(match) != nil {
+			ips = append(ips, match)
+		}
+	}
+
+	if len(ips) > 0 {
+		return ips[0]
+	}
+	return ""
 }

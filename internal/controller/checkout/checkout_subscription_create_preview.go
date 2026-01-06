@@ -19,6 +19,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	controllerSubscription := merchant.ControllerSubscription{}
 	preview, err := controllerSubscription.CreatePreview(ctx, &subscription2.CreatePreviewReq{
 		PlanId:                 req.PlanId,
+		Currency:               req.Currency,
 		Email:                  req.Email,
 		UserId:                 req.UserId,
 		ExternalUserId:         req.ExternalUserId,

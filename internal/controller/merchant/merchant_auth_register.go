@@ -38,6 +38,8 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		UserName:    req.UserName,
 		CountryName: req.CountryName,
 		CountryCode: req.CountryCode,
+		CompanyName: req.CompanyName,
+		Metadata:    req.Metadata,
 	}
 	userStr, err := json.Marshal(
 		internalReq,
@@ -45,13 +47,13 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Set(ctx, CacheKeyMerchantRegisterPrefix+req.Email, userStr)
 	utility.AssertError(err, "Server Error")
-	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email, 3*60)
+	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email, 3*24*60*60)
 	utility.AssertError(err, "Server Error")
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Println("verification ", verificationCode)
 	_, err = g.Redis().Set(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", verificationCode)
 	utility.AssertError(err, "Server Error")
-	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
+	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*24*60*60)
 	utility.AssertError(err, "Server Error")
 
 	list := query.GetActiveMerchantList(ctx)

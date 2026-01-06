@@ -1,18 +1,20 @@
 package metric
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type ListReq struct {
 	g.Meta          `path:"/list" tags:"Metric" method:"get,post" summary:"Get Merchant Metric list"`
+	SearchKey       string `json:"searchKey" dc:"Search Key, code or name"  `
 	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create，Default gmt_create" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int    `json:"page"  dc:"Page,Start 0" `
 	Count           int    `json:"count" dc:"Count OF Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type ListRes struct {
@@ -22,12 +24,14 @@ type ListRes struct {
 
 type NewReq struct {
 	g.Meta              `path:"/new" tags:"Metric" method:"post" summary:"New Merchant Metric"`
-	Code                string `json:"code" dc:"Code" v:"required"`
-	Type                *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
-	MetricName          string `json:"metricName" dc:"MetricName" v:"required"`
-	MetricDescription   string `json:"metricDescription" dc:"MetricDescription"`
-	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
-	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	Code                string                 `json:"code" dc:"Code" v:"required"`
+	Type                *int                   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
+	MetricName          string                 `json:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription   string                 `json:"metricDescription" dc:"MetricDescription"`
+	AggregationType     int                    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
+	AggregationProperty string                 `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	MetaData            map[string]interface{} `json:"metaData"            description:"meta_data(json)"`
+	Unit                string                 `json:"unit"                description:"unit"`
 }
 
 type NewRes struct {
@@ -36,10 +40,12 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta            `path:"/edit" tags:"Metric" method:"post" summary:"Edit Merchant Metric"`
-	MetricId          uint64 `json:"metricId" dc:"MetricId" v:"required"`
-	Type              *int   `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
-	MetricName        string `json:"metricName" dc:"MetricName" v:"required"`
-	MetricDescription string `json:"metricDescription" dc:"MetricDescription"`
+	MetricId          uint64                  `json:"metricId" dc:"MetricId" v:"required"`
+	Type              *int                    `json:"type"                description:"1-limit_metered，2-charge_metered,3-charge_recurring"`
+	MetricName        string                  `json:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription string                  `json:"metricDescription" dc:"MetricDescription"`
+	MetaData          *map[string]interface{} `json:"metaData"            description:"meta_data(json)"`
+	Unit              string                  `json:"unit"                description:"unit"`
 }
 
 type EditRes struct {

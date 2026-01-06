@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	dao "unibee/internal/dao/default"
+	_interface "unibee/internal/interface/context"
 	entity "unibee/internal/model/entity/default"
 )
 
@@ -20,6 +21,10 @@ func GetDiscountById(ctx context.Context, id uint64) (one *entity.MerchantDiscou
 func GetDiscountByCode(ctx context.Context, merchantId uint64, code string) (one *entity.MerchantDiscountCode) {
 	if len(code) <= 0 || merchantId <= 0 {
 		return nil
+	}
+	one = _interface.GetDiscountCodeFromPreloadContext(ctx, code)
+	if one != nil {
+		return one
 	}
 	err := dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).

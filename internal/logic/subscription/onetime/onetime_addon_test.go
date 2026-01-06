@@ -64,7 +64,8 @@ func TestSubscription(t *testing.T) {
 			SubscriptionId: one.SubscriptionId,
 			AddonId:        114,
 			Quantity:       1,
-			RedirectUrl:    "",
+			ReturnUrl:      "",
+			CancelUrl:      "",
 			Metadata:       nil,
 		})
 		if err != nil {

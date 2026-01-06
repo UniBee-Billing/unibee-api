@@ -1,7 +1,7 @@
 package model
 
-// SessionNotice 存放在Session中的提示信息，往往使用后则删除
+// SessionNotice stores notification messages in Session, often deleted after use
 type SessionNotice struct {
-	Type    string // 消息类型
-	Content string // 消息内容
+	Type    string // Message type
+	Content string // Message content
 }

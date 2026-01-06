@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"net/http"
@@ -185,13 +186,13 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 		items = append(items, item)
 	}
 
-	var productName = createPayContext.Invoice.ProductName
-	if len(productName) == 0 {
-		productName = createPayContext.Invoice.InvoiceName
-	}
-	if len(productName) == 0 {
-		productName = "DefaultProduct"
-	}
+	//var productName = createPayContext.Invoice.ProductName
+	//if len(productName) == 0 {
+	//	productName = createPayContext.Invoice.InvoiceName
+	//}
+	//if len(productName) == 0 {
+	//	productName = "DefaultProduct"
+	//}
 	var paymentSource = &paypal.PaymentSource{
 		Paypal: &paypal.PaymentSourcePaypal{},
 	}
@@ -238,12 +239,22 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 	if err != nil {
 		return nil, err
 	}
+	action := gjson.New("")
+	_ = action.Set("paypalOrderID", payment.GatewayPaymentId)
+	_ = action.Set("paypalClientId", gateway.GatewayKey)
+	_ = action.Set("paypalReturnUrl", webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true))
+	_ = action.Set("paypalCancelUrl", webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false))
+	paymentLink := payment.Link
+	if createPayContext.PaymentUIMode == "embedded" || createPayContext.PaymentUIMode == "custom" {
+		paymentLink = fmt.Sprintf("%s/embedded/paypal?paymentId=%s", config.GetConfigInstance().Server.GetServerPath(), createPayContext.Pay.PaymentId)
+	}
 	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 consts.PaymentStatusEnum(payment.Status),
 		GatewayPaymentId:       payment.GatewayPaymentId,
 		GatewayPaymentIntentId: payment.GatewayPaymentId,
 		GatewayPaymentMethod:   payment.GatewayPaymentMethod,
-		Link:                   payment.Link,
+		Link:                   paymentLink,
+		Action:                 action,
 	}, nil
 }
 

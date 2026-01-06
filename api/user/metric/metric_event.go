@@ -30,8 +30,8 @@ type EventListReq struct {
 	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int     `json:"page"  dc:"Page,Start 0" `
 	Count           int     `json:"count" dc:"Count OF Page" `
-	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type EventListRes struct {

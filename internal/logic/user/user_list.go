@@ -5,28 +5,31 @@ import (
 	"strings"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/default"
+	"unibee/internal/logic/preload"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
 type UserListInternalReq struct {
-	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId          int64  `json:"userId" dc:"Filter UserId, Default All" `
-	Email           string `json:"email" dc:"Search Email" `
-	FirstName       string `json:"firstName" dc:"Search FirstName" `
-	LastName        string `json:"lastName" dc:"Search LastName" `
-	SubscriptionId  string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
-	SubStatus       []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
-	Status          []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
-	PlanIds         []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
-	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page"  dc:"Page,Start 0" `
-	Count           int    `json:"count" dc:"Count Of Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	MerchantId      uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId          int64   `json:"userId" dc:"Filter UserId, Default All" `
+	ExternalUserId  string  `json:"externalUserId" dc:"ExternalUserId"`
+	Email           string  `json:"email" dc:"Search Email" `
+	FirstName       string  `json:"firstName" dc:"Search FirstName" `
+	LastName        string  `json:"lastName" dc:"Search LastName" `
+	SubscriptionId  string  `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
+	SubStatus       []int   `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
+	Status          []int   `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	PlanIds         []int   `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
+	GatewayIds      []int64 `json:"gatewayIds" dc:"GatewayIds, Search Filter GatewayIds" `
+	DeleteInclude   bool    `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField       string  `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int     `json:"page"  dc:"Page,Start 0" `
+	Count           int     `json:"count" dc:"Count Of Page" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd" `
 	SkipTotal       bool
 }
 
@@ -66,6 +69,9 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if req.UserId > 0 {
 		q = q.Where(dao.UserAccount.Columns().Id, req.UserId)
 	}
+	if req.ExternalUserId != "" {
+		q = q.Where(dao.UserAccount.Columns().ExternalUserId, req.ExternalUserId)
+	}
 	if len(req.SubscriptionId) > 0 {
 		q = q.Where(dao.UserAccount.Columns().SubscriptionId, req.SubscriptionId)
 	}
@@ -87,6 +93,9 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if req.PlanIds != nil && len(req.PlanIds) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().PlanId, req.PlanIds)
 	}
+	if req.GatewayIds != nil && len(req.GatewayIds) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().GatewayId, req.GatewayIds)
+	}
 	if req.CreateTimeStart > 0 {
 		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
 	}
@@ -104,6 +113,7 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if err != nil {
 		return nil, err
 	}
+	preload.UserListPreloadForContext(ctx, mainList)
 	var resultList = make([]*detail.UserAccountDetail, 0)
 	for _, one := range mainList {
 		resultList = append(resultList, detail.ConvertUserAccountToDetail(ctx, one))

@@ -3,18 +3,20 @@ package invoice_compute
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"math"
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/credit/payment"
 	"unibee/internal/logic/discount"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 type CalculateInvoiceReq struct {
@@ -205,12 +207,20 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		refundDiscountAmount = -refundDiscountAmount
 	}
 
+	var metadata = make(map[string]interface{})
+	if len(originalInvoice.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(originalInvoice.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+
 	return &bean.Invoice{
 		InvoiceName:                    "Credit Note",
 		ProductName:                    originalInvoice.ProductName,
 		BizType:                        originalInvoice.BizType,
 		Currency:                       originalInvoice.Currency,
-		OriginAmount:                   originalInvoice.TotalAmount + originalInvoice.DiscountAmount,
+		OriginAmount:                   originalInvoice.TotalAmount + originalInvoice.DiscountAmount + originalInvoice.PromoCreditDiscountAmount,
 		TaxAmount:                      refundTax,
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmount - refundTax,
@@ -227,6 +237,8 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SendNote:                       fmt.Sprintf("%s (%s)", originalInvoice.InvoiceId, refundType),
 		PaymentId:                      payment.PaymentId,
 		RefundId:                       refund.RefundId,
+		Data:                           originalInvoice.Data,
+		Metadata:                       metadata,
 	}
 }
 
@@ -234,9 +246,9 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, fmt.Sprintf("plan not found:%d", req.PlanId))
 	addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
-	var totalAmountExcludingTax = plan.Amount * req.Quantity
+	var totalAmountExcludingTax = plan.CurrencyAmount(ctx, req.Currency) * req.Quantity
 	for _, addon := range addons {
-		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
+		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.CurrencyAmount(ctx, req.Currency)*addon.Quantity
 	}
 	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.MeteredChargeStats) > 0 {
 		for _, metricCharge := range req.UserMetricChargeForInvoice.MeteredChargeStats {
@@ -255,7 +267,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	}
 
 	var invoiceItems []*bean.InvoiceItemSimplify
-	var planAmountExcludingTax = req.Quantity * plan.Amount
+	var planAmountExcludingTax = req.Quantity * plan.CurrencyAmount(ctx, req.Currency)
 	var planTaxAmount = int64(math.Round(float64(planAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 	var name = plan.PlanName
 	var description = fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period)
@@ -272,7 +284,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Tax:                    planTaxAmount,
 		TaxPercentage:          req.TaxPercentage,
 		AmountExcludingTax:     planAmountExcludingTax,
-		UnitAmountExcludingTax: plan.Amount,
+		UnitAmountExcludingTax: plan.CurrencyAmount(ctx, req.Currency),
 		Quantity:               req.Quantity,
 		Name:                   name,
 		Description:            description,
@@ -280,7 +292,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Plan:                   bean.SimplifyPlan(plan),
 	})
 	for _, addon := range addons {
-		var addonAmountExcludingTax = addon.Quantity * addon.AddonPlan.Amount
+		var addonAmountExcludingTax = addon.Quantity * addon.AddonPlan.CurrencyAmount(ctx, req.Currency)
 		var addonTaxAmount = int64(math.Round(float64(addonAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
@@ -289,7 +301,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 			Tax:                    addonTaxAmount,
 			TaxPercentage:          req.TaxPercentage,
 			AmountExcludingTax:     addonAmountExcludingTax,
-			UnitAmountExcludingTax: addon.AddonPlan.Amount,
+			UnitAmountExcludingTax: addon.AddonPlan.CurrencyAmount(ctx, req.Currency),
 			Quantity:               addon.Quantity,
 			Name:                   addon.AddonPlan.PlanName,
 			Description:            fmt.Sprintf("%d * %s %s", addon.Quantity, addon.AddonPlan.PlanName, period),
@@ -300,42 +312,82 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.MeteredChargeStats) > 0 {
 		for _, metricCharge := range req.UserMetricChargeForInvoice.MeteredChargeStats {
 			if metricCharge.TotalChargeAmount > 0 {
-				var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
-				var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
-				invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
-					Currency:               req.Currency,
-					OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
-					Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
-					Tax:                    metricChargeTaxAmount,
-					TaxPercentage:          req.TaxPercentage,
-					AmountExcludingTax:     metricChargeAmountExcludingTax,
-					UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
-					Quantity:               metricCharge.CurrentUsedValue,
-					Name:                   metricCharge.Name,
-					Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
-					MetricCharge:           metricCharge,
-				})
+				if metricCharge.Lines != nil && len(metricCharge.Lines) > 0 {
+					for _, line := range metricCharge.Lines {
+						var metricChargeAmountExcludingTax = line.Amount
+						var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+						invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+							Currency:               req.Currency,
+							OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+							Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+							Tax:                    metricChargeTaxAmount,
+							TaxPercentage:          req.TaxPercentage,
+							AmountExcludingTax:     metricChargeAmountExcludingTax,
+							UnitAmountExcludingTax: line.UnitAmount,
+							Quantity:               line.Quantity,
+							Name:                   metricCharge.Name,
+							Description:            fmt.Sprintf("%s,%s%s, As Of %s", metricCharge.Name, metricCharge.Description, line.Step, gtime.NewFromTimeStamp(req.TimeNow).Layout("2006-01-02")),
+							MetricCharge:           metricCharge,
+						})
+					}
+				} else {
+					var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
+					var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+					invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+						Currency:               req.Currency,
+						OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+						Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+						Tax:                    metricChargeTaxAmount,
+						TaxPercentage:          req.TaxPercentage,
+						AmountExcludingTax:     metricChargeAmountExcludingTax,
+						UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
+						Quantity:               metricCharge.CurrentUsedValue,
+						Name:                   metricCharge.Name,
+						Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
+						MetricCharge:           metricCharge,
+					})
+				}
 			}
 		}
 	}
 	if req.UserMetricChargeForInvoice != nil && len(req.UserMetricChargeForInvoice.RecurringChargeStats) > 0 {
 		for _, metricCharge := range req.UserMetricChargeForInvoice.RecurringChargeStats {
 			if metricCharge.TotalChargeAmount > 0 {
-				var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
-				var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
-				invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
-					Currency:               req.Currency,
-					OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
-					Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
-					Tax:                    metricChargeTaxAmount,
-					TaxPercentage:          req.TaxPercentage,
-					AmountExcludingTax:     metricChargeAmountExcludingTax,
-					UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
-					Quantity:               metricCharge.CurrentUsedValue,
-					Name:                   metricCharge.Name,
-					Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
-					MetricCharge:           metricCharge,
-				})
+				if metricCharge.Lines != nil && len(metricCharge.Lines) > 0 {
+					for _, line := range metricCharge.Lines {
+						var metricChargeAmountExcludingTax = line.Amount
+						var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+						invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+							Currency:               req.Currency,
+							OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+							Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+							Tax:                    metricChargeTaxAmount,
+							TaxPercentage:          req.TaxPercentage,
+							AmountExcludingTax:     metricChargeAmountExcludingTax,
+							UnitAmountExcludingTax: line.UnitAmount,
+							Quantity:               line.Quantity,
+							Name:                   metricCharge.Name,
+							Description:            fmt.Sprintf("%s,%s%s, As Of %s", metricCharge.Name, metricCharge.Description, line.Step, gtime.NewFromTimeStamp(req.TimeNow).Layout("2006-01-02")),
+							MetricCharge:           metricCharge,
+						})
+					}
+				} else {
+					var metricChargeAmountExcludingTax = metricCharge.TotalChargeAmount
+					var metricChargeTaxAmount = int64(math.Round(float64(metricChargeAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
+					invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+						Currency:               req.Currency,
+						OriginAmount:           metricChargeAmountExcludingTax + metricChargeTaxAmount,
+						Amount:                 metricChargeAmountExcludingTax + metricChargeTaxAmount,
+						Tax:                    metricChargeTaxAmount,
+						TaxPercentage:          req.TaxPercentage,
+						AmountExcludingTax:     metricChargeAmountExcludingTax,
+						UnitAmountExcludingTax: metricChargeAmountExcludingTax / metricCharge.CurrentUsedValue,
+						Quantity:               metricCharge.CurrentUsedValue,
+						Name:                   metricCharge.Name,
+						Description:            fmt.Sprintf("%s,%s", metricCharge.Name, metricCharge.Description),
+						MetricCharge:           metricCharge,
+					})
+				}
 			}
 		}
 	}
@@ -345,19 +397,22 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	var promoCreditAccount *bean.CreditAccount
 	var promoCreditPayout *bean.CreditPayout
 	var creditPayoutErr error
+	var totalDiscountAmount int64 = 0
 	if req.ApplyPromoCredit {
-		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, plan.MerchantId, req.UserId, consts.CreditAccountTypePromo, plan.Currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
+		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, plan.MerchantId, req.UserId, consts.CreditAccountTypePromo, req.Currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
 		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
 			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
 			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+			totalDiscountAmount += promoCreditDiscountAmount
 		}
 	}
 
-	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, plan.MerchantId, req.DiscountCode), totalAmountExcludingTax, req.Currency, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	totalDiscountAmount += discountAmount
 
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
-	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
+	prorationCompensateTotalToItems(totalDiscountAmount, taxAmount, invoiceItems)
 
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
@@ -422,7 +477,6 @@ type CalculateProrationInvoiceReq struct {
 }
 
 func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.Invoice {
-	// todo mark upgrade with different taxPercentage
 	if req.OldProrationPlans == nil {
 		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
 	}
@@ -445,7 +499,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		plan := query.GetPlanById(ctx, oldPlanSub.PlanId)
 		merchantId = plan.MerchantId
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(oldPlanSub.PlanId, 10))
-		unitAmountExcludingTax := int64(math.Round(float64(plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
+		unitAmountExcludingTax := int64(math.Round(float64(plan.CurrencyAmount(ctx, req.Currency)) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
 		if newPlanSub, ok := newMap[oldPlanSub.PlanId]; ok {
 			//new plan contain old
 			quantityDiff := newPlanSub.Quantity - oldPlanSub.Quantity
@@ -471,7 +525,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 				// quantity decrease
 				quantityDiff = -quantityDiff
 				unitAmountExcludingTax = -unitAmountExcludingTax
-				unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.Amount, req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
+				unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.CurrencyAmount(ctx, req.Currency), req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
 				unitAmountExcludingTax = unitAmountExcludingTax - unitDiscountAmount
 				var amountExcludingTax = quantityDiff * unitAmountExcludingTax
 				var taxAmount = int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
@@ -495,7 +549,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 			//old removed
 			quantityDiff := oldPlanSub.Quantity
 			unitAmountExcludingTax = -unitAmountExcludingTax
-			unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.Amount, req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
+			unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.CurrencyAmount(ctx, req.Currency), req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
 			unitAmountExcludingTax = unitAmountExcludingTax - unitDiscountAmount
 			var amountExcludingTax = quantityDiff * unitAmountExcludingTax
 			var taxAmount = int64(math.Round(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
@@ -518,7 +572,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 	for _, newPlanSub := range newMap {
 		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
-		unitAmountExcludingTax := int64(math.Round(float64(plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
+		unitAmountExcludingTax := int64(math.Round(float64(plan.CurrencyAmount(ctx, req.Currency)) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
 		quantityDiff := newPlanSub.Quantity
 		var amountExcludingTax = quantityDiff * unitAmountExcludingTax
 		var taxAmount = int64(math.Round(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
@@ -543,18 +597,21 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 	var promoCreditAccount *bean.CreditAccount
 	var promoCreditPayout *bean.CreditPayout
 	var creditPayoutErr error
+	var totalDiscountAmount int64 = 0
 	if req.ApplyPromoCredit {
 		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, req.Currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
 		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
 			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
 			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+			totalDiscountAmount += promoCreditDiscountAmount
 		}
 	}
 
-	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, merchantId, req.DiscountCode), totalAmountExcludingTax, req.Currency, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	totalDiscountAmount += discountAmount
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
-	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
+	prorationCompensateTotalToItems(totalDiscountAmount, taxAmount, invoiceItems)
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
@@ -611,11 +668,11 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		plan := query.GetPlanById(ctx, oldPlanSub.PlanId)
 		merchantId = plan.MerchantId
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(oldPlanSub.PlanId, 10))
-		unitAmountExcludingTax := int64(math.Round(float64(plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
+		unitAmountExcludingTax := int64(math.Round(float64(plan.CurrencyAmount(ctx, req.Currency)) * utility.ConvertTaxPercentageToInternalFloat(timeScale)))
 		//old removed
 		quantityDiff := oldPlanSub.Quantity
 		unitAmountExcludingTax = -unitAmountExcludingTax
-		unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.Amount, req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
+		unitDiscountAmount := utility.MaxInt64(-int64(math.Round(float64(discount.ComputeHistoryDiscountAmount(ctx, merchantId, plan.CurrencyAmount(ctx, req.Currency), req.Currency, req.OldDiscountCode, req.TimeNow)))*utility.ConvertTaxPercentageToInternalFloat(timeScale)), unitAmountExcludingTax)
 		unitAmountExcludingTax = unitAmountExcludingTax - unitDiscountAmount
 		var amountExcludingTax = quantityDiff * unitAmountExcludingTax
 		var taxAmount = int64(math.Round(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
@@ -639,7 +696,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
 		if plan.Type == consts.PlanTypeMain {
-			newPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, req.ProrationDate, req.ProrationDate, plan.Id)
+			newPeriodEnd = period.GetPeriodEndFromStart(ctx, req.ProrationDate, req.ProrationDate, plan.Id)
 		}
 	}
 	utility.Assert(newPeriodEnd > 0, "no main plan for upgrade")
@@ -649,7 +706,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 	for _, newPlanSub := range newMap {
 		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
-		unitAmountExcludingTax := plan.Amount
+		unitAmountExcludingTax := plan.CurrencyAmount(ctx, req.Currency)
 		var amountExcludingTax = newPlanSub.Quantity * unitAmountExcludingTax
 		var taxAmount = int64(math.Round(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
@@ -677,17 +734,20 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 	var promoCreditAccount *bean.CreditAccount
 	var promoCreditPayout *bean.CreditPayout
 	var creditPayoutErr error
+	var totalDiscountAmount int64 = 0
 	if req.ApplyPromoCredit {
 		promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, req.Currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
 		if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
 			promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
 			totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
+			totalDiscountAmount += promoCreditDiscountAmount
 		}
 	}
-	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, merchantId, req.DiscountCode), totalAmountExcludingTax, req.Currency, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	totalDiscountAmount += discountAmount
 	var taxAmount = int64(math.Round(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage)))
-	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
+	prorationCompensateTotalToItems(totalDiscountAmount, taxAmount, invoiceItems)
 	return &bean.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
@@ -766,7 +826,7 @@ func prorationCompensateTotalToItems(totalDiscountAmount int64, totalTaxAmount i
 		}
 		leftDiscountAmount = leftDiscountAmount - appendDiscountAmount
 		item.DiscountAmount = item.DiscountAmount + appendDiscountAmount
-		item.Tax = int64(math.Round(float64(item.AmountExcludingTax-item.DiscountAmount)) * utility.ConvertTaxPercentageToInternalFloat(item.TaxPercentage))
+		item.Tax = int64(math.Round(float64(item.AmountExcludingTax-item.DiscountAmount) * utility.ConvertTaxPercentageToInternalFloat(item.TaxPercentage)))
 		item.Amount = item.AmountExcludingTax - item.DiscountAmount + item.Tax
 		item.OriginAmount = item.Amount + item.DiscountAmount
 	}
@@ -777,7 +837,7 @@ func prorationCompensateTotalToItems(totalDiscountAmount int64, totalTaxAmount i
 				appendDiscountAmount := utility.MinInt64(leftDiscountAmount, item.AmountExcludingTax)
 				leftDiscountAmount = leftDiscountAmount - appendDiscountAmount
 				item.DiscountAmount = item.DiscountAmount + appendDiscountAmount
-				item.Tax = int64(math.Round(float64(item.AmountExcludingTax-item.DiscountAmount)) * utility.ConvertTaxPercentageToInternalFloat(item.TaxPercentage))
+				item.Tax = int64(math.Round(float64(item.AmountExcludingTax-item.DiscountAmount) * utility.ConvertTaxPercentageToInternalFloat(item.TaxPercentage)))
 				item.Amount = item.AmountExcludingTax - item.DiscountAmount + item.Tax
 				item.OriginAmount = item.Amount + item.DiscountAmount
 			} else {

@@ -20,7 +20,7 @@ import (
 	handler2 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/metric_event"
 	"unibee/internal/logic/payment/service"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	"unibee/internal/logic/subscription/billingcycle/expire"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
@@ -73,12 +73,15 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
 		}
 
-		if len(sub.PendingUpdateId) > 0 {
-			pendingUpdate := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-			if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished && pendingUpdate.CreateTime+3600 < timeNow { // one hour
-				err = pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, pendingUpdate.PendingUpdateId, "EffectTimeout")
-				if err != nil {
-					g.Log().Errorf(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
+		if (utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) - timeNow) < 3600*6 {
+			// last 6 hours
+			if len(sub.PendingUpdateId) > 0 {
+				pendingUpdate := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+				if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished && pendingUpdate.CreateTime+3600 < timeNow { // 1 hour
+					err = pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, pendingUpdate.PendingUpdateId, "EffectTimeout")
+					if err != nil {
+						g.Log().Errorf(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
+					}
 				}
 			}
 		}
@@ -118,6 +121,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if plan.DisableAutoCharge > 0 || plan.Type != consts.PlanTypeMain || plan.Amount == 0 {
 			needInvoiceGenerate = false
 			needTryInvoiceAutomaticPayment = false
+		}
+
+		if !needInvoiceGenerate && latestInvoice != nil &&
+			latestInvoice.Status == consts.InvoiceStatusProcessing &&
+			latestInvoice.TotalAmount == 0 &&
+			!needTryInvoiceAutomaticPayment {
+			// pay invoice immediate if amount is zero
+			needTryInvoiceAutomaticPayment = true
 		}
 
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusFailed || sub.Status == consts.SubStatusCancelled {
@@ -255,7 +266,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if sub.CancelAtPeriodEnd == 1 {
 					return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As CancelPeriodEnd Set"}, nil
 				}
-				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
+				if latestInvoice == nil {
+					return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As invalid latestInvoice"}, nil
+				}
+				if latestInvoice.Status == consts.InvoiceStatusProcessing {
 					trackForSubscriptionLatestProcessInvoice(ctx, sub, timeNow)
 				}
 
@@ -271,7 +285,18 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 							}
 							return nil, err
 						}
-						_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+						pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, paidInvoice.InvoiceId)
+						if pendingUpdate != nil {
+							_, err = handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.PendingUpdateId, paidInvoice)
+							if err != nil {
+								g.Log().Errorf(ctx, "AutomaticPaymentByCycle For Zero Invoice HandlePendingUpdatePaymentSuccess error:%s", err.Error())
+							}
+						} else {
+							err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+							if err != nil {
+								g.Log().Errorf(ctx, "AutomaticPaymentByCycle For Zero Invoice HandleSubscriptionNextBillingCyclePaymentSuccess error:%s", err.Error())
+							}
+						}
 						return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Finish Zero Invoice Payment Result:%s", utility.MarshalToJsonString(paidInvoice))}, nil
 					} else {
 						// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
@@ -289,11 +314,22 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						}
 
 						if createRes.Payment != nil && createRes.Status == consts.PaymentSuccess {
-							_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+							pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, latestInvoice.InvoiceId)
+							if pendingUpdate != nil {
+								_, err = handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.PendingUpdateId, latestInvoice)
+								if err != nil {
+									g.Log().Errorf(ctx, "AutomaticPaymentByCycle HandlePendingUpdatePaymentSuccess error:%s", err.Error())
+								}
+							} else {
+								err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
+								if err != nil {
+									g.Log().Errorf(ctx, "AutomaticPaymentByCycle HandleSubscriptionNextBillingCyclePaymentSuccess error:%s", err.Error())
+								}
+							}
 						}
 						return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 					}
-				} else if latestInvoice != nil && latestInvoice.GatewayId <= 0 {
+				} else if latestInvoice.GatewayId <= 0 {
 					return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo, Seems Invoice Gateway Need Specified"}, nil
 				} else {
 					return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo, Seems Invoice Does not Need Generate"}, nil
@@ -358,7 +394,7 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 		//generate PendingUpdate cycle invoice
 		updatePlan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
 		var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
+		var nextPeriodEnd = period.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, updatePlan.Id)
 
 		invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 			UserId:                     sub.UserId,
@@ -386,7 +422,7 @@ func PreviewSubscriptionNextInvoice(ctx context.Context, sub *entity.Subscriptio
 		plan = query.GetPlanById(ctx, sub.PlanId)
 
 		var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
+		var nextPeriodEnd = period.GetPeriodEndFromStart(ctx, nextPeriodStart, sub.BillingCycleAnchor, plan.Id)
 
 		invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 			UserId:                     sub.UserId,

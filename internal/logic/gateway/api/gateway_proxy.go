@@ -2,10 +2,6 @@ package api
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
 	"strings"
 	"time"
 	"unibee/internal/consts"
@@ -16,6 +12,11 @@ import (
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/default"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
 var GatewayNameMapping = map[string]_interface.GatewayInterface{
@@ -33,6 +34,13 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"alipay":          &Alipay{},
 	"alipay+":         &AlipayPlus{},
 	"credit":          &credit.Credit{},
+	"bank131":         &Bank131{},
+	"sberpay":         &SberPay{},
+	"firekassa":       &FireKassa{},
+	"mulenpay":        &MulenPay{},
+	"alikassa":        &AliKassa{},
+	"blockonomics":    &Blockonomics{},
+	//"airwallex":       &Airwallex{},
 }
 
 var GatewayShortNameMapping = map[string]string{
@@ -50,6 +58,13 @@ var GatewayShortNameMapping = map[string]string{
 	"credit":          "CR",
 	"alipay":          "ALI",
 	"alipay+":         "ALIP",
+	"bank131":         "B131",
+	"sberpay":         "SBP",
+	"firekassa":       "FK",
+	"mulenpay":        "MP",
+	"alikassa":        "AK",
+	"blockonomics":    "BK",
+	"airwallex":       "AW",
 }
 
 // var ExportGatewaySetupListKeys = []string{"stripe", "changelly", "paypal", "unitpay", "payssion", "wire_transfer"}
@@ -63,6 +78,12 @@ var ExportGatewaySetupList = map[string]*_interface.GatewayInfo{
 	"wire_transfer": Wire{}.GatewayInfo(context.Background()),
 	"alipay":        Alipay{}.GatewayInfo(context.Background()),
 	"alipay+":       AlipayPlus{}.GatewayInfo(context.Background()),
+	"bank131":       Bank131{}.GatewayInfo(context.Background()),
+	"sberpay":       SberPay{}.GatewayInfo(context.Background()),
+	"firekassa":     FireKassa{}.GatewayInfo(context.Background()),
+	"mulenpay":      MulenPay{}.GatewayInfo(context.Background()),
+	"alikassa":      AliKassa{}.GatewayInfo(context.Background()),
+	"blockonomics":  Blockonomics{}.GatewayInfo(context.Background()),
 	//"cryptadium": Cryptadium{}.GatewayInfo(context.Background()),
 }
 

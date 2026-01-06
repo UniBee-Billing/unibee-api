@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -13,6 +14,8 @@ type UserCurrentSubscriptionDetailReq struct {
 }
 type UserCurrentSubscriptionDetailRes struct {
 	User                                *bean.UserAccount                       `json:"user" dc:"user"`
+	PromoCreditAccounts                 []*bean.CreditAccount                   `json:"promoCreditAccounts" dc:"promoCreditAccounts"`
+	CreditAccounts                      []*bean.CreditAccount                   `json:"creditAccounts" dc:"creditAccounts"`
 	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
 	Gateway                             *detail.Gateway                         `json:"gateway" dc:"Gateway"`
@@ -29,6 +32,8 @@ type DetailReq struct {
 
 type DetailRes struct {
 	User                                *bean.UserAccount                       `json:"user" dc:"user"`
+	PromoCreditAccounts                 []*bean.CreditAccount                   `json:"promoCreditAccounts" dc:"promoCreditAccounts"`
+	CreditAccounts                      []*bean.CreditAccount                   `json:"creditAccounts" dc:"creditAccounts"`
 	Subscription                        *bean.Subscription                      `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.Plan                              `json:"plan" dc:"Plan"`
 	Gateway                             *detail.Gateway                         `json:"gateway" dc:"Gateway"`
@@ -50,6 +55,7 @@ type PayCheckRes struct {
 type CreatePreviewReq struct {
 	g.Meta                 `path:"/create_preview" tags:"User-Subscription" method:"post" summary:"User Create Subscription Preview"`
 	PlanId                 uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency of payment"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id" `
 	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
@@ -89,13 +95,14 @@ type CreatePreviewRes struct {
 type CreateReq struct {
 	g.Meta                 `path:"/create_submit" tags:"User-Subscription" method:"post" summary:"User Create Subscription"`
 	PlanId                 uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency of payment"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId              *uint64                `json:"gatewayId" dc:"Id" `
 	GatewayPaymentType     string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	AddonParams            []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ReturnUrl              string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	ReturnUrl              string                 `json:"returnUrl"  dc:"ReturnUrl"  `
 	VatCountryCode         string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                 `json:"vatNumber" dc:"VatNumber" `
 	PaymentMethodId        string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
@@ -103,12 +110,16 @@ type CreateReq struct {
 	Metadata               map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	ApplyPromoCredit       bool                   `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
+	PaymentUIMode          string                 `json:"paymentUIMode"  dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 }
 
 type CreateRes struct {
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	PaymentId    string             `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId    string             `json:"invoiceId" dc:"The unique id of invoice"`
 	Paid         bool               `json:"paid"`
 	Link         string             `json:"link"`
+	Action       *gjson.Json        `json:"action"`
 }
 
 type UpdatePreviewReq struct {
@@ -155,13 +166,17 @@ type UpdateReq struct {
 	ApplyPromoCredit       bool                   `json:"applyPromoCredit"  dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                 `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
 	ManualPayment          bool                   `json:"manualPayment" dc:"ManualPayment"`
+	PaymentUIMode          string                 `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 }
 
 type UpdateRes struct {
 	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
-	Paid                      bool                                    `json:"paid" dc:"Paid，true|false"`
-	Link                      string                                  `json:"link" dc:"Pay Link"`
+	PaymentId                 string                                  `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId                 string                                  `json:"invoiceId" dc:"The unique id of invoice"`
+	Paid                      bool                                    `json:"paid" dc:"Paid or not，true|false"`
+	Link                      string                                  `json:"link" dc:"The payment link, need redirect customer to link if paid=false"`
 	Note                      string                                  `json:"note" dc:"note"`
+	Action                    *gjson.Json                             `json:"action"`
 }
 
 type ListReq struct {
@@ -232,8 +247,10 @@ type OnetimeAddonNewReq struct {
 	g.Meta         `path:"/new_onetime_addon_payment" tags:"User-Subscription" method:"post" summary:"New Subscription Onetime Addon Payment"`
 	SubscriptionId string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
 	AddonId        uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
+	Currency       string                 `json:"currency"          dc:"The currency of payment"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
 	ReturnUrl      string                 `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
+	CancelUrl      string                 `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if user cancel the payment"`
 	Metadata       map[string]interface{} `json:"metadata" dc:"Metadata，custom data"`
 	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
 	GatewayId      *uint64                `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
@@ -283,6 +300,7 @@ type RenewReq struct {
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
@@ -293,6 +311,9 @@ type RenewReq struct {
 
 type RenewRes struct {
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	PaymentId    string             `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId    string             `json:"invoiceId" dc:"The unique id of invoice"`
 	Paid         bool               `json:"paid"`
 	Link         string             `json:"link"`
+	Action       *gjson.Json        `json:"action"`
 }

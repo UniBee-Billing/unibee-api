@@ -10,5 +10,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *bean.Merchant `json:"merchant" dc:"Merchant"`
+	Merchant           *bean.Merchant       `json:"merchant" dc:"Merchant"`
+	PromoCreditConfigs []*bean.CreditConfig `json:"promoCreditConfigs" dc:"Promo Credit Config List Object"`
+	CreditConfigs      []*bean.CreditConfig `json:"creditConfigs" dc:"Credit Config List Object"`
 }

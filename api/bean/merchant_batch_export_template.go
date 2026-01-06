@@ -10,7 +10,7 @@ type MerchantBatchExportTemplate struct {
 	Name          string                 `json:"name"          description:"name"`        // name
 	MerchantId    uint64                 `json:"merchantId"    description:"merchant_id"` // merchant_id
 	MemberId      uint64                 `json:"memberId"      description:"member_id"`   // member_id
-	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`

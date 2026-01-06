@@ -1,11 +1,6 @@
 package invoice_compute
 
-import (
-	"context"
-	"unibee/api/bean"
-	"unibee/internal/logic/discount"
-	"unibee/utility"
-)
+import "unibee/api/bean"
 
 type InvoiceSimplifyInternalReq struct {
 	Id             uint64                            `json:"id"`
@@ -32,54 +27,4 @@ type InvoiceItemSimplifyInternalReq struct {
 	Name                   string     `json:"name"`
 	Description            string     `json:"description"`
 	Plan                   *bean.Plan `json:"plan"`
-}
-
-func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *bean.Invoice {
-	utility.Assert(req.Lines != nil, "MakeInvoiceSimplify error, line is null")
-	utility.Assert(req.MerchantId > 0, "MakeInvoiceSimplify error, merchantId is null")
-	var invoiceItems = make([]*bean.InvoiceItemSimplify, 0)
-	var totalAmountExcludingTax int64 = 0
-	for _, item := range req.Lines {
-		var amountExcludingTax = item.Quantity * item.UnitAmountExcludingTax
-		var taxAmount = int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
-			Currency:               req.Currency,
-			OriginAmount:           amountExcludingTax + taxAmount,
-			Amount:                 amountExcludingTax + taxAmount,
-			Tax:                    taxAmount,
-			TaxPercentage:          req.TaxPercentage,
-			AmountExcludingTax:     amountExcludingTax,
-			UnitAmountExcludingTax: item.UnitAmountExcludingTax,
-			Quantity:               item.Quantity,
-			Name:                   item.Name,
-			Description:            item.Description,
-			Plan:                   item.Plan,
-		})
-		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
-	}
-
-	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, req.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
-	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
-	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
-	prorationCompensateTotalToItems(discountAmount, taxAmount, invoiceItems)
-
-	return &bean.Invoice{
-		InvoiceName:                    req.InvoiceName,
-		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
-		TotalAmount:                    totalAmountExcludingTax + taxAmount,
-		TotalAmountExcludingTax:        totalAmountExcludingTax,
-		DiscountAmount:                 discountAmount,
-		DiscountCode:                   req.DiscountCode,
-		TaxAmount:                      taxAmount,
-		Currency:                       req.Currency,
-		TaxPercentage:                  req.TaxPercentage,
-		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
-		Lines:                          invoiceItems,
-		PeriodStart:                    req.PeriodStart,
-		PeriodEnd:                      req.PeriodEnd,
-		FinishTime:                     req.FinishTime,
-		SendStatus:                     req.SendStatus,
-		DayUtilDue:                     req.DayUtilDue,
-	}
 }

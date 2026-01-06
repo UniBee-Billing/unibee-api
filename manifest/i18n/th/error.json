@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "มีการสมัครสมาชิกที่ใช้งานอยู่หรือไม่สมบูรณ์อื่นอยู่",
+  "ClickTooFast": "คุณคลิกเร็วเกินไป กรุณารอสักครู่แล้วลองใหม่",
+  "AmountNotMatch": "จำนวนเงินรวมล้าสมัย กรุณาอัปเดตและลองใหม่",
+  "PlanTrialGatewayError": "ต้องการเกตเวย์การชำระเงินด้วยบัตรหรือPayPalสำหรับแผนนี้",
+  "VatValidateError": "การตรวจสอบหมายเลขVATล้มเหลว หมายเลข: %s",
+  "VatGatewayNeedSetup": "ต้องตั้งค่าเกตเวย์VAT",
+  "CountryCodeVatNumberNotMatch": "ข้อผิดพลาดรหัสประเทศ ประเทศของหมายเลขVATของคุณคือ %s",
+  "DiscountCodeInvalid": "รหัสส่วนลดไม่ถูกต้อง",
+  "DiscountCodeNotStart": "รหัสส่วนลดยังไม่เริ่ม",
+  "DiscountCodePlanError": "ไม่สามารถใช้รหัสส่วนลดกับแผนนี้ได้",
+  "DiscountCodeReachLimitation": "ถึงขีดจำกัดการใช้งานรหัสส่วนลดแล้ว"
+} 

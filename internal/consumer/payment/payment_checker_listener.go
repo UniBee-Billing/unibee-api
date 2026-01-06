@@ -37,6 +37,11 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 	one := query.GetPaymentByPaymentId(ctx, message.Body)
 	if one != nil {
 		if one.Status == consts.PaymentSuccess {
+			err := handler2.CompensateForPaymentSuccess(ctx, one)
+			if err != nil {
+				g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback paymentId:%s CompensateForPaymentSuccess error:%s", message.Body, err.Error())
+				return redismq.ReconsumeLater
+			}
 			g.Log().Infof(ctx, "PaymentCheckerListener_Commit payment already success paymentId:%s", message.Body)
 			return redismq.CommitMessage
 		}

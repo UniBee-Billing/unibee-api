@@ -60,6 +60,9 @@ type Invoice struct {
 	PartialCreditPaidAmount        int64                              `json:"partialCreditPaidAmount"        description:"partial credit paid amount"`
 	PromoCreditTransaction         *CreditTransaction                 `json:"promoCreditTransaction"               description:"promo credit transaction"`
 	UserMetricChargeForInvoice     *UserMetricChargeInvoiceItemEntity `json:"userMetricChargeForInvoice"`
+	PaymentType                    string                             `json:"paymentType"               description:""`
+	PaymentMethodId                string                             `json:"PaymentMethodId"               description:""`
+	PlanSnapshot                   *InvoicePlanSnapshot               `json:"planSnapshot" description:"Snapshot of the plan and addons at the time of billing. Includes both the current and previous plans when applicable (e.g., upgrade or downgrade)."`
 }
 
 type InvoiceItemSimplify struct {
@@ -81,6 +84,26 @@ type InvoiceItemSimplify struct {
 	PeriodStart                int64                        `json:"periodStart"`
 	Plan                       *Plan                        `json:"plan"`
 	MetricCharge               *UserMetricChargeInvoiceItem `json:"metricCharge"`
+}
+
+type InvoiceSnapshotChargeType int
+
+const (
+	InvoiceChargeTypeOneTime InvoiceSnapshotChargeType = iota
+	InvoiceChargeTypeSubscriptionCreate
+	InvoiceChargeTypeSubscriptionUpgrade
+	InvoiceChargeTypeSubscriptionDowngrade
+	InvoiceChargeTypeSubscriptionRenew
+	InvoiceChargeTypeSubscriptionCycle
+)
+
+type InvoicePlanSnapshot struct {
+	ChargeType     InvoiceSnapshotChargeType `json:"chargeType" dc:"Billing charge type. 0: One-time, 1: New Subscription, 2: Upgrade, 3: Downgrade, 4: Renewal, 5: Billing Cycle Charge."`
+	AutoCharge     bool                      `json:"autoCharge" dc:"Billing charge"`
+	Plan           *Plan                     `json:"plan" dc:"Current plan snapshot at the time of billing."`
+	Addons         []*PlanAddonDetail        `json:"addons" dc:"Addons associated with the current plan."`
+	PreviousPlan   *Plan                     `json:"previousPlan" dc:"Previous plan before upgrade or downgrade. Available only when paidType = 2 or 3."`
+	PreviousAddons []*PlanAddonDetail        `json:"previousAddons" dc:"Addons from the previous plan, relevant for upgrade or downgrade (paidType = 2 or 3)."`
 }
 
 func SimplifyInvoice(one *entity.Invoice) *Invoice {
@@ -113,7 +136,7 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 		InvoiceName:                    one.InvoiceName,
 		ProductName:                    one.ProductName,
 		InvoiceId:                      one.InvoiceId,
-		OriginAmount:                   one.TotalAmount + one.DiscountAmount,
+		OriginAmount:                   one.TotalAmount + one.DiscountAmount + one.PromoCreditDiscountAmount,
 		TotalAmount:                    one.TotalAmount,
 		DiscountCode:                   one.DiscountCode,
 		DiscountAmount:                 one.DiscountAmount,
@@ -150,5 +173,6 @@ func SimplifyInvoice(one *entity.Invoice) *Invoice {
 		PromoCreditDiscountAmount:      one.PromoCreditDiscountAmount,
 		PartialCreditPaidAmount:        one.PartialCreditPaidAmount,
 		UserMetricChargeForInvoice:     userMetricChargeForInvoice,
+		PaymentType:                    one.GatewayInvoiceId,
 	}
 }

@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Et annet aktivt eller ufullstendig abonnement eksisterer",
+  "ClickTooFast": "Du klikker for raskt. Vennligst vent et øyeblikk og prøv igjen.",
+  "AmountNotMatch": "Det totale beløpet er utdatert. Oppdater og prøv igjen.",
+  "PlanTrialGatewayError": "En kort- eller PayPal-betalingsgateway kreves for denne planen.",
+  "VatValidateError": "VAT-nummerverifisering mislyktes. Nummer: %s",
+  "VatGatewayNeedSetup": "VAT-gateway må konfigureres.",
+  "CountryCodeVatNumberNotMatch": "Landkodefeil. Landet for ditt VAT-nummer er %s.",
+  "DiscountCodeInvalid": "Rabattkoden er ugyldig.",
+  "DiscountCodeNotStart": "Rabattkoden har ikke startet ennå.",
+  "DiscountCodePlanError": "Rabattkoden kan ikke brukes med denne planen.",
+  "DiscountCodeReachLimitation": "Bruksgrensen for rabattkoden er nådd."
+} 

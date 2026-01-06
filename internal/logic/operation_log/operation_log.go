@@ -25,6 +25,7 @@ type OptLogRequest struct {
 	InvoiceId      string
 	PlanId         uint64
 	DiscountCode   string
+	Data           string
 }
 
 func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) {
@@ -90,26 +91,27 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 		optAccountId = ""
 	}
 	operationLog := &entity.MerchantOperationLog{
-		CompanyId:      0,
-		MerchantId:     merchantId,
-		MemberId:       memberId,
-		OptAccount:     optAccount,
-		OptAccountId:   optAccountId,
-		OptAccountType: optAccountType,
-		ClientType:     clientType,
-		BizType:        0,
-		OptTarget:      req.Target,
-		OptContent:     req.Content,
-		CreateTime:     gtime.Now().Timestamp(),
-		GmtCreate:      gtime.Now(),
-		GmtModify:      gtime.Now(),
-		ServerType:     0,
-		ServerTypeDesc: "",
-		SubscriptionId: req.SubscriptionId,
-		UserId:         req.UserId,
-		InvoiceId:      req.InvoiceId,
-		PlanId:         req.PlanId,
-		DiscountCode:   req.DiscountCode,
+		CompanyId:          0,
+		MerchantId:         merchantId,
+		MemberId:           memberId,
+		OptAccount:         optAccount,
+		OptAccountId:       optAccountId,
+		OptAccountType:     optAccountType,
+		ClientType:         clientType,
+		BizType:            0,
+		OptTarget:          req.Target,
+		OptContent:         req.Content,
+		CreateTime:         gtime.Now().Timestamp(),
+		GmtCreate:          gtime.Now(),
+		GmtModify:          gtime.Now(),
+		ServerType:         0,
+		ServerTypeDesc:     "",
+		SubscriptionId:     req.SubscriptionId,
+		UserId:             req.UserId,
+		InvoiceId:          req.InvoiceId,
+		PlanId:             req.PlanId,
+		DiscountCode:       req.DiscountCode,
+		QueryportRequestId: req.Data,
 	}
 	if memberId <= 0 {
 		if optAccount == "System" {

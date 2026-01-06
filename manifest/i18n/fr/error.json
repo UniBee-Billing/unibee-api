@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Un autre abonnement actif ou incomplet existe",
+  "ClickTooFast": "Vous cliquez trop rapidement. Veuillez attendre un moment et réessayer.",
+  "AmountNotMatch": "Le montant total est obsolète. Veuillez actualiser et réessayer.",
+  "PlanTrialGatewayError": "Une passerelle de paiement par carte ou PayPal est requise pour ce plan.",
+  "VatValidateError": "La validation du numéro de TVA a échoué. Numéro: %s",
+  "VatGatewayNeedSetup": "La passerelle TVA doit être configurée.",
+  "CountryCodeVatNumberNotMatch": "Erreur de code pays. Le pays de votre numéro de TVA est %s.",
+  "DiscountCodeInvalid": "Le code de réduction est invalide.",
+  "DiscountCodeNotStart": "Le code de réduction n'a pas encore commencé.",
+  "DiscountCodePlanError": "Le code de réduction ne peut pas être utilisé avec ce plan.",
+  "DiscountCodeReachLimitation": "La limite d'utilisation du code de réduction a été atteinte."
+} 

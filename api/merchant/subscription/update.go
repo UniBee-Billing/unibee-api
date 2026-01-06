@@ -1,9 +1,11 @@
 package subscription
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type PendingUpdateListReq struct {
@@ -40,8 +42,9 @@ type RenewReq struct {
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
-	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
+	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl, back to returnUrl if renew completed"  `
+	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if renew cancelled"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	Metadata               map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	ApplyPromoCredit       *bool                       `json:"applyPromoCredit" dc:"apply promo credit or not"`
@@ -50,8 +53,11 @@ type RenewReq struct {
 
 type RenewRes struct {
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
+	PaymentId    string             `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId    string             `json:"invoiceId" dc:"The unique id of invoice"`
 	Paid         bool               `json:"paid"`
 	Link         string             `json:"link"`
+	Action       *gjson.Json        `json:"action"`
 }
 
 type UpdatePreviewReq struct {
@@ -98,8 +104,9 @@ type UpdateReq struct {
 	DiscountCode           string                      `json:"discountCode" dc:"DiscountCode"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment          bool                        `json:"manualPayment" dc:"ManualPayment"`
-	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
+	ReturnUrl              string                      `json:"returnUrl"  dc:"ReturnUrl, back to returnUrl if update completed"  `
+	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if customer cancelled"  `
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	ApplyPromoCredit       bool                        `json:"applyPromoCredit" dc:"apply promo credit or not"`
 	ApplyPromoCreditAmount *int64                      `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
@@ -107,7 +114,19 @@ type UpdateReq struct {
 
 type UpdateRes struct {
 	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"subscriptionPendingUpdate"`
-	Paid                      bool                                    `json:"paid"`
-	Link                      string                                  `json:"link"`
+	PaymentId                 string                                  `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId                 string                                  `json:"invoiceId" dc:"The unique id of invoice"`
+	Paid                      bool                                    `json:"paid" dc:"Paid or not，true|false"`
+	Link                      string                                  `json:"link" dc:"The payment link, need redirect customer to link if paid=false"`
+	Action                    *gjson.Json                             `json:"action"`
 	Note                      string                                  `json:"note" dc:"note"`
+}
+
+type UpdateMetadataReq struct {
+	g.Meta         `path:"/metadata_update" tags:"Subscription Update" method:"post" summary:"Update Subscription Metadata"`
+	SubscriptionId string                 `json:"subscriptionId" dc:"SubscriptionId"`
+	Metadata       map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+}
+
+type UpdateMetadataRes struct {
 }

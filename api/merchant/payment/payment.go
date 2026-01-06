@@ -15,6 +15,7 @@ type NewReq struct {
 	Currency           string                 `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
 	TotalAmount        int64                  `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
 	PlanId             uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，used when planId not null, Default 1" `
 	GatewayId          uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	GatewayPaymentType string                 `json:"gatewayPaymentType" dc:"GatewayPaymentType"`
 	RedirectUrl        string                 `json:"redirectUrl" dc:"Redirect Url"`
@@ -27,11 +28,13 @@ type NewReq struct {
 	GasPayer           string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
 	SendInvoice        bool                   `json:"sendInvoice" d:"false" dc:"Whether sen invoice email to customer or not，default false"`
 	PaymentType        string                 `json:"paymentType" dc:"Payment Type"`
+	PaymentUIMode      string                 `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 }
 
 type NewRes struct {
 	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
 	PaymentId         string      `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId         string      `json:"invoiceId" dc:"The unique id of invoice"`
 	ExternalPaymentId string      `json:"externalPaymentId" dc:"The external unique id of payment"`
 	Link              string      `json:"link"`
 	Action            *gjson.Json `json:"action" dc:"action"`

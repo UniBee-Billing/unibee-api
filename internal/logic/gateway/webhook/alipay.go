@@ -55,7 +55,7 @@ func (c AlipayWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 }
 
 func (c AlipayWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	payIdStr := r.Get("paymentRequestId").String()
+	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false
 	var returnUrl = ""

@@ -185,15 +185,16 @@ func (c Alipay) GatewayNewPayment(ctx context.Context, gateway *entity.MerchantG
 				items = append(items, item)
 			}
 		} else {
-			var productName = createPayContext.Invoice.ProductName
-			if len(productName) == 0 {
-				productName = createPayContext.Invoice.InvoiceName
-			}
-			if len(productName) == 0 {
-				productName = "DefaultProduct"
-			}
+			//var productName = createPayContext.Invoice.ProductName
+			//if len(productName) == 0 {
+			//	productName = createPayContext.Invoice.InvoiceName
+			//}
+			//if len(productName) == 0 {
+			//	productName = "DefaultProduct"
+			//}
+			name, _ := createPayContext.GetInvoiceSingleProductNameAndDescription()
 			item := &model.Goods{
-				GoodsName: fmt.Sprintf("%s", productName),
+				GoodsName: fmt.Sprintf("%s", name),
 				GoodsUnitAmount: &model.Amount{
 					Currency: strings.ToLower(createPayContext.Pay.Currency),
 					Value:    fmt.Sprintf("%d", createPayContext.Invoice.TotalAmount),

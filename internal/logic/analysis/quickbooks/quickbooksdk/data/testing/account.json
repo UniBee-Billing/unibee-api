@@ -1,0 +1,26 @@
+{
+	"Account": {
+		"FullyQualifiedName": "MyJobs",
+		"domain": "QBO",
+		"Name": "MyJobs",
+		"Classification": "Asset",
+		"AccountSubType": "AccountsReceivable",
+		"CurrencyRef": {
+			"name": "United States Dollar",
+			"value": "USD"
+		},
+		"CurrentBalanceWithSubAccounts": 0,
+		"sparse": false,
+		"MetaData": {
+			"CreateTime": "2014-12-31T09:29:05-08:00",
+			"LastUpdatedTime": "2014-12-31T09:29:05-08:00"
+		},
+		"AccountType": "Accounts Receivable",
+		"CurrentBalance": 0,
+		"Active": true,
+		"SyncToken": "0",
+		"Id": "94",
+		"SubAccount": false
+	},
+	"time": "2014-12-31T09:29:05.717-08:00"
+}

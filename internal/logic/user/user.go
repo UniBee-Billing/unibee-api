@@ -248,6 +248,7 @@ func CreateUser(ctx context.Context, req *NewUserInternalReq) (one *entity.UserA
 		Address:            req.Address,
 		ExternalUserId:     req.ExternalUserId,
 		CountryCode:        req.CountryCode,
+		ReMark:             req.State,
 		CountryName:        countryName,
 		UserName:           req.UserName,
 		MerchantId:         req.MerchantId,
@@ -302,27 +303,27 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 		one, err = CreateUser(ctx, req)
 		utility.AssertError(err, "Server Error")
 	} else {
-		if strings.Compare(one.Email, req.Email) != 0 {
-			//email changed, update email
-			emailOne := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
-			utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email of other externalUserId exist")
-			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-				dao.UserAccount.Columns().Email:     req.Email,
-				dao.UserAccount.Columns().GmtModify: gtime.Now(),
-			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
-			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-				MerchantId:     one.MerchantId,
-				Target:         fmt.Sprintf("User(%v)", one.Id),
-				Content:        fmt.Sprintf("ChangeToNewEmail(%s)", req.Email),
-				UserId:         one.Id,
-				SubscriptionId: "",
-				InvoiceId:      "",
-				PlanId:         0,
-				DiscountCode:   "",
-			}, err)
-			utility.AssertError(err, "Server Error")
-		}
-		if strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
+		//if len(req.Email) > 0 && strings.Compare(one.Email, req.Email) != 0 {
+		//	//email changed, update email
+		//	emailOne := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+		//	utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email of other externalUserId exist")
+		//	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+		//		dao.UserAccount.Columns().Email:     req.Email,
+		//		dao.UserAccount.Columns().GmtModify: gtime.Now(),
+		//	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+		//	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		//		MerchantId:     one.MerchantId,
+		//		Target:         fmt.Sprintf("User(%v)", one.Id),
+		//		Content:        fmt.Sprintf("ChangeToNewEmail(%s)", req.Email),
+		//		UserId:         one.Id,
+		//		SubscriptionId: "",
+		//		InvoiceId:      "",
+		//		PlanId:         0,
+		//		DiscountCode:   "",
+		//	}, err)
+		//	utility.AssertError(err, "Server Error")
+		//}
+		if len(req.ExternalUserId) > 0 && strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
 			//externalUserId not match, update externalUserId
 			otherOne := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 			utility.Assert(otherOne == nil || otherOne.Id == one.Id, "externalUserId of other email exist")
@@ -354,6 +355,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewUserInternalReq) (one *entit
 			dao.UserAccount.Columns().Language:           req.Language,
 			dao.UserAccount.Columns().Address:            req.Address,
 			dao.UserAccount.Columns().CompanyName:        req.CompanyName,
+			dao.UserAccount.Columns().ReMark:             req.State,
 			dao.UserAccount.Columns().RegistrationNumber: req.RegistrationNumber,
 			dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()

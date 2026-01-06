@@ -65,6 +65,7 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 			DiscountCode:           req.DiscountCode,
 			Discount:               req.Discount,
 			ManualPayment:          req.ManualPayment,
+			PaymentUIMode:          req.PaymentUIMode,
 			ReturnUrl:              req.ReturnUrl,
 			CancelUrl:              req.CancelUrl,
 			ProductData:            req.ProductData,
@@ -93,7 +94,10 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 	}
 	return &subscription.RenewRes{
 		Subscription: renewRes.Subscription,
+		PaymentId:    renewRes.PaymentId,
+		InvoiceId:    renewRes.InvoiceId,
 		Paid:         renewRes.Paid,
 		Link:         renewRes.Link,
+		Action:       renewRes.Action,
 	}, nil
 }

@@ -19,7 +19,7 @@ import (
 type ListInternalReq struct {
 	MerchantId    uint64  `json:"merchantId" dc:"MerchantId" v:"required"`
 	PlanIds       []int64 `json:"planIds"  dc:"filter id list of plan, default all" `
-	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default all" `
+	ProductIds    []int64 `json:"productIds"  dc:"filter id list of product, default product if not specified" `
 	Type          []int   `json:"type" dc:"Default All，,1-main plan，2-recurring addon, 3-one time addon" `
 	Status        []int   `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int     `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
@@ -65,10 +65,10 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 	return &plan.DetailRes{
 		Plan: &detail.PlanDetail{
 			Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(one.ProductId), merchantId)),
-			Plan:                  bean.SimplifyPlan(one),
-			Addons:                bean.SimplifyPlanList(query.GetAddonsByIds(ctx, addonIds)),
+			Plan:                  bean.SimplifyPlanWithContext(ctx, one),
+			Addons:                bean.SimplifyPlanList(ctx, query.GetAddonsByIds(ctx, addonIds)),
 			AddonIds:              addonIds,
-			OnetimeAddons:         bean.SimplifyPlanList(query.GetAddonsByIds(ctx, oneTimeAddonIds)),
+			OnetimeAddons:         bean.SimplifyPlanList(ctx, query.GetAddonsByIds(ctx, oneTimeAddonIds)),
 			OnetimeAddonIds:       oneTimeAddonIds,
 			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
 			MetricMeteredCharge:   detail.ConvertMetricPlanChargeDetailArrayFromParam(ctx, bean.ConvertMetricPlanBindingEntityFromPlan(one).MetricMeteredCharge),
@@ -103,6 +103,9 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		} else {
 			q = q.WhereIn(dao.Plan.Columns().ProductId, req.ProductIds)
 		}
+	} else {
+		// default product
+		q = q.Where(q.Builder().WhereOr(dao.Plan.Columns().ProductId, 0).WhereOrNull(dao.Plan.Columns().ProductId))
 	}
 	if len(req.PlanIds) > 0 {
 		q = q.WhereIn(dao.Plan.Columns().Id, req.PlanIds)
@@ -138,7 +141,7 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		if p.Type != consts.PlanTypeMain {
 			list = append(list, &detail.PlanDetail{
 				Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
-				Plan:                  bean.SimplifyPlan(p),
+				Plan:                  bean.SimplifyPlanWithContext(ctx, p),
 				MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Addons:                nil,
 				AddonIds:              nil,
@@ -177,7 +180,7 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 		}
 		list = append(list, &detail.PlanDetail{
 			Product:               bean.SimplifyProduct(query.GetProductById(ctx, uint64(p.ProductId), req.MerchantId)),
-			Plan:                  bean.SimplifyPlan(p),
+			Plan:                  bean.SimplifyPlanWithContext(ctx, p),
 			MetricPlanLimits:      metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Addons:                nil,
 			AddonIds:              addonIds,
@@ -201,7 +204,7 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 				if len(planRo.AddonIds) > 0 {
 					for _, id := range planRo.AddonIds {
 						if mapPlans[id] != nil {
-							planRo.Addons = append(planRo.Addons, bean.SimplifyPlan(mapPlans[id]))
+							planRo.Addons = append(planRo.Addons, bean.SimplifyPlanWithContext(ctx, mapPlans[id]))
 						}
 					}
 				}
@@ -222,7 +225,7 @@ func PlanList(ctx context.Context, req *ListInternalReq) (list []*detail.PlanDet
 				if len(planRo.OnetimeAddonIds) > 0 {
 					for _, id := range planRo.OnetimeAddonIds {
 						if mapPlans[id] != nil {
-							planRo.OnetimeAddons = append(planRo.OnetimeAddons, bean.SimplifyPlan(mapPlans[id]))
+							planRo.OnetimeAddons = append(planRo.OnetimeAddons, bean.SimplifyPlanWithContext(ctx, mapPlans[id]))
 						}
 					}
 				}

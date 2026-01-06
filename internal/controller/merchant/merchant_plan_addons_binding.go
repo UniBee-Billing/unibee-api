@@ -12,5 +12,5 @@ func (c *ControllerPlan) AddonsBinding(ctx context.Context, req *plan.AddonsBind
 	if err != nil {
 		return nil, err
 	}
-	return &plan.AddonsBindingRes{Plan: bean.SimplifyPlan(one)}, nil
+	return &plan.AddonsBindingRes{Plan: bean.SimplifyPlanWithContext(ctx, one)}, nil
 }

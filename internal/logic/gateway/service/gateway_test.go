@@ -13,7 +13,7 @@ func TestEditGateway(t *testing.T) {
 	ctx := context.Background()
 	t.Run("Wire Transfer", func(t *testing.T) {
 		gatewayName := "wire_transfer"
-		one := query.GetGatewayByGatewayName(ctx, test.TestMerchant.Id, gatewayName)
+		one := query.GetDefaultGatewayByGatewayName(ctx, test.TestMerchant.Id, gatewayName)
 		if one == nil {
 			one = SetupWireTransferGateway(ctx, &WireTransferSetupReq{
 				MerchantId:    test.TestMerchant.Id,

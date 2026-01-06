@@ -37,4 +37,5 @@ type MerchantGateway struct {
 	Currency              string      `json:"currency"              description:"currency"`                                        // currency
 	MinimumAmount         int64       `json:"minimumAmount"         description:"minimum amount, cent"`                            // minimum amount, cent
 	BankData              string      `json:"bankData"              description:"bank credentials data"`                           // bank credentials data
+	MetaData              string      `json:"metaData"              description:"meta_data(json)"`                                 // meta_data(json)
 }

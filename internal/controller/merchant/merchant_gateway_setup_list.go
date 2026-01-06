@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/gateway"
@@ -10,6 +11,7 @@ import (
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/merchant_config"
+	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -21,6 +23,15 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 	if sortConfig != nil {
 		_ = utility.UnmarshalFromJsonString(sortConfig.ConfigValue, &sortMap)
 	}
+	gatewayList := query.GetMerchantGatewaySetupList(ctx, _interface.GetMerchantId(ctx))
+	gatewayMap := make(map[string][]*entity.MerchantGateway)
+	for _, one := range gatewayList {
+		if slice, ok := gatewayMap[one.GatewayName]; ok {
+			gatewayMap[one.GatewayName] = append(slice, one)
+		} else {
+			gatewayMap[one.GatewayName] = []*entity.MerchantGateway{one}
+		}
+	}
 	for _, gatewayName := range api.ExportGatewaySetupListKeys() {
 		if info, exists := api.ExportGatewaySetupList[gatewayName]; exists {
 			if config.GetConfigInstance().IsProd() {
@@ -28,12 +39,34 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 					continue
 				}
 			}
-			one := query.GetGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), gatewayName)
-			if one != nil && one.IsDeleted == 0 {
-				gatewayDetail := detail.ConvertGatewayDetail(ctx, one)
-				gatewayDetail.SetupGatewayPaymentTypes = info.GatewayPaymentTypes
-				list = append(list, gatewayDetail)
-			} else {
+			var needSetupValidOne = true
+			targetGatewayList := gatewayMap[gatewayName]
+			if targetGatewayList != nil && len(targetGatewayList) > 0 {
+				//needSetupValidOne = true
+				//} else {
+				for _, one := range targetGatewayList {
+					gatewayDetail := detail.ConvertGatewayDetail(ctx, one)
+					gatewayDetail.SetupGatewayPaymentTypes = info.GatewayPaymentTypes
+					gatewayDetail.Name = fmt.Sprintf("[ID: %d] %s", gatewayDetail.Id, gatewayDetail.Name)
+					if gatewayDetail.Archive {
+						gatewayDetail.Name = fmt.Sprintf("%s ARV", gatewayDetail.Name)
+						gatewayDetail.Sort = 99999999
+						// archived gateway sort to end
+					}
+					if one.IsDeleted == 0 {
+						needSetupValidOne = false
+					}
+					list = append(list, gatewayDetail)
+				}
+			}
+
+			//one := query.GetDefaultGatewayByGatewayName(ctx, _interface.GetMerchantId(ctx), gatewayName)
+			//if one != nil && one.IsDeleted == 0 {
+			//	gatewayDetail := detail.ConvertGatewayDetail(ctx, one)
+			//	gatewayDetail.SetupGatewayPaymentTypes = info.GatewayPaymentTypes
+			//	list = append(list, gatewayDetail)
+			//} else {
+			if needSetupValidOne {
 				gatewaySort := info.Sort
 				if _, ok := sortMap[gatewayName]; ok {
 					gatewaySort = sortMap[gatewayName]
@@ -51,10 +84,13 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 				if len(info.SubGatewayName) > 0 {
 					subGatewayName = info.SubGatewayName
 				}
-
+				name := info.Name
+				if info.IsStaging {
+					name = fmt.Sprintf("%s Beta", info.Name)
+				}
 				list = append(list, &detail.Gateway{
 					Id:                            0,
-					Name:                          info.Name,
+					Name:                          name,
 					Description:                   info.Description,
 					GatewayName:                   gatewayName,
 					DisplayName:                   info.DisplayName,
@@ -86,7 +122,7 @@ func (c *ControllerGateway) SetupList(ctx context.Context, req *gateway.SetupLis
 		}
 	}
 	sort.Slice(list, func(i, j int) bool {
-		return list[i].Sort > list[j].Sort
+		return list[i].Sort < list[j].Sort
 	})
 	return &gateway.SetupListRes{Gateways: list}, nil
 }

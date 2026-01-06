@@ -2,8 +2,12 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"github.com/pquerna/otp"
+	"github.com/pquerna/otp/totp"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/test"
@@ -92,4 +96,33 @@ func TestUserCreateAndDelete(t *testing.T) {
 		one = query.GetUserAccountById(ctx, one.Id)
 		require.Nil(t, one)
 	})
+}
+
+// key:QV6GZORZI54F4A3NGQRKH76K3YBPT6ME
+// url:otpauth://totp/Unibee:jack.fu@wowow.io?algorithm=SHA1&digits=6&issuer=Unibee&period=30&secret=QV6GZORZI54F4A3NGQRKH76K3YBPT6ME
+func TestTotp(t *testing.T) {
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "Unibee",           // Application Name
+		AccountName: "jack.fu@wowow.io", // Account
+	})
+	if err != nil {
+		fmt.Printf("error:%s\n", err.Error())
+		return
+	}
+	fmt.Printf("key:%s\n", key.Secret())
+	fmt.Printf("url:%s\n", key.URL())
+}
+
+func TestTotpCode(t *testing.T) {
+	validateResult, err := totp.ValidateCustom("029844", "QV6GZORZI54F4A3NGQRKH76K3YBPT6ME", time.Now(), totp.ValidateOpts{
+		Period:    30,
+		Skew:      1,
+		Digits:    otp.DigitsSix,
+		Algorithm: otp.AlgorithmSHA1,
+	})
+	if err != nil {
+		fmt.Printf("error:%s\n", err.Error())
+		return
+	}
+	fmt.Println(validateResult)
 }

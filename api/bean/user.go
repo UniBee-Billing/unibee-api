@@ -16,7 +16,8 @@ type NewUser struct {
 	Address            string `json:"address" dc:"Address"`
 	UserName           string `json:"userName" dc:"UserName"`
 	CountryCode        string `json:"countryCode" dc:"CountryCode"`
-	Type               int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	State              string `json:"state" dc:"State"`
+	Type               int64  `json:"type" dc:"User type, 1-Individual|2-Business"`
 	CompanyName        string `json:"companyName" dc:"company name"`
 	VatNumber          string `json:"vatNumber" dc:"vat number"`
 	City               string `json:"city" dc:"city"`
@@ -37,29 +38,29 @@ type UserAccount struct {
 	Birthday           string                 `json:"birthday"           description:"brithday"`                                  // brithday
 	Profession         string                 `json:"profession"         description:"profession"`                                // profession
 	School             string                 `json:"school"             description:"school"`                                    // school
-	Custom             string                 `json:"custom"             description:"custom"`                                    // custom
-	LastLoginAt        int64                  `json:"lastLoginAt"        description:"last login time, utc time"`                 // last login time, utc time
-	IsRisk             int                    `json:"isRisk"             description:"is risk account (deperated)"`               // is risk account (deperated)
-	GatewayId          uint64                 `json:"gatewayId"          description:"gateway_id"`                                // gateway_id
-	Version            int                    `json:"version"            description:"version"`                                   // version
-	Phone              string                 `json:"phone"              description:"phone"`                                     // phone
-	Address            string                 `json:"address"            description:"address"`                                   // address
-	FirstName          string                 `json:"firstName"          description:"first name"`                                // first name
-	LastName           string                 `json:"lastName"           description:"last name"`                                 // last name
-	CompanyName        string                 `json:"companyName"        description:"company name"`                              // company name
-	VATNumber          string                 `json:"vATNumber"          description:"vat number"`                                // vat number
-	Telegram           string                 `json:"telegram"           description:"telegram"`                                  // telegram
-	WhatsAPP           string                 `json:"whatsAPP"           description:"whats app"`                                 // whats app
-	WeChat             string                 `json:"weChat"             description:"wechat"`                                    // wechat
-	TikTok             string                 `json:"tikTok"             description:"tictok"`                                    // tictok
-	LinkedIn           string                 `json:"linkedIn"           description:"linkedin"`                                  // linkedin
-	Facebook           string                 `json:"facebook"           description:"facebook"`                                  // facebook
-	OtherSocialInfo    string                 `json:"otherSocialInfo"    description:""`                                          //
-	PaymentMethod      string                 `json:"paymentMethod"      description:""`                                          //
-	CountryCode        string                 `json:"countryCode"        description:"country_code"`                              // country_code
-	CountryName        string                 `json:"countryName"        description:"country_name"`                              // country_name
-	SubscriptionName   string                 `json:"subscriptionName"   description:"subscription name"`                         // subscription name
-	SubscriptionId     string                 `json:"subscriptionId"     description:"subscription id"`                           // subscription id
+	State              string                 `json:"state,omitempty"    description:"State"`
+	LastLoginAt        int64                  `json:"lastLoginAt"        description:"last login time, utc time"`   // last login time, utc time
+	IsRisk             int                    `json:"isRisk"             description:"is risk account (deperated)"` // is risk account (deperated)
+	GatewayId          uint64                 `json:"gatewayId"          description:"gateway_id"`                  // gateway_id
+	Version            int                    `json:"version"            description:"version"`                     // version
+	Phone              string                 `json:"phone"              description:"phone"`                       // phone
+	Address            string                 `json:"address"            description:"address"`                     // address
+	FirstName          string                 `json:"firstName"          description:"first name"`                  // first name
+	LastName           string                 `json:"lastName"           description:"last name"`                   // last name
+	CompanyName        string                 `json:"companyName"        description:"company name"`                // company name
+	VATNumber          string                 `json:"vATNumber"          description:"vat number"`                  // vat number
+	Telegram           string                 `json:"telegram"           description:"telegram"`                    // telegram
+	WhatsAPP           string                 `json:"whatsAPP"           description:"whats app"`                   // whats app
+	WeChat             string                 `json:"weChat"             description:"wechat"`                      // wechat
+	TikTok             string                 `json:"tikTok"             description:"tictok"`                      // tictok
+	LinkedIn           string                 `json:"linkedIn"           description:"linkedin"`                    // linkedin
+	Facebook           string                 `json:"facebook"           description:"facebook"`                    // facebook
+	OtherSocialInfo    string                 `json:"otherSocialInfo"    description:""`                            //
+	PaymentMethod      string                 `json:"paymentMethod"      description:""`                            //
+	CountryCode        string                 `json:"countryCode"        description:"country_code"`                // country_code
+	CountryName        string                 `json:"countryName"        description:"country_name"`                // country_name
+	SubscriptionName   string                 `json:"subscriptionName"   description:"subscription name"`           // subscription name
+	SubscriptionId     string                 `json:"subscriptionId"     description:"subscription id"`             // subscription id
 	SubscriptionStatus int                    `json:"subscriptionStatus" description:"sub status， 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed"`
 	RecurringAmount    int64                  `json:"recurringAmount"    description:"total recurring amount, cent"` // total recurring amount, cent
 	BillingType        int                    `json:"billingType"        description:"1-recurring,2-one-time"`       // 1-recurring,2-one-time
@@ -67,14 +68,15 @@ type UserAccount struct {
 	CreateTime         int64                  `json:"createTime"         description:"create utc time"`              // create utc time
 	ExternalUserId     string                 `json:"externalUserId"     description:"external_user_id"`             // external_user_id
 	Status             int                    `json:"status"             description:"0-Active, 2-Suspend"`
-	TaxPercentage      int64                  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`               // taxPercentage，1000 = 10%
-	Type               int64                  `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
+	TaxPercentage      int64                  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`           // taxPercentage，1000 = 10%
+	Type               int64                  `json:"type"               description:"User type, 1-Individual|2-Business"` // User type, 1-Individual|2-Business
 	City               string                 `json:"city" dc:"city"`
 	ZipCode            string                 `json:"zipCode" dc:"zip_code"`
 	Language           string                 `json:"language" dc:"User Language, en|ru|cn|vi|bp"`
 	RegistrationNumber string                 `json:"registrationNumber" dc:"RegistrationNumber"`
 	Metadata           map[string]interface{} `json:"metadata"                  description:""`
 	GatewayPaymentType string                 `json:"gatewayPaymentType"              description:""`
+	Custom             string                 `json:"custom" dc:"Custom"`
 }
 
 func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
@@ -110,7 +112,6 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		Birthday:           one.Birthday,
 		Profession:         one.Profession,
 		School:             one.School,
-		Custom:             one.Custom,
 		LastLoginAt:        one.LastLoginAt,
 		IsRisk:             one.IsRisk,
 		GatewayId:          gatewayId,
@@ -131,6 +132,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		PaymentMethod:      one.PaymentMethod,
 		CountryCode:        one.CountryCode,
 		CountryName:        one.CountryName,
+		State:              one.ReMark,
 		SubscriptionName:   one.SubscriptionId,
 		SubscriptionId:     one.SubscriptionId,
 		SubscriptionStatus: one.SubscriptionStatus,
@@ -145,5 +147,6 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccount {
 		Language:           one.Language,
 		RegistrationNumber: one.RegistrationNumber,
 		Metadata:           metadata,
+		Custom:             one.Custom,
 	}
 }

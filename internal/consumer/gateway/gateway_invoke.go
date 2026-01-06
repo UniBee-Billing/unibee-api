@@ -2,8 +2,6 @@ package gateway
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"unibee/api/bean/detail"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/service"
@@ -11,6 +9,9 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 func init() {
@@ -35,7 +36,7 @@ func init() {
 				Sort:          req.Sort,
 			})
 		} else {
-			one = service.SetupGateway(ctx, req.MerchantId, req.GatewayName, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.GatewayPaymentTypes, req.DisplayName, req.GatewayIcons, req.Sort, req.CurrencyExchange)
+			one = service.SetupGateway(ctx, req.MerchantId, req.GatewayName, req.GatewayKey, req.GatewaySecret, req.SubGateway, req.GatewayPaymentTypes, req.DisplayName, req.GatewayIcons, req.Sort, req.CurrencyExchange, nil)
 			if one != nil && len(req.WebhookSecret) > 0 {
 				utility.Assert(one.MerchantId == req.MerchantId, "merchant not match")
 				gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)

@@ -3,9 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/user/vat"
@@ -14,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
+	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/default"
 	_interface "unibee/internal/interface/context"
 	"unibee/internal/logic/email"
@@ -22,13 +20,17 @@ import (
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/service"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanAddonParam) []*bean.PlanAddonDetail {
@@ -58,7 +60,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanA
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
 				addons = append(addons, &bean.PlanAddonDetail{
 					Quantity:  param.Quantity,
-					AddonPlan: bean.SimplifyPlan(mapPlans[param.AddonPlanId]),
+					AddonPlan: bean.SimplifyPlanWithContext(ctx, mapPlans[param.AddonPlanId]),
 				})
 			}
 		}
@@ -76,8 +78,11 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.Nu
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
 }
 
-func GetSubscriptionZeroPaymentLink(returnUrl string, subId string) string {
+func GetSubscriptionZeroPaymentLink(invoice *entity.Invoice, returnUrl string, subId string) string {
 	if returnUrl == "" {
+		if invoice != nil {
+			return link.GetInvoiceLink(invoice.InvoiceId, invoice.SendTerms)
+		}
 		return returnUrl
 	}
 	if strings.Contains(returnUrl, "?") {
@@ -132,7 +137,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 					template = email.TemplateSubscriptionCancelledByTrialEnd
 				}
 				if strings.Compare(reason, "CancelledByAnotherCreation") != 0 {
-					err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, template, "", &email.TemplateVariable{
+					err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, template, "", &bean.EmailTemplateVariable{
 						UserName:              user.FirstName + " " + user.LastName,
 						MerchantProductName:   plan.PlanName,
 						MerchantCustomerEmail: merchant.Email,
@@ -194,7 +199,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	// SendEmail
 	if merchantMemberId > 0 {
 		//merchant Cancel
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &bean.EmailTemplateVariable{
 			UserName:              user.FirstName + " " + user.LastName,
 			MerchantProductName:   plan.PlanName,
 			MerchantCustomerEmail: merchant.Email,
@@ -205,7 +210,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelAtPeriodEnd:%s", err.Error())
 		}
 	} else {
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &bean.EmailTemplateVariable{
 			UserName:              user.FirstName + " " + user.LastName,
 			MerchantProductName:   plan.PlanName,
 			MerchantCustomerEmail: merchant.Email,
@@ -265,7 +270,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, user.Language, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &bean.EmailTemplateVariable{
 		UserName:              user.FirstName + " " + user.LastName,
 		MerchantProductName:   plan.PlanName,
 		MerchantCustomerEmail: merchant.Email,
@@ -315,7 +320,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
 	newStatus := sub.Status
 	if newTrialEnd > gtime.Now().Timestamp() {
 		//automatic change sub status to active
@@ -346,7 +351,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 		Topic:      redismq2.TopicSubscriptionUpdate.Topic,
 		Tag:        redismq2.TopicSubscriptionUpdate.Tag,
 		Body:       sub.SubscriptionId,
-		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName()},
+		CustomData: map[string]interface{}{"CreateFrom": utility.ReflectCurrentFunctionName(), "Note": "AddNewTrialEnd"},
 	})
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicUserMetricUpdate.Topic,
@@ -361,7 +366,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     sub.MerchantId,
 		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
-		Content:        fmt.Sprintf("AddNewTrialEnd:%d(%s-%s)", newTrialEnd, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(newStatus).Description()),
+		Content:        fmt.Sprintf("ChangeDueDay-AddNewTrialEnd:%d(%s-%s)", newTrialEnd, consts.SubStatusToEnum(sub.Status).Description(), consts.SubStatusToEnum(newStatus).Description()),
 		UserId:         sub.UserId,
 		SubscriptionId: sub.SubscriptionId,
 		InvoiceId:      "",
@@ -404,7 +409,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if oneUser != nil && plan != nil && merchant != nil {
-			err := email.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionTrialStart, "", &email.TemplateVariable{
+			err := email.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, oneUser.Language, email.TemplateSubscriptionTrialStart, "", &bean.EmailTemplateVariable{
 				UserName:              oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName:   plan.PlanName,
 				MerchantCustomerEmail: merchant.Email,
@@ -464,7 +469,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
 	newTrialEnd := sub.CurrentPeriodStart - 1
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
 	newStatus := sub.Status
 	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
 		// todo mark has unfinished pending update
@@ -473,7 +478,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 		plan := query.GetPlanById(ctx, sub.PlanId)
 
 		var nextPeriodStart = gtime.Now().Timestamp()
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, nextPeriodStart, plan.Id)
+		var nextPeriodEnd = period.GetPeriodEndFromStart(ctx, nextPeriodStart, nextPeriodStart, plan.Id)
 		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 			UserId:             sub.UserId,
 			Currency:           sub.Currency,

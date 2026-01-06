@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	go_redismq "github.com/jackyang-hk/go-redismq"
-	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
@@ -50,10 +49,16 @@ func GetMerchantMemberLimit(ctx context.Context, merchantId uint64) int {
 	license := GetMerchantLicense(ctx, merchantId)
 	if license != nil && license.IsPaid && license.Plan != nil && license.Plan.Metadata != nil {
 		if license.Plan.Metadata["MemberCount"] != nil {
-			memberCount, err := strconv.Atoi(fmt.Sprintf("%s", license.Plan.Metadata["MemberCount"]))
-			if err == nil && memberCount != 0 {
-				return memberCount
+			if v, ok := license.Plan.Metadata["MemberCount"].(float64); ok {
+				memberLimit := int(v)
+				if memberLimit > 0 {
+					return memberLimit
+				}
 			}
+			//memberCount, err := strconv.Atoi(fmt.Sprintf("%s", license.Plan.Metadata["MemberCount"]))
+			//if err == nil && memberCount > 0 {
+			//	return memberCount
+			//}
 		}
 	}
 	return defaultMemberLimit

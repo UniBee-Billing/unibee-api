@@ -1,0 +1,60 @@
+# UniBee 与 QuickBooks 对接说明
+
+当您在 UniBee 中开启 QuickBooks 对接功能时，我们将代表您将 UniBee 中的账务数据同步到 QuickBooks。由于 UniBee 已完成完整的收款与税务闭环，QuickBooks 在该流程中**仅作为记账系统**，而不负责收款和税务计算。
+
+## 📌 为什么使用 Invoice + Payment 方式？
+
+我们采用 `Invoice + Payment` 模式，而非 `SalesReceipt`，原因如下：
+
+- ✅ **UniBee 已完成实际收款**，QuickBooks 无需参与。
+- ✅ **税费由 UniBee 计算完成**，使用 SalesReceipt 容易引发 QuickBooks 自动重新计算税（尤其在美国区）。
+- ✅ 使用 `Invoice` 可控制税务行为，避免 QuickBooks 重新计算导致金额不一致。
+- ✅ 支持后续灵活操作（如退款、付款记录关联等）。
+
+## 🧾 记录方式说明
+
+在 QuickBooks 中，我们将以如下方式记录每笔订单：
+
+- 创建一条 `Invoice`，每个商品行不计算税（TaxCodeRef=NON）。
+- 在 `Invoice` 中新增一条“总税额”行，表示实际支付的税。
+- 设置 `GlobalTaxCalculation: NotApplicable`，避免 QuickBooks 重算税。
+- 创建一条 `Payment`，与该 `Invoice` 关联，表示已付款。
+
+这样可以确保：
+
+- 金额与税费与 UniBee 系统完全一致。
+- QuickBooks 账务清晰，不产生二次计算误差。
+- 后续支持退款、账单同步等操作。
+
+## 🌐 特别说明（美国区）
+
+如果您是美国 QuickBooks 用户，由于 QuickBooks 默认启用了自动税务计算（AST），上述做法是**唯一可行的同步方式**。否则 QuickBooks 会：
+
+- 自动判断客户地址和税率；
+- 覆盖我们传入的金额和税金；
+- 导致账务不一致。
+
+## 🔐 授权时的知情义务
+
+在客户授权 UniBee 访问 QuickBooks 时，我们将：
+
+- **仅使用您的账务数据权限**；
+- **不会控制或影响您的 QuickBooks 收款通道**；
+- **不会修改您的税率配置**，仅写入静态数据；
+- **使用 UniBee 已知账户进行入账分类（如收入账户、付款账户）**。
+
+若您希望修改默认账户或对接逻辑，请联系我们的技术支持。
+
+---
+
+## 🤝 合作建议
+
+为保证账务一致性，建议您：
+
+- 不在 QuickBooks 中修改 UniBee 推送的发票和付款；
+- 在 UniBee 中完成所有收款、退款、开票操作；
+- 若有多地税务需求，请提前配置好税码（TaxCode），并同步到 UniBee。
+
+---
+
+如您对 QuickBooks 对接过程有任何疑问，请随时联系 UniBee 客服或技术支持团队。

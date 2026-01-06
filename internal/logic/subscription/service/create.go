@@ -3,10 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	redismq "github.com/jackyang-hk/go-redismq"
 	"strconv"
 	"strings"
 	"unibee/api/bean"
@@ -27,7 +23,7 @@ import (
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
-	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/plan/period"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/user/sub_update"
@@ -36,11 +32,18 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/unibee"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	redismq "github.com/jackyang-hk/go-redismq"
 )
 
 type CreatePreviewInternalReq struct {
 	MerchantId             uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	PlanId                 uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                 `json:"currency"          dc:"The currency"`
 	UserId                 uint64                 `json:"userId" dc:"UserId"`
 	Quantity               int64                  `json:"quantity" dc:"Quantity" `
 	DiscountCode           string                 `json:"discountCode"        dc:"DiscountCode"`
@@ -51,6 +54,7 @@ type CreatePreviewInternalReq struct {
 	VatNumber              string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage          *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	TrialEnd               int64                  `json:"trialEnd"  description:"trial_end, utc time, override plan's trial feature if specified'"` // trial_end, utc time
+	FreeInInitialPeriod    *bool                  `json:"freeInInitialPeriod"  dc:"Is free or not for the first period, true or false"`
 	IsSubmit               bool
 	ProductData            *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	PaymentMethodId        string
@@ -97,6 +101,7 @@ type CreatePreviewInternalRes struct {
 type CreateInternalReq struct {
 	MerchantId             uint64                      `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	PlanId                 uint64                      `json:"planId" dc:"PlanId" v:"required"`
+	Currency               string                      `json:"currency"          dc:"The currency"`
 	UserId                 uint64                      `json:"userId" dc:"UserId" v:"required"`
 	DiscountCode           string                      `json:"discountCode"        dc:"DiscountCode"`
 	Discount               *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
@@ -106,15 +111,17 @@ type CreateInternalReq struct {
 	AddonParams            []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount     int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency        string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ReturnUrl              string                      `json:"returnUrl"  dc:"RedirectUrl"  `
-	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl"`
+	ReturnUrl              string                      `json:"returnUrl"  dc:"RedirectUrl, back to returnUrl if creation completed"  `
+	CancelUrl              string                      `json:"cancelUrl" dc:"CancelUrl, back to cancelUrl if creation cancelled"`
 	VatCountryCode         string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber              string                      `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage          *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	PaymentMethodId        string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata               map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	TrialEnd               int64                       `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	FreeInInitialPeriod    *bool                       `json:"freeInInitialPeriod"  dc:"Is free or not for the first period, true or false"`
 	StartIncomplete        bool                        `json:"StartIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
+	PaymentUIMode          string                      `json:"paymentUIMode" dc:"The checkout UI Mode, hosted|embedded|custom, default hosted"`
 	ProductData            *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	ApplyPromoCredit       bool                        `json:"applyPromoCredit" `
 	ApplyPromoCreditAmount *int64                      `json:"applyPromoCreditAmount"  dc:"apply promo credit amount, auto compute if not specified"`
@@ -124,8 +131,11 @@ type CreateInternalRes struct {
 	Plan         *entity.Plan       `json:"plan"`
 	Subscription *bean.Subscription `json:"subscription" dc:"Subscription"`
 	User         *bean.UserAccount  `json:"user" dc:"user"`
+	PaymentId    string             `json:"paymentId" dc:"The unique id of payment"`
+	InvoiceId    string             `json:"invoiceId" dc:"The unique id of invoice"`
 	Paid         bool               `json:"paid"`
 	Link         string             `json:"link"`
+	Action       *gjson.Json        `json:"action"`
 }
 
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
@@ -140,6 +150,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v not active", plan.Id))
 	utility.Assert(plan.Type != consts.PlanTypeRecurringAddon, fmt.Sprintf("Plan Id:%v is addon", plan.Id))
+	var currency = plan.Currency
+	if len(req.Currency) > 0 {
+		currency = req.Currency
+	}
 	var user *entity.UserAccount = nil
 	if req.UserId > 0 || req.IsSubmit {
 		user = query.GetUserAccountById(ctx, req.UserId)
@@ -159,7 +173,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		utility.Assert(gatewayId > 0, "gateway need specified")
 		gateway = query.GetGatewayById(ctx, gatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
-		utility.Assert(gateway.MerchantId == req.MerchantId, "invalid gateway")
+		utility.Assert(gateway.MerchantId == req.MerchantId, fmt.Sprintf("invalid gatewayId:%d", gatewayId))
 	}
 	if !_interface.Context().Get(ctx).IsOpenApiCall && user != nil && gatewayId > 0 {
 		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId, req.GatewayPaymentType)
@@ -231,28 +245,27 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		subscriptionTaxPercentage = taxPercentage
 	}
 
-	var currency = plan.Currency
-	var TotalAmountExcludingTax = plan.Amount * req.Quantity
+	var TotalAmountExcludingTax = plan.CurrencyAmount(ctx, currency) * req.Quantity
 
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 
 	for _, addon := range addons {
-		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
+		//utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("Addon Id:%v Not Recurring Type", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.IntervalUnit == plan.IntervalUnit, "update addon must have same recurring interval to plan")
 		utility.Assert(addon.AddonPlan.IntervalCount == plan.IntervalCount, "update addon must have same recurring interval to plan")
-		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
+		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.CurrencyAmount(ctx, currency)*addon.Quantity
 	}
 
-	promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency)
+	promoCreditDiscountCodeExclusive := config.CheckCreditConfigDiscountCodeExclusive(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, currency)
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
 			MerchantId:         req.MerchantId,
 			UserId:             req.UserId,
 			DiscountCode:       req.DiscountCode,
-			Currency:           plan.Currency,
+			Currency:           currency,
 			PLanId:             plan.Id,
 			TimeNow:            gtime.Now().Timestamp(),
 			IsUpgrade:          false,
@@ -271,7 +284,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		{
 			//conflict, disable discount code
 			if promoCreditDiscountCodeExclusive && canApply && req.ApplyPromoCredit != nil && *req.ApplyPromoCredit {
-				_, promoCreditPayout, _ := payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, plan.Currency, plan.Amount, req.ApplyPromoCreditAmount)
+				_, promoCreditPayout, _ := payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, currency, plan.CurrencyAmount(ctx, currency), req.ApplyPromoCreditAmount)
 				if promoCreditPayout != nil && promoCreditPayout.CurrencyAmount > 0 {
 					discountMessage = "Promo Credit Conflict with Discount code"
 					req.DiscountCode = ""
@@ -290,13 +303,16 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if promoCreditDiscountCodeExclusive && len(req.DiscountCode) > 0 {
 			req.ApplyPromoCredit = unibee.Bool(false)
 		} else {
-			req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, plan.Currency))
+			req.ApplyPromoCredit = unibee.Bool(config.CheckCreditConfigPreviewDefaultUsed(ctx, _interface.GetMerchantId(ctx), consts.CreditAccountTypePromo, currency))
 		}
 	}
 
 	var currentTimeStart = gtime.Now()
 	var trialEnd = currentTimeStart.Timestamp() - 1
-	if req.TrialEnd <= currentTimeStart.Timestamp() {
+	var currentTimeEnd = period.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
+	if req.FreeInInitialPeriod != nil && *req.FreeInInitialPeriod {
+		req.TrialEnd = currentTimeEnd + 1
+	} else if req.TrialEnd <= currentTimeStart.Timestamp() {
 		req.TrialEnd = 0
 	}
 	utility.Assert(len(plan.IntervalUnit) > 0, "Invalid plan billing period")
@@ -307,9 +323,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		}
 		var totalAmountExcludingTax int64 = 0
 		trialEnd = req.TrialEnd
-		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
 		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
-			totalAmountExcludingTax = plan.TrialAmount * req.Quantity
+			totalAmountExcludingTax = plan.ExchangeAmountToCurrency(ctx, plan.TrialAmount, currency) * req.Quantity
 			currentTimeEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
 			trialEnd = currentTimeStart.Timestamp() - 1
 		}
@@ -320,14 +335,14 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		var promoCreditPayout *bean.CreditPayout
 		var creditPayoutErr error
 		if *req.ApplyPromoCredit {
-			promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, plan.Currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
+			promoCreditAccount, promoCreditPayout, creditPayoutErr = payment.CheckCreditUserPayout(ctx, req.MerchantId, req.UserId, consts.CreditAccountTypePromo, currency, totalAmountExcludingTax, req.ApplyPromoCreditAmount)
 			if creditPayoutErr == nil && promoCreditAccount != nil && promoCreditPayout != nil {
 				promoCreditDiscountAmount = promoCreditPayout.CurrencyAmount
 				totalAmountExcludingTax = totalAmountExcludingTax - promoCreditDiscountAmount
 			}
 		}
 
-		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), totalAmountExcludingTax)
+		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, query.GetDiscountByCode(ctx, plan.MerchantId, req.DiscountCode), totalAmountExcludingTax, currency, currentTimeStart.Timestamp()), totalAmountExcludingTax)
 		totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 
 		var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
@@ -338,6 +353,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			description = req.ProductData.Description
 		}
 		invoice := &bean.Invoice{
+			BizType:                        consts.BizTypeSubscription,
 			InvoiceName:                    "SubscriptionCreate",
 			ProductName:                    name,
 			OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount + promoCreditDiscountAmount,
@@ -348,21 +364,20 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			PromoCreditDiscountAmount:      promoCreditDiscountAmount,
 			PromoCreditAccount:             promoCreditAccount,
 			PromoCreditPayout:              promoCreditPayout,
-			Currency:                       plan.Currency,
+			Currency:                       currency,
 			TaxAmount:                      taxAmount,
-			BizType:                        consts.BizTypeSubscription,
 			SubscriptionAmount:             totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount + taxAmount,
 			SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount,
 			TrialEnd:                       trialEnd,
 			Lines: []*bean.InvoiceItemSimplify{{
-				Currency:               plan.Currency,
+				Currency:               currency,
 				OriginAmount:           totalAmountExcludingTax + taxAmount + discountAmount + promoCreditDiscountAmount,
 				Amount:                 totalAmountExcludingTax + taxAmount,
-				DiscountAmount:         discountAmount,
+				DiscountAmount:         discountAmount + promoCreditDiscountAmount,
 				Tax:                    taxAmount,
 				AmountExcludingTax:     totalAmountExcludingTax + discountAmount + promoCreditDiscountAmount,
 				TaxPercentage:          subscriptionTaxPercentage,
-				UnitAmountExcludingTax: plan.TrialAmount,
+				UnitAmountExcludingTax: plan.ExchangeAmountToCurrency(ctx, plan.TrialAmount, currency),
 				Name:                   name,
 				Description:            description,
 				Proration:              false,
@@ -394,7 +409,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountAmount:            invoice.DiscountAmount,
 			Invoice:                   invoice,
 			RecurringDiscountCode:     recurringDiscountCode,
-			Discount:                  bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
+			Discount:                  bean.SimplifyMerchantDiscountCodeWithTargetCurrency(ctx, query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode), currency),
 			Currency:                  currency,
 			VatCountryCode:            vatCountryCode,
 			VatCountryName:            vatCountryName,
@@ -411,9 +426,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			OtherActiveSubscriptionId: otherActiveSubscriptionId,
 			ApplyPromoCredit:          *req.ApplyPromoCredit,
 			CancelAtPeriodEnd:         plan.CancelAtTrialEnd,
+			GatewayPaymentType:        paymentType,
 		}, nil
 	} else {
-		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
+		//var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
 		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 			UserId:                 req.UserId,
 			InvoiceName:            "SubscriptionCreate",
@@ -450,7 +466,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountAmount:            invoice.DiscountAmount,
 			Invoice:                   invoice,
 			RecurringDiscountCode:     recurringDiscountCode,
-			Discount:                  bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
+			Discount:                  bean.SimplifyMerchantDiscountCodeWithTargetCurrency(ctx, query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode), currency),
 			Currency:                  currency,
 			VatCountryCode:            vatCountryCode,
 			VatCountryName:            vatCountryName,
@@ -481,7 +497,11 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		plan := query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(req.PlanId, 10), req.Discount, plan.Currency, gtime.Now().Timestamp())
+		currency := plan.Currency
+		if len(req.Currency) > 0 {
+			currency = req.Currency
+		}
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(req.PlanId, 10), req.Discount, currency, gtime.Now().Timestamp())
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -502,6 +522,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		PlanId:                 req.PlanId,
 		UserId:                 req.UserId,
 		DiscountCode:           req.DiscountCode,
+		Currency:               req.Currency,
 		Quantity:               req.Quantity,
 		GatewayId:              req.GatewayId,
 		GatewayPaymentType:     req.GatewayPaymentType,
@@ -511,6 +532,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		TaxPercentage:          req.TaxPercentage,
 		IsSubmit:               true,
 		TrialEnd:               req.TrialEnd,
+		FreeInInitialPeriod:    req.FreeInInitialPeriod,
 		ProductData:            req.ProductData,
 		PaymentMethodId:        req.PaymentMethodId,
 		Metadata:               req.Metadata,
@@ -530,7 +552,11 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 
 	if prepare.Invoice.TotalAmount == 0 && strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
-		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeCard || prepare.Gateway.GatewayType == consts.GatewayTypePaypal, i18n.LocalizationFormat(ctx, "{#PlanTrialGatewayError}"))
+		utility.Assert(prepare.Gateway.GatewayName == "stripe" || prepare.Gateway.GatewayType == consts.GatewayTypePaypal, i18n.LocalizationFormat(ctx, "{#PlanTrialGatewayError}"))
+	}
+
+	if prepare.Invoice.TotalAmount != 0 && prepare.Gateway.GatewayType == consts.GatewayTypeWireTransfer {
+		utility.Assert(strings.ToUpper(prepare.Invoice.Currency) == strings.ToUpper(prepare.Gateway.Currency), "Invoice currency not match the gateway's currency")
 	}
 
 	var subType = consts.SubTypeDefault
@@ -538,7 +564,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		subType = consts.SubTypeUniBeeControl
 	}
 
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(prepare.Invoice.PeriodEnd, prepare.TrialEnd), prepare.Plan.Id)
+	var dunningTime = period.GetDunningTimeFromEnd(ctx, utility.MaxInt64(prepare.Invoice.PeriodEnd, prepare.TrialEnd), prepare.Plan.Id)
 
 	one := &entity.Subscription{
 		MerchantId:                  prepare.Merchant.Id,
@@ -613,6 +639,8 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			})
 			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 				GatewaySubscriptionId: one.SubscriptionId,
+				PaymentId:             invoice.PaymentId,
+				InvoiceId:             invoice.InvoiceId,
 				Link:                  url,
 				Paid:                  false,
 			}
@@ -622,13 +650,16 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			sub_update.UpdateUserCountryCode(ctx, one.UserId, one.CountryCode)
 			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 				GatewaySubscriptionId: one.SubscriptionId,
-				Link:                  GetSubscriptionZeroPaymentLink(req.ReturnUrl, one.SubscriptionId),
+				PaymentId:             invoice.PaymentId,
+				InvoiceId:             invoice.InvoiceId,
+				Link:                  GetSubscriptionZeroPaymentLink(invoice, req.ReturnUrl, one.SubscriptionId),
 				Paid:                  true,
 			}
 		}
 	} else {
 		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, &service.CreateSubInvoicePaymentDefaultAutomaticReq{
 			Invoice:       invoice,
+			PaymentUIMode: req.PaymentUIMode,
 			ManualPayment: len(req.PaymentMethodId) == 0,
 			ReturnUrl:     req.ReturnUrl,
 			CancelUrl:     req.CancelUrl,
@@ -650,8 +681,11 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 			GatewaySubscriptionId: createPaymentResult.Payment.PaymentId,
 			Data:                  utility.MarshalToJsonString(createPaymentResult),
+			PaymentId:             createPaymentResult.Invoice.PaymentId,
+			InvoiceId:             createPaymentResult.Invoice.InvoiceId,
 			Link:                  createPaymentResult.Link,
 			Paid:                  createPaymentResult.Status == consts.PaymentSuccess,
+			Action:                createPaymentResult.Action,
 		}
 	}
 
@@ -703,7 +737,10 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Plan:         prepare.Plan,
 		Subscription: bean.SimplifySubscription(ctx, one),
 		User:         prepare.User,
+		PaymentId:    createRes.PaymentId,
+		InvoiceId:    createRes.InvoiceId,
 		Paid:         createRes.Paid,
-		Link:         one.Link,
+		Link:         createRes.Link,
+		Action:       createRes.Action,
 	}, nil
 }

@@ -100,7 +100,11 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 		if payment != nil && payment.Status == consts.PaymentSuccess {
 			// status haven't sync completely
 			res.Link = link.GetInvoicePdfLink(one.InvoiceId, one.SendTerms)
-		} else if gateway.GatewayType != consts.GatewayTypeCrypto || payment == nil || payment.Status == consts.PaymentCancelled || payment.Status == consts.PaymentFailed {
+		} else if gateway.GatewayType != consts.GatewayTypeCrypto ||
+			payment == nil ||
+			//(gateway.GatewayType == consts.GatewayTypeCrypto && (gtime.Now().Timestamp()-payment.CreateTime) > 60*60) ||
+			payment.Status == consts.PaymentCancelled ||
+			payment.Status == consts.PaymentFailed {
 			// create new payment for this invoice
 			var lines []*bean.InvoiceItemSimplify
 			err := utility.UnmarshalFromJsonString(one.Lines, &lines)

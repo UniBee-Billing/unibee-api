@@ -35,7 +35,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 	var update *service.UpdateInternalRes
 	go func() {
 		defer wg.Done()
-		taskCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		taskCtx, cancel := context.WithTimeout(_interface.Context().CopyFromCtx(ctx), 60*time.Second)
 		defer cancel()
 		var backgroundErr error
 		defer func() {
@@ -68,6 +68,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 			ReturnUrl:              req.ReturnUrl,
 			CancelUrl:              req.CancelUrl,
 			ManualPayment:          req.ManualPayment,
+			PaymentUIMode:          req.PaymentUIMode,
 		}, 0)
 	}()
 	wg.Wait()
@@ -80,8 +81,11 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 	}
 	return &subscription.UpdateRes{
 		SubscriptionPendingUpdate: update.SubscriptionPendingUpdate,
+		PaymentId:                 update.PaymentId,
+		InvoiceId:                 update.InvoiceId,
 		Paid:                      update.Paid,
 		Link:                      update.Link,
 		Note:                      update.Note,
+		Action:                    update.Action,
 	}, err
 }

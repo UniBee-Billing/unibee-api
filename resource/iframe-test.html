@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Payment iframe Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .iframe-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .test-button.secondary {
+            background-color: #6c757d;
+        }
+        .test-button.secondary:hover {
+            background-color: #545b62;
+        }
+        .test-input {
+            padding: 8px 12px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-input.large {
+            width: 300px;
+        }
+        .gateway-select {
+            padding: 8px 12px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            max-width: 95vw;
+            max-height: 95vh;
+        }
+        
+        .modal-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 0;
+            position: relative;
+        }
+        
+        .iframe-wrapper {
+            border: none;
+            overflow: hidden;
+            background-color: #fff;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        
+        .iframe-wrapper iframe {
+            border: none;
+            display: block;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info-section {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .info-section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .info-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-section li {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Embedded Payment iframe Test Tool</h1>
+        <p>Test embedded payment pages in iframe environment to verify iframe compatibility and payment flow.</p>
+    </div>
+
+    <div class="controls">
+        <h2>Test Configuration</h2>
+        <div style="margin-bottom: 15px;">
+            <label for="baseUrl">Base URL:</label><br>
+            <input type="text" id="baseUrl" class="test-input large" 
+                   placeholder="Enter Base URL" 
+                   value="https://api.unibee.top" />
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="paymentId">Payment ID:</label><br>
+            <input type="text" id="paymentId" class="test-input large" 
+                   placeholder="Enter Payment ID" 
+                   value="pay20250909wjy2uIuuTcQWt7s" />
+        </div>
+        
+
+        <div style="margin-bottom: 15px;">
+            <label for="iframeSize">iframe Size:</label><br>
+            <select id="iframeSize" class="gateway-select" onchange="updateIframeSize()">
+                <option value="mobile">Mobile (375x667)</option>
+                <option value="tablet">Tablet (768x1024)</option>
+                <option value="desktop" selected>Desktop (100%x600)</option>
+                <option value="large">Large (1200x800)</option>
+                <option value="custom">Custom Size</option>
+            </select>
+        </div>
+
+        <div id="customSizeControls" style="margin-bottom: 15px; display: none;">
+            <label for="customWidth">Width:</label>
+            <input type="number" id="customWidth" class="test-input" value="800" style="width: 80px;" onchange="updateIframeSize()" />
+            <label for="customHeight" style="margin-left: 10px;">Height:</label>
+            <input type="number" id="customHeight" class="test-input" value="600" style="width: 80px;" onchange="updateIframeSize()" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <button class="test-button" onclick="openModal()">Open Payment Modal</button>
+            <button class="test-button secondary" onclick="openInNewWindow()">Open in New Window</button>
+            <button class="test-button secondary" onclick="closeModal()">Close Modal</button>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+
+    <!-- Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Payment Gateway</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-wrapper">
+                    <iframe id="paymentIframe" src="about:blank" title="Payment iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>📋 Test Instructions</h3>
+        <ul>
+            <li><strong>Default Payment ID:</strong> The form is pre-filled with a test payment ID</li>
+            <li><strong>iframe Test:</strong> Click "Open Payment Modal" to test iframe compatibility</li>
+            <li><strong>New Window Test:</strong> Click "Open in New Window" to compare behavior</li>
+            <li><strong>Payment URL Format:</strong> Uses unified format: <code>/pay/{paymentId}</code></li>
+            <li><strong>Auto Detection:</strong> Payment gateway is automatically detected from payment data</li>
+        </ul>
+
+        <h3>🔍 What to Test</h3>
+        <ul>
+            <li>Check if payment page loads correctly in iframe</li>
+            <li>Test payment flow completion and message communication</li>
+            <li>Verify payment status updates and redirects work properly</li>
+            <li>Compare behavior between iframe and new window</li>
+            <li>Check console for any iframe-related errors</li>
+        </ul>
+
+        <h3>🚨 Known Issues</h3>
+        <ul>
+            <li><strong>Cross-origin:</strong> Some payment providers may restrict iframe usage</li>
+            <li><strong>Mobile:</strong> iframe behavior may differ on mobile devices</li>
+            <li><strong>Popup Blockers:</strong> Some payment methods may require popup windows</li>
+        </ul>
+    </div>
+
+    <script>
+
+        function showStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        function hideStatus() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'none';
+        }
+
+        function updateIframeSize() {
+            const sizeSelect = document.getElementById('iframeSize');
+            const customControls = document.getElementById('customSizeControls');
+            const iframe = document.getElementById('paymentIframe');
+            const iframeWrapper = iframe.parentElement; // Get the wrapper div
+            const modalContent = document.querySelector('.modal-content'); // Get the modal content
+            
+            // Show/hide custom size controls
+            if (sizeSelect.value === 'custom') {
+                customControls.style.display = 'block';
+            } else {
+                customControls.style.display = 'none';
+            }
+            
+            // Apply size based on selection
+            let width, height;
+            
+            switch (sizeSelect.value) {
+                case 'mobile':
+                    width = '375px';
+                    height = '667px';
+                    break;
+                case 'tablet':
+                    width = '768px';
+                    height = '1024px';
+                    break;
+                case 'desktop':
+                    width = '100%';
+                    height = '600px';
+                    break;
+                case 'large':
+                    width = '1200px';
+                    height = '800px';
+                    break;
+                case 'custom':
+                    const customWidth = document.getElementById('customWidth').value;
+                    const customHeight = document.getElementById('customHeight').value;
+                    width = customWidth + 'px';
+                    height = customHeight + 'px';
+                    break;
+                default:
+                    width = '100%';
+                    height = '600px';
+            }
+            
+            // Apply the new size to iframe, wrapper, and modal content
+            iframe.style.width = width;
+            iframe.style.height = height;
+            iframeWrapper.style.width = width;
+            iframeWrapper.style.height = height;
+            
+            // Update modal content size to match iframe
+            if (modalContent) {
+                modalContent.style.width = width;
+                modalContent.style.height = 'auto'; // Let height adjust to content
+            }
+            
+            console.log(`iframe size updated: ${width} x ${height}`);
+        }
+
+        function openModal() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const paymentId = document.getElementById('paymentId').value.trim();
+            
+            if (!baseUrl) {
+                showStatus('Please enter a base URL', 'error');
+                return;
+            }
+            
+            if (!paymentId) {
+                showStatus('Please enter a payment ID', 'error');
+                return;
+            }
+            
+            // Update modal title
+            document.getElementById('modalTitle').textContent = 'Payment Checkout';
+            
+            // Apply iframe size before showing modal
+            updateIframeSize();
+            
+            // Show modal
+            document.getElementById('paymentModal').style.display = 'flex';
+            
+            // Load payment in iframe
+            loadPaymentInModal(baseUrl, paymentId);
+        }
+        
+        function loadPaymentInModal(baseUrl, paymentId) {
+            showStatus('Loading payment in modal...', 'loading');
+            
+            // Construct the payment URL using /pay/{paymentId} format
+            const paymentUrl = `${baseUrl}/pay/${encodeURIComponent(paymentId)}`;
+            
+            console.log('Loading payment URL in modal iframe:', paymentUrl);
+            
+            // Load the payment page in iframe
+            const iframe = document.getElementById('paymentIframe');
+            iframe.src = paymentUrl;
+            
+            // Set up iframe load event
+            iframe.onload = function() {
+                hideStatus();
+                console.log('Payment iframe loaded successfully in modal');
+            };
+            
+            iframe.onerror = function() {
+                showStatus('Failed to load payment page in modal', 'error');
+                console.error('Failed to load payment iframe in modal');
+            };
+        }
+        
+        function closeModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            hideStatus();
+        }
+        
+
+        function openInNewWindow() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const paymentId = document.getElementById('paymentId').value.trim();
+            
+            if (!baseUrl) {
+                showStatus('Please enter a base URL', 'error');
+                return;
+            }
+            
+            if (!paymentId) {
+                showStatus('Please enter a payment ID', 'error');
+                return;
+            }
+            
+            const paymentUrl = `${baseUrl}/pay/${encodeURIComponent(paymentId)}`;
+            
+            console.log('Opening payment URL in new window:', paymentUrl);
+            window.open(paymentUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        }
+
+        function clearIframe() {
+            const iframe = document.getElementById('paymentIframe');
+            iframe.src = 'about:blank';
+            hideStatus();
+            console.log('iframe cleared');
+        }
+
+        // Listen for messages from iframe
+        window.addEventListener('message', function(event) {
+            console.log('Received message from iframe:', event.data);
+            
+            // Verify message origin for security (in production, specify exact domain)
+            // if (event.origin !== 'https://your-domain.com') return;
+            
+            if (event.data.type === 'UniBee_PaymentSuccess') {
+                showStatus(`Payment Success! Payment ID: ${event.data.paymentId}, Invoice ID: ${event.data.invoiceId}`, 'success');
+                // Close modal after a short delay
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
+            } else if (event.data.type === 'UniBee_PaymentFailed') {
+                showStatus(`Payment Failed! Payment ID: ${event.data.paymentId}, Invoice ID: ${event.data.invoiceId}`, 'error');
+                // Close modal after a short delay
+                setTimeout(() => {
+                    closeModal();
+                }, 3000);
+            } else if (event.data.type === 'UniBee_PaymentCancelled') {
+                showStatus(`Payment Cancelled! Payment ID: ${event.data.paymentId}, Invoice ID: ${event.data.invoiceId}`, 'error');
+                // Close modal after a short delay
+                setTimeout(() => {
+                    closeModal();
+                }, 3000);
+            }
+        });
+
+        // Auto-load default payment on page load
+        window.addEventListener('load', function() {
+            console.log('iframe test page loaded');
+            // Initialize iframe size
+            updateIframeSize();
+            // Uncomment the line below to auto-load the default payment
+            // openModal();
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -36,6 +36,10 @@ func JodaTimePrefix() (prefix string) {
 	return time.Now().Format("20060102")
 }
 
+func CreateHistoryEventId() string {
+	return fmt.Sprintf("hisev%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+}
+
 func CreateEventId() string {
 	return fmt.Sprintf("ev%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
@@ -120,4 +124,11 @@ func GenerateRandomOpenApiKey(length int) (string, error) {
 	// Truncate the encoded string to the desired length
 	// (base64 encoding increases the length by approximately 33%)
 	return encodedKey[:length], nil
+}
+
+func Base64EncodeToString(source string) string {
+	if source == "" {
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString([]byte(source))
 }

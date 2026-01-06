@@ -19,7 +19,7 @@ type ListRes struct {
 
 type ExportColumnListReq struct {
 	g.Meta `path:"/export_column_list" tags:"Task" method:"post" summary:"Export Column List" description:""`
-	Task   string `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Task   string `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport"`
 }
 
 type ExportColumnListRes struct {
@@ -31,7 +31,7 @@ type ExportColumnListRes struct {
 
 type NewReq struct {
 	g.Meta        `path:"/new_export" tags:"Task" method:"post" summary:"New Export" description:""`
-	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport" v:"required"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload, Task query parameters, positive or negative 'timeZone' available for all task"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
@@ -51,7 +51,7 @@ type NewImportRes struct {
 type NewTemplateReq struct {
 	g.Meta        `path:"/new_export_template" tags:"Task" method:"post" summary:"New Export Template" description:""`
 	Name          string                 `json:"name"      v:"required"    description:"name"`
-	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport" v:"required"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified, first char should lower case"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
@@ -65,7 +65,7 @@ type EditTemplateReq struct {
 	g.Meta        `path:"/edit_export_template" tags:"Task" method:"post" summary:"Edit Export Template" description:""`
 	TemplateId    int64                   `json:"templateId"    v:"required"      description:"templateId"`
 	Name          *string                 `json:"name"          description:"name"`
-	Task          *string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Task          *string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport"`
 	Payload       *map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns *[]string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 	Format        *string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
@@ -85,7 +85,7 @@ type DeleteTemplateRes struct {
 
 type ExportTemplateListReq struct {
 	g.Meta `path:"/export_template_list" tags:"Task" method:"get,post" summary:"Get Export Template List"`
-	Task   string `json:"task" dc:"Filter Task, Optional, InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Task   string `json:"task" dc:"Filter Task, Optional, InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport|PlanExport"`
 	Page   int    `json:"page"  description:"Page, Start With 0" `
 	Count  int    `json:"count"  description:"Count Of Page"`
 }

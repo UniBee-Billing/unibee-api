@@ -22,4 +22,5 @@ type MerchantEmailHistory struct {
 	GmtModify  *gtime.Time // update time
 	Response   interface{} //
 	CreateTime interface{} // create utc time
+	Status     interface{} // 0-pending,1-success,2-failure
 }

@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "別のアクティブまたは不完全なサブスクリプションが存在します",
+  "ClickTooFast": "クリックが速すぎます。少し待ってから再試行してください。",
+  "AmountNotMatch": "合計金額が古くなっています。更新して再試行してください。",
+  "PlanTrialGatewayError": "このプランにはカードまたはPayPal決済ゲートウェイが必要です。",
+  "VatValidateError": "VAT番号の検証に失敗しました。番号: %s",
+  "VatGatewayNeedSetup": "VATゲートウェイの設定が必要です。",
+  "CountryCodeVatNumberNotMatch": "国コードエラー。VAT番号の国: %s。",
+  "DiscountCodeInvalid": "割引コードが無効です。",
+  "DiscountCodeNotStart": "割引コードが開始されていません。",
+  "DiscountCodePlanError": "このプランでは割引コードを使用できません。",
+  "DiscountCodeReachLimitation": "割引コードの使用制限に達しました。"
+} 

@@ -5,6 +5,14 @@ import (
 	"unibee/api/bean"
 )
 
+type GetWebhookSecretReq struct {
+	g.Meta `path:"/get_webhook_secret" tags:"Webhook" method:"get" summary:"Get Webhook Secret"`
+}
+
+type GetWebhookSecretRes struct {
+	Secret string `json:"secret"`
+}
+
 type EventListReq struct {
 	g.Meta `path:"/event_list" tags:"Webhook" method:"get" summary:"Webhook Event List"`
 }

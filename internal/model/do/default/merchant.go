@@ -11,28 +11,29 @@ import (
 
 // Merchant is the golang structure of table merchant for DAO operations like Where/Data.
 type Merchant struct {
-	g.Meta      `orm:"table:merchant, do:true"`
-	Id          interface{} // merchant_id
-	CompanyId   interface{} // company_id
-	UserId      interface{} // create_user_id
-	Type        interface{} // type
-	CompanyName interface{} // company_name
-	Email       interface{} // email
-	BusinessNum interface{} // business_num
-	Name        interface{} // name
-	Idcard      interface{} // idcard
-	Location    interface{} // location
-	Address     interface{} // address
-	GmtCreate   *gtime.Time // create time
-	GmtModify   *gtime.Time // update_time
-	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
-	CompanyLogo interface{} // company_logo
-	HomeUrl     interface{} //
-	Phone       interface{} // phone
-	CreateTime  interface{} // create utc time
-	TimeZone    interface{} // merchant default time zone
-	Host        interface{} // merchant user portal host
-	ApiKey      interface{} // merchant open api key
-	CountryCode interface{} // country_code
-	CountryName interface{} // country_name
+	g.Meta        `orm:"table:merchant, do:true"`
+	Id            interface{} // merchant_id
+	CompanyId     interface{} // company_id
+	UserId        interface{} // create_user_id
+	Type          interface{} // type
+	CompanyName   interface{} // company_name
+	Email         interface{} // email
+	BusinessNum   interface{} // business_num
+	Name          interface{} // name
+	Idcard        interface{} // idcard
+	Location      interface{} // location
+	Address       interface{} // address
+	GmtCreate     *gtime.Time // create time
+	GmtModify     *gtime.Time // update_time
+	IsDeleted     interface{} // Unarchived: <= 0; Archived: > 0
+	CompanyLogo   interface{} // company_logo
+	HomeUrl       interface{} //
+	Phone         interface{} // phone
+	CreateTime    interface{} // create utc time
+	TimeZone      interface{} // merchant default time zone
+	Host          interface{} // merchant user portal host
+	ApiKey        interface{} // merchant open api key
+	CountryCode   interface{} // country_code
+	CountryName   interface{} // country_name
+	WebhookSecret interface{} // merchant webhook secret
 }

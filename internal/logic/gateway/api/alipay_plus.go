@@ -162,18 +162,29 @@ func (c AlipayPlus) GatewayNewPayment(ctx context.Context, gateway *entity.Merch
 	{
 		order := &model.Order{}
 		{
-			var name = ""
-			var description = ""
-			if len(createPayContext.Invoice.Lines) > 0 {
-				var line = createPayContext.Invoice.Lines[0]
-				if len(line.Name) == 0 {
-					name = line.Description
-				} else {
-					name = line.Name
-					description = line.Description
-				}
-			}
+			//var containNegative = false
+			//for _, line := range createPayContext.Invoice.Lines {
+			//	if line.Amount <= 0 {
+			//		containNegative = true
+			//	}
+			//}
+			//if !containNegative {
+			//	var name = ""
+			//	var description = ""
+			//	if len(createPayContext.Invoice.Lines) > 0 {
+			//		var line = createPayContext.Invoice.Lines[0]
+			//		if len(line.Name) == 0 {
+			//			name = line.Description
+			//		} else {
+			//			name = line.Name
+			//			description = line.Description
+			//		}
+			//	}
+			//	order.OrderDescription = fmt.Sprintf("%s_%s", name, description)
+			//} else {
+			name, description := createPayContext.GetInvoiceSingleProductNameAndDescription()
 			order.OrderDescription = fmt.Sprintf("%s_%s", name, description)
+			//}
 		}
 		order.ReferenceOrderId = createPayContext.Pay.PaymentId
 		order.OrderAmount = model.NewAmount(fmt.Sprintf("%d", createPayContext.Pay.TotalAmount), createPayContext.Pay.Currency)
@@ -181,55 +192,56 @@ func (c AlipayPlus) GatewayNewPayment(ctx context.Context, gateway *entity.Merch
 			ReferenceBuyerId: fmt.Sprintf("%d", createPayContext.Pay.UserId),
 			BuyerEmail:       createPayContext.Email,
 		}
-		var containNegative = false
-		for _, line := range createPayContext.Invoice.Lines {
-			if line.Amount <= 0 {
-				containNegative = true
-			}
-		}
-		var items []*model.Goods
-		if !containNegative {
-			for _, line := range createPayContext.Invoice.Lines {
-				var name = ""
-				var description = ""
-				if len(line.Name) == 0 {
-					name = line.Description
-				} else {
-					name = line.Name
-					description = line.Description
-				}
-				item := &model.Goods{
-					GoodsName: fmt.Sprintf("%s", name),
-					GoodsUnitAmount: &model.Amount{
-						Currency: strings.ToLower(createPayContext.Pay.Currency),
-						Value:    fmt.Sprintf("%d", line.Amount),
-					},
-					GoodsQuantity: fmt.Sprintf("%d", 1),
-				}
-				if len(description) > 0 {
-					item.GoodsName = fmt.Sprintf("%s", description)
-				}
-				items = append(items, item)
-			}
-		} else {
-			var productName = createPayContext.Invoice.ProductName
-			if len(productName) == 0 {
-				productName = createPayContext.Invoice.InvoiceName
-			}
-			if len(productName) == 0 {
-				productName = "DefaultProduct"
-			}
-			item := &model.Goods{
-				GoodsName: fmt.Sprintf("%s", productName),
-				GoodsUnitAmount: &model.Amount{
-					Currency: strings.ToLower(createPayContext.Pay.Currency),
-					Value:    fmt.Sprintf("%d", createPayContext.Invoice.TotalAmount),
-				},
-				GoodsQuantity: fmt.Sprintf("%d", 1),
-			}
-
-			items = append(items, item)
-		}
+		//var containNegative = false
+		//for _, line := range createPayContext.Invoice.Lines {
+		//	if line.Amount <= 0 {
+		//		containNegative = true
+		//	}
+		//}
+		//var items []*model.Goods
+		//if !containNegative {
+		//	for _, line := range createPayContext.Invoice.Lines {
+		//		var name = ""
+		//		var description = ""
+		//		if len(line.Name) == 0 {
+		//			name = line.Description
+		//		} else {
+		//			name = line.Name
+		//			description = line.Description
+		//		}
+		//		item := &model.Goods{
+		//			GoodsName: fmt.Sprintf("%s", name),
+		//			GoodsUnitAmount: &model.Amount{
+		//				Currency: strings.ToLower(createPayContext.Pay.Currency),
+		//				Value:    fmt.Sprintf("%d", line.Amount),
+		//			},
+		//			GoodsQuantity: fmt.Sprintf("%d", 1),
+		//		}
+		//		if len(description) > 0 {
+		//			item.GoodsName = fmt.Sprintf("%s", description)
+		//		}
+		//		items = append(items, item)
+		//	}
+		//} else {
+		//	//var productName = createPayContext.Invoice.ProductName
+		//	//if len(productName) == 0 {
+		//	//	productName = createPayContext.Invoice.InvoiceName
+		//	//}
+		//	//if len(productName) == 0 {
+		//	//	productName = "DefaultProduct"
+		//	//}
+		//	name, _ := createPayContext.GetInvoiceSingleProductNameAndDescription()
+		//	item := &model.Goods{
+		//		GoodsName: fmt.Sprintf("%s", name),
+		//		GoodsUnitAmount: &model.Amount{
+		//			Currency: strings.ToLower(createPayContext.Pay.Currency),
+		//			Value:    fmt.Sprintf("%d", createPayContext.Invoice.TotalAmount),
+		//		},
+		//		GoodsQuantity: fmt.Sprintf("%d", 1),
+		//	}
+		//
+		//	items = append(items, item)
+		//}
 
 		request.Order = order
 	}

@@ -22,5 +22,5 @@ func (c *ControllerPlan) Copy(ctx context.Context, req *plan.CopyReq) (res *plan
 	if err != nil {
 		return nil, err
 	}
-	return &plan.CopyRes{Plan: bean.SimplifyPlan(one)}, nil
+	return &plan.CopyRes{Plan: bean.SimplifyPlanWithContext(ctx, one)}, nil
 }

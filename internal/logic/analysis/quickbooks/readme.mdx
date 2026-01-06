@@ -1,0 +1,60 @@
+# UniBee Integration with QuickBooks
+
+When you enable QuickBooks integration within UniBee, we will synchronize your billing records from UniBee into your QuickBooks account. Since UniBee has already completed the **payment and tax processes**, QuickBooks acts purely as an **accounting record system**, not a payment processor or tax calculator.
+
+## 📌 Why We Use the Invoice + Payment Model
+
+We adopt the `Invoice + Payment` model instead of `SalesReceipt` for the following reasons:
+
+- ✅ **UniBee handles real payments** — QuickBooks should not duplicate them.
+- ✅ **Taxes are calculated within UniBee**, avoiding tax mismatches.
+- ✅ Using `Invoice` allows us to **control tax logic**, avoiding QuickBooks' auto-tax computation.
+- ✅ It supports flexibility in updates, refunds, and linking payments.
+
+## 🧾 How We Record Your Transactions
+
+For each paid transaction, we will:
+
+- Create an `Invoice` in QuickBooks with each item line marked as non-taxable (`TaxCodeRef=NON`).
+- Add a separate line to represent the **total tax amount** collected.
+- Set `GlobalTaxCalculation: NotApplicable` to **prevent automatic tax overrides**.
+- Create a `Payment` entry linked to the `Invoice` to show it is paid.
+
+This ensures:
+
+- Amounts and taxes match UniBee exactly.
+- QuickBooks serves only as an accurate ledger.
+- Compatibility with future actions like refunds and reporting.
+
+## 🌐 Note for US QuickBooks Accounts
+
+For US-based QuickBooks accounts, **automatic tax calculation (AST)** is enabled by default. The approach described above is the **only safe and consistent integration** method. Otherwise, QuickBooks may:
+
+- Auto-calculate tax based on customer address;
+- Override your provided invoice totals;
+- Lead to discrepancies between UniBee and QuickBooks.
+
+## 🔐 What Happens During Authorization
+
+When your customer authorizes UniBee to access QuickBooks, we:
+
+- **Only access billing and accounting-related scopes**;
+- **Do not handle or redirect your QuickBooks payment channels**;
+- **Do not modify your tax rules** — we only push static records;
+- **Assign revenue and deposit accounts** to properly classify your data.
+
+If you need to customize the mapping or account types, feel free to contact our support team.
+
+---
+
+## 🤝 Recommendations for a Smooth Integration
+
+To ensure clean and accurate records:
+
+- Avoid manually modifying invoices and payments pushed by UniBee;
+- Perform all payment, refund, and invoice actions inside UniBee;
+- If you operate in multiple regions with different taxes, please configure the correct Tax Codes in QuickBooks beforehand and sync them with UniBee.
+
+---
+
+If you have any questions about QuickBooks integration, please contact the UniBee Support or Customer Success team.

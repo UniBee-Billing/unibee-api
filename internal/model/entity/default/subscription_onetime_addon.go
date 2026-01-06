@@ -22,4 +22,7 @@ type SubscriptionOnetimeAddon struct {
 	PaymentId      string      `json:"paymentId"      description:"paymentId"`                                     // paymentId
 	MetaData       string      `json:"metaData"       description:"meta_data(json)"`                               // meta_data(json)
 	UserId         uint64      `json:"userId"         description:"userId"`                                        // userId
+	InvoiceId      string      `json:"invoiceId"      description:"invoice id"`                                    // invoice id
+	PeriodStart    int64       `json:"periodStart"    description:"period_start, utc time"`                        // period_start, utc time
+	PeriodEnd      int64       `json:"periodEnd"      description:"period_end utc time"`                           // period_end utc time
 }

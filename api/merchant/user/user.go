@@ -24,21 +24,23 @@ type NewRes struct {
 
 type ListReq struct {
 	g.Meta          `path:"/list" tags:"User" method:"get,post" summary:"User List"`
-	UserId          int64  `json:"userId" dc:"Filter UserId" `
-	FirstName       string `json:"firstName" dc:"Search FirstName" `
-	LastName        string `json:"lastName" dc:"Search LastName" `
-	Email           string `json:"email" dc:"Search Filter Email" `
-	PlanIds         []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
-	SubscriptionId  string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
-	SubStatus       []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
-	Status          []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
-	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page            int    `json:"page"  dc:"Page,Start 0" `
-	Count           int    `json:"count" dc:"Count OF Page" `
-	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	UserId          int64   `json:"userId" dc:"Filter UserId" `
+	ExternalUserId  string  `json:"externalUserId" dc:"ExternalUserId"`
+	FirstName       string  `json:"firstName" dc:"Search FirstName" `
+	LastName        string  `json:"lastName" dc:"Search LastName" `
+	Email           string  `json:"email" dc:"Search Filter Email" `
+	PlanIds         []int   `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
+	GatewayIds      []int64 `json:"gatewayIds" dc:"GatewayIds, Search Filter GatewayIds" `
+	SubscriptionId  string  `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
+	SubStatus       []int   `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
+	Status          []int   `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	DeleteInclude   bool    `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField       string  `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType        string  `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int     `json:"page"  dc:"Page,Start 0" `
+	Count           int     `json:"count" dc:"Count OF Page" `
+	CreateTimeStart int64   `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64   `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type ListRes struct {
@@ -48,8 +50,8 @@ type ListRes struct {
 
 type CountReq struct {
 	g.Meta          `path:"/count" tags:"User" method:"get" summary:"User Count"`
-	CreateTimeStart int64 `json:"createTimeStart" dc:"CreateTimeStart" `
-	CreateTimeEnd   int64 `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	CreateTimeStart int64 `json:"createTimeStart" dc:"CreateTimeStart，UTC timestamp，seconds" `
+	CreateTimeEnd   int64 `json:"createTimeEnd" dc:"CreateTimeEnd，UTC timestamp，seconds" `
 }
 
 type CountRes struct {
@@ -109,7 +111,7 @@ type UpdateReq struct {
 	OtherSocialInfo    *string                 `json:"otherSocialInfo" dc:"Other Social Info"`
 	CountryCode        *string                 `json:"countryCode" dc:"Country Code"`
 	CountryName        *string                 `json:"countryName" dc:"Country Name"`
-	Type               *int64                  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	Type               *int64                  `json:"type" dc:"User type, 1-Individual|2-Business"`
 	GatewayId          *uint64                 `json:"gatewayId" dc:"GatewayId"`
 	GatewayPaymentType *string                 `json:"gatewayPaymentType" dc:"Gateway Payment Type"`
 	PaymentMethodId    *string                 `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `

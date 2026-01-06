@@ -20,4 +20,5 @@ type MerchantWebhookMessage struct {
 	GmtCreate       *gtime.Time // create time
 	GmtModify       *gtime.Time // update time
 	CreateTime      interface{} // create utc time
+	SubscriptionId  interface{} // subscription id
 }

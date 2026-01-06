@@ -3,7 +3,9 @@ package middleware
 import (
 	"fmt"
 	"github.com/gogf/gf/v2/i18n/gi18n"
+	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"unibee/internal/cmd/config"
@@ -17,6 +19,7 @@ import (
 	"unibee/internal/logic/merchant"
 	"unibee/internal/logic/middleware/license"
 	"unibee/internal/logic/middleware/rate_limit"
+	"unibee/internal/logic/totp/client_activity"
 	"unibee/internal/model"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -78,22 +81,34 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 
 	customCtx.UserAgent = r.Header.Get("User-Agent")
-	//if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
-	//	customCtx.IsOpenApiCall = true
-	//}
+	if len(customCtx.UserAgent) > 0 {
+		customCtx.UserAgentIdentity = fmt.Sprintf("%s_%s", getUserAgentInfo(customCtx.UserAgent), utility.MD5(customCtx.UserAgent))
+	}
+	customCtx.RemoteIP = getClientIP(r.Request)
+	customCtx.ClientIdentity = fmt.Sprintf("%s_%s", customCtx.RemoteIP, customCtx.UserAgentIdentity)
+
 	customCtx.Authorization = r.Header.Get("Authorization")
+	if customCtx.Authorization == "undefined" {
+		customCtx.Authorization = ""
+	}
 	customCtx.TokenString = customCtx.Authorization
+	if len(customCtx.TokenString) == 0 && r.Cookie.Get(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY) != nil && len(r.Cookie.Get(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY).String()) > 0 {
+		customCtx.TokenString = r.Cookie.Get(jwt.MERCHANT_TYPE_TOKEN_COOKIE_KEY).String()
+	}
 	customCtx.TokenString = strings.TrimSpace(strings.Replace(customCtx.TokenString, "Bearer ", "", 1)) // remove Bearer
 	if len(customCtx.TokenString) > 0 && !jwt.IsPortalToken(customCtx.TokenString) {
 		customCtx.IsOpenApiCall = true
 	}
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s][%s] IsOpenApi:%v Token:%s Body:%s", customCtx.Language, customCtx.RequestId, r.Method, r.GetUrl(), customCtx.IsOpenApiCall, customCtx.TokenString, r.GetBodyString()))
+	if len(customCtx.UserAgent) > 0 && strings.Contains(customCtx.UserAgent, "OpenAPI") {
+		customCtx.IsOpenApiCall = true
+	}
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s][%s][%s] IsOpenApi:%v Token:%s Body:%s", customCtx.ClientIdentity, customCtx.RequestId, customCtx.Language, r.Method, r.GetUrl(), customCtx.IsOpenApiCall, customCtx.TokenString, r.GetBodyString()))
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
-		g.Log().Errorf(r.Context(), "[Request][%s][%s][%s] Global_Exception Panic Body:%s Error:%v", customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString(), err)
+		g.Log().Errorf(r.Context(), "[Request][%s][%s][%s][%s] Global_Exception Panic Body:%s Error:%v", customCtx.ClientIdentity, customCtx.RequestId, r.Method, r.GetUrl(), r.GetBodyString(), err)
 		return
 	})
-	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s] MerchantId:%d", customCtx.RequestId, r.Method, r.GetUrl(), customCtx.MerchantId))
+	g.Log().Info(r.Context(), fmt.Sprintf("[Request][%s][%s][%s][%s] MerchantId:%d", customCtx.ClientIdentity, customCtx.RequestId, r.Method, r.GetUrl(), customCtx.MerchantId))
 
 	var (
 		err             = r.GetError()
@@ -124,12 +139,16 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 				_interface.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
 			}
 		} else if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
+			var errorCode = gcode.CodeValidationFailed.Code()
+			if strings.Contains(message, "2FA Code Needed") {
+				errorCode = 49
+			}
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+				_interface.OpenApiJsonExit(r, errorCode, strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
-				_interface.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+				_interface.JsonExit(r, errorCode, strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 			}
 		} else {
 			if customCtx.IsOpenApiCall {
@@ -210,6 +229,9 @@ func (s *SMiddleware) MerchantHandler(r *ghttp.Request) {
 			}
 			if len(lang) > 0 && i18n.IsLangAvailable(lang) {
 				r.SetCtx(gi18n.WithLanguage(r.Context(), strings.ToLower(strings.TrimSpace(lang))))
+			}
+			if customCtx.ClientIdentity != "" {
+				client_activity.UpdateClientIdentityActivityTime(r.Context(), customCtx.ClientIdentity)
 			}
 		} else {
 			g.Log().Infof(r.Context(), "MerchantHandler invalid token type token:%v", utility.MarshalToJsonString(customCtx.Token))
@@ -412,4 +434,55 @@ func merchantQPSLimit(merchantId uint64, r *ghttp.Request) {
 		g.Log().Infof(r.Context(), "merchantQPSLimitCheck merchantId:%d currentQps:%d maxQps:%d", merchantId, current, maxQps)
 		utility.Assert(checked, fmt.Sprintf("Reached max api qps limitation, please upgrade your plan, current qps:%d", current))
 	}
+}
+
+func getClientIP(r *http.Request) string {
+	// X-Forwarded-For At first
+	xForwardedFor := r.Header.Get("X-Forwarded-For")
+	if xForwardedFor != "" {
+		// may have several
+		parts := strings.Split(xForwardedFor, ",")
+		if len(parts) > 0 {
+			return strings.TrimSpace(parts[0])
+		}
+	}
+
+	// Try X-Real-IP
+	xRealIP := r.Header.Get("X-Real-IP")
+	if xRealIP != "" {
+		return xRealIP
+	}
+
+	// fallback To RemoteAddr Finally
+	ip := r.RemoteAddr
+	if strings.Contains(ip, ":") {
+		// Remove
+		ip = strings.Split(ip, ":")[0]
+	}
+	return ip
+}
+
+func getUserAgentInfo(userAgent string) string {
+	browserRe := regexp.MustCompile(`(Chrome|Firefox|Safari|Opera|MSIE|Trident)/([\d\.]+)`)
+	osRe := regexp.MustCompile(`(Android|iPhone|Windows NT|Macintosh|Linux)`)
+
+	browserMatch := browserRe.FindStringSubmatch(userAgent)
+	var browser, browserVersion string
+	if len(browserMatch) >= 3 {
+		browser = browserMatch[1]
+		browserVersion = browserMatch[2]
+	} else {
+		browser = "Unknown"
+		browserVersion = "Unknown"
+	}
+
+	osMatch := osRe.FindStringSubmatch(userAgent)
+	var os string
+	if len(osMatch) > 1 {
+		os = osMatch[1]
+	} else {
+		os = "Unknown"
+	}
+
+	return fmt.Sprintf("%s_%s(%s)", browser, browserVersion, os)
 }

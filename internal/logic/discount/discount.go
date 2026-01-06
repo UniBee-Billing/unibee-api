@@ -19,32 +19,34 @@ import (
 )
 
 type CreateDiscountCodeInternalReq struct {
-	Id                 uint64                 `json:"id"                 description:"The discount's Id"`
-	Type               int                    `json:"type"               description:"type, 1-external discount code"` // type, 1-external discount code
-	MerchantId         uint64                 `json:"MerchantId"        description:"MerchantId"`
-	Code               string                 `json:"Code"              description:"Code"`
-	Name               *string                `json:"name"              description:"name"`                                                                        // name
-	BillingType        int                    `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"`                                       // billing_type, 1-one-time, 2-recurring
-	DiscountType       int                    `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"`                                 // discount_type, 1-percentage, 2-fixed_amount
-	DiscountAmount     int64                  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
-	DiscountPercentage int64                  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string                 `json:"Currency"          description:"Currency of discount, available when discount_type is fixed_amount"`          // Currency of discount, available when discount_type is fixed_amount
-	CycleLimit         int                    `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
-	SubscriptionLimit  int                    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
-	StartTime          *int64                 `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
-	EndTime            *int64                 `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
-	Quantity           *uint64                `json:"quantity"           description:"Quantity of code"`
-	PlanApplyType      *int                   `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified"` // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
-	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
-	Advance            *bool                  `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
-	UserScope          *int                   `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
-	UpgradeOnly        *bool                  `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
-	UpgradeLongerOnly  *bool                  `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
-	UserLimit          *int                   `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
-	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	Id                 uint64                  `json:"id"                 description:"The discount's Id"`
+	Type               int                     `json:"type"               description:"type, 1-external discount code"` // type, 1-external discount code
+	MerchantId         uint64                  `json:"MerchantId"        description:"MerchantId"`
+	Code               string                  `json:"Code"              description:"Code"`
+	Name               *string                 `json:"name"              description:"name"`                                                                        // name
+	BillingType        int                     `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"`                                       // billing_type, 1-one-time, 2-recurring
+	DiscountType       int                     `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"`                                 // discount_type, 1-percentage, 2-fixed_amount
+	DiscountAmount     int64                   `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
+	DiscountPercentage int64                   `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
+	Currency           string                  `json:"Currency"          description:"Currency of discount, available when discount_type is fixed_amount"`          // Currency of discount, available when discount_type is fixed_amount
+	CycleLimit         int                     `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
+	SubscriptionLimit  int                     `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
+	StartTime          *int64                  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
+	EndTime            *int64                  `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
+	Quantity           *uint64                 `json:"quantity"           description:"Quantity of code"`
+	PlanApplyType      *int                    `json:"planApplyType"      description:"plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified, 3-Apply to Plans by Groups(Billing Period Included), 4-Apply to Plans except by Groups(Billing Period Included)"` // plan apply type, 0-apply for all, 1-apply for plans specified, 2-exclude for plans specified
+	PlanApplyGroup     *bean.GroupPlanSelector `json:"planApplyGroup"       dc:"plan apply group, each item match once if specified, matched all if item not specified"`
+	PlanIds            []int64                 `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Advance            *bool                   `json:"advance"            description:"AdvanceConfig, 0-false,1-true, will enable all advance config if set true"` // AdvanceConfig,  0-false,1-true, will enable all advance config if set 1
+	UserScope          *int                    `json:"userScope"  dc:"AdvanceConfig, Apply user scope,0-for all, 1-for only new user, 2-for only renewals, renewals is upgrade&downgrade&renew"`
+	UpgradeOnly        *bool                   `json:"upgradeOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade action if set true" `
+	UpgradeLongerOnly  *bool                   `json:"upgradeLongPlanOnly"  dc:"AdvanceConfig, true or false, will forbid for all except upgrade to longer plan if set true" `
+	UserLimit          *int                    `json:"userLimit"         dc:"AdvanceConfig, The limit of every customer can apply, the recurring apply not involved, 0-unlimited"`
+	Metadata           map[string]interface{}  `json:"metadata" dc:"Metadata，Map"`
 }
 
 func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInternalReq) (*entity.MerchantDiscountCode, error) {
+	req.Code = strings.TrimSpace(req.Code)
 	utility.Assert(req.Code != "", "invalid Code")
 	one := query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
 	utility.Assert(one == nil, "exist Code:"+req.Code)
@@ -107,6 +109,9 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	if len(req.PlanIds) > 0 && planApplyType == 0 {
 		planApplyType = 1
 	}
+	if planApplyType == 3 || planApplyType == 4 {
+		utility.Assert(req.PlanApplyGroup != nil, "PlanApplyGroup should not empty while planApplyType = 3 or 4")
+	}
 	one = &entity.MerchantDiscountCode{
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
@@ -125,6 +130,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		Quantity:           quantity,
 		MetaData:           utility.MarshalToJsonString(req.Metadata),
 		PlanApplyType:      planApplyType,
+		PlanApplyGroup:     utility.MarshalToJsonString(req.PlanApplyGroup),
 		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
 		Advance:            advance,
@@ -181,6 +187,13 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	if len(req.PlanIds) > 0 && req.PlanApplyType != nil && *req.PlanApplyType == 0 && one.PlanApplyType == 0 {
 		req.PlanApplyType = unibee.Int(1)
 	}
+	var planApplyGroupData = one.PlanApplyGroup
+	if req.PlanApplyGroup != nil {
+		planApplyGroupData = utility.MarshalToJsonString(req.PlanApplyGroup)
+	}
+	if req.PlanApplyType != nil && (*req.PlanApplyType == 3 || *req.PlanApplyType == 4) {
+		utility.Assert(req.PlanApplyGroup != nil, "PlanApplyGroup should not empty while planApplyType = 3 or 4")
+	}
 	//edit after activate
 	if one.Status > consts.DiscountStatusEditable {
 		utility.Assert((req.StartTime != nil && req.EndTime != nil) || req.PlanIds != nil, "startTime&endTime or planIds should not be nil")
@@ -198,6 +211,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 			dao.MerchantDiscountCode.Columns().StartTime:         req.StartTime,
 			dao.MerchantDiscountCode.Columns().EndTime:           req.EndTime,
 			dao.MerchantDiscountCode.Columns().PlanApplyType:     req.PlanApplyType,
+			dao.MerchantDiscountCode.Columns().PlanApplyGroup:    planApplyGroupData,
 			dao.MerchantDiscountCode.Columns().PlanIds:           planIdsStr,
 			dao.MerchantDiscountCode.Columns().MetaData:          utility.MarshalToJsonString(utility.MergeMetadata(one.MetaData, &req.Metadata)),
 			dao.MerchantDiscountCode.Columns().GmtModify:         gtime.Now(),
@@ -256,6 +270,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,
 		dao.MerchantDiscountCode.Columns().Quantity:           req.Quantity,
 		dao.MerchantDiscountCode.Columns().PlanApplyType:      req.PlanApplyType,
+		dao.MerchantDiscountCode.Columns().PlanApplyGroup:     planApplyGroupData,
 		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
 		dao.MerchantDiscountCode.Columns().MetaData:           utility.MarshalToJsonString(req.Metadata),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),

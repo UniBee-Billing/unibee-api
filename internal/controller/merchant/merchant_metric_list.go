@@ -2,10 +2,11 @@ package merchant
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
 	_interface "unibee/internal/interface/context"
 	metric2 "unibee/internal/logic/metric"
 	"unibee/internal/query"
+
+	"github.com/gogf/gf/v2/errors/gerror"
 
 	"unibee/api/merchant/metric"
 )
@@ -17,6 +18,7 @@ func (c *ControllerMetric) List(ctx context.Context, req *metric.ListReq) (res *
 	}
 	list, total := metric2.MerchantMetricList(ctx, &metric2.ListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
+		SearchKey:       req.SearchKey,
 		SortType:        req.SortType,
 		SortField:       req.SortField,
 		Page:            req.Page,

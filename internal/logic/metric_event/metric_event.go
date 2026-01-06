@@ -4,12 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/default"
 	"unibee/internal/logic/metric"
 	"unibee/internal/logic/metric_event/event_charge"
@@ -17,6 +13,12 @@ import (
 	entity "unibee/internal/model/entity/default"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 type MerchantMetricEventInternalReq struct {
@@ -30,6 +32,49 @@ type MerchantMetricEventInternalReq struct {
 	ProductId           int64       `json:"productId" dc:"Id of product" dc:"default product will use if productId not specified and subscriptionId is blank"`
 }
 
+func MerchantMetricEventCurrentValue(ctx context.Context, req *MerchantMetricEventInternalReq) int64 {
+	utility.Assert(req.MerchantId > 0, "invalid merchantId")
+	utility.Assert(len(req.MetricCode) > 0, "invalid metricCode")
+	utility.Assert(req.UserId > 0, "invalid userId")
+	// user check
+	user := query.GetUserAccountById(ctx, req.UserId)
+	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.MerchantId == req.MerchantId, "invalid user merchantId")
+	// merchant check
+	// metric check
+	met := query.GetMerchantMetricByCode(ctx, req.MerchantId, req.MetricCode)
+	utility.Assert(met != nil, "metric not found")
+	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
+	// check the only active subscription
+	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId, req.ProductId)
+	utility.Assert(sub != nil, "user has no active subscription")
+	planMetricBindingEntity := bean.ConvertMetricPlanBindingEntityFromPlan(query.GetPlanById(ctx, sub.PlanId))
+	if met.Type == metric.MetricTypeChargeMetered {
+		containMetric := false
+		if planMetricBindingEntity != nil && planMetricBindingEntity.MetricMeteredCharge != nil && len(planMetricBindingEntity.MetricMeteredCharge) > 0 {
+			for _, charge := range planMetricBindingEntity.MetricMeteredCharge {
+				if charge.MetricId == met.Id {
+					containMetric = true
+				}
+			}
+		}
+		utility.Assert(containMetric, fmt.Sprintf("The user should subscribe the plan bind metric(code:%s) first", met.Code))
+	} else if met.Type == metric.MetricTypeChargeRecurring {
+		containMetric := false
+		if planMetricBindingEntity != nil && planMetricBindingEntity.MetricRecurringCharge != nil && len(planMetricBindingEntity.MetricRecurringCharge) > 0 {
+			for _, charge := range planMetricBindingEntity.MetricRecurringCharge {
+				if charge.MetricId == met.Id {
+					containMetric = true
+				}
+			}
+		}
+		utility.Assert(containMetric, fmt.Sprintf("The user should subscribe the plan bind metric(code:%s) first", met.Code))
+	}
+
+	useValue := GetUserMetricCachedUseValue(ctx, req.MerchantId, user.Id, met, sub, false)
+	return useValue.UsedValue
+}
+
 func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) (*entity.MerchantMetricEvent, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.MetricCode) > 0, "invalid metricCode")
@@ -41,12 +86,35 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid user merchantId")
 	// merchant check
 	// metric check
-	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
+	met := query.GetMerchantMetricByCode(ctx, req.MerchantId, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
 	// check the only active subscription
 	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, user.Id, req.MerchantId, req.ProductId)
-	utility.Assert(sub != nil, "user has no active subscription")
+	utility.Assert(sub != nil, fmt.Sprintf("The user should subscribe the plan bind metric(code:%s) first", met.Code))
+	planMetricBindingEntity := bean.ConvertMetricPlanBindingEntityFromPlan(query.GetPlanById(ctx, sub.PlanId))
+	if met.Type == metric.MetricTypeChargeMetered {
+		containMetric := false
+		if planMetricBindingEntity != nil && planMetricBindingEntity.MetricMeteredCharge != nil && len(planMetricBindingEntity.MetricMeteredCharge) > 0 {
+			for _, charge := range planMetricBindingEntity.MetricMeteredCharge {
+				if charge.MetricId == met.Id {
+					containMetric = true
+				}
+			}
+		}
+		utility.Assert(containMetric, fmt.Sprintf("The user should subscribe the plan bind metric(code:%s) first", met.Code))
+	} else if met.Type == metric.MetricTypeChargeRecurring {
+		containMetric := false
+		if planMetricBindingEntity != nil && planMetricBindingEntity.MetricRecurringCharge != nil && len(planMetricBindingEntity.MetricRecurringCharge) > 0 {
+			for _, charge := range planMetricBindingEntity.MetricRecurringCharge {
+				if charge.MetricId == met.Id {
+					containMetric = true
+				}
+			}
+		}
+		utility.Assert(containMetric, fmt.Sprintf("The user should subscribe the plan bind metric(code:%s) first", met.Code))
+	}
+
 	if req.MetricProperties == nil {
 		req.MetricProperties = gjson.New("")
 	}
@@ -90,7 +158,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	}
 
 	var chargeStatus = 0
-	oldUsedValue, metricLimit, validAppend := checkMetricUsedValue(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
+	oldUsedValue, metricLimit, validAppend := checkMetricUsedValue(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt, false)
 	if met.Type == metric.MetricTypeLimitMetered {
 		// check if metric limit reached and reject it
 		utility.Assert(validAppend, fmt.Sprintf("metric limit reached, current used: %d, limit: %d", oldUsedValue, metricLimit))
@@ -132,7 +200,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	// append the metric usage
 	newUsedValue := appendMetricCachedUseValue(ctx, req.MerchantId, user, met, sub, aggregationPropertyInt, one.Id)
 	one.Used = newUsedValue.UsedValue
-	one.ChargeData = utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue))
+	one.ChargeData = utility.MarshalToJsonString(event_charge.ComputeEventCharge(ctx, sub.PlanId, one, oldUsedValue, sub.Currency))
 
 	_, err = dao.MerchantMetricEvent.Ctx(ctx).Data(g.Map{
 		dao.MerchantMetricEvent.Columns().Used:       one.Used,
@@ -196,13 +264,13 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.MerchantId == req.MerchantId, "invalid user merchantId")
 	// metric check
-	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
+	met := query.GetMerchantMetricByCode(ctx, req.MerchantId, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
 	var list []*entity.MerchantMetricEvent
 	err := dao.MerchantMetricEvent.Ctx(ctx).
 		Where(dao.MerchantMetricEvent.Columns().MerchantId, req.MerchantId).
-		Where(dao.MerchantMetricEvent.Columns().MetricId, met.MerchantId).
+		Where(dao.MerchantMetricEvent.Columns().MetricId, met.Id).
 		Where(dao.MerchantMetricEvent.Columns().UserId, int64(user.Id)).
 		Where(dao.MerchantMetricEvent.Columns().ExternalEventId, req.ExternalEventId).
 		Scan(&list)
@@ -210,10 +278,17 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		return err
 	}
 	utility.Assert(len(list) == 1, "event not found")
+	utility.Assert(len(list[0].ChargeInvoiceId) == 0, fmt.Sprintf("event already charged via invoiceId:%s", list[0].ChargeInvoiceId))
 	_, err = dao.MerchantMetricEvent.Ctx(ctx).Data(g.Map{
 		dao.MerchantMetricEvent.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricEvent.Columns().Id, list[0].Id).OmitNil().Update()
+	if len(list[0].SubscriptionIds) > 0 {
+		sub := query.GetSubscriptionBySubscriptionId(ctx, list[0].SubscriptionIds)
+		if sub != nil {
+			GetUserSubscriptionMetricStat(ctx, sub.MerchantId, user, sub, true)
+		}
+	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     req.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", met.Id),

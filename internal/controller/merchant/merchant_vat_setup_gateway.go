@@ -10,14 +10,10 @@ import (
 
 func (c *ControllerVat) SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error) {
 	err = setup.SetupMerchantVatConfig(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.Data, req.IsDefault)
-	if err != nil {
-		return nil, err
-	}
+	utility.AssertError(err, "Setup Vat Gateway Error")
 	if req.IsDefault {
 		err = setup.InitMerchantDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
-		if err != nil {
-			return nil, err
-		}
+		utility.AssertError(err, "Init Vat Gateway Error")
 	}
 	return &vat.SetupGatewayRes{Data: utility.HideStar(req.Data)}, nil
 }

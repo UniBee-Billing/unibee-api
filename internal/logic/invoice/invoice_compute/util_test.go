@@ -2,11 +2,14 @@ package invoice_compute
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/gtime"
+	"math"
 	"testing"
 	"unibee/api/bean"
 	"unibee/test"
 	"unibee/utility"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 func TestInvoiceSimplifyCreation(t *testing.T) {
@@ -37,5 +40,15 @@ func TestInvoiceSimplifyCreation(t *testing.T) {
 			Metadata:           nil,
 		})
 		VerifyInvoiceSimplify(invoice)
+	})
+}
+
+func TestInvoiceCalculate(t *testing.T) {
+	t.Run("Test Calculate", func(t *testing.T) {
+		ctx := context.Background()
+		tax := int64(math.Round(float64(101-50)) * utility.ConvertTaxPercentageToInternalFloat(500))
+		g.Log().Infof(ctx, "Tax %d", tax)
+		var taxAmount = int64(math.Round(float64(101-50) * utility.ConvertTaxPercentageToInternalFloat(500)))
+		g.Log().Infof(ctx, "Total Tax %d", taxAmount)
 	})
 }

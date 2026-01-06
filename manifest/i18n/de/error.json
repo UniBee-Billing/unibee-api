@@ -1,0 +1,13 @@
+{
+  "SubDuplicateCreation": "Ein anderer aktiver oder unvollständiger Abonnement existiert bereits",
+  "ClickTooFast": "Sie klicken zu schnell. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+  "AmountNotMatch": "Der Gesamtbetrag ist veraltet. Bitte aktualisieren Sie und versuchen Sie es erneut.",
+  "PlanTrialGatewayError": "Ein Karten- oder PayPal-Zahlungsgateway ist für diesen Plan erforderlich.",
+  "VatValidateError": "VAT-Nummernvalidierung fehlgeschlagen. Nummer: %s",
+  "VatGatewayNeedSetup": "VAT-Gateway muss eingerichtet werden.",
+  "CountryCodeVatNumberNotMatch": "Ländercode-Fehler. Das Land Ihrer VAT-Nummer ist %s.",
+  "DiscountCodeInvalid": "Der Rabattcode ist ungültig.",
+  "DiscountCodeNotStart": "Der Rabattcode hat noch nicht begonnen.",
+  "DiscountCodePlanError": "Der Rabattcode kann nicht mit diesem Plan verwendet werden.",
+  "DiscountCodeReachLimitation": "Das Nutzungslimit des Rabattcodes wurde erreicht."
+} 

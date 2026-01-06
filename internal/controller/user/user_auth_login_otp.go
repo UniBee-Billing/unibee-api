@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"unibee/api/bean"
 	"unibee/api/user/auth"
 	"unibee/internal/cmd/i18n"
 	_interface "unibee/internal/interface/context"
@@ -30,7 +31,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	user := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
-	err = email.SendTemplateEmail(ctx, user.MerchantId, req.Email, user.TimeZone, user.Language, email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, user.MerchantId, req.Email, user.TimeZone, user.Language, email.TemplateUserOTPLogin, "", &bean.EmailTemplateVariable{
 		UserName:         user.FirstName + " " + user.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
